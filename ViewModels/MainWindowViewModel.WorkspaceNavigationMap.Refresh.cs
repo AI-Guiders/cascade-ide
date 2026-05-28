@@ -91,7 +91,7 @@ public partial class MainWindowViewModel
             var sm = _settings.CodeNavigationMap;
             wantList = sm.WantsCodeNavigationMapList;
             wantGraph = sm.WantsCodeNavigationMapGraph;
-            level = CodeNavigationMapLevelKind.Normalize(sm.Depth);
+            level = CodeNavigationMapLevelKind.Normalize(CodeNavigationMapLevel);
             controlFlowGrain = CodeNavigationMapControlFlowGrainKind.Normalize(sm.ControlFlowGrain);
             if (level == CodeNavigationMapLevelKind.ControlFlow)
             {
@@ -170,6 +170,19 @@ public partial class MainWindowViewModel
         {
             return;
         }
+        catch (Exception ex)
+        {
+            await UiScheduler.Default.InvokeAsync(() =>
+            {
+                if (ct.IsCancellationRequested)
+                    return;
+                WorkspaceNavigationMapStatus = $"Не удалось построить контекст карты: {ex.Message}";
+                CodeNavigationMapGraphScene = null;
+                WorkspaceNavigationMapItems.Clear();
+                WorkspaceNavigationMapRelatedCount = 0;
+            });
+            return;
+        }
 
         if (ct.IsCancellationRequested)
             return;
@@ -178,6 +191,9 @@ public partial class MainWindowViewModel
             _traceFlowChannelCoordinator,
             _traceFlowCdsRouter,
             _traceFlowSurfaceCompositor);
+        var graphWidth = SanitizeMapViewportDimension(CodeNavigationMapGraphWidth, CodeNavigationMapCompositor.DefaultWidth);
+        var graphHeight = SanitizeMapViewportDimension(CodeNavigationMapGraphHeight, CodeNavigationMapCompositor.DefaultHeightFile);
+
         var dry = WorkspaceNavigationMapRefreshComposer.Compose(
             deps,
             json,
@@ -186,8 +202,8 @@ public partial class MainWindowViewModel
             navigationPath,
             solutionPath,
             level,
-            CodeNavigationMapGraphWidth,
-            CodeNavigationMapGraphHeight,
+            graphWidth,
+            graphHeight,
             _settings.CodeNavigationMap.NormalizedDetailLevel,
             _settings.CodeNavigationMap.NormalizedRelatedGraphLayout,
             _settings.CodeNavigationMap.NormalizedControlFlowMainAxis,
@@ -271,6 +287,9 @@ public partial class MainWindowViewModel
 
         return null;
     }
+
+    private static double SanitizeMapViewportDimension(double value, double fallback) =>
+        double.IsFinite(value) && value > 0 ? value : fallback;
 
     private IEnumerable<AvaloniaEdit.TextEditor> EnumerateEditorsForPath(string? currentPath)
     {

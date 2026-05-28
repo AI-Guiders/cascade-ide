@@ -41,7 +41,11 @@ public static class CodeNavigationMapInstrumentBlockCompositor
         double viewportWidth,
         double viewportHeight)
     {
-        if (scene.IsEmpty || viewportWidth <= 0 || viewportHeight <= 0)
+        if (scene.IsEmpty
+            || !double.IsFinite(viewportWidth)
+            || !double.IsFinite(viewportHeight)
+            || viewportWidth <= 0
+            || viewportHeight <= 0)
             return Array.Empty<CodeNavigationMapInstrumentBlockDescriptor>();
 
         if (!scene.UseLegendColumn)

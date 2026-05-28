@@ -223,6 +223,7 @@ internal static class IntentCatalogLoader
         var autoRunOnCommit = row.AutoRunOnCommit ?? false;
         var autoRunRequiresArgs = row.AutoRunRequiresArgs ?? true;
         var argTailKindExplicit = ParseSlashArgTail(row.ArgTail, path, slashPath);
+        var semantics = ResolveSlashSemantics(row, slashPath, mapLevel, path);
 
         routes[slashPath] = new SlashRouteEntry(
             slashPath,
@@ -239,7 +240,66 @@ internal static class IntentCatalogLoader
             audience,
             autoRunOnCommit,
             autoRunRequiresArgs,
-            argTailKindExplicit);
+            argTailKindExplicit,
+            semantics.Domain,
+            semantics.Object,
+            semantics.Intent,
+            semantics.PathRole);
+    }
+
+    private static SlashSemanticFields ResolveSlashSemantics(
+        SlashFormToml row,
+        string slashPath,
+        string? mapLevel,
+        string catalogPath)
+    {
+        var hasExplicit = !string.IsNullOrWhiteSpace(row.Domain)
+                          || !string.IsNullOrWhiteSpace(row.Object)
+                          || !string.IsNullOrWhiteSpace(row.Intent)
+                          || !string.IsNullOrWhiteSpace(row.PathRole);
+
+        var inferred = SlashRouteSemantics.Resolve(slashPath, mapLevel);
+        if (!hasExplicit)
+            return inferred;
+
+        var domain = NormOptional(row.Domain) ?? "";
+        var obj = NormOptional(row.Object) ?? "";
+        var intent = NormOptional(row.Intent) ?? "";
+        var role = ParsePathRole(row.PathRole, catalogPath, slashPath);
+        var explicitFields = new SlashSemanticFields(domain, obj, intent, role);
+
+        if (!string.Equals(inferred.Domain, explicitFields.Domain, StringComparison.OrdinalIgnoreCase)
+            || !string.Equals(inferred.Object, explicitFields.Object, StringComparison.OrdinalIgnoreCase)
+            || !string.Equals(inferred.Intent, explicitFields.Intent, StringComparison.OrdinalIgnoreCase)
+            || inferred.PathRole != explicitFields.PathRole)
+        {
+            throw new InvalidOperationException(
+                $"{catalogPath}: slash '{slashPath}' domain/object/intent/path_role не согласованы с path " +
+                $"(ожидалось {inferred.Domain}/{inferred.Object}/{inferred.Intent}/{inferred.PathRole}, " +
+                $"в TOML {explicitFields.Domain}/{explicitFields.Object}/{explicitFields.Intent}/{explicitFields.PathRole}).");
+        }
+
+        if (!SlashRouteSemantics.PathMatchesSemantic(slashPath, explicitFields))
+        {
+            throw new InvalidOperationException(
+                $"{catalogPath}: slash '{slashPath}' path не соответствует domain/object/intent.");
+        }
+
+        return explicitFields;
+    }
+
+    private static SlashPathRole ParsePathRole(string? raw, string catalogPath, string slashPath)
+    {
+        if (string.IsNullOrWhiteSpace(raw))
+            return SlashPathRole.Canonical;
+
+        return raw.Trim().ToLowerInvariant() switch
+        {
+            "canonical" => SlashPathRole.Canonical,
+            "alias" => SlashPathRole.Alias,
+            _ => throw new InvalidOperationException(
+                $"{catalogPath}: slash '{slashPath}' path_role must be canonical|alias, got '{raw}'."),
+        };
     }
 
     private static SlashArgTailKind? ParseSlashArgTail(string? argTail, string path, string slashPath)

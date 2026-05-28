@@ -16,6 +16,7 @@
 | [0150](0150-slash-line-canonical-resolution.md) | `SlashLineResolver`, `arg_tail`, единый резолв строки — **дополняется** этим ADR (источник пути) |
 | [0124](0124-slash-parametric-editor-line-commands.md) | Параметрические хвосты (`wire_class`, сегменты) — **без** отдельной стадии парсера пути |
 | [0125](0125-slash-workspace-file-commands-and-dynamic-completion.md) | Динамический completion после канонического пути |
+| [0154](0154-slash-catalog-domain-object-intent.md) | Семантика `domain` · `object` · `intent`, elision, v1 scope; миграция TOML/loader — deferred |
 
 ## Проблема
 

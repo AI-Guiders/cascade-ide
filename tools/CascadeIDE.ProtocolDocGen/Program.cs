@@ -19,6 +19,7 @@ static int PrintUsage()
     Console.Error.WriteLine("  --cs-only   Generate only *.g.cs files (no MCP-PROTOCOL.md update).");
     Console.Error.WriteLine("  --md-only   Update MCP-PROTOCOL.md only (no *.g.cs generation).");
     Console.Error.WriteLine("  --lint      Validate IdeCommands.xml doc contract only (build gate).");
+    Console.Error.WriteLine("  --annotate-slash-semantics  Add domain/object/intent/path_role to intent-catalog.toml (ADR 0154).");
     Console.Error.WriteLine("  -h|--help   Show help.");
     return ExitUsageOrMissingInput;
 }
@@ -29,6 +30,8 @@ if (args.Any(a => string.Equals(a, "-h", StringComparison.OrdinalIgnoreCase) || 
 var csOnly = args.Any(a => string.Equals(a, "--cs-only", StringComparison.OrdinalIgnoreCase));
 var mdOnly = args.Any(a => string.Equals(a, "--md-only", StringComparison.OrdinalIgnoreCase));
 var lintOnly = args.Any(a => string.Equals(a, "--lint", StringComparison.OrdinalIgnoreCase));
+var annotateSlashSemantics = args.Any(a =>
+    string.Equals(a, "--annotate-slash-semantics", StringComparison.OrdinalIgnoreCase));
 if (csOnly && mdOnly)
 {
     Console.Error.WriteLine("Specify at most one of --cs-only / --md-only.");
@@ -37,6 +40,11 @@ if (csOnly && mdOnly)
 if (lintOnly && (csOnly || mdOnly))
 {
     Console.Error.WriteLine("Specify --lint alone (do not combine with --cs-only/--md-only).");
+    return PrintUsage();
+}
+if (annotateSlashSemantics && (csOnly || mdOnly || lintOnly))
+{
+    Console.Error.WriteLine("Specify --annotate-slash-semantics alone.");
     return PrintUsage();
 }
 
@@ -63,6 +71,19 @@ var generatedContractPath = Path.Combine(root, "Services", "Generated", "IdeComm
 var generatedExecutorPath = Path.Combine(root, "Features", "IdeMcp", "Execution", "Generated", "IdeMcpCommandExecutor.Generated.g.cs");
 var intentCatalogPath = Path.Combine(root, "IntentMelody", "intent-catalog.toml");
 var generatedSlashPaths = Path.Combine(root, "Services", "Generated", "SlashRouteCatalogPathsGenerated.g.cs");
+
+if (annotateSlashSemantics)
+{
+    if (!File.Exists(intentCatalogPath))
+    {
+        Console.Error.WriteLine($"Missing file: {intentCatalogPath}");
+        return PrintUsage();
+    }
+
+    return SlashCatalogSemanticAnnotator.AnnotateFile(intentCatalogPath) >= 0
+        ? ExitSuccess
+        : ExitUsageOrMissingInput;
+}
 
 if (!File.Exists(ideCommandsPath))
 {

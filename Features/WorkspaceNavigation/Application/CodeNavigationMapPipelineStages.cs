@@ -166,7 +166,8 @@ public sealed class CodeNavigationMapLayoutStage(
             var preferredHeight = viewport.Height > 0
                 ? Math.Max(viewport.Height, intrinsicHeight)
                 : intrinsicHeight;
-            var fileLayout = _fileLayoutResolver(state.RelatedGraphLayout);
+            var fileLayout = ResolveAutoRelatedFileLayout(state.RelatedGraphLayout, satelliteCount, width, preferredHeight, state.DetailLevel)
+                             ?? _fileLayoutResolver(state.RelatedGraphLayout);
             var layoutScene = fileLayout.Layout(state.Subgraph, width, preferredHeight, state.DetailLevel, controlFlowMainAxisOverride: null)
                 .WithPresentation(presentation);
             return new CodeNavigationMapCompositionResult(
@@ -207,4 +208,23 @@ public sealed class CodeNavigationMapLayoutStage(
             CodeNavigationMapRelatedGraphLayoutKind.BottomUp => new GraphRelatedFileHierarchyLayoutEngine(anchorAtTop: false),
             _ => new StarGraphLayoutEngine()
         };
+
+    private static IGraphLayoutEngine? ResolveAutoRelatedFileLayout(
+        string relatedLayout,
+        int satelliteCount,
+        double width,
+        double height,
+        CodeNavigationMapDetailLevel detailLevel)
+    {
+        if (CodeNavigationMapRelatedGraphLayoutKind.Normalize(relatedLayout) != CodeNavigationMapRelatedGraphLayoutKind.Auto)
+            return null;
+
+        // Heuristic: hierarchy is great when it has enough vertical space; otherwise radial is more readable.
+        if (satelliteCount <= 6)
+            return new GraphRelatedFileHierarchyLayoutEngine(anchorAtTop: true);
+
+        var desiredHierarchy = GraphFileLayoutMetrics.EstimateHierarchyHeight(satelliteCount, detailLevel);
+        var cramped = height < desiredHierarchy * 0.70 || height < 180 || width < 220;
+        return cramped ? new StarGraphLayoutEngine() : new GraphRelatedFileHierarchyLayoutEngine(anchorAtTop: true);
+    }
 }

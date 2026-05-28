@@ -35,10 +35,16 @@ public sealed class GraphRelatedFileHierarchyLayoutEngine : IGraphLayoutEngine
         var innerW = Math.Max(80, width - 2 * margin);
         var innerH = Math.Max(80, height - 2 * margin);
         var cx = width / 2;
-        var scale = Math.Clamp(Math.Min(innerW, innerH) / 220.0, 0.58, 1.22);
+        var scale = Math.Clamp(Math.Min(innerW, innerH) / 220.0, 0.58, ResolveRelatedAutoScaleCeiling(innerW, innerH, satellites.Count));
         var anchorR = 16 * scale;
         var satR = 12 * scale;
-        var rowStep = Math.Clamp(anchorR * 2.6 + satR * 2.2, 38, innerH / Math.Max(2, satellites.Count + 1));
+        var desiredRowStep = anchorR * 2.6 + satR * 2.2;
+        var minReadableStep = Math.Clamp(desiredRowStep, 18, 52);
+        var maxRowsPerColumn = Math.Max(1, (int)Math.Floor(innerH / minReadableStep));
+        var columns = Math.Clamp((int)Math.Ceiling(satellites.Count / (double)maxRowsPerColumn), 1, 4);
+        var rows = columns == 1 ? satellites.Count : Math.Min(maxRowsPerColumn, satellites.Count);
+        var rowStep = rows > 0 ? innerH / Math.Max(2, rows + 1) : innerH / 2;
+        rowStep = Math.Min(rowStep, minReadableStep);
 
         var layouts = new List<GraphLayoutNode>();
         var idToCenter = new Dictionary<string, Point>(StringComparer.OrdinalIgnoreCase);
@@ -62,13 +68,17 @@ public sealed class GraphRelatedFileHierarchyLayoutEngine : IGraphLayoutEngine
             layouts.Add(MakeNode(anchor, ac, anchorR, isAnchor: true));
         }
 
+        var colW = innerW / columns;
         for (var i = 0; i < satellites.Count; i++)
         {
             var sat = satellites[i];
+            var col = columns == 1 ? 0 : i / rows;
+            var row = columns == 1 ? i : i % rows;
+            var x = margin + (col + 0.5) * colW;
             var y = _anchorAtTop
-                ? childStartY + i * rowStep
-                : childStartY - i * rowStep;
-            var p = new Point(cx, y);
+                ? childStartY + row * rowStep
+                : childStartY - row * rowStep;
+            var p = new Point(x, y);
             idToCenter[sat.Id] = p;
             idToRadius[sat.Id] = satR;
             layouts.Add(MakeNode(sat, p, satR, isAnchor: false));
@@ -100,7 +110,7 @@ public sealed class GraphRelatedFileHierarchyLayoutEngine : IGraphLayoutEngine
             Center = center,
             Radius = radius,
             IsAnchor = isAnchor,
-            Shape = GraphNodeShape.Circle,
+            Shape = GraphNodeShape.Rectangle,
             LineStart = n.LineStart,
             LineEnd = n.LineEnd
         };
@@ -162,8 +172,25 @@ public sealed class GraphRelatedFileHierarchyLayoutEngine : IGraphLayoutEngine
 
     private static string TruncateLabel(string label)
     {
-        if (label.Length <= GraphControlFlowLayoutMetrics.LabelMaxLength)
-            return label;
-        return label[..GraphControlFlowLayoutMetrics.LabelTruncateLength] + "…";
+        // For related-files we want the renderer to handle wrapping inside cards.
+        // Control-flow uses strict budgets; related-files doesn't.
+        var s = label?.Trim() ?? "";
+        if (s.Length <= 80)
+            return s;
+        return s[..77] + "…";
+    }
+
+    private static double ResolveRelatedAutoScaleCeiling(double innerW, double innerH, int satelliteCount)
+    {
+        // Similar policy to radial: if there is a lot of vertical room, make cards larger.
+        // For hierarchy we can be slightly more aggressive: no orbits, mostly vertical flow.
+        var minDim = Math.Min(innerW, innerH);
+        if (satelliteCount <= 4 && minDim >= 260)
+            return 1.90;
+        if (satelliteCount <= 8 && minDim >= 240)
+            return 1.65;
+        if (satelliteCount <= 12 && minDim >= 220)
+            return 1.45;
+        return 1.22;
     }
 }

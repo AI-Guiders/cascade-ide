@@ -12,6 +12,7 @@
 | [0053](0053-semantic-map-control-flow-pfd.md) | карта и курсор в методе |
 | [0028](0028-user-settings-toml-localappdata-and-secrets.md) | Пользовательские настройки — `settings.toml`, каталог `%LocalAppData%\CascadeIDE\`, секреты отдельно |
 | [0050](0050-declarative-instrument-zone-placement-toml.md) | декларативные карты в TOML |
+| [0155](0155-documentation-code-correspondence-and-architectural-drift.md) | сквозной каркас: док ↔ код, слои L0–L4, drift; этот ADR = **L1** |
 
 ## Резюме
 

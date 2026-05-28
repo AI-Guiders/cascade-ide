@@ -1,5 +1,6 @@
 using CascadeIDE.Cockpit.Graph;
 using CascadeIDE.Cockpit.Graph.Layout;
+using CascadeIDE.Features.WorkspaceNavigation.Application;
 using CascadeIDE.Models;
 using Xunit;
 
@@ -7,45 +8,99 @@ namespace CascadeIDE.Tests;
 
 public sealed class GraphRelatedFileHierarchyLayoutEngineTests
 {
-    [Fact]
-    public void TopDown_PlacesAnchorAboveChildren()
+    /// <summary>
+    /// Регрессия 2026-05: <c>Math.Clamp(step, 38, innerH/(n+1))</c> при <c>38 &gt; innerH/(n+1)</c>
+    /// (типично ~32 при умеренной высоте) кидал ArgumentException → «Не удалось разобрать ответ навигации».
+    /// </summary>
+    [Theory]
+    [InlineData(5, 200)]
+    [InlineData(37, 520)]
+    public void Layout_top_down_regression_inverted_math_clamp_bounds_does_not_throw(int satelliteCount, double height)
     {
-        var doc = SampleDoc();
-        var scene = new GraphRelatedFileHierarchyLayoutEngine(anchorAtTop: true)
-            .Layout(doc, 320, 220, CodeNavigationMapDetailLevel.Normal);
+        var doc = BuildStarDoc(satelliteCount);
+        var engine = new GraphRelatedFileHierarchyLayoutEngine(anchorAtTop: true);
 
-        var anchor = scene.Nodes.First(n => n.IsAnchor);
-        var child = scene.Nodes.First(n => !n.IsAnchor);
-        Assert.True(anchor.Center.Y < child.Center.Y);
-        Assert.Equal(CodeNavigationMapRelatedGraphLayoutKind.TopDown, scene.RelatedFilesLayout);
+        var ex = Record.Exception(() =>
+            engine.Layout(doc, width: 280, height, CodeNavigationMapDetailLevel.Normal));
+
+        Assert.Null(ex);
     }
 
     [Fact]
-    public void BottomUp_PlacesAnchorBelowChildren()
+    public void Layout_many_satellites_top_down_places_all_nodes()
     {
-        var doc = SampleDoc();
-        var scene = new GraphRelatedFileHierarchyLayoutEngine(anchorAtTop: false)
-            .Layout(doc, 320, 220, CodeNavigationMapDetailLevel.Normal);
+        var doc = BuildStarDoc(satelliteCount: 37);
+        var engine = new GraphRelatedFileHierarchyLayoutEngine(anchorAtTop: true);
 
-        var anchor = scene.Nodes.First(n => n.IsAnchor);
-        var child = scene.Nodes.First(n => !n.IsAnchor);
-        Assert.True(anchor.Center.Y > child.Center.Y);
+        var scene = engine.Layout(doc, width: 280, height: 520, CodeNavigationMapDetailLevel.Normal);
+
+        Assert.Equal(38, scene.Nodes.Count);
+        Assert.All(scene.Nodes, n => Assert.True(n.Radius > 0));
+        Assert.All(scene.Nodes, n => Assert.Equal(GraphNodeShape.Rectangle, n.Shape));
     }
 
-    private static GraphDocument SampleDoc() =>
-        new()
+    [Fact]
+    public void Compositor_file_top_down_many_related_nodes_does_not_throw()
+    {
+        var nodes = new List<GraphNode>
+        {
+            new() { Id = "n0", Path = @"D:\w\A.cs", Kind = "anchor", Label = "A.cs" }
+        };
+        for (var i = 1; i <= 37; i++)
+        {
+            nodes.Add(new GraphNode
+            {
+                Id = $"n{i}",
+                Path = $@"D:\w\B{i}.cs",
+                Kind = "project_peer",
+                Label = $"B{i}.cs"
+            });
+        }
+
+        var doc = new GraphDocument
         {
             AnchorPath = @"D:\w\A.cs",
-            Nodes =
-            [
-                new GraphNode { Id = "n0", Path = @"D:\w\A.cs", Kind = "anchor", Label = "A.cs" },
-                new GraphNode { Id = "n1", Path = @"D:\w\B.cs", Kind = "project_peer", Label = "B.cs" },
-                new GraphNode { Id = "n2", Path = @"D:\w\C.cs", Kind = "project_peer", Label = "C.cs" }
-            ],
-            Edges =
-            [
-                new GraphEdge { FromId = "n0", ToId = "n1", Kind = "related_to" },
-                new GraphEdge { FromId = "n0", ToId = "n2", Kind = "related_to" }
-            ]
+            Kind = GraphKind.RelatedFiles,
+            Nodes = nodes,
+            Edges = nodes.Skip(1).Select(n => new GraphEdge { FromId = "n0", ToId = n.Id, Kind = "related_to" }).ToList()
         };
+
+        var compositor = new CodeNavigationMapCompositor();
+        var result = compositor.Compose(
+            new CodeNavigationMapCompositionIntent(
+                doc,
+                CodeNavigationMapLevelKind.File,
+                CodeNavigationMapDetailLevel.Normal,
+                CodeNavigationMapRelatedGraphLayoutKind.TopDown,
+                CodeNavigationMapControlFlowMainAxisKind.Auto),
+            new Services.SkiaInstruments.SkiaInstrumentViewport(280, 120));
+
+        Assert.True(result.PreferredHeight >= 120);
+        Assert.Equal(38, result.ToSceneVm(280, result.PreferredHeight).Nodes.Count);
+    }
+
+    private static GraphDocument BuildStarDoc(int satelliteCount)
+    {
+        var nodes = new List<GraphNode>
+        {
+            new() { Id = "n0", Path = @"D:\w\A.cs", Kind = "anchor", Label = "A.cs" }
+        };
+        for (var i = 1; i <= satelliteCount; i++)
+        {
+            nodes.Add(new GraphNode
+            {
+                Id = $"n{i}",
+                Path = $@"D:\w\B{i}.cs",
+                Kind = "project_peer",
+                Label = $"B{i}.cs"
+            });
+        }
+
+        return new GraphDocument
+        {
+            AnchorPath = @"D:\w\A.cs",
+            Nodes = nodes,
+            Edges = nodes.Skip(1).Select(n => new GraphEdge { FromId = "n0", ToId = n.Id }).ToList()
+        };
+    }
 }

@@ -32,7 +32,7 @@ public sealed class StarGraphLayoutEngine : IGraphLayoutEngine
         var cx = width / 2;
         var cy = height / 2;
         var minDim = Math.Min(innerW, innerH);
-        var scale = Math.Clamp(minDim / 220.0, 0.58, 1.22);
+        var scale = Math.Clamp(minDim / 220.0, 0.58, ResolveRelatedAutoScaleCeiling(innerW, innerH, satellites.Count));
         var anchorR = 16 * scale;
         var satR = 13 * scale;
         const int singleRingMaxSatellites = 8;
@@ -143,7 +143,7 @@ public sealed class StarGraphLayoutEngine : IGraphLayoutEngine
             Center = center,
             Radius = radius,
             IsAnchor = isAnchor,
-            Shape = GraphNodeShape.Circle,
+            Shape = GraphNodeShape.Rectangle,
             LineStart = n.LineStart,
             LineEnd = n.LineEnd
         };
@@ -159,8 +159,25 @@ public sealed class StarGraphLayoutEngine : IGraphLayoutEngine
 
     private static string TruncateLabel(string label)
     {
-        if (label.Length <= GraphControlFlowLayoutMetrics.LabelMaxLength)
-            return label;
-        return label[..GraphControlFlowLayoutMetrics.LabelTruncateLength] + "…";
+        // For related-files we want the renderer to handle wrapping inside cards.
+        // Control-flow uses strict budgets; related-files doesn't.
+        var s = label?.Trim() ?? "";
+        if (s.Length <= 80)
+            return s;
+        return s[..77] + "…";
+    }
+
+    private static double ResolveRelatedAutoScaleCeiling(double innerW, double innerH, int satelliteCount)
+    {
+        // For related-files, bigger cards are more readable when there's a lot of empty space.
+        // Keep a conservative ceiling for dense graphs to avoid overlap.
+        var minDim = Math.Min(innerW, innerH);
+        if (satelliteCount <= 4 && minDim >= 260)
+            return 1.75;
+        if (satelliteCount <= 8 && minDim >= 240)
+            return 1.55;
+        if (satelliteCount <= 12 && minDim >= 220)
+            return 1.40;
+        return 1.22;
     }
 }

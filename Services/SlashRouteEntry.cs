@@ -20,4 +20,11 @@ public readonly record struct SlashRouteEntry(
     IntercomMessageAudience MessageAudience = IntercomMessageAudience.Channel,
     bool AutoRunOnCommit = false,
     bool AutoRunRequiresArgs = true,
-    SlashArgTailKind? ArgTailKindExplicit = null);
+    SlashArgTailKind? ArgTailKindExplicit = null,
+    string Domain = "",
+    string Object = "",
+    string Intent = "",
+    SlashPathRole PathRole = SlashPathRole.Canonical)
+{
+    public SlashSemanticFields SemanticFields => new(Domain, Object, Intent, PathRole);
+}

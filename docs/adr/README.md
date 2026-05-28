@@ -75,7 +75,7 @@
 | 0134 | [prepare-pipeline](0134-intercom-message-prepare-pipeline-v1.md) — **In progress** (MCP fast path @ send) |
 | 0135 | [symbol cache + HCI sidecar](0135-intercom-attach-symbol-cache-and-hci-sidecar.md) — **In progress** (L1 parse cache, L2 SQLite @ HCI reindex) |
 | 0136 | [gutter + `/intercom` namespace](0136-intercom-feed-gutter-and-slash-namespace.md) — **In progress** (select ПКМ/slash, без старых `/topic`) |
-| 0150, 0153 | [slash резолв строки](0150-slash-line-canonical-resolution.md) · [только каталог, без parser shape](0153-slash-catalog-only-resolution.md) |
+| 0150, 0153–0155 | [slash резолв](0150-slash-line-canonical-resolution.md) · [catalog-only](0153-slash-catalog-only-resolution.md) · [domain/object/intent](0154-slash-catalog-domain-object-intent.md) · [**док ↔ код / drift**](0155-documentation-code-correspondence-and-architectural-drift.md) |
 | 0138 | [Cockpit Command Line](0138-cockpit-command-line-and-parametric-ranges.md) — **Accepted** (парсер + slash multi-select; CCL UI — фаза A) |
 | 0141 | [прогрев при open solution](0141-solution-scoped-warmup-orchestration.md) — **Implemented** (v1 оркестратор; AEE L0 warmup — [0148](0148-agent-execution-environment-verification-ladder-and-native-tooling.md)) |
 | 0148 | [Agent Execution Environment](0148-agent-execution-environment-verification-ladder-and-native-tooling.md) — **In progress** (W1–W2 в коде; supervised build worker; MLP на target hardware) |
@@ -146,7 +146,7 @@
 | [0058](0058-agent-roslyn-mcp-coupling-settings-toml.md) | Сопряжение агента и Roslyn MCP в `settings.toml` (лимиты, виды узлов, таймауты, пресеты) | Proposed |
 | [0059](0059-roslyn-mcp-profiles-manager-tactical-strategic-efb.md) | Профили Roslyn MCP, Manager, тактика (PFD) / EFB на MFD, Auto-Focus / Combat / Echelon | Proposed |
 | [0060](0060-keyboard-chord-stack-fms-tactical-strategic.md) | Аккордный слой (Ctrl+K), FMS-style, S/T, overlay; расширение ADR 0013 | Accepted |
-| [0061](0061-context-aware-adr-map-pfd-knowledge-indicator.md) | Контекстная карта ADR ↔ пути в `workspace.toml`, индикатор на PFD, intent/tooltip, advisory для агента (GPWS для доков) | Proposed |
+| [0061](0061-context-aware-adr-map-pfd-knowledge-indicator.md) | Контекстная карта ADR ↔ пути в `workspace.toml`, индикатор на PFD, intent/tooltip, advisory для агента (GPWS для доков); **L1** в [0155](0155-documentation-code-correspondence-and-architectural-drift.md) | Proposed |
 | [0062](0062-git-submodules-semantic-map-subgraph.md) | **GitMap:** submodules и git-границы **отдельно** от WSNC/карты намерений; общий Skia pipeline; собственный контракт/MCP; [git-and-submodules-v1](../git-and-submodules-v1.md) | Proposed |
 | [0063](0063-instrument-deck-named-composition-one-anchor.md) | **Instrument deck** + **`ContentRepresentation`**; таксономия примитивов (в т.ч. Readout, Trend, Gauge, Presence); **Presence/Activity vs Dark Cockpit**; `DedicatedPage` — режим Page для WH, не deck | Accepted |
 | [0064](0064-deck-primitives-visual-language-render-layer-and-palette.md) | **Виды индикаторов** deck: единое графическое воплощение; **библиотека отрисовки** + **семантическая палитра**; без лишнего архитектурного слоя; `DeckPrimitiveKind` = каталог видов | Accepted |
@@ -235,6 +235,8 @@
 | [0151](0151-control-flow-subgraph-intent-vs-detailed-grain.md) | Мини-карта CF: `[code_navigation_map].control_flow_grain` intent (деф.) vs detailed; MCP следует тем же settings | Accepted · Implemented |
 | [0152](0152-editor-control-flow-virtual-spacing.md) | Virtual Spacing в редакторе: полоса слева от текста под глифы CF (не поверх кода) | Accepted · Implemented |
 | [0153](0153-slash-catalog-only-resolution.md) | Slash: только `intent-catalog` + codegen trie; удалены `SlashParse`, parser shape, legacy `[[slash_route]]` | Accepted · Implemented |
+| [0154](0154-slash-catalog-domain-object-intent.md) | Slash: `domain` · `object` · `intent`; TOML, loader, semantic autocomplete index | Accepted · Implemented |
+| [0155](0155-documentation-code-correspondence-and-architectural-drift.md) | **Сквозной каркас:** соответствие документации и кода (correspondence), архитектурный drift; слои L0–L4; связывает [0061](0061-context-aware-adr-map-pfd-knowledge-indicator.md), [0098](0098-semantic-first-document-as-projection.md), [0039](0039-workspace-navigation-affordances.md), [0042](0042-pre-flight-planned-changes-and-review-before-apply.md), [0137](0137-intercom-message-code-correspondence.md) | Proposed |
 
 ## Сборка в один документ (HTML, TXT, PDF)
 

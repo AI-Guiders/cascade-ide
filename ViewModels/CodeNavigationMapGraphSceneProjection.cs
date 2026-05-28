@@ -151,8 +151,18 @@ public static class CodeNavigationMapGraphSceneProjection
             : GraphLegendBlockPlacement.BesideGraph;
 
     private static CodeNavigationMapNodeShape MapNodeShape(GraphNodeShape shape) =>
-        shape == GraphNodeShape.Condition ? CodeNavigationMapNodeShape.Condition : CodeNavigationMapNodeShape.Circle;
+        shape switch
+        {
+            GraphNodeShape.Condition => CodeNavigationMapNodeShape.Condition,
+            GraphNodeShape.Rectangle => CodeNavigationMapNodeShape.Rectangle,
+            _ => CodeNavigationMapNodeShape.Circle
+        };
 
     private static GraphNodeShape MapNodeShapeToLayout(CodeNavigationMapNodeShape shape) =>
-        shape == CodeNavigationMapNodeShape.Condition ? GraphNodeShape.Condition : GraphNodeShape.Circle;
+        shape switch
+        {
+            CodeNavigationMapNodeShape.Condition => GraphNodeShape.Condition,
+            CodeNavigationMapNodeShape.Rectangle => GraphNodeShape.Rectangle,
+            _ => GraphNodeShape.Circle
+        };
 }

@@ -1,4 +1,4 @@
-# intent-catalog.toml — command-first каталог форм ввода (ADR 0109, 0119)
+﻿# intent-catalog.toml — command-first каталог форм ввода (ADR 0109, 0119)
 # Оверлей: IntentMelody/intent-catalog.toml рядом с exe (legacy: intent-melody-aliases.toml).
 #
 # Cookbook:
@@ -10,13 +10,14 @@
 # - enabled = false — отключить команду или отдельный slash без удаления из файла.
 # - auto_run_on_commit / auto_run_requires_args — после Tab выполнить без второго Enter (по умолчанию false / true).
 # - arg_tail = none|optional|required — режим хвоста после полного пути (ADR 0150; обязательно для новых slash).
+# - domain / object / intent / path_role — семантика пути (ADR 0154); path_role=alias при elision (/build run).
 # - requires_arg_tail — устарело; не использовать (loader маппит только для старых оверлеев).
 # - IML v2 (параметрические мелодии, tail_wire_class) — смысл языка, ADR 0109; не путать с intent_catalog_schema_version.
 # - Параметрический slash: любая команда с melody_shape=parametric — хвост по wire_class (ADR 0124).
 #   Редактор: /editor line select|delete <строки>. Портал: /portal open [url] (как c:wai).
 # - Норматив: docs/intent-melody-language-v1.md
 #
-intent_catalog_schema_version = 1
+intent_catalog_schema_version = 2
 
 # ------------------------------------------------------------------------------
 # [[tail_wire_class]] — провода хвоста parametric melody (c:)
@@ -52,6 +53,9 @@ melody_palette_usage_category = "Editor -> Line -> Delete"
 
 [[command.form.slash]]
 path = "/editor line delete"
+domain = "editor"
+object = "line"
+intent = "delete"
 help = "Удалить строки в открытом файле (1-based): одна, «5 10» или «5:10»."
 group = "Editor"
 arg_tail = "required"
@@ -69,6 +73,9 @@ melody_palette_usage_category = "Editor -> Line -> Select"
 
 [[command.form.slash]]
 path = "/editor line select"
+domain = "editor"
+object = "line"
+intent = "select"
 help = "Выделить строки в открытом файле (1-based): одна, «5 10» или «5:10»."
 group = "Editor"
 arg_tail = "required"
@@ -86,6 +93,9 @@ melody_palette_usage_category = "Editor -> Code"
 
 [[command.form.slash]]
 path = "/editor select code"
+domain = "editor"
+object = "code"
+intent = "select"
 help = "Выделить фрагмент по bracket: [M:…], [file.cs M:…] или [F:…; M:…; L:…]."
 group = "Editor"
 arg_tail = "required"
@@ -103,6 +113,9 @@ melody_palette_usage_category = "Editor -> Code"
 
 [[command.form.slash]]
 path = "/editor reveal code"
+domain = "editor"
+object = "code"
+intent = "reveal"
 help = "Показать фрагмент по bracket без изменения selection."
 group = "Editor"
 arg_tail = "required"
@@ -112,6 +125,9 @@ arg_tail = "required"
 
 [[command.form.slash]]
 path = "/intercom attach selection"
+domain = "intercom"
+object = "attach"
+intent = "selection"
 help = "Прикрепить текущее выделение в редакторе к черновику сообщения."
 group = "Intercom"
 kind = "intercom"
@@ -123,6 +139,9 @@ arg_tail = "none"
 
 [[command.form.slash]]
 path = "/intercom attach scope"
+domain = "intercom"
+object = "attach"
+intent = "scope"
 help = "Прикрепить innermost for/if/while @ каретке."
 group = "Intercom"
 kind = "intercom"
@@ -134,6 +153,9 @@ arg_tail = "none"
 
 [[command.form.slash]]
 path = "/intercom attach file"
+domain = "intercom"
+object = "attach"
+intent = "file"
 help = "Прикрепить файл: /attach file <path> [start] [end]."
 group = "Intercom"
 kind = "intercom"
@@ -153,6 +175,7 @@ melody_shape = "simple"
 
 [[command.form.slash]]
 path = "/export"
+domain = "export"
 help = "Экспорт чата в Markdown."
 group = "Intercom"
 
@@ -162,6 +185,9 @@ command_id = "chat_get_product_spine"
 
 [[command.form.slash]]
 path = "/intercom spine show"
+domain = "intercom"
+object = "spine"
+intent = "show"
 help = "Показать текущий spine (JSON)."
 group = "Intercom"
 
@@ -173,6 +199,7 @@ melody_shape = "simple"
 
 [[command.form.slash]]
 path = "/open"
+domain = "open"
 help = "Открыть detail выбранной темы."
 group = "Intercom"
 
@@ -184,6 +211,9 @@ melody_shape = "simple"
 
 [[command.form.slash]]
 path = "/intercom message next"
+domain = "intercom"
+object = "message"
+intent = "next"
 help = "Следующее сообщение в detail-ленте."
 group = "Intercom"
 
@@ -195,6 +225,9 @@ melody_shape = "simple"
 
 [[command.form.slash]]
 path = "/intercom topic next"
+domain = "intercom"
+object = "topic"
+intent = "next"
 help = "Следующая тема в overview."
 group = "Intercom"
 
@@ -206,6 +239,9 @@ melody_shape = "simple"
 
 [[command.form.slash]]
 path = "/intercom message prev"
+domain = "intercom"
+object = "message"
+intent = "prev"
 help = "Предыдущее сообщение в detail-ленте."
 group = "Intercom"
 
@@ -217,6 +253,9 @@ melody_shape = "simple"
 
 [[command.form.slash]]
 path = "/intercom topic prev"
+domain = "intercom"
+object = "topic"
+intent = "prev"
 help = "Предыдущая тема в overview."
 group = "Intercom"
 
@@ -226,6 +265,9 @@ command_id = "chat_set_product_spine"
 
 [[command.form.slash]]
 path = "/intercom spine set"
+domain = "intercom"
+object = "spine"
+intent = "set"
 help = "Обновить product spine (хвост — focus)."
 group = "Intercom"
 arg_tail = "required"
@@ -238,6 +280,8 @@ melody_shape = "simple"
 
 [[command.form.slash]]
 path = "/intercom overview"
+domain = "intercom"
+intent = "overview"
 help = "Показать картотеку тем."
 group = "Intercom"
 
@@ -247,6 +291,9 @@ command_id = "chat_toggle_product_spine_in_agent_context"
 
 [[command.form.slash]]
 path = "/intercom spine toggle"
+domain = "intercom"
+object = "spine"
+intent = "toggle"
 help = "Spine в контексте агента: вкл/выкл."
 group = "Intercom"
 
@@ -276,6 +323,8 @@ melody_shape = "simple"
 
 [[command.form.slash]]
 path = "/chat send"
+domain = "chat"
+intent = "send"
 help = "Отправить черновик из поля ввода (как c:cs)."
 group = "Intercom"
 
@@ -287,6 +336,8 @@ melody_shape = "simple"
 
 [[command.form.slash]]
 path = "/chat show"
+domain = "chat"
+intent = "show"
 help = "Страница Chat (регион Mfd)."
 group = "Intercom"
 
@@ -300,6 +351,10 @@ command_id = "build"
 
 [[command.form.slash]]
 path = "/build run"
+domain = "solution"
+object = "build"
+intent = "run"
+path_role = "alias"
 help = "Собрать решение (structured JSON)."
 group = "Сборка"
 arg_tail = "none"
@@ -312,6 +367,10 @@ melody_shape = "simple"
 
 [[command.form.slash]]
 path = "/build ui"
+domain = "solution"
+object = "build"
+intent = "ui"
+path_role = "alias"
 help = "Собрать решение (вывод в панель)."
 group = "Сборка"
 
@@ -323,6 +382,10 @@ melody_shape = "simple"
 
 [[command.form.slash]]
 path = "/build structured"
+domain = "solution"
+object = "build"
+intent = "structured"
+path_role = "alias"
 help = "Собрать решение (structured JSON, без UI-панели)."
 group = "Сборка"
 
@@ -332,6 +395,10 @@ command_id = "run_code_cleanup"
 
 [[command.form.slash]]
 path = "/format run"
+domain = "solution"
+object = "format"
+intent = "run"
+path_role = "alias"
 help = "dotnet format / code cleanup."
 group = "Сборка"
 
@@ -345,6 +412,10 @@ command_id = "run_affected_tests"
 
 [[command.form.slash]]
 path = "/test affected"
+domain = "solution"
+object = "test"
+intent = "affected"
+path_role = "alias"
 help = "Затронутые тесты (git changed paths)."
 group = "Тесты"
 
@@ -356,6 +427,10 @@ melody_shape = "simple"
 
 [[command.form.slash]]
 path = "/test run"
+domain = "solution"
+object = "test"
+intent = "run"
+path_role = "alias"
 help = "Запустить тесты."
 group = "Тесты"
 
@@ -371,6 +446,10 @@ melody_shape = "simple"
 
 [[command.form.slash]]
 path = "/debug attach"
+domain = "solution"
+object = "debug"
+intent = "attach"
+path_role = "alias"
 help = "Подключиться к процессу .NET."
 group = "Отладка"
 
@@ -382,6 +461,10 @@ melody_shape = "simple"
 
 [[command.form.slash]]
 path = "/debug continue"
+domain = "solution"
+object = "debug"
+intent = "continue"
+path_role = "alias"
 help = "Продолжить (F5)."
 group = "Отладка"
 
@@ -393,6 +476,10 @@ melody_shape = "simple"
 
 [[command.form.slash]]
 path = "/debug launch"
+domain = "solution"
+object = "debug"
+intent = "launch"
+path_role = "alias"
 help = "Запуск под отладчиком."
 group = "Отладка"
 
@@ -404,6 +491,10 @@ melody_shape = "simple"
 
 [[command.form.slash]]
 path = "/debug step-into"
+domain = "solution"
+object = "debug"
+intent = "step-into"
+path_role = "alias"
 help = "Шаг с заходом."
 group = "Отладка"
 
@@ -415,6 +506,10 @@ melody_shape = "simple"
 
 [[command.form.slash]]
 path = "/debug step-out"
+domain = "solution"
+object = "debug"
+intent = "step-out"
+path_role = "alias"
 help = "Шаг с выходом."
 group = "Отладка"
 
@@ -426,6 +521,10 @@ melody_shape = "simple"
 
 [[command.form.slash]]
 path = "/debug step-over"
+domain = "solution"
+object = "debug"
+intent = "step-over"
+path_role = "alias"
 help = "Шаг с обходом."
 group = "Отладка"
 
@@ -437,6 +536,10 @@ melody_shape = "simple"
 
 [[command.form.slash]]
 path = "/debug stop"
+domain = "solution"
+object = "debug"
+intent = "stop"
+path_role = "alias"
 help = "Остановить сессию отладки."
 group = "Отладка"
 
@@ -450,6 +553,8 @@ command_id = "git_branch"
 
 [[command.form.slash]]
 path = "/git branch"
+domain = "git"
+intent = "branch"
 help = "git branch list/create."
 group = "Git"
 
@@ -461,6 +566,8 @@ melody_shape = "simple"
 
 [[command.form.slash]]
 path = "/git commit"
+domain = "git"
+intent = "commit"
 help = "Коммит: хвост — сообщение (можно в кавычках: «feat: …»)."
 group = "Git"
 
@@ -470,6 +577,8 @@ command_id = "git_diff"
 
 [[command.form.slash]]
 path = "/git diff"
+domain = "git"
+intent = "diff"
 help = "git diff (опционально path в хвосте)."
 group = "Git"
 
@@ -479,6 +588,8 @@ command_id = "git_fetch"
 
 [[command.form.slash]]
 path = "/git fetch"
+domain = "git"
+intent = "fetch"
 help = "git fetch."
 group = "Git"
 
@@ -488,6 +599,8 @@ command_id = "git_log"
 
 [[command.form.slash]]
 path = "/git log"
+domain = "git"
+intent = "log"
 help = "git log (хвост — n, напр. 20)."
 group = "Git"
 
@@ -497,6 +610,8 @@ command_id = "git_preflight"
 
 [[command.form.slash]]
 path = "/git preflight"
+domain = "git"
+intent = "preflight"
 help = "Preflight перед коммитом."
 group = "Git"
 
@@ -506,6 +621,8 @@ command_id = "git_preflight_fix_safe"
 
 [[command.form.slash]]
 path = "/git preflight-fix"
+domain = "git"
+intent = "preflight-fix"
 help = "Preflight + renormalize (safe)."
 group = "Git"
 
@@ -515,6 +632,8 @@ command_id = "git_pull"
 
 [[command.form.slash]]
 path = "/git pull"
+domain = "git"
+intent = "pull"
 help = "git pull (--ff-only)."
 group = "Git"
 
@@ -526,6 +645,8 @@ melody_shape = "simple"
 
 [[command.form.slash]]
 path = "/git push"
+domain = "git"
+intent = "push"
 help = "git push."
 group = "Git"
 
@@ -537,6 +658,8 @@ melody_shape = "simple"
 
 [[command.form.slash]]
 path = "/git status"
+domain = "git"
+intent = "status"
 help = "git status (кратко)."
 group = "Git"
 
@@ -548,6 +671,8 @@ melody_shape = "simple"
 
 [[command.form.slash]]
 path = "/git submodule"
+domain = "git"
+intent = "submodule"
 help = "git submodule status/update."
 group = "Git"
 
@@ -561,6 +686,8 @@ command_id = "focus_editor"
 
 [[command.form.slash]]
 path = "/editor focus"
+domain = "editor"
+intent = "focus"
 help = "Фокус в редактор."
 group = "Редактор"
 
@@ -570,6 +697,8 @@ command_id = "get_current_file_diagnostics"
 
 [[command.form.slash]]
 path = "/diagnostics show"
+domain = "diagnostics"
+intent = "show"
 help = "Диагностики открытого .cs."
 group = "Workspace"
 
@@ -579,6 +708,8 @@ command_id = "get_ide_state"
 
 [[command.form.slash]]
 path = "/state show"
+domain = "state"
+intent = "show"
 help = "Сводка состояния IDE (JSON)."
 group = "Workspace"
 
@@ -590,6 +721,8 @@ melody_shape = "simple"
 
 [[command.form.slash]]
 path = "/solution open"
+domain = "solution"
+intent = "open"
 help = "Открыть диалог выбора .sln / .slnx."
 group = "Workspace"
 
@@ -599,6 +732,8 @@ command_id = "create_new_solution_dialog"
 
 [[command.form.slash]]
 path = "/solution new"
+domain = "solution"
+intent = "new"
 help = "Новое пустое решение (диалог, dotnet new sln)."
 group = "Workspace"
 
@@ -608,6 +743,10 @@ command_id = "create_project_in_solution"
 
 [[command.form.slash]]
 path = "/solution new console"
+domain = "solution"
+object = "project"
+intent = "new"
+path_role = "alias"
 help = "Добавить консольный проект в открытое решение (хвост — имя)."
 group = "Workspace"
 
@@ -627,6 +766,8 @@ command_id = "open_folder_dialog"
 
 [[command.form.slash]]
 path = "/folder open"
+domain = "folder"
+intent = "open"
 help = "Открыть папку как workspace (диалог)."
 group = "Workspace"
 
@@ -636,6 +777,8 @@ command_id = "load_solution"
 
 [[command.form.slash]]
 path = "/solution load"
+domain = "solution"
+intent = "load"
 help = "Загрузить решение или проект по пути (хвост — путь)."
 group = "Workspace"
 completion = "workspace_files"
@@ -648,6 +791,8 @@ command_id = "open_file_dialog"
 
 [[command.form.slash]]
 path = "/file pick"
+domain = "file"
+intent = "pick"
 help = "Диалог выбора файла для редактора."
 group = "Файл"
 
@@ -657,6 +802,8 @@ command_id = "open_file"
 
 [[command.form.slash]]
 path = "/file open"
+domain = "file"
+intent = "open"
 help = "Открыть файл в редакторе (хвост — путь)."
 group = "Файл"
 completion = "workspace_files"
@@ -669,6 +816,7 @@ command_id = "search_workspace_text"
 
 [[command.form.slash]]
 path = "/search"
+domain = "search"
 help = "Поиск по workspace (хвост — pattern)."
 group = "Workspace"
 arg_tail = "required"
@@ -679,6 +827,8 @@ command_id = "set_primary_work_surface"
 
 [[command.form.slash]]
 path = "/intercom show"
+domain = "intercom"
+intent = "show"
 help = "Якорь Forward: Intercom."
 group = "Intercom"
 
@@ -701,6 +851,8 @@ melody_shape = "simple"
 
 [[command.form.slash]]
 path = "/workspace splitters-lock"
+domain = "workspace"
+intent = "splitters-lock"
 help = "Сплиттеры рабочей области: переключить ON GND / IN AIR."
 group = "Workspace"
 
@@ -714,6 +866,9 @@ command_id = "show_solution_explorer_page"
 
 [[command.form.slash]]
 path = "/solution explorer show"
+domain = "solution"
+object = "explorer"
+intent = "show"
 help = "Обозреватель решения (дерево проектов и файлов) в регионе Mfd."
 group = "Workspace"
 auto_run_on_commit = true
@@ -726,6 +881,10 @@ slash_group = "Карта"
 
 [[command.form.slash]]
 path = "/map type file"
+domain = "map"
+object = "type"
+intent = "set"
+path_role = "alias"
 help = "Карта намерений: уровень file (связанные файлы по якорю)."
 group = "Карта"
 auto_run_on_commit = true
@@ -750,6 +909,9 @@ command_id = "cycle_code_navigation_map_presentation"
 
 [[command.form.slash]]
 path = "/map cycle presentation"
+domain = "map"
+object = "cycle"
+intent = "presentation"
 help = "Карта намерений: цикл вида list / graph / both."
 group = "Карта"
 auto_run_on_commit = true
@@ -761,6 +923,9 @@ command_id = "cycle_code_navigation_map_level"
 
 [[command.form.slash]]
 path = "/map cycle level"
+domain = "map"
+object = "cycle"
+intent = "level"
 help = "Карта намерений: переключить уровень file ↔ controlFlow."
 group = "Карта"
 auto_run_on_commit = true
@@ -772,6 +937,9 @@ command_id = "cycle_code_navigation_map_detail_level"
 
 [[command.form.slash]]
 path = "/map cycle detail"
+domain = "map"
+object = "cycle"
+intent = "detail"
 help = "Карта намерений: цикл детализации glance / normal / inspect."
 group = "Карта"
 auto_run_on_commit = true
@@ -783,6 +951,9 @@ command_id = "cycle_code_navigation_map_related_graph_layout"
 
 [[command.form.slash]]
 path = "/map cycle layout"
+domain = "map"
+object = "cycle"
+intent = "layout"
 help = "Карта намерений: цикл укладки related (radial / top_down / bottom_up)."
 group = "Карта"
 auto_run_on_commit = true
@@ -794,6 +965,8 @@ command_id = "show_pfd_region_panel"
 
 [[command.form.slash]]
 path = "/pfd show"
+domain = "pfd"
+intent = "show"
 help = "Развернуть регион Pfd (карта намерений)."
 group = "Карта"
 auto_run_on_commit = true
@@ -805,6 +978,8 @@ command_id = "toggle_pfd_region_expanded"
 
 [[command.form.slash]]
 path = "/pfd toggle"
+domain = "pfd"
+intent = "toggle"
 help = "Переключить регион Pfd (карта намерений)."
 group = "Карта"
 auto_run_on_commit = true
@@ -816,6 +991,8 @@ command_id = "show_related_files_mfd_page"
 
 [[command.form.slash]]
 path = "/related show"
+domain = "related"
+intent = "show"
 help = "Страница «Связанные файлы» (Mfd) по якорю."
 group = "Карта"
 auto_run_on_commit = true
@@ -827,6 +1004,8 @@ command_id = "toggle_mfd_region_expanded"
 
 [[command.form.slash]]
 path = "/mfd toggle"
+domain = "mfd"
+intent = "toggle"
 help = "Переключить развёрнут/свёрнут регион Mfd."
 group = "Панели"
 auto_run_on_commit = true
@@ -838,6 +1017,8 @@ command_id = "show_markdown_preview_page"
 
 [[command.form.slash]]
 path = "/preview show"
+domain = "preview"
+intent = "show"
 help = "Markdown preview (страница Mfd)."
 group = "Панели"
 auto_run_on_commit = true
@@ -849,6 +1030,8 @@ command_id = "toggle_build_output"
 
 [[command.form.slash]]
 path = "/output toggle"
+domain = "output"
+intent = "toggle"
 help = "Переключить панель вывода сборки."
 group = "Сборка"
 auto_run_on_commit = true
@@ -860,6 +1043,8 @@ command_id = "hide_build_output_panel"
 
 [[command.form.slash]]
 path = "/output hide"
+domain = "output"
+intent = "hide"
 help = "Скрыть панель вывода сборки."
 group = "Сборка"
 auto_run_on_commit = true
@@ -871,6 +1056,8 @@ command_id = "toggle_git_panel"
 
 [[command.form.slash]]
 path = "/repository toggle"
+domain = "repository"
+intent = "toggle"
 help = "Переключить панель Git (SCM)."
 group = "Панели"
 auto_run_on_commit = true
@@ -882,6 +1069,8 @@ command_id = "toggle_instrumentation_dock"
 
 [[command.form.slash]]
 path = "/instrumentation toggle"
+domain = "instrumentation"
+intent = "toggle"
 help = "Переключить док инструментирования (Events/Tests/Debug)."
 group = "Панели"
 auto_run_on_commit = true
@@ -893,6 +1082,9 @@ command_id = "set_single_editor_group"
 
 [[command.form.slash]]
 path = "/editor layout single"
+domain = "editor"
+object = "layout"
+intent = "single"
 help = "Одна группа редакторов (1-up)."
 group = "Редактор"
 auto_run_on_commit = true
@@ -904,6 +1096,9 @@ command_id = "set_dual_editor_group"
 
 [[command.form.slash]]
 path = "/editor layout dual"
+domain = "editor"
+object = "layout"
+intent = "dual"
 help = "Две группы редакторов (2-up)."
 group = "Редактор"
 auto_run_on_commit = true
@@ -915,6 +1110,9 @@ command_id = "set_triple_editor_group"
 
 [[command.form.slash]]
 path = "/editor layout triple"
+domain = "editor"
+object = "layout"
+intent = "triple"
 help = "Три группы редакторов (3-up)."
 group = "Редактор"
 auto_run_on_commit = true
@@ -931,6 +1129,8 @@ slash_group = "Панели"
 
 [[command.form.slash]]
 path = "/output show"
+domain = "output"
+intent = "show"
 help = "Показать панель вывода сборки."
 group = "Сборка"
 
@@ -1025,6 +1225,8 @@ melody_shape = "simple"
 
 [[command.form.slash]]
 path = "/readiness show"
+domain = "readiness"
+intent = "show"
 help = "Страница готовности окружения (Environment Readiness)."
 group = "Панели"
 
@@ -1036,6 +1238,8 @@ melody_shape = "simple"
 
 [[command.form.slash]]
 path = "/index show"
+domain = "index"
+intent = "show"
 help = "Hybrid codebase index."
 group = "Панели"
 
@@ -1060,6 +1264,8 @@ melody_palette_usage_category = "Web AI Portal"
 
 [[command.form.slash]]
 path = "/portal open"
+domain = "portal"
+intent = "open"
 help = "Открыть Web AI Portal; опционально URL (как c:wai:…). Без URL — страница по умолчанию."
 group = "Web AI Portal"
 arg_tail = "optional"
@@ -1071,6 +1277,9 @@ arg_tail = "optional"
 [[command]]
 [[command.form.slash]]
 path = "/intercom topic list"
+domain = "intercom"
+object = "topic"
+intent = "list"
 help = "Интерактивный список тем в ленте (клик — открыть). Текст для агента: /topic list text."
 group = "Intercom"
 kind = "intercom"
@@ -1079,6 +1288,9 @@ intercom_handler = "topic_list"
 [[command]]
 [[command.form.slash]]
 path = "/intercom topic list text"
+domain = "intercom"
+object = "topic"
+intent = "list_text"
 help = "Текстовый список тем (для агента): main, active, число сообщений."
 group = "Intercom"
 kind = "report"
@@ -1087,6 +1299,9 @@ report_handler = "topic_list_text"
 [[command]]
 [[command.form.slash]]
 path = "/intercom topic tree"
+domain = "intercom"
+object = "topic"
+intent = "tree"
 help = "Интерактивное дерево тем в ленте (клик — открыть). Текст: /topic tree text."
 group = "Intercom"
 kind = "intercom"
@@ -1095,6 +1310,9 @@ intercom_handler = "topic_tree"
 [[command]]
 [[command.form.slash]]
 path = "/intercom topic tree text"
+domain = "intercom"
+object = "topic"
+intent = "tree_text"
 help = "Текстовое дерево веток (fork) с числом сообщений."
 group = "Intercom"
 kind = "report"
@@ -1103,6 +1321,9 @@ report_handler = "topic_tree_text"
 [[command]]
 [[command.form.slash]]
 path = "/intercom topic create"
+domain = "intercom"
+object = "topic"
+intent = "create"
 help = "Новая тема с заголовком: /topic create <название>."
 group = "Intercom"
 kind = "intercom"
@@ -1112,6 +1333,9 @@ arg_tail = "required"
 [[command]]
 [[command.form.slash]]
 path = "/intercom topic rename"
+domain = "intercom"
+object = "topic"
+intent = "rename"
 help = "Переименовать текущую тему: /topic rename <название>."
 group = "Intercom"
 kind = "intercom"
@@ -1121,6 +1345,9 @@ arg_tail = "required"
 [[command]]
 [[command.form.slash]]
 path = "/intercom spine list"
+domain = "intercom"
+object = "spine"
+intent = "list"
 help = "Product spine: линия, фокус, вехи (список)."
 group = "Intercom"
 kind = "report"
@@ -1129,6 +1356,9 @@ report_handler = "spine_list"
 [[command]]
 [[command.form.slash]]
 path = "/intercom spine tree"
+domain = "intercom"
+object = "spine"
+intent = "tree"
 help = "Product spine: линия → фокус → вехи (дерево)."
 group = "Intercom"
 kind = "report"
@@ -1137,6 +1367,9 @@ report_handler = "spine_tree"
 [[command]]
 [[command.form.slash]]
 path = "/intercom topic cards"
+domain = "intercom"
+object = "topic"
+intent = "cards"
 help = "Картотека тем (overview): карточки тем и spine; drill-in — /topic open."
 group = "Intercom"
 kind = "intercom"
@@ -1148,6 +1381,9 @@ arg_tail = "none"
 [[command]]
 [[command.form.slash]]
 path = "/intercom topic open"
+domain = "intercom"
+object = "topic"
+intent = "open"
 help = "Открыть тему (detail): подсказки «id · заголовок»; аргумент — короткий id, заголовок или пусто — выбранная/активная."
 group = "Intercom"
 kind = "intercom"
@@ -1160,6 +1396,9 @@ arg_tail = "optional"
 [[command]]
 [[command.form.slash]]
 path = "/intercom spine open"
+domain = "intercom"
+object = "spine"
+intent = "open"
 help = "Картотека (overview); то же, что /intercom topic cards."
 group = "Intercom"
 kind = "intercom"
@@ -1171,6 +1410,9 @@ arg_tail = "optional"
 [[command]]
 [[command.form.slash]]
 path = "/intercom message select"
+domain = "intercom"
+object = "message"
+intent = "select"
 help = "Выбрать сообщение по gutter (1-based): n, «n m» или «n:m» (как /editor line select); активно — конец диапазона."
 group = "Intercom"
 kind = "intercom"
@@ -1180,6 +1422,9 @@ arg_tail = "required"
 [[command]]
 [[command.form.slash]]
 path = "/intercom message select clear"
+domain = "intercom"
+object = "message"
+intent = "select_clear"
 help = "Сбросить подсветку gutter-выбора и активное сообщение в detail-ленте."
 group = "Intercom"
 kind = "intercom"
@@ -1188,6 +1433,9 @@ intercom_handler = "message_select_clear"
 [[command]]
 [[command.form.slash]]
 path = "/intercom message find"
+domain = "intercom"
+object = "message"
+intent = "find"
 help = "Сообщения ветки по коду (inferred из attach): selection, L:10-20, [M:…]."
 group = "Intercom"
 kind = "intercom"
@@ -1197,6 +1445,9 @@ arg_tail = "required"
 [[command]]
 [[command.form.slash]]
 path = "/intercom message relate"
+domain = "intercom"
+object = "message"
+intent = "relate"
 help = "Связать диапазон gutter (#n или n:m) с кодом: «3:5 relate selection»; в лог — AttachmentAnchor, не голые строки."
 group = "Intercom"
 kind = "intercom"
@@ -1206,6 +1457,9 @@ arg_tail = "required"
 [[command]]
 [[command.form.slash]]
 path = "/intercom message anchors list"
+domain = "intercom"
+object = "message"
+intent = "anchors_list"
 help = "Якоря выбранного сообщения и черновика composer: a:id, статус resolve, путь. Без hit-test — затем /anchor peek <id>."
 group = "Intercom"
 kind = "intercom"
@@ -1214,6 +1468,10 @@ intercom_handler = "message_anchors_list"
 [[command]]
 [[command.form.slash]]
 path = "/anchor peek"
+domain = "intercom"
+object = "anchor"
+intent = "peek"
+path_role = "alias"
 help = "Reveal вложения: № якоря (#1…) выбранного сообщения или 8 hex (⟦a:…⟧, list). Пример: /anchor peek 1"
 group = "Intercom"
 kind = "intercom"
@@ -1233,6 +1491,9 @@ arg_tail = "required"
 [[command]]
 [[command.form.slash]]
 path = "/intercom server status"
+domain = "intercom"
+object = "server"
+intent = "status"
 help = "Статус локального intercom-service, /health и transport."
 group = "Intercom"
 kind = "intercom"
@@ -1241,6 +1502,9 @@ intercom_handler = "server_status"
 [[command]]
 [[command.form.slash]]
 path = "/intercom server start"
+domain = "intercom"
+object = "server"
+intent = "start"
 help = "Запустить reference intercom-service (dotnet run). Опционально base URL."
 group = "Intercom"
 kind = "intercom"
@@ -1250,6 +1514,9 @@ arg_tail = "optional"
 [[command]]
 [[command.form.slash]]
 path = "/intercom server stop"
+domain = "intercom"
+object = "server"
+intent = "stop"
 help = "Остановить intercom-service, запущенный из CIDE."
 group = "Intercom"
 kind = "intercom"
@@ -1258,6 +1525,9 @@ intercom_handler = "server_stop"
 [[command]]
 [[command.form.slash]]
 path = "/intercom team members"
+domain = "intercom"
+object = "team"
+intent = "members"
 help = "Список участников team (member_id, role, display name)."
 group = "Intercom"
 kind = "intercom"
@@ -1266,6 +1536,9 @@ intercom_handler = "team_members"
 [[command]]
 [[command.form.slash]]
 path = "/intercom team invite"
+domain = "intercom"
+object = "team"
+intent = "invite"
 help = "Создать invite token. Хвост: team_role (member, guest, admin…)."
 group = "Intercom"
 kind = "intercom"
@@ -1275,6 +1548,9 @@ arg_tail = "required"
 [[command]]
 [[command.form.slash]]
 path = "/intercom team seed"
+domain = "intercom"
+object = "team"
+intent = "seed"
 help = "Seed project+repo для resolve (ADR 0147 §1b). Хвост: project_id."
 group = "Intercom"
 kind = "intercom"
@@ -1284,6 +1560,9 @@ arg_tail = "required"
 [[command]]
 [[command.form.slash]]
 path = "/intercom agent list"
+domain = "intercom"
+object = "agent"
+intent = "list"
 help = "Список agent accounts в team (* — выбранный для fan-out)."
 group = "Intercom"
 kind = "intercom"
@@ -1292,6 +1571,9 @@ intercom_handler = "agent_list"
 [[command]]
 [[command.form.slash]]
 path = "/intercom agent provision"
+domain = "intercom"
+object = "agent"
+intent = "provision"
 help = "Создать agent account. Хвост: display name."
 group = "Intercom"
 kind = "intercom"
@@ -1301,6 +1583,9 @@ arg_tail = "required"
 [[command]]
 [[command.form.slash]]
 path = "/intercom agent select"
+domain = "intercom"
+object = "agent"
+intent = "select"
 help = "Выбрать agent member_id для transport fan-out."
 group = "Intercom"
 kind = "intercom"
@@ -1313,6 +1598,8 @@ arg_tail = "required"
 
 [[command.form.slash]]
 path = "/agent verify"
+domain = "agent"
+intent = "verify"
 help = "Verification ladder (build + tests по policy). Хвост: minimal | standard | strict | ci_parity."
 group = "Agent"
 kind = "agent"
@@ -1360,6 +1647,9 @@ melody_palette_usage_category = "Cockpit"
 
 [[command.form.slash]]
 path = "/cockpit command line"
+domain = "cockpit"
+object = "command"
+intent = "line"
 help = "Открыть Cockpit Command Line над composer (не путать с composer и не с MFD Terminal)."
 group = "Cockpit"
 
@@ -1372,6 +1662,7 @@ group = "Cockpit"
 
 [[command.form.slash]]
 path = "/help"
+domain = "help"
 help = "Справка Intercom: темы, [вложения], слэши; /help <namespace> — только команды."
 group = "Справка"
 kind = "help"

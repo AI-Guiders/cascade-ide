@@ -76,6 +76,14 @@ internal sealed class SlashFormToml
     public bool? RequiresArgTail { get; set; }
     /// <summary><c>none</c> | <c>optional</c> | <c>required</c> — режим хвоста после пути (ADR 0150).</summary>
     public string? ArgTail { get; set; }
+    /// <summary>Slash domain (ADR 0154).</summary>
+    public string? Domain { get; set; }
+    /// <summary>Slash object (ADR 0154).</summary>
+    public string? Object { get; set; }
+    /// <summary>Slash intent (ADR 0154).</summary>
+    public string? Intent { get; set; }
+    /// <summary><c>canonical</c> | <c>alias</c> (ADR 0154).</summary>
+    public string? PathRole { get; set; }
 }
 
 /// <remarks><c>[command.form.slash.args]</c> → JSON args исполнителя.</remarks>

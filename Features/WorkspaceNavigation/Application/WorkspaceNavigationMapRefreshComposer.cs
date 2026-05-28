@@ -61,6 +61,7 @@ public static class WorkspaceNavigationMapRefreshComposer
         var graphPreferredHeight = CodeNavigationMapCompositor.DefaultHeightFile;
         var accentCount = 0;
         string? cfAnchorFullPath = null;
+        string? wireError = null;
 
         try
         {
@@ -70,7 +71,7 @@ public static class WorkspaceNavigationMapRefreshComposer
             {
                 status = WorkspaceNavigationMapOrchestrator.ResolveErrorStatus(root, currentPath);
             }
-            else if (useSubgraphMode && GraphDocumentJson.TryParse(json, out var subgraph, out _))
+            else if (useSubgraphMode && GraphDocumentJson.TryParseRoot(root, out var subgraph, out wireError))
             {
                 if (string.Equals(normalizedLevel, CodeNavigationMapLevelKind.ControlFlow, StringComparison.Ordinal)
                     && SolutionTreePath.TryGetFullPath(subgraph!.AnchorPath, out var anchorNorm))
@@ -121,6 +122,10 @@ public static class WorkspaceNavigationMapRefreshComposer
                 accentCount = rows.Count;
                 status = WorkspaceNavigationMapOrchestrator.ResolveEmptyStatus(rows, status, wantList: true);
             }
+            else if (useSubgraphMode && !string.IsNullOrEmpty(wireError))
+            {
+                status = FormatWireParseStatus(wireError, root);
+            }
 
             return new DryResult(status, anchorLabel, scene, graphPreferredHeight, accentCount, rows, cfAnchorFullPath);
         }
@@ -128,10 +133,10 @@ public static class WorkspaceNavigationMapRefreshComposer
         {
             throw;
         }
-        catch
+        catch (Exception ex)
         {
             return new DryResult(
-                "Не удалось разобрать ответ навигации.",
+                FormatComposeExceptionStatus(ex),
                 "—",
                 null,
                 CodeNavigationMapCompositor.DefaultHeightFile,
@@ -140,4 +145,29 @@ public static class WorkspaceNavigationMapRefreshComposer
                 null);
         }
     }
+
+    private static string FormatWireParseStatus(string wireError, JsonElement root)
+    {
+        if (wireError is "error" or "bad_mode" or "no_anchor" or "no_items")
+        {
+            var msg = root.TryGetProperty("message", out var m) && m.ValueKind == JsonValueKind.String
+                ? m.GetString()
+                : null;
+            if (!string.IsNullOrEmpty(msg))
+                return msg;
+        }
+
+        return wireError switch
+        {
+            "no_items" => "Нет связанных файлов по текущим эвристикам.",
+            "no_anchor" => "Не задан якорный файл для карты.",
+            "bad_mode" => "Неподдерживаемый режим ответа навигации.",
+            _ => $"Не удалось разобрать ответ навигации ({wireError})."
+        };
+    }
+
+    private static string FormatComposeExceptionStatus(Exception ex) =>
+        string.IsNullOrWhiteSpace(ex.Message)
+            ? "Не удалось разобрать ответ навигации."
+            : $"Не удалось разобрать ответ навигации: {ex.Message}";
 }

@@ -94,7 +94,10 @@ public enum CodeNavigationMapNodeShape
     Circle,
 
     /// <summary>Условие / ветвление в CFG; на карте — ромб (не имя геометрии в API).</summary>
-    Condition
+    Condition,
+
+    /// <summary>Файловая карточка / узел related-files (прямоугольник с подписью внутри).</summary>
+    Rectangle
 }
 
 public sealed class CodeNavigationMapGraphNodeLayout

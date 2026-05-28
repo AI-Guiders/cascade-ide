@@ -9,5 +9,8 @@
   <ItemGroup>
     <PackageReference Include="Tomlyn" Version="2.3.0" />
   </ItemGroup>
+  <ItemGroup>
+    <Compile Include="..\..\Shared\SlashRouteSemantics.cs" Link="SlashRouteSemantics.cs" />
+  </ItemGroup>
 </Project>
 
