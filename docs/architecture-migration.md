@@ -84,8 +84,8 @@
 | `MainWindowViewModel.UiGitWorkspace.cs` | 126 | Git + workspace UI. |
 | `MainWindowViewModel.ViewBridge.cs` | 68 | Колбэки и провайдеры, которые View подставляет в главный VM (диалоги, UI automation). |
 | `MainWindowViewModel.WebAiPortal.cs` | 29 | Страница MFD «веб-портал» (ADR 0108): URL, результат последнего вызова моста, `WebAiPortalCommandBridge`. |
-| `MainWindowViewModel.WorkspaceNavigationMap.cs` | 413 | Слот Pfd: отображение карты намерений / `GraphDocument` (те же данные, что JSON MCP). Граф подграфа — не синоним `instrument_id`, см. ADR 0065. По доменам: карта намерений (в т.ч. control flow) — CodeNavigation; зависимости файлов — WorkspaceNavigation; submodules — дерево/GitMap (ADR 0062). |
-| `MainWindowViewModel.WorkspaceNavigationMap.Refresh.cs` | 334 | Срез карты workspace: перезапрос refresh и сборка через `WorkspaceNavigationMapRefreshComposer`. |
+| `MainWindowViewModel.WorkspaceNavigationMap.Bridge.cs` | ≈40 | Мост `NavigationMap` + `IWorkspaceNavigationMapHost`; прокси для MCP/редактора. |
+| `Features/WorkspaceNavigation/Presentation/WorkspaceNavigationMapViewModel*.cs` | ≈750 | Слот Pfd/MFD: карта намерений (ADR 0039/0065), refresh через `WorkspaceNavigationMapRefreshComposer`. |
 | `MainWindowViewModel.WorkspaceSplitters.cs` | 23 | Сплиттеры рабочей области (MainGrid, обозреватель решения, Git и т.д.): режим «взлёт» — блокировка перетаскивания. |
 
 <!-- AUTO:MAIN-WINDOW-SLICE:MWVM-TABLE:END -->
