@@ -34,6 +34,15 @@ public sealed class MarkdownPreviewPayloadBuilder
 
         try
         {
+            renderMarkdown = MarkdownCodeAnchorPreviewExpander.Expand(renderMarkdown);
+        }
+        catch (Exception ex)
+        {
+            notices.Add($"Code anchor links: {ex.Message}");
+        }
+
+        try
+        {
             renderMarkdown = await MarkdownDiagramExpansion.ExpandAsync(renderMarkdown, settings, cancellationToken).ConfigureAwait(false);
         }
         catch (OperationCanceledException)

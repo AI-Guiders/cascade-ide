@@ -55,7 +55,21 @@ public partial class MarkdownPreviewSurfaceView : UserControl
         {
             try
             {
-                host.Content = Renderer.Render(payload);
+                var anchors = new MarkdownPreviewAnchorRegistry();
+                var ctx = new MarkdownPreviewRenderContext(
+                    payload.SourcePath,
+                    vm.TryGetWorkspaceRoot(),
+                    url => vm.TryOpenPreviewLink(url, anchors),
+                    anchors);
+                host.Content = Renderer.Render(payload, ctx);
+
+                var scrollLine = vm.ConsumePendingScrollLine();
+                if (scrollLine is > 0)
+                    anchors.ScrollToLine(scrollLine.Value);
+
+                var scrollFragment = vm.ConsumePendingScrollFragment();
+                if (!string.IsNullOrWhiteSpace(scrollFragment))
+                    anchors.ScrollToFragment(scrollFragment);
             }
             catch (Exception ex)
             {

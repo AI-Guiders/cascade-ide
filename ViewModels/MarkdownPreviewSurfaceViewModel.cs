@@ -1,7 +1,11 @@
 #nullable enable
 using System.ComponentModel;
+using System.Diagnostics;
 using Avalonia.Threading;
+using CascadeIDE.Features.Workspace;
+using CascadeIDE.Features.WorkspaceNavigation.Application;
 using CascadeIDE.Models;
+using CascadeIDE.Services.Intercom;
 using CascadeIDE.Services.MarkdownPreview;
 using CommunityToolkit.Mvvm.ComponentModel;
 
@@ -14,6 +18,8 @@ public abstract partial class MarkdownPreviewSurfaceViewModel : ObservableObject
     private MainWindowViewModel? _editorVm;
     private PropertyChangedEventHandler? _editorHandler;
     private CancellationTokenSource? _refreshCts;
+    private int? _pendingScrollLine;
+    private string? _pendingScrollFragment;
 
     [ObservableProperty]
     private string _title = "Markdown Preview";
@@ -65,12 +71,162 @@ public abstract partial class MarkdownPreviewSurfaceViewModel : ObservableObject
         _editorHandler = null;
     }
 
-    public void SetContent(string title, string content, string? sourcePath = null)
+    public void SetContent(string title, string content, string? sourcePath = null, int? scrollToLine = null)
     {
+        if (scrollToLine is > 0)
+            _pendingScrollLine = scrollToLine;
+
         QueueRefresh(
             new MarkdownPreviewSource(title, content ?? "", sourcePath),
             SettingsService.Load(),
             emptyMessage: "Markdown content is empty.");
+    }
+
+    /// <summary>Единый обработчик ссылок preview: http, .md, #fragment, code-anchor.</summary>
+    public void TryOpenPreviewLink(string linkUrl, MarkdownPreviewAnchorRegistry? anchors)
+    {
+        if (string.IsNullOrWhiteSpace(linkUrl))
+            return;
+
+        var trimmed = linkUrl.Trim();
+        if (trimmed.StartsWith(MarkdownCodeAnchorPreviewExpander.UriScheme, StringComparison.OrdinalIgnoreCase))
+        {
+            TryOpenCodeAnchor(trimmed);
+            return;
+        }
+
+        if (trimmed.StartsWith("http://", StringComparison.OrdinalIgnoreCase)
+            || trimmed.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
+        {
+            TryOpenExternalUrl(trimmed);
+            return;
+        }
+
+        if (trimmed.StartsWith('#'))
+        {
+            anchors?.ScrollToFragment(trimmed[1..]);
+            return;
+        }
+
+        var (path, fragment) = MarkdownPreviewRenderContext.SplitUrl(trimmed);
+        if (!string.IsNullOrWhiteSpace(path))
+            TryOpenLinkedDocument(path);
+
+        if (!string.IsNullOrWhiteSpace(fragment))
+            anchors?.ScrollToFragment(fragment);
+    }
+
+    /// <summary>Открыть связанный markdown (ADR/KB) в этом же preview.</summary>
+    public void TryOpenLinkedDocument(string linkUrl)
+    {
+        var ws = TryGetWorkspaceRoot();
+        if (string.IsNullOrWhiteSpace(ws))
+            return;
+
+        var (path, fragment) = MarkdownPreviewRenderContext.SplitUrl(linkUrl);
+        if (string.IsNullOrWhiteSpace(path))
+        {
+            if (!string.IsNullOrWhiteSpace(fragment))
+                _pendingScrollFragment = fragment;
+            return;
+        }
+
+        var ctx = new MarkdownPreviewRenderContext(Payload?.SourcePath, ws);
+        var target = ctx.ResolveNavigateTarget(path);
+        if (string.IsNullOrWhiteSpace(target))
+            return;
+
+        if (!string.IsNullOrWhiteSpace(fragment))
+            _pendingScrollFragment = fragment;
+
+        if (!WorkspaceMarkdownPreviewOpener.TryOpenRepoDocument(
+                ws,
+                target,
+                (title, content, source) => SetContent(title, content, source),
+                out _))
+            return;
+    }
+
+    internal int? ConsumePendingScrollLine()
+    {
+        var line = _pendingScrollLine;
+        _pendingScrollLine = null;
+        return line;
+    }
+
+    internal string? ConsumePendingScrollFragment()
+    {
+        var fragment = _pendingScrollFragment;
+        _pendingScrollFragment = null;
+        return fragment;
+    }
+
+    internal void TryOpenCodeAnchor(string codeAnchorUrl)
+    {
+        if (_editorVm is null)
+            return;
+
+        var inner = Uri.UnescapeDataString(
+            codeAnchorUrl[MarkdownCodeAnchorPreviewExpander.UriScheme.Length..]);
+        if (!BracketCodeReferenceParser.TryParse(inner, out var reference, out _))
+            return;
+
+        var ws = TryGetWorkspaceRoot();
+        if (!BracketCodeReferenceParser.TryToAttachmentAnchor(
+                reference,
+                _editorVm.CurrentFilePath,
+                ws,
+                _editorVm.Workspace.SolutionPath,
+                indexDirectoryRelative: null,
+                out var anchor,
+                out _))
+        {
+            return;
+        }
+
+        var absolute = ResolveAnchorAbsolutePath(anchor.File, ws);
+        if (string.IsNullOrWhiteSpace(absolute))
+            return;
+
+        var line = anchor.LineStart is > 0 ? anchor.LineStart.Value : 1;
+        var endLine = anchor.LineEnd is > 0 ? anchor.LineEnd.Value : line;
+        _editorVm.IdeMcp.GoToPosition(absolute, line, 1, endLine, null);
+    }
+
+    internal void TryOpenExternalUrl(string url)
+    {
+        try
+        {
+            Process.Start(new ProcessStartInfo(url) { UseShellExecute = true });
+        }
+        catch
+        {
+            // ignore — preview must not crash on bad URL
+        }
+    }
+
+    private static string? ResolveAnchorAbsolutePath(string? relativeFile, string? workspaceRoot)
+    {
+        if (string.IsNullOrWhiteSpace(relativeFile))
+            return null;
+
+        var normalized = relativeFile.Replace('\\', '/').Trim();
+        if (Path.IsPathRooted(normalized))
+            return normalized;
+
+        if (string.IsNullOrWhiteSpace(workspaceRoot))
+            return null;
+
+        var candidate = Path.GetFullPath(Path.Combine(workspaceRoot, normalized.Replace('/', Path.DirectorySeparatorChar)));
+        return File.Exists(candidate) ? candidate : candidate;
+    }
+
+    internal string? TryGetWorkspaceRoot()
+    {
+        if (_editorVm is null)
+            return null;
+
+        return WorkspaceDirectoryFromSolutionPath.Resolve(_editorVm.Workspace.SolutionPath ?? "");
     }
 
     public void RefreshFromEditor()
