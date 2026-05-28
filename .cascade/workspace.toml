@@ -43,3 +43,6 @@ docs = [
 ]
 tags = ["workspace", "navigation", "pfd", "mfd", "graph"]
 
+[workspace.docs_templates]
+catalog_path = "docs/templates/catalog.toml"
+

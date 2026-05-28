@@ -68,6 +68,37 @@ public sealed class UiWorkspaceWorkspaceToml
 {
     public UiWorkspaceAdrToml? Adr { get; set; }
     public UiWorkspaceFeaturesToml? Features { get; set; }
+    public UiWorkspaceDocsTemplatesToml? DocsTemplates { get; set; }
+}
+
+/// <summary>
+/// TOML: <c>[workspace.docs_templates]</c>. Can optionally point to an external catalog TOML file.
+/// </summary>
+public sealed class UiWorkspaceDocsTemplatesToml
+{
+    /// <summary>Repo-relative path to a catalog file (TOML). TOML: <c>catalog_path</c>.</summary>
+    public string? CatalogPath { get; set; }
+
+    /// <summary>Inline templates (override/augment). TOML: <c>[[workspace.docs_templates.template]]</c>.</summary>
+    public List<DocsTemplateToml> Template { get; set; } = [];
+}
+
+/// <summary>One template entry (repo file or knowledge file).</summary>
+public sealed class DocsTemplateToml
+{
+    public string? Id { get; set; }
+    public string? Title { get; set; }
+    /// <summary>Semantic kind: feature_doc | module_doc | adr | runbook | ...</summary>
+    public string? Kind { get; set; }
+    /// <summary>Source: repo | knowledge</summary>
+    public string? Source { get; set; }
+
+    // repo
+    public string? Path { get; set; }
+
+    // knowledge
+    public string? KnowledgeRootId { get; set; }
+    public string? FilePath { get; set; }
 }
 
 /// <summary>

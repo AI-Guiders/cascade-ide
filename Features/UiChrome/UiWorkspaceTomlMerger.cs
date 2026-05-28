@@ -34,6 +34,7 @@ public static class UiWorkspaceTomlMerger
         {
             Adr = MergeWorkspaceAdr(lower?.Adr, higher?.Adr),
             Features = MergeWorkspaceFeatures(lower?.Features, higher?.Features),
+            DocsTemplates = MergeDocsTemplates(lower?.DocsTemplates, higher?.DocsTemplates),
         };
     }
 
@@ -92,6 +93,54 @@ public static class UiWorkspaceTomlMerger
         Paths = f.Paths?.Where(x => !string.IsNullOrWhiteSpace(x)).Select(x => x.Trim()).ToList() ?? [],
         Docs = f.Docs?.Where(x => !string.IsNullOrWhiteSpace(x)).Select(x => x.Trim()).ToList() ?? [],
         Tags = f.Tags?.Where(x => !string.IsNullOrWhiteSpace(x)).Select(x => x.Trim()).ToList() ?? [],
+    };
+
+    private static UiWorkspaceDocsTemplatesToml? MergeDocsTemplates(
+        UiWorkspaceDocsTemplatesToml? lower,
+        UiWorkspaceDocsTemplatesToml? higher)
+    {
+        if (lower is null && higher is null)
+            return null;
+
+        // Higher wins for catalog path; inline templates are merged by id (higher overrides).
+        var merged = new Dictionary<string, DocsTemplateToml>(StringComparer.OrdinalIgnoreCase);
+        if (lower?.Template is { Count: > 0 })
+        {
+            foreach (var t in lower.Template)
+            {
+                var id = (t.Id ?? "").Trim();
+                if (id.Length == 0)
+                    continue;
+                merged[id] = CloneTemplate(t);
+            }
+        }
+        if (higher?.Template is { Count: > 0 })
+        {
+            foreach (var t in higher.Template)
+            {
+                var id = (t.Id ?? "").Trim();
+                if (id.Length == 0)
+                    continue;
+                merged[id] = CloneTemplate(t);
+            }
+        }
+
+        return new UiWorkspaceDocsTemplatesToml
+        {
+            CatalogPath = higher?.CatalogPath ?? lower?.CatalogPath,
+            Template = merged.Values.ToList()
+        };
+    }
+
+    private static DocsTemplateToml CloneTemplate(DocsTemplateToml t) => new()
+    {
+        Id = t.Id?.Trim(),
+        Title = t.Title?.Trim(),
+        Kind = t.Kind?.Trim(),
+        Source = t.Source?.Trim(),
+        Path = t.Path?.Trim(),
+        KnowledgeRootId = t.KnowledgeRootId?.Trim(),
+        FilePath = t.FilePath?.Trim(),
     };
 
     private static Dictionary<string, object>? MergeObjectDictionary(

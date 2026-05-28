@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
+using System.Text.Json;
 using Avalonia.Controls;
 using CascadeIDE.Cockpit.Cds;
 using CascadeIDE.Cockpit.Channels.TraceFlow;
@@ -11,6 +12,7 @@ using CascadeIDE.Models;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CascadeIDE.Services;
+using CascadeIDE.Features.UiChrome;
 
 namespace CascadeIDE.ViewModels;
 
@@ -254,32 +256,91 @@ public partial class MainWindowViewModel
         if (string.IsNullOrWhiteSpace(wsRoot))
             return;
 
+        var workspaceToml = TryReadRepositoryWorkspaceToml(wsRoot);
+        var templates = DocsTemplatesCatalogResolver.ResolveTemplatesFromWorkspaceToml(workspaceToml, wsRoot);
+        if (templates.Count == 0)
+            return;
+
         var requested = parameter as string;
-        var rel = !string.IsNullOrWhiteSpace(requested) ? requested!.Trim() : null;
-        if (string.IsNullOrWhiteSpace(rel))
+        var selectedId = !string.IsNullOrWhiteSpace(requested) ? requested!.Trim() : null;
+        if (string.IsNullOrWhiteSpace(selectedId))
         {
-            rel = RequestPickFeatureDocAsync is not null
-                ? await RequestPickFeatureDocAsync("Шаблон документации", TemplateDocPaths).ConfigureAwait(true)
-                : TemplateDocPaths[0];
+            var labels = templates.Select(t => $"{t.Id} — {t.Title}").ToArray();
+            var pick = RequestPickFeatureDocAsync is not null
+                ? await RequestPickFeatureDocAsync("Шаблон документации", labels).ConfigureAwait(true)
+                : labels[0];
+
+            if (string.IsNullOrWhiteSpace(pick))
+                return;
+
+            var dash = pick.IndexOf("—", StringComparison.Ordinal);
+            selectedId = (dash > 0 ? pick[..dash] : pick).Trim();
         }
 
-        if (string.IsNullOrWhiteSpace(rel))
+        if (string.IsNullOrWhiteSpace(selectedId))
             return;
 
-        var abs = WorkspaceAdrMapResolver.TryResolveAbsoluteDocPath(wsRoot, rel);
-        if (string.IsNullOrWhiteSpace(abs) || !File.Exists(abs))
+        var entry = templates.FirstOrDefault(t => string.Equals(t.Id, selectedId, StringComparison.OrdinalIgnoreCase));
+        if (entry is null)
             return;
 
+        if (entry.Source == "knowledge" && !string.IsNullOrWhiteSpace(entry.KnowledgeFilePath))
+        {
+            try
+            {
+                var args = new Dictionary<string, System.Text.Json.JsonElement>
+                {
+                    ["file_path"] = System.Text.Json.JsonDocument.Parse($"\"{entry.KnowledgeFilePath}\"").RootElement.Clone(),
+                };
+                if (!string.IsNullOrWhiteSpace(entry.KnowledgeRootId))
+                    args["knowledge_root_id"] = System.Text.Json.JsonDocument.Parse($"\"{entry.KnowledgeRootId}\"").RootElement.Clone();
+
+                var content = await IdeMcp.ExecuteCommandAsync(Services.IdeCommands.ReadKnowledgeFile, args, CancellationToken.None)
+                    .ConfigureAwait(true);
+
+                MarkdownPreviewTool.SetContent($"KB template: {entry.Title}", content ?? "", entry.KnowledgeFilePath);
+                ApplyMfdRegionExpanded(true);
+                TryNavigateToMfdShellPage(MfdShellPage.MarkdownPreview);
+            }
+            catch
+            {
+                // ignore
+            }
+            return;
+        }
+
+        if (!string.IsNullOrWhiteSpace(entry.RepoPath))
+        {
+            var abs = WorkspaceAdrMapResolver.TryResolveAbsoluteDocPath(wsRoot, entry.RepoPath);
+            if (string.IsNullOrWhiteSpace(abs) || !File.Exists(abs))
+                return;
+
+            try
+            {
+                var content = File.ReadAllText(abs);
+                MarkdownPreviewTool.SetContent(entry.Title, content, abs);
+                ApplyMfdRegionExpanded(true);
+                TryNavigateToMfdShellPage(MfdShellPage.MarkdownPreview);
+            }
+            catch
+            {
+                // ignore
+            }
+        }
+    }
+
+    private static UiWorkspaceToml? TryReadRepositoryWorkspaceToml(string workspaceRoot)
+    {
         try
         {
-            var content = File.ReadAllText(abs);
-            MarkdownPreviewTool.SetContent(rel, content, abs);
-            ApplyMfdRegionExpanded(true);
-            TryNavigateToMfdShellPage(MfdShellPage.MarkdownPreview);
+            var path = Path.Combine(workspaceRoot.Trim(), ".cascade", "workspace.toml");
+            if (!File.Exists(path))
+                return null;
+            return CascadeTomlSerializer.Deserialize<UiWorkspaceToml>(File.ReadAllText(path));
         }
         catch
         {
-            // ignore
+            return null;
         }
     }
 
