@@ -23,7 +23,9 @@ public sealed record ClaimNavItem(
     string ConceptId,
     string DocPath,
     string Section,
+    string Text,
     string? Bundle,
+    string? ClaimKind,
     IReadOnlyList<CodeAnchorItem>? CodeAnchors);
 
 public sealed record CodeAnchorItem(string File, int? Line, int? LineEnd);
@@ -109,6 +111,8 @@ public static class FieldStateLoader
                 continue;
 
             var sec = item.TryGetProperty("section", out var s) ? s.GetString() ?? "" : "";
+            var text = item.TryGetProperty("text", out var tx) ? tx.GetString() ?? "" : "";
+            var claimKind = item.TryGetProperty("claim_kind", out var ck) ? ck.GetString() : null;
             var bundle = item.TryGetProperty("bundle", out var b) ? b.GetString() : null;
             IReadOnlyList<CodeAnchorItem>? anchors = null;
             if (item.TryGetProperty("code_anchors", out var ca) && ca.ValueKind == JsonValueKind.Array)
@@ -127,7 +131,7 @@ public static class FieldStateLoader
                     anchors = al;
             }
 
-            list.Add(new ClaimNavItem(cid!, dp!, sec, bundle, anchors));
+            list.Add(new ClaimNavItem(cid!, dp!, sec, text, bundle, claimKind, anchors));
         }
 
         return list;

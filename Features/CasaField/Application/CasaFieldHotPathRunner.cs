@@ -60,6 +60,15 @@ public static class CasaFieldHotPathRunner
                     taskBand = result.Cen.TaskBand,
                     queryToDmn = result.Cen.QueryToDmn,
                     confidence = result.Cen.Confidence,
+                    answerBlocks = result.Cen.AnswerBlocks.Select(b => new
+                    {
+                        conceptId = b.ConceptId,
+                        text = b.Text,
+                        section = b.Section,
+                        docPath = b.DocPath,
+                        score = b.Score,
+                        claimKind = b.ClaimKind,
+                    }),
                 },
             };
             return JsonSerializer.Serialize(payload, JsonOptions);

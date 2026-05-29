@@ -120,8 +120,8 @@
 | `append_agent_notes` | Добавить блок в конец заметок агента. args: content:string; returns: text; example: {"content":"\\n# Update\\n..."}. |
 | `build` | Сборка решения (структурированный результат). returns: json. |
 | `build_structured` | Сборка решения (структурированный результат). То же, что `build`; выделено для совместимости/алиасов. returns: json. |
+| `casa_field_infer` | CASA native hot path (decode + SN/CEN in C#). args: query?:string; returns: json; example: {"query":"согласно приказу"}. |
 | `casa_field_query` | CASA field query: match KB concepts → doc_path + section. args: query:string, open?:boolean; returns: json; example: {"query":"import knowledge delta","open":true}. |
-| `casa_field_infer` | CASA native hot path (C# decode + SN/CEN). args: query?:string; returns: json. |
 | `compact_hot_context` | Ужать hot-context (preview/apply). args: apply?:boolean; returns: json; example: {"apply":false}. |
 | `extract_from_archive` | Поиск по архивной ревизии заметок с контекстом строк. args: query:string, revision_file?:string, head_limit?:integer, context_lines?:integer; returns: json; example: {"query":"ActiveProjectId","head_limit":10,"context_lines":2}. |
 | `get_build_output` | Текст панели «Вывод сборки» + цвета оформления. returns: json. |

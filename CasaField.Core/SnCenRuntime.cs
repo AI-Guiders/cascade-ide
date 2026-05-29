@@ -11,6 +11,14 @@ public sealed record CenTarget(
     int? Line,
     int? LineEnd);
 
+public sealed record AnswerBlock(
+    string ConceptId,
+    string Text,
+    string Section,
+    string DocPath,
+    int Score,
+    string ClaimKind);
+
 public sealed record CenTask(
     string Intent,
     string Action,
@@ -18,7 +26,8 @@ public sealed record CenTask(
     IReadOnlyList<CenTarget> Targets,
     double Confidence,
     string? QueryToDmn,
-    IReadOnlyDictionary<string, double> TaskBand);
+    IReadOnlyDictionary<string, double> TaskBand,
+    IReadOnlyList<AnswerBlock> AnswerBlocks);
 
 public sealed record HotPathResult(
     double WallMs,
@@ -70,7 +79,19 @@ public static class SnCenRuntime
         var targets = BuildTargets(top);
         var action = targets.Any(t => t.Kind == "code") ? "open_code"
             : targets.Any(t => t.Kind == "kb") ? "open_kb"
+            : hits.Count > 0 ? "answer_from_memory"
             : "answer_from_memory";
+
+        var answerBlocks = hits
+            .Take(3)
+            .Select(h => new AnswerBlock(
+                h.Item.ConceptId,
+                h.Item.Text,
+                h.Item.Section,
+                h.Item.DocPath,
+                h.Score,
+                h.Item.ClaimKind ?? "claim"))
+            .ToList();
 
         var conf = sn.Ports.GetValueOrDefault("p2_sn_to_cen");
         var taskBand = new Dictionary<string, double>
@@ -88,16 +109,17 @@ public static class SnCenRuntime
             targets,
             conf,
             hits.Count == 0 && !string.IsNullOrEmpty(query) ? $"clarify:{query[..Math.Min(120, query.Length)]}" : null,
-            taskBand);
+            taskBand,
+            answerBlocks);
     }
 
     private static List<string> Tokenize(string? query)
     {
         if (string.IsNullOrWhiteSpace(query))
             return [];
-        return query.Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+        return System.Text.RegularExpressions.Regex.Matches(query, @"[\w\u0400-\u04FF]+")
+            .Select(m => m.Value.ToLowerInvariant())
             .Where(w => w.Length > 2)
-            .Select(w => w.ToLowerInvariant())
             .ToList();
     }
 
@@ -106,6 +128,7 @@ public static class SnCenRuntime
         var score = 0;
         var cid = item.ConceptId.ToLowerInvariant();
         var sec = item.Section.ToLowerInvariant();
+        var text = item.Text.ToLowerInvariant();
         var q = query.ToLowerInvariant();
         if (cid.Contains(q, StringComparison.Ordinal) || q.Contains(cid, StringComparison.Ordinal))
             score += 12;
@@ -113,6 +136,7 @@ public static class SnCenRuntime
         {
             if (cid.Contains(w, StringComparison.Ordinal)) score += 4;
             if (sec.Contains(w, StringComparison.Ordinal)) score += 3;
+            if (text.Contains(w, StringComparison.Ordinal)) score += 2;
         }
         return score;
     }

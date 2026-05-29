@@ -6,6 +6,6 @@ public static partial class IdeCommands
     /// <summary>CASA field query: match KB concepts → doc_path + section. args: query:string, open?:boolean; returns: json; example: {"query":"import knowledge delta","open":true}.</summary>
     public const string CasaFieldQuery = "casa_field_query";
 
-    /// <summary>CASA native hot path (decode + SN/CEN in C#). args: query?:string; returns: json.</summary>
+    /// <summary>CASA native hot path (decode + SN/CEN in C#). args: query?:string; returns: json; example: {"query":"согласно приказу"}.</summary>
     public const string CasaFieldInfer = "casa_field_infer";
 }
