@@ -66,6 +66,7 @@ internal sealed partial class IdeMcpCommandExecutor
         RegisterFocusPowerAndAgentActions(Add);
         RegisterDocuments(Add);
         RegisterCorrespondence(Add);
+        RegisterCasa(Add);
         // NOTE: UI inspection/control (pure IIdeMcpActions) is generated.
         RegisterDebugUiSurface(Add);
         RegisterAgentNotes(Add);

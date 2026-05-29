@@ -75,3 +75,7 @@ doc = "docs/adr/0156-correspondence-mfd-surface-and-reverse-code-anchors.md"
 file = "Views/CorrespondenceMfdPageView.axaml"
 kind = "documents"
 
+[workspace.casa_field]
+store_dir = "../casa-ontology-payload/examples/agent-stores/research-agent-lab-v0"
+payload_repo = "../casa-ontology-payload"
+

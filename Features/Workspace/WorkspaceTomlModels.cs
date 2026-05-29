@@ -33,6 +33,8 @@ public sealed class RepositoryWorkspaceSectionToml
     public RepositoryFeaturesToml? Features { get; set; }
     public RepositoryDocsTemplatesToml? DocsTemplates { get; set; }
     public RepositoryCorrespondenceToml? Correspondence { get; set; }
+
+    public RepositoryCasaFieldToml? CasaField { get; set; }
 }
 
 /// <summary>Explicit doc↔code anchors (<c>[[workspace.correspondence.code_anchors]]</c>, ADR 0156 §2.5).</summary>
