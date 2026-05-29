@@ -1,5 +1,6 @@
 using Avalonia;
 using Avalonia.Win32;
+using CascadeIDE.Features.MagicLink;
 using CascadeIDE.Services;
 using CascadeIDE.Services.AgentContract;
 
@@ -23,6 +24,23 @@ sealed class Program
         }
 
         App.RunMcpStdio = args.Contains("--mcp-stdio");
+
+        var magicLinkUri = CideMagicLinkArgExtractor.FromArgs(args);
+        if (!CideMagicLinkSingleInstance.TryAcquirePrimary(out var primaryMutex))
+        {
+            if (!string.IsNullOrWhiteSpace(magicLinkUri)
+                && CideMagicLinkSingleInstance.TryForwardToPrimary(magicLinkUri))
+            {
+                return;
+            }
+        }
+        else
+        {
+            App.MagicLinkPrimaryMutex = primaryMutex;
+            if (!string.IsNullOrWhiteSpace(magicLinkUri))
+                App.PendingMagicLinkUri = magicLinkUri;
+        }
+
         BuildAvaloniaApp().StartWithClassicDesktopLifetime(args);
     }
 

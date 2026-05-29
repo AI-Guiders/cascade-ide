@@ -19,6 +19,7 @@ id_regex = "(?:^|/)docs/adr/(?<id>\\d{4})-"
   "docs/adr/0155-documentation-code-correspondence-and-architectural-drift.md",
   "docs/adr/0061-context-aware-adr-map-pfd-knowledge-indicator.md",
   "docs/adr/0156-correspondence-mfd-surface-and-reverse-code-anchors.md",
+  "docs/adr/0157-cide-magic-link-protocol.md",
 ]
 "*" = "docs/adr/0006-presentation-layers-and-feature-slices.md"
 
@@ -44,8 +45,9 @@ docs = [
   "docs/adr/0061-context-aware-adr-map-pfd-knowledge-indicator.md",
   "docs/adr/0155-documentation-code-correspondence-and-architectural-drift.md",
   "docs/adr/0156-correspondence-mfd-surface-and-reverse-code-anchors.md",
+  "docs/adr/0157-cide-magic-link-protocol.md",
 ]
-tags = ["workspace", "navigation", "pfd", "mfd", "graph", "correspondence", "crs"]
+tags = ["workspace", "navigation", "pfd", "mfd", "graph", "correspondence", "crs", "magic-link"]
 
 [workspace.docs_templates]
 catalog_path = "docs/templates/catalog.toml"

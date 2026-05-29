@@ -188,6 +188,7 @@ public partial class MainWindowViewModel
         _workspaceDiagnostics.DiagnosticsChanged += OnWorkspaceDiagnosticsChangedForHud;
         MarkdownPreviewTool = new MarkdownPreviewToolViewModel();
         MarkdownPreviewTool.AttachToEditor(this);
+        StartMagicLinkListener();
 
         new UiChromeCapabilitiesModule().Register(_capabilities);
         new MarkdownCapabilitiesModule().Register(_capabilities);

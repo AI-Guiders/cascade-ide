@@ -17,6 +17,7 @@
 |-----|------------------------|
 | [0061](0061-context-aware-adr-map-pfd-knowledge-indicator.md) | **L1:** декларативная карта `путь → ADR`, PFD, advisory агента (GPWS для доков) |
 | [0156](0156-correspondence-mfd-surface-and-reverse-code-anchors.md) | **CRS:** страница Mfd для L0–L4; **reverse anchors** (док → код через CodeAnchor) |
+| [0157](0157-cide-magic-link-protocol.md) | Magic Link `cide://` (сайт доков → IDE) |
 | [0098](0098-semantic-first-document-as-projection.md) | **L0:** семантическая карта первична; код/доки/git — проекции; риск drift между проекциями |
 | [0039](0039-workspace-navigation-affordances.md) | **L2:** код ↔ код («связанные» файлы, subgraph, MCP `get_code_navigation_context`) |
 | [0053](0053-semantic-map-control-flow-pfd.md) | **L2:** намерения **в коде** (control flow, grain intent/detailed) |

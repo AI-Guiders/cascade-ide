@@ -75,6 +75,9 @@ public partial class MainWindow : PointerTrackingWindow
         }
 
         TryApplyHotkeys();
+
+        if (DataContext is ViewModels.MainWindowViewModel loadedVm)
+            _ = loadedVm.FlushPendingMagicLinksAsync();
     }
 
     private void TryApplyHotkeys()

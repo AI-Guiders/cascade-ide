@@ -14,6 +14,11 @@ public partial class App : Application
     /// <summary>Запуск с MCP-сервером на stdio (агент/Cursor подключается к IDE по stdin/stdout).</summary>
     public static bool RunMcpStdio { get; set; }
 
+    /// <summary><c>cide://</c> из argv при cold start (ADR 0157).</summary>
+    public static string? PendingMagicLinkUri { get; set; }
+
+    internal static IDisposable? MagicLinkPrimaryMutex { get; set; }
+
     public override void Initialize()
     {
         AvaloniaXamlLoader.Load(this);
@@ -30,6 +35,12 @@ public partial class App : Application
             desktop.MainWindow = new MainWindow { DataContext = vm };
             if (RunMcpStdio)
                 _ = RunMcpServerAsync(vm);
+            if (!string.IsNullOrWhiteSpace(PendingMagicLinkUri))
+            {
+                vm.EnqueueMagicLink(PendingMagicLinkUri);
+                PendingMagicLinkUri = null;
+            }
+
             _ = vm.RefreshOllamaAsync();
         }
 

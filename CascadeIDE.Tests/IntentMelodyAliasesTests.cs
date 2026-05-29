@@ -80,10 +80,10 @@ public sealed class IntentMelodyAliasesTests
     public void Bundled_intent_melody_toml_is_readable_like_runtime()
     {
         Assert.True(BundledAppContent.TryReadDiskThenEmbedded(IntentMelodyAliases.BundledRelativePath, out var text));
-        Assert.Contains("intent_catalog_schema_version = 1", text, StringComparison.Ordinal);
+        Assert.Contains("intent_catalog_schema_version = 2", text, StringComparison.Ordinal);
         Assert.Contains("[[tail_wire_class]]", text, StringComparison.Ordinal);
         Assert.Contains("[[command]]", text, StringComparison.Ordinal);
-        Assert.Contains("[[command.form.slash]]", text, StringComparison.Ordinal);
+        Assert.Contains("[[command.slash]]", text, StringComparison.Ordinal);
         Assert.Contains("path = \"/terminal show\"", text, StringComparison.Ordinal);
         Assert.Contains("melody_slug = \"ers\"", text, StringComparison.Ordinal);
         Assert.Contains("command_id = \"show_environment_readiness_page\"", text, StringComparison.Ordinal);
@@ -107,7 +107,7 @@ public sealed class IntentMelodyAliasesTests
         Assert.Contains("melody_slug = \"tol\"", text, StringComparison.Ordinal);
         Assert.Contains("command_id = \"toggle_workspace_splitters_lock\"", text, StringComparison.Ordinal);
         Assert.Contains("slash_group = \"Панели\"", text, StringComparison.Ordinal);
-        Assert.Contains("[command.form.slash.args]", text, StringComparison.Ordinal);
+        Assert.Contains("path = \"/mfd toggle\"", text, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -240,7 +240,7 @@ public sealed class IntentMelodyAliasesTests
 
     [Fact]
     public void FilterByTailPrefix_c_Matches_chat_core_melodies() =>
-        Assert.Equal(4, IntentMelodyAliases.FilterByTailPrefix("c").Count);
+        Assert.Equal(6, IntentMelodyAliases.FilterByTailPrefix("c").Count);
 
     [Fact]
     public void FilterByTailPrefix_a_Matches_agent_navigation_melodies() =>

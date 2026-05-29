@@ -22,6 +22,7 @@
 | [0128](0128-intercom-attachment-anchors-and-code-references.md) | **CodeAnchor** / `AttachmentAnchor` — file + line range + member |
 | [0137](0137-intercom-message-code-correspondence.md) | L4 discourse ↔ code |
 | [0029](0029-configuration-toml-canonical-ui-facade.md) | TOML для экземпляров L1; не онтология kinds |
+| [0157](0157-cide-magic-link-protocol.md) | Magic Link `cide://` из браузера → IDE |
 
 ---
 
