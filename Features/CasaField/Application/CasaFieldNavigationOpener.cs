@@ -17,6 +17,12 @@ public static class CasaFieldNavigationOpener
         if (target is null)
             return false;
 
+        if (target.Kind == "code")
+            return CasaFieldCodeNavigationOpener.TryOpenCodeTarget(vm, target);
+
+        if (string.IsNullOrWhiteSpace(target.DocPath))
+            return false;
+
         var ws = vm.GetWorkspacePath();
         if (string.IsNullOrWhiteSpace(ws))
             return false;

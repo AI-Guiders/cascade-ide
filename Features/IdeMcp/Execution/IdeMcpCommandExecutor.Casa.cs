@@ -25,5 +25,11 @@ internal sealed partial class IdeMcpCommandExecutor
 
             return json;
         });
+
+        add(IdeCommands.CasaFieldInfer, async (args, _) =>
+        {
+            var query = McpCommandJsonArgs.String(args, "query")?.Trim();
+            return CasaFieldHotPathRunner.BuildJson(_vm.GetWorkspacePath(), query);
+        });
     }
 }

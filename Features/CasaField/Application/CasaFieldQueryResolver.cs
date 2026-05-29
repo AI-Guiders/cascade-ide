@@ -42,15 +42,20 @@ public static class CasaFieldStoreResolver
 
 public sealed record CasaFieldTarget(
     string ConceptId,
-    string DocPath,
-    string Section,
+    string Kind,
+    string? DocPath,
+    string? Section,
     int? SectionLine,
+    string? CodeFile,
+    int? CodeLine,
     string? TextPreview);
 
 public sealed record CasaFieldQueryResult(
     string Query,
     double WallMs,
     string? BundleName,
+    int? FieldVersion,
+    bool? Stale,
     IReadOnlyList<CasaFieldTarget> Targets,
     string? Error);
 
@@ -74,11 +79,11 @@ public static class CasaFieldQueryResolver
     {
         var sw = Stopwatch.StartNew();
         if (string.IsNullOrWhiteSpace(workspaceRoot))
-            return new CasaFieldQueryResult(query, 0, null, [], "no_workspace");
+            return new CasaFieldQueryResult(query, 0, null, null, null, [], "no_workspace");
 
         var fieldPath = CasaFieldStoreResolver.ResolveFieldStatePath(workspaceRoot);
         if (fieldPath is null || !File.Exists(fieldPath))
-            return new CasaFieldQueryResult(query, sw.Elapsed.TotalMilliseconds, null, [], "field_state_missing");
+            return new CasaFieldQueryResult(query, sw.Elapsed.TotalMilliseconds, null, null, null, [], "field_state_missing");
 
         var storeDir = Path.GetDirectoryName(fieldPath)!;
         try
@@ -91,18 +96,41 @@ public static class CasaFieldQueryResolver
                 : null;
 
             var navItems = ReadNavItems(root, storeDir, bundleName);
+            var fieldVersion = root.TryGetProperty("field_version", out var fv) && fv.ValueKind == JsonValueKind.Number
+                ? fv.GetInt32()
+                : (int?)null;
+            var stale = IsFieldStale(root, storeDir);
             var targets = MatchQuery(query, navItems, workspaceRoot);
             sw.Stop();
-            return new CasaFieldQueryResult(query, Math.Round(sw.Elapsed.TotalMilliseconds, 2), bundleName, targets, null);
+            return new CasaFieldQueryResult(query, Math.Round(sw.Elapsed.TotalMilliseconds, 2), bundleName, fieldVersion, stale, targets, null);
         }
         catch (Exception ex)
         {
             sw.Stop();
-            return new CasaFieldQueryResult(query, sw.Elapsed.TotalMilliseconds, null, [], ex.Message);
+            return new CasaFieldQueryResult(query, sw.Elapsed.TotalMilliseconds, null, null, null, [], ex.Message);
         }
     }
 
-    private static List<(string ConceptId, string DocPath, string Section, string Text)> ReadNavItems(
+    private sealed record NavItem(
+        string ConceptId,
+        string DocPath,
+        string Section,
+        string Text,
+        IReadOnlyList<(string File, int? Line)> CodeAnchors);
+
+    private static bool IsFieldStale(JsonElement root, string storeDir)
+    {
+        if (!root.TryGetProperty("bundles", out var bundles) || bundles.ValueKind != JsonValueKind.Object)
+            return false;
+        foreach (var prop in bundles.EnumerateObject())
+        {
+            if (!File.Exists(Path.Combine(storeDir, "bundles", prop.Name)))
+                return true;
+        }
+        return false;
+    }
+
+    private static List<NavItem> ReadNavItems(
         JsonElement root,
         string storeDir,
         string? bundleName)
@@ -124,32 +152,52 @@ public static class CasaFieldQueryResolver
         return [];
     }
 
-    private static List<(string ConceptId, string DocPath, string Section, string Text)> ParseNavArray(JsonElement nav)
+    private static List<NavItem> ParseNavArray(JsonElement nav)
     {
-        var list = new List<(string, string, string, string)>();
+        var list = new List<NavItem>();
         foreach (var item in nav.EnumerateArray())
         {
             var cid = item.TryGetProperty("concept_id", out var c) ? c.GetString() : null;
             var dp = item.TryGetProperty("doc_path", out var d) ? d.GetString() : null;
             var sec = item.TryGetProperty("section", out var s) ? s.GetString() ?? "" : "";
-            if (!string.IsNullOrWhiteSpace(cid) && !string.IsNullOrWhiteSpace(dp))
-                list.Add((cid!, dp!, sec, ""));
+            if (string.IsNullOrWhiteSpace(cid) || string.IsNullOrWhiteSpace(dp))
+                continue;
+            list.Add(new NavItem(cid!, dp!, sec, "", ParseCodeAnchors(item)));
         }
 
         return list;
     }
 
-    private static List<(string ConceptId, string DocPath, string Section, string Text)> ParseClaims(JsonElement claims)
+    private static List<NavItem> ParseClaims(JsonElement claims)
     {
-        var list = new List<(string, string, string, string)>();
+        var list = new List<NavItem>();
         foreach (var c in claims.EnumerateArray())
         {
             var cid = c.TryGetProperty("concept_id", out var ci) ? ci.GetString() : null;
             var dp = c.TryGetProperty("doc_path", out var di) ? di.GetString() : null;
             var sec = c.TryGetProperty("section", out var si) ? si.GetString() ?? "" : "";
             var text = c.TryGetProperty("text", out var ti) ? ti.GetString() ?? "" : "";
-            if (!string.IsNullOrWhiteSpace(cid) && !string.IsNullOrWhiteSpace(dp))
-                list.Add((cid!, dp!, sec, text));
+            if (string.IsNullOrWhiteSpace(cid) || string.IsNullOrWhiteSpace(dp))
+                continue;
+            list.Add(new NavItem(cid!, dp!, sec, text, ParseCodeAnchors(c)));
+        }
+
+        return list;
+    }
+
+    private static IReadOnlyList<(string File, int? Line)> ParseCodeAnchors(JsonElement item)
+    {
+        if (!item.TryGetProperty("code_anchors", out var arr) || arr.ValueKind != JsonValueKind.Array)
+            return [];
+
+        var list = new List<(string, int?)>();
+        foreach (var a in arr.EnumerateArray())
+        {
+            var file = a.TryGetProperty("file", out var f) ? f.GetString() : null;
+            if (string.IsNullOrWhiteSpace(file))
+                continue;
+            int? line = a.TryGetProperty("line", out var ln) && ln.ValueKind == JsonValueKind.Number ? ln.GetInt32() : null;
+            list.Add((file!, line));
         }
 
         return list;
@@ -157,7 +205,7 @@ public static class CasaFieldQueryResolver
 
     private static List<CasaFieldTarget> MatchQuery(
         string query,
-        List<(string ConceptId, string DocPath, string Section, string Text)> items,
+        List<NavItem> items,
         string workspaceRoot)
     {
         var q = query.Trim();
@@ -168,12 +216,12 @@ public static class CasaFieldQueryResolver
 
         var hits = new List<(int Score, CasaFieldTarget Target)>();
 
-        foreach (var (cid, docPath, section, text) in items)
+        foreach (var item in items)
         {
             var score = 0;
-            var cidL = cid.ToLowerInvariant();
-            var secL = section.ToLowerInvariant();
-            var textL = text.ToLowerInvariant();
+            var cidL = item.ConceptId.ToLowerInvariant();
+            var secL = item.Section.ToLowerInvariant();
+            var textL = item.Text.ToLowerInvariant();
             var qL = q.ToLowerInvariant();
 
             if (cidL.Contains(qL, StringComparison.Ordinal) || qL.Contains(cidL, StringComparison.Ordinal))
@@ -189,13 +237,19 @@ public static class CasaFieldQueryResolver
             if (score <= 0)
                 continue;
 
-            var preview = text.Length > 120 ? text[..117] + "…" : text;
-            var line = KbSectionLineResolver.TryFindSectionLine(workspaceRoot, docPath, section);
-            hits.Add((score, new CasaFieldTarget(cid, docPath, section, line, preview)));
+            var preview = item.Text.Length > 120 ? item.Text[..117] + "…" : item.Text;
+            var line = KbSectionLineResolver.TryFindSectionLine(workspaceRoot, item.DocPath, item.Section);
+            hits.Add((score, new CasaFieldTarget(item.ConceptId, "kb", item.DocPath, item.Section, line, null, null, preview)));
+
+            foreach (var (file, codeLine) in item.CodeAnchors)
+            {
+                hits.Add((score, new CasaFieldTarget(item.ConceptId, "code", null, null, null, file, codeLine, preview)));
+            }
         }
 
         return hits
             .OrderByDescending(h => h.Score)
+            .ThenBy(h => h.Target.Kind, StringComparer.Ordinal)
             .ThenBy(h => h.Target.ConceptId, StringComparer.OrdinalIgnoreCase)
             .Select(h => h.Target)
             .Take(8)

@@ -15,6 +15,7 @@ internal static class IdeCommandsArgsGenerated
         ["apply_edit"] = new IdeCommandsArgs.Arg[] { new("file_path", "string", true, false, null), new("start_line", "integer", true, false, null), new("start_column", "integer", true, false, null), new("end_line", "integer", true, false, null), new("end_column", "integer", true, false, null), new("new_text", "string", true, false, null) },
         ["capture_window"] = new IdeCommandsArgs.Arg[] { new("scope", "string", false, false, null), new("workspace_path", "string", false, false, null), new("output_path", "string", false, false, null) },
         ["casa_field_query"] = new IdeCommandsArgs.Arg[] { new("query", "string", true, false, null), new("open", "boolean", false, false, null) },
+        ["casa_field_infer"] = new IdeCommandsArgs.Arg[] { new("query", "string", false, false, null) },
         ["chat_edit_message"] = new IdeCommandsArgs.Arg[] { new("message_id", "string", true, false, null), new("new_content", "string", true, false, null), new("reason", "string", false, false, null) },
         ["chat_export_readable"] = new IdeCommandsArgs.Arg[] { new("write_file", "boolean", false, false, null), new("file_name", "string", false, false, null) },
         ["chat_select_message"] = new IdeCommandsArgs.Arg[] { new("ordinal", "integer", false, false, null), new("end_ordinal", "integer", false, false, null), new("index", "integer", false, false, null) },

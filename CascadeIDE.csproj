@@ -37,6 +37,7 @@
     <Compile Remove="**/bin/**" />
     <!-- Contracts project lives inside repo; exclude its sources from main app compilation (use ProjectReference). -->
     <Compile Remove="CascadeIDE.Contracts\**\*.cs" />
+    <Compile Remove="CasaField.Core\**\*.cs" />
     <!-- Внешний субмодуль/вендор: не компилировать в IDE (иначе sandbox с top-level Main перехватывает входную точку). -->
     <Compile Remove="externals\**\*.cs" />
     <AvaloniaXaml Remove="externals\**\*.axaml" />
@@ -96,6 +97,7 @@
     <PackageReference Include="AIGuiders.AgentNotes.Core" Version="2.1.2" Condition="!Exists('..\agent-notes-core\AgentNotes.Core.csproj')" />
     <PackageReference Include="AIGuiders.GitMcp.Core" Version="1.0.1" />
     <ProjectReference Include="CascadeIDE.Contracts\CascadeIDE.Contracts.csproj" />
+    <ProjectReference Include="CasaField.Core\CasaField.Core.csproj" />
     <!-- RoslynMcp передаёт RoslynMcpWorkspace=true: не ссылаться на локальный анализатор, иначе DLL в bin держит процесс MCP и ломает dotnet build. -->
     <ProjectReference Include="CascadeIDE.ArchitectureAnalyzers\CascadeIDE.ArchitectureAnalyzers.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" Condition="'$(RoslynMcpWorkspace)'!='true'" />
   </ItemGroup>
