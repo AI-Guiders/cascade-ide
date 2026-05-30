@@ -5,6 +5,7 @@ using CascadeIDE.Services;
 
 namespace CascadeIDE.ViewModels;
 
+/// <summary>Magic link: pipe-сервер single-instance и обработка URI.</summary>
 public partial class MainWindowViewModel
 {
     private readonly object _magicLinkGate = new();
