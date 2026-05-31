@@ -1,3 +1,4 @@
+using CascadeIDE.Features.Terminal.DataAcquisition;
 using CascadeIDE.Services;
 using CascadeIDE.ViewModels;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -6,18 +7,23 @@ using CommunityToolkit.Mvvm.Input;
 namespace CascadeIDE.Features.Terminal;
 
 /// <summary>
-/// Вкладка «Terminal» нижней панели: вывод и ввод команд в рабочем каталоге решения.
+/// Вкладка «Terminal» нижней панели: интерактивная shell-сессия (ConPTY на Windows, redirected fallback).
 /// </summary>
-public partial class TerminalPanelViewModel : ViewModelBase
+public partial class TerminalPanelViewModel : ViewModelBase, IDisposable
 {
     public const int MaxChars = 250_000;
 
     private readonly Func<string?> _getSolutionPath;
+    private readonly IntegratedTerminalSessionHost _shellHost;
     private OutputAccumulator _acc = new(MaxChars);
+    private bool _disposed;
 
     public TerminalPanelViewModel(Func<string?> getSolutionPath)
     {
         _getSolutionPath = getSolutionPath;
+        _shellHost = new IntegratedTerminalSessionHost(getSolutionPath);
+        _shellHost.OutputReceived += AppendOutput;
+        _shellHost.SessionExited += OnShellSessionExited;
     }
 
     [ObservableProperty]
@@ -32,26 +38,6 @@ public partial class TerminalPanelViewModel : ViewModelBase
         TerminalOutput = "";
     }
 
-    private static string ResolveTerminalWorkingDirectory(string? solutionPath)
-    {
-        if (string.IsNullOrWhiteSpace(solutionPath))
-            return Environment.CurrentDirectory;
-        try
-        {
-            var p = CanonicalFilePath.Normalize(solutionPath.Trim());
-            if (File.Exists(p))
-                return Path.GetDirectoryName(p) ?? Environment.CurrentDirectory;
-            if (Directory.Exists(p))
-                return p;
-        }
-        catch
-        {
-            // fall through
-        }
-
-        return Environment.CurrentDirectory;
-    }
-
     public void AppendOutput(string text)
     {
         if (string.IsNullOrEmpty(text))
@@ -61,48 +47,48 @@ public partial class TerminalPanelViewModel : ViewModelBase
     }
 
     [RelayCommand]
-    private async Task RunTerminalCommandAsync()
+    private Task RunTerminalCommandAsync()
     {
         var cmd = TerminalInput?.Trim() ?? "";
         if (string.IsNullOrEmpty(cmd))
-            return;
+            return Task.CompletedTask;
+
         TerminalInput = "";
-        var solutionPath = _getSolutionPath();
-        var workDir = ResolveTerminalWorkingDirectory(solutionPath);
-        AppendOutput($"> {cmd}\r\n");
         try
         {
-            using var process = AdHocShellCommandProcess.TryStart(workDir, cmd, out var startError);
-            if (process is null)
+            _shellHost.EnsureStarted();
+            if (_shellHost.ActiveShellDisplayName is { } shellName
+                && TerminalOutput.Length == 0)
             {
-                AppendOutput((startError is not null ? startError + "\r\n" : "") + "Не удалось запустить процесс.\r\n");
-                return;
+                var workDir = IntegratedShellLaunch.ResolveWorkingDirectory(_getSolutionPath());
+                AppendOutput($"[{shellName} · {workDir}]\r\n");
             }
 
-            async Task PumpAsync(StreamReader reader)
-            {
-                var buffer = new char[4096];
-                while (true)
-                {
-                    var read = await reader.ReadAsync(buffer).ConfigureAwait(true);
-                    if (read <= 0)
-                        break;
-                    AppendOutput(new string(buffer, 0, read));
-                }
-            }
-
-            var pumpOut = PumpAsync(process.StandardOutput);
-            var pumpErr = PumpAsync(process.StandardError);
-
-            await Task.WhenAll(pumpOut, pumpErr).ConfigureAwait(true);
-            await process.WaitForExitAsync().ConfigureAwait(true);
-
-            if (process.ExitCode != 0)
-                AppendOutput($"\r\nExit code: {process.ExitCode}\r\n");
+            AppendOutput($"> {cmd}\r\n");
+            _shellHost.SendCommandLine(cmd);
         }
         catch (Exception ex)
         {
             AppendOutput(ex.Message + "\r\n");
         }
+
+        return Task.CompletedTask;
+    }
+
+    private void OnShellSessionExited(int exitCode)
+    {
+        if (exitCode != 0)
+            AppendOutput($"\r\nShell exited: {exitCode}\r\n");
+    }
+
+    public void Dispose()
+    {
+        if (_disposed)
+            return;
+
+        _disposed = true;
+        _shellHost.OutputReceived -= AppendOutput;
+        _shellHost.SessionExited -= OnShellSessionExited;
+        _shellHost.Dispose();
     }
 }

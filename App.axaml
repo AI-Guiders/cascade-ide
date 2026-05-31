@@ -147,7 +147,6 @@
         <!-- SukiUI: пакет 6.0.3 не совместим с Avalonia 12 (MissingMethodException в SukiTheme/TextBox.axaml). Вернуть после релиза Suki под v12. -->
         <StyleInclude Source="avares://Dock.Avalonia.Themes.Fluent/DockFluentTheme.axaml"/>
         <StyleInclude Source="avares://AvaloniaEdit/Themes/Fluent/AvaloniaEdit.xaml" />
-        <StyleInclude Source="avares://AvaloniaTerminal/Styles/Colors.axaml" />
         <!-- Заголовки панелей: полоса + разделитель + акцент (концепт Power cockpit) -->
         <Style Selector="Border.panelChromeHeaderStrip">
             <Setter Property="Background" Value="{DynamicResource CascadeTheme.PanelChromeHeaderBackground}"/>

@@ -6,7 +6,7 @@
 
 - **Страница MFD:** `Views/TerminalMfdPageView.axaml` — read-only `TextBox` (вывод) + однострочный `TextBox` (ввод, Enter → команда). Это **не** эмулятор терминала: нет PTY, нет рендера escape-последовательностей, нет интерактивной сессии shell.
 - Макет главного окна **без** отдельной нижней полосы вкладок: терминал — **страница MFD** (`TerminalMfdPageView` в стеке `MfdShellPageStack`). Тот же `TerminalPanel` / `TerminalInputBox` (см. [cascade-ide-ui-layout-v1.md](cascade-ide-ui-layout-v1.md)).
-- **Логика:** `Features/Terminal/TerminalPanelViewModel.cs` — запуск **одноразовой** команды через `cmd /c` (Windows) или `sh -c` (иначе), перенаправленный stdout/stderr в накопитель строки. Это **«выполни и допиши в буфер»**, а не **Integrated Shell** в духе встроенного PowerShell / Windows Terminal / ConPTY.
+- **Логика:** `Features/Terminal/TerminalPanelViewModel.cs` — **интерактивная shell-сессия** через `IntegratedShellLaunch` (ConPTY на Windows, redirected fallback). Команды уходят в живой pwsh/cmd; вывод — поток UTF-8. Старый `cmd /c` one-shot удалён.
 
 ## Чем это не является (без сарказма к коду)
 

@@ -6,7 +6,7 @@
 
 - **`Git/`** — вкладка Git нижней панели: `GitPanelViewModel.cs`.
 - **`Build/`** — вкладка Build output: `BuildOutputPanelViewModel.cs`.
-- **`Terminal/`** — вкладка Terminal: `TerminalPanelViewModel.cs`.
+- **`Terminal/`** — вкладка Terminal: ConPTY/redirected integrated shell (`Features/Terminal/DataAcquisition/*`), `TerminalPanelViewModel.cs`.
 - **`Chat/`** — правая колонка: чат с LLM — `ChatPanelViewModel.cs`.
 - **`Instrumentation/`** — трасса агента, таймлайн событий, очередь задач Power, лог тестов, стек/переменные MCP-отладки — `InstrumentationPanelViewModel.cs`.
 
