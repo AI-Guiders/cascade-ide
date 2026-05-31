@@ -75,20 +75,20 @@ internal sealed partial class IdeMcpCommandExecutor
 
         add(Services.IdeCommands.SetSafetyL1, async (_, _) =>
         {
-            if (_vm.SetSafetyL1Command.CanExecute(null))
-                _vm.SetSafetyL1Command.Execute(null);
+            if (_vm.SetSafetyObserveCommand.CanExecute(null))
+                _vm.SetSafetyObserveCommand.Execute(null);
             return "OK";
         });
         add(Services.IdeCommands.SetSafetyL2, async (_, _) =>
         {
-            if (_vm.SetSafetyL2Command.CanExecute(null))
-                _vm.SetSafetyL2Command.Execute(null);
+            if (_vm.SetSafetyConfirmCommand.CanExecute(null))
+                _vm.SetSafetyConfirmCommand.Execute(null);
             return "OK";
         });
         add(Services.IdeCommands.SetSafetyL3, async (_, _) =>
         {
-            if (_vm.SetSafetyL3Command.CanExecute(null))
-                _vm.SetSafetyL3Command.Execute(null);
+            if (_vm.SetSafetyAutonomousCommand.CanExecute(null))
+                _vm.SetSafetyAutonomousCommand.Execute(null);
             return "OK";
         });
 

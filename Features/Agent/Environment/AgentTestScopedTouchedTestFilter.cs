@@ -4,8 +4,8 @@ using CascadeIDE.Services;
 
 namespace CascadeIDE.Features.Agent.Environment;
 
-/// <summary>Узкий <c>dotnet test --filter</c> по затронутым типам (ADR 0148 W6/F).</summary>
-public static class AgentL3TouchedTestFilter
+/// <summary>Узкий <c>dotnet test --filter</c> по затронутым типам (<see cref="VerifyRung.TestScoped"/>, ADR 0148 W6/F).</summary>
+public static class AgentTestScopedTouchedTestFilter
 {
     private static readonly Regex s_typeName = new(
         @"\b(?:class|record|struct|interface)\s+(\w+)",
@@ -17,7 +17,7 @@ public static class AgentL3TouchedTestFilter
         string? workspaceRoot,
         CancellationToken cancellationToken = default)
     {
-        if (!ladder.L3TouchedTestsOnly)
+        if (!ladder.TestScopedTouchedTestsOnly)
             return null;
 
         if (git is null || string.IsNullOrWhiteSpace(workspaceRoot) || !Directory.Exists(workspaceRoot))
@@ -26,7 +26,7 @@ public static class AgentL3TouchedTestFilter
         var paths = await AgentGitDirtyCsPaths.CollectAsync(
             git,
             workspaceRoot,
-            ladder.L0GitDirtyMaxFiles,
+            ladder.DiagnoseFilesGitDirtyMaxFiles,
             cancellationToken).ConfigureAwait(false);
 
         if (paths.Count == 0)

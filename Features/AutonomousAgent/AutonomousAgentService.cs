@@ -211,7 +211,7 @@ public sealed class AutonomousAgentService
 $@"You are an autonomous agent inside CascadeIDE.
 Your job: {objective}
 
-Safety level: {safetyLevel} (L1/L2/L3).
+Safety level: {safetyLevel} ({AgentSafetyLevel.Observe} read-only, {AgentSafetyLevel.Confirm} confirm high-risk, {AgentSafetyLevel.Autonomous} full autonomy).
 Rules:
 - Return ONLY valid JSON (no markdown).
 - Decide ONE action per step: either a tool_call or final.
@@ -340,7 +340,7 @@ Return JSON in this exact shape:
                     argsDict = argsEl.EnumerateObject().ToDictionary(p => p.Name, p => p.Value);
             }
 
-            if (IsHighRiskIdeCommand(cmd) && !string.Equals(safetyLevel, "L3", StringComparison.OrdinalIgnoreCase))
+            if (IsHighRiskIdeCommand(cmd) && !AgentSafetyLevel.IsAutonomous(safetyLevel))
             {
                 var ok = await _ideActions.RequestConfirmationAsync(
                              $"Autonomous action: {cmd}\nSafety={safetyLevel}\nExecute tool call?",
@@ -361,10 +361,10 @@ Return JSON in this exact shape:
             if (string.IsNullOrWhiteSpace(key))
                 return "Blocked: missing external_tool_key.";
 
-            if (!string.Equals(safetyLevel, "L3", StringComparison.OrdinalIgnoreCase))
+            if (!AgentSafetyLevel.IsAutonomous(safetyLevel))
             {
-                _appendTraceStep("OBSERVATION", $"External tool calls require L3. Blocked: {key}", "WARNING", null);
-                return $"Blocked by safety ({safetyLevel}): external tool calls require L3.";
+                _appendTraceStep("OBSERVATION", $"External tool calls require {AgentSafetyLevel.Autonomous}. Blocked: {key}", "WARNING", null);
+                return $"Blocked by safety ({safetyLevel}): external tool calls require {AgentSafetyLevel.Autonomous}.";
             }
 
             _appendTraceStep("ACTION", $"external {key}", "PENDING", null);
@@ -390,20 +390,19 @@ Return JSON in this exact shape:
     private static bool IsIdeCommandAllowed(string cmd, string safetyLevel, out string reason)
     {
         reason = "";
-        if (string.Equals(safetyLevel, "L3", StringComparison.OrdinalIgnoreCase))
+        if (AgentSafetyLevel.IsAutonomous(safetyLevel))
             return true;
 
-        // L1 is strictly read-only: no file edits and no git commit/push.
-        if (string.Equals(safetyLevel, "L1", StringComparison.OrdinalIgnoreCase))
+        if (AgentSafetyLevel.IsObserve(safetyLevel))
         {
             if (IsHighRiskIdeCommand(cmd))
             {
-                reason = "high-risk (edit/git) blocked in L1";
+                reason = $"high-risk (edit/git) blocked in {AgentSafetyLevel.Observe}";
                 return false;
             }
         }
 
-        // L2 allows tool calls, but high-risk ones still need confirmation.
+        // safety.confirm allows tool calls, but high-risk ones still need confirmation.
         return true;
     }
 

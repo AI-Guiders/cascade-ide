@@ -14,8 +14,8 @@ public sealed class AgentEnvironmentChatTraceThreadTests
             "assistant",
             """
             [AEE] verify deadbeef…
-              Environment: 1.0s (environment)
-              Status: green (L2)
+              ✓ build.affected      1.0s
+              Status: green · max rung: build.affected
             """,
             mainId,
             null,

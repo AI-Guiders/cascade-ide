@@ -4,6 +4,8 @@ using CascadeIDE.Models;
 using CascadeIDE.Services.Presentation;
 using Xunit;
 
+using CascadeIDE.Features.Agent.Environment;
+
 namespace CascadeIDE.Tests;
 
 /// <summary>
@@ -40,7 +42,7 @@ public sealed class SolutionExplorerDockPlacementInvariantTests : IDisposable
                 ExpandedMfdWidthPixels: 300,
                 CollapsedMfdWidthPixels: 12,
                 DisplaySettings: display,
-                SafetyLevel: "L2"));
+                SafetyLevel: AgentSafetyLevel.Confirm));
     }
 
     private static string? InstrumentInSlot(MainWindowHostSurfaceFrame frame, string slotId)

@@ -1,3 +1,4 @@
+using CascadeIDE.Features.Agent.Environment;
 using CascadeIDE.Features.Shell.Application;
 using CascadeIDE.Features.UiChrome;
 using Xunit;
@@ -68,7 +69,7 @@ public sealed class MainWindowPresentationCapabilitiesProjectionTests
     [Fact]
     public void IsSafetyLevel_is_ordinal_ignore_case()
     {
-        Assert.True(MainWindowPresentationCapabilitiesProjection.IsSafetyLevel("l1", "L1"));
-        Assert.False(MainWindowPresentationCapabilitiesProjection.IsSafetyLevel("L2", "L1"));
+        Assert.True(MainWindowPresentationCapabilitiesProjection.IsSafetyLevel(AgentSafetyLevel.Observe, AgentSafetyLevel.Observe));
+        Assert.False(MainWindowPresentationCapabilitiesProjection.IsSafetyLevel(AgentSafetyLevel.Confirm, AgentSafetyLevel.Observe));
     }
 }

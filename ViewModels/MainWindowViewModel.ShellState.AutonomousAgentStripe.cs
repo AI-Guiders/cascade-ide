@@ -1,3 +1,4 @@
+using CascadeIDE.Features.Agent.Environment;
 using CascadeIDE.Features.Shell.Application;
 using CommunityToolkit.Mvvm.ComponentModel;
 
@@ -33,19 +34,19 @@ public partial class MainWindowViewModel
     private string _nextActionSummary = "Ожидание следующего шага.";
 
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(IsSafetyL1))]
-    [NotifyPropertyChangedFor(nameof(IsSafetyL2))]
-    [NotifyPropertyChangedFor(nameof(IsSafetyL3))]
+    [NotifyPropertyChangedFor(nameof(IsSafetyObserve))]
+    [NotifyPropertyChangedFor(nameof(IsSafetyConfirm))]
+    [NotifyPropertyChangedFor(nameof(IsSafetyAutonomous))]
     [NotifyPropertyChangedFor(nameof(SafetyLevelDescription))]
-    [NotifyPropertyChangedFor(nameof(SafetyL1Opacity))]
-    [NotifyPropertyChangedFor(nameof(SafetyL2Opacity))]
-    [NotifyPropertyChangedFor(nameof(SafetyL3Opacity))]
+    [NotifyPropertyChangedFor(nameof(SafetyObserveOpacity))]
+    [NotifyPropertyChangedFor(nameof(SafetyConfirmOpacity))]
+    [NotifyPropertyChangedFor(nameof(SafetyAutonomousOpacity))]
     [NotifyPropertyChangedFor(nameof(IdeHealthMountPayload))]
     [NotifyPropertyChangedFor(nameof(IsPfdIdeHealthMountVisible))]
     [NotifyPropertyChangedFor(nameof(IsMfdIdeHealthMountVisible))]
     [NotifyPropertyChangedFor(nameof(PfdIdeHealthMountContext))]
     [NotifyPropertyChangedFor(nameof(MfdIdeHealthMountContext))]
-    private string _safetyLevel = "L2";
+    private string _safetyLevel = AgentSafetyLevel.Confirm;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsLocBadgeVisible))]

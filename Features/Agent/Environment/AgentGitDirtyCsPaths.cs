@@ -2,7 +2,7 @@ using CascadeIDE.Services;
 
 namespace CascadeIDE.Features.Agent.Environment;
 
-/// <summary>Сбор <c>.cs</c> из git diff (shared L0/L3).</summary>
+/// <summary>Сбор <c>.cs</c> из git diff (shared diagnose.files / test.scoped).</summary>
 internal static class AgentGitDirtyCsPaths
 {
     public static async Task<IReadOnlyList<string>> CollectAsync(
@@ -14,7 +14,7 @@ internal static class AgentGitDirtyCsPaths
         var wsFull = Path.GetFullPath(workspaceRoot.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar));
         var unstaged = await GitNameOnlyAsync(git, wsFull, ["diff", "--name-only"], cancellationToken).ConfigureAwait(false);
         var staged = await GitNameOnlyAsync(git, wsFull, ["diff", "--name-only", "--cached"], cancellationToken).ConfigureAwait(false);
-        var relCs = AgentL0CsScopeParser.MergeGitNameOnlyOutputs(unstaged, staged);
+        var relCs = AgentDiagnoseFilesCsScopeParser.MergeGitNameOnlyOutputs(unstaged, staged);
 
         var cap = Math.Max(1, maxFiles);
         var result = new List<string>();
@@ -23,7 +23,7 @@ internal static class AgentGitDirtyCsPaths
             if (result.Count >= cap)
                 break;
 
-            if (!AgentL0CsScopeParser.TryResolveWorkspaceCs(wsFull, rel, out var full))
+            if (!AgentDiagnoseFilesCsScopeParser.TryResolveWorkspaceCs(wsFull, rel, out var full))
                 continue;
 
             result.Add(full);

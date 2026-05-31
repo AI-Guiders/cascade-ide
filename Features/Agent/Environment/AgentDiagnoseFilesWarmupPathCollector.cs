@@ -1,7 +1,7 @@
 namespace CascadeIDE.Features.Agent.Environment;
 
-/// <summary>Пути .cs для L0 из того же набора, что прогревает solution warm-up (ADR 0141 → 0148 L0).</summary>
-internal static class AgentL0WarmupPathCollector
+/// <summary>Пути .cs для <see cref="VerifyRung.DiagnoseFiles"/> из того же набора, что прогревает solution warm-up (ADR 0141 → 0148).</summary>
+internal static class AgentDiagnoseFilesWarmupPathCollector
 {
     public static IReadOnlyList<string> Collect(
         bool enabled,

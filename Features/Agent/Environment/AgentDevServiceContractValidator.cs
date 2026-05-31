@@ -14,7 +14,7 @@ public static class AgentDevServiceContractValidator
         AgentSandboxProcessEnvironmentKeys.DevPort,
     ];
 
-    public static DevServiceContractCheckResult ValidateForL3(
+    public static DevServiceContractCheckResult ValidateForTestScoped(
         AgentDevServiceContractSettings contract,
         AgentSandboxProfile profile,
         AgentSandboxLease lease)
@@ -26,9 +26,9 @@ public static class AgentDevServiceContractValidator
             return new(true, "dev contract: skipped (non-ephemeral profile)");
 
         if (lease.Substrate is null)
-            return contract.GateL3OnViolation
+            return contract.GateTestScopedOnViolation
                 ? new(false, "dev contract: ephemeral run without substrate bundle")
-                : new(true, "dev contract: warn — no substrate (L3 not gated)");
+                : new(true, $"dev contract: warn — no substrate ({VerifyRung.TestScoped} not gated)");
 
         var env = AgentSandboxProcessEnvironmentKeys.ForBundle(lease.Substrate);
         foreach (var key in s_requiredEnvKeys)

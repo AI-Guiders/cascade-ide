@@ -3,12 +3,12 @@ using Xunit;
 
 namespace CascadeIDE.Tests;
 
-public sealed class AgentL0CsScopeParserTests
+public sealed class AgentDiagnoseFilesCsScopeParserTests
 {
     [Fact]
     public void Merge_git_name_only_keeps_cs_and_order()
     {
-        var merged = AgentL0CsScopeParser.MergeGitNameOnlyOutputs(
+        var merged = AgentDiagnoseFilesCsScopeParser.MergeGitNameOnlyOutputs(
             "a.cs\nmisc.txt\nsubdir/b.cs",
             "subdir/b.cs\nc.cs");
 
@@ -25,13 +25,13 @@ public sealed class AgentL0CsScopeParserTests
             var okCs = Path.Combine(ws, "X.cs");
             File.WriteAllText(okCs, "//");
 
-            Assert.True(AgentL0CsScopeParser.TryResolveWorkspaceCs(ws, "X.cs", out var fullOk));
+            Assert.True(AgentDiagnoseFilesCsScopeParser.TryResolveWorkspaceCs(ws, "X.cs", out var fullOk));
             Assert.Equal(Path.GetFullPath(okCs), fullOk);
 
             var parent = Directory.GetParent(ws)!.FullName;
             var escaped = Path.Combine(parent, "EscapedOutside.cs");
             File.WriteAllText(escaped, "//");
-            Assert.False(AgentL0CsScopeParser.TryResolveWorkspaceCs(
+            Assert.False(AgentDiagnoseFilesCsScopeParser.TryResolveWorkspaceCs(
                 ws,
                 Path.Combine("..", "EscapedOutside.cs").Replace(Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar),
                 out _));
@@ -39,7 +39,7 @@ public sealed class AgentL0CsScopeParserTests
             Directory.CreateDirectory(Path.Combine(ws, "nested"));
             var nestedCs = Path.Combine(ws, "nested", "z.cs");
             File.WriteAllText(nestedCs, "//");
-            Assert.True(AgentL0CsScopeParser.TryResolveWorkspaceCs(ws, "nested/z.cs", out var zn));
+            Assert.True(AgentDiagnoseFilesCsScopeParser.TryResolveWorkspaceCs(ws, "nested/z.cs", out var zn));
             Assert.Equal(Path.GetFullPath(nestedCs), zn);
         }
         finally
@@ -62,5 +62,5 @@ public sealed class AgentL0CsScopeParserTests
     [InlineData("open_tabs_and_git_dirty_cs", true)]
     [InlineData("OPEN_TABS_AND_GIT_DIRTY_CS", true)]
     public void IncludesGitDirtyWorktreeCs_recognizes_scope(string scope, bool expected) =>
-        Assert.Equal(expected, AgentL0CsScopeParser.IncludesGitDirtyWorktreeCs(scope));
+        Assert.Equal(expected, AgentDiagnoseFilesCsScopeParser.IncludesGitDirtyWorktreeCs(scope));
 }

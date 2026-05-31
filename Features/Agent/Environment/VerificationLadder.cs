@@ -10,11 +10,11 @@ public sealed record VerificationLadderResult(
     IReadOnlyList<AgentTimeSlice> Slices,
     string? FailureDetail);
 
-/// <summary>L0–L4 climb (ADR 0148 W2).</summary>
+/// <summary>Verify rung climb (ADR 0148 W2).</summary>
 public sealed class VerificationLadder
 {
     private readonly EnvironmentTaskRunner _runner;
-    private readonly AgentRoslynL0Diagnostics _l0;
+    private readonly AgentRoslynDiagnoseFilesDiagnostics _diagnoseFiles;
     private readonly AgentEnvironmentSettings _settings;
     private readonly AgentSandboxManager _sandbox;
     private readonly EnvironmentTaskDedup _dedup;
@@ -25,7 +25,7 @@ public sealed class VerificationLadder
     public VerificationLadder(
         IDataBus dataBus,
         IBuildTestHost host,
-        AgentRoslynL0Diagnostics l0,
+        AgentRoslynDiagnoseFilesDiagnostics diagnoseFiles,
         AgentEnvironmentSettings settings,
         AgentSandboxManager sandbox,
         IGitCommandRunner? gitRunner = null,
@@ -33,7 +33,7 @@ public sealed class VerificationLadder
     {
         _dataBus = dataBus;
         _runner = new EnvironmentTaskRunner(dataBus, host.JobBackend);
-        _l0 = l0;
+        _diagnoseFiles = diagnoseFiles;
         _settings = settings;
         _sandbox = sandbox;
         _dedup = new EnvironmentTaskDedup(settings.CoalesceWindowMs);
@@ -52,33 +52,36 @@ public sealed class VerificationLadder
     {
         var slices = new List<AgentTimeSlice>();
         var envStart = DateTimeOffset.UtcNow;
-        var maxRung = "L0";
+        var maxRung = VerifyRung.DiagnoseFiles;
         var green = true;
         string? failure = null;
 
         try
         {
-            if (policy != AgentVerifyPolicy.Minimal && _settings.Ladder.L0Enabled)
+            if (policy != AgentVerifyPolicy.Minimal && _settings.Ladder.DiagnoseFilesEnabled)
             {
-                maxRung = "L0";
-                var l0Start = DateTimeOffset.UtcNow;
-                var l0 = await _l0.RunAsync(cancellationToken).ConfigureAwait(false);
+                maxRung = VerifyRung.DiagnoseFiles;
+                var diagnoseStart = DateTimeOffset.UtcNow;
+                var diagnose = await _diagnoseFiles.RunAsync(cancellationToken).ConfigureAwait(false);
                 slices.Add(new AgentTimeSlice(
                     AgentRunPhaseKind.Environment,
-                    (DateTimeOffset.UtcNow - l0Start).TotalSeconds,
-                    l0.Detail));
-                green = l0.Green;
+                    (DateTimeOffset.UtcNow - diagnoseStart).TotalSeconds,
+                    diagnose.Detail));
+                green = diagnose.Green;
                 if (!green)
                 {
-                    failure = l0.Detail;
+                    failure = diagnose.Detail;
                     return Finish(slices, envStart, maxRung, green, failure);
                 }
             }
 
             if (green && policy is not AgentVerifyPolicy.Minimal)
             {
-                maxRung = "L1";
-                slices.Add(new AgentTimeSlice(AgentRunPhaseKind.Environment, 0, "L1: delegated to L2 (MLP)"));
+                maxRung = VerifyRung.CompileProject;
+                slices.Add(new AgentTimeSlice(
+                    AgentRunPhaseKind.Environment,
+                    0,
+                    $"{VerifyRung.CompileProject}: delegated to {VerifyRung.BuildAffected} (MLP)"));
             }
 
             if (green)
@@ -87,7 +90,7 @@ public sealed class VerificationLadder
                 var coalesced = _dedup.ShouldCoalesce(dedupKey);
                 if (!coalesced)
                 {
-                    maxRung = "L2";
+                    maxRung = VerifyRung.BuildAffected;
                     var build = await _runner.RunBuildAsync(
                             runId,
                             solutionPath,
@@ -100,11 +103,11 @@ public sealed class VerificationLadder
                 }
                 else
                 {
-                    maxRung = "L2";
+                    maxRung = VerifyRung.BuildAffected;
                     slices.Add(new AgentTimeSlice(
                         AgentRunPhaseKind.Environment,
                         0,
-                        "L2: build skipped (dedup/coalesce window; prior build assumed sufficient)"));
+                        $"{VerifyRung.BuildAffected}: build skipped (dedup/coalesce window; prior build assumed sufficient)"));
                 }
             }
 
@@ -114,14 +117,14 @@ public sealed class VerificationLadder
                 {
                     Substrate = _sandbox.RecreateSubstrateBeforeTests(sandboxLease),
                 };
-                maxRung = "L3";
+                maxRung = VerifyRung.TestScoped;
 
-                var contract = AgentDevServiceContractValidator.ValidateForL3(
+                var contract = AgentDevServiceContractValidator.ValidateForTestScoped(
                     _settings.DevServices,
                     sandboxLease.Profile,
                     sandboxLease);
                 slices.Add(new AgentTimeSlice(AgentRunPhaseKind.Environment, 0, contract.Detail));
-                if (!contract.Ok && _settings.DevServices.GateL3OnViolation)
+                if (!contract.Ok && _settings.DevServices.GateTestScopedOnViolation)
                 {
                     green = false;
                     failure = contract.Detail;
@@ -132,7 +135,7 @@ public sealed class VerificationLadder
                     ? null
                     : AgentSandboxProcessEnvironmentKeys.ForBundle(sandboxLease.Substrate);
 
-                var filter = await AgentL3TouchedTestFilter.BuildFilterExpressionAsync(
+                var filter = await AgentTestScopedTouchedTestFilter.BuildFilterExpressionAsync(
                     _settings.Ladder,
                     _gitRunner,
                     _getWorkspaceRoot?.Invoke(),
@@ -152,9 +155,12 @@ public sealed class VerificationLadder
 
             if (green && policy is AgentVerifyPolicy.CiParity)
             {
-                maxRung = "L4";
-                if (_settings.Ladder.L4RequireExplicit)
-                    slices.Add(new AgentTimeSlice(AgentRunPhaseKind.Environment, 0, "L4: ci_parity marker (MLP)"));
+                maxRung = VerifyRung.TestFull;
+                if (_settings.Ladder.TestFullRequireExplicit)
+                    slices.Add(new AgentTimeSlice(
+                        AgentRunPhaseKind.Environment,
+                        0,
+                        $"{VerifyRung.TestFull}: ci_parity marker (MLP)"));
             }
         }
         catch (OperationCanceledException)
@@ -174,7 +180,7 @@ public sealed class VerificationLadder
         string? failure)
     {
         var total = (DateTimeOffset.UtcNow - envStart).TotalSeconds;
-        if (!slices.Any(s => s.Detail?.StartsWith("L0", StringComparison.Ordinal) == true))
+        if (!slices.Any(s => s.Detail?.StartsWith(VerifyRung.DiagnoseFiles, StringComparison.Ordinal) == true))
             slices.Insert(0, new AgentTimeSlice(AgentRunPhaseKind.Environment, total, $"ladder → {maxRung}"));
         return new(green, maxRung, slices, failure);
     }

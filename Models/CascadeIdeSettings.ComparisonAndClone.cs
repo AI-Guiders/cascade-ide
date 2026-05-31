@@ -119,17 +119,17 @@ public sealed partial class CascadeIdeSettings
                     DevServices = new AgentDevServiceContractSettings
                     {
                         RequireConfigOverride = Agent.Environment.DevServices.RequireConfigOverride,
-                        GateL3OnViolation = Agent.Environment.DevServices.GateL3OnViolation,
+                        GateTestScopedOnViolation = Agent.Environment.DevServices.GateTestScopedOnViolation,
                     },
                     Ladder = new AgentEnvironmentLadderSettings
                     {
-                        L0Enabled = Agent.Environment.Ladder.L0Enabled,
-                        L4RequireExplicit = Agent.Environment.Ladder.L4RequireExplicit,
-                        L0CsScope = Agent.Environment.Ladder.L0CsScope,
-                        L0GitDirtyMaxFiles = Agent.Environment.Ladder.L0GitDirtyMaxFiles,
-                        L0IncludeWarmupCs = Agent.Environment.Ladder.L0IncludeWarmupCs,
-                        L0WarmupMaxFiles = Agent.Environment.Ladder.L0WarmupMaxFiles,
-                        L3TouchedTestsOnly = Agent.Environment.Ladder.L3TouchedTestsOnly,
+                        DiagnoseFilesEnabled = Agent.Environment.Ladder.DiagnoseFilesEnabled,
+                        TestFullRequireExplicit = Agent.Environment.Ladder.TestFullRequireExplicit,
+                        DiagnoseFilesCsScope = Agent.Environment.Ladder.DiagnoseFilesCsScope,
+                        DiagnoseFilesGitDirtyMaxFiles = Agent.Environment.Ladder.DiagnoseFilesGitDirtyMaxFiles,
+                        DiagnoseFilesIncludeWarmupCs = Agent.Environment.Ladder.DiagnoseFilesIncludeWarmupCs,
+                        DiagnoseFilesWarmupMaxFiles = Agent.Environment.Ladder.DiagnoseFilesWarmupMaxFiles,
+                        TestScopedTouchedTestsOnly = Agent.Environment.Ladder.TestScopedTouchedTestsOnly,
                     },
                     TimeAccounting = new AgentEnvironmentTimeAccountingSettings
                     {
@@ -435,12 +435,15 @@ public sealed partial class CascadeIdeSettings
             && ea.LongRunSandboxProfile == eb.LongRunSandboxProfile
             && ea.BuildVerifyHost == eb.BuildVerifyHost
             && ea.BuildVerifyWorkerAssemblyPath == eb.BuildVerifyWorkerAssemblyPath
-            && ea.Ladder.L0Enabled == eb.Ladder.L0Enabled
-            && ea.Ladder.L4RequireExplicit == eb.Ladder.L4RequireExplicit
-            && ea.Ladder.L0CsScope == eb.Ladder.L0CsScope
-            && ea.Ladder.L0GitDirtyMaxFiles == eb.Ladder.L0GitDirtyMaxFiles
-            && ea.Ladder.L0IncludeWarmupCs == eb.Ladder.L0IncludeWarmupCs
-            && ea.Ladder.L0WarmupMaxFiles == eb.Ladder.L0WarmupMaxFiles
+            && ea.Ladder.DiagnoseFilesEnabled == eb.Ladder.DiagnoseFilesEnabled
+            && ea.Ladder.TestFullRequireExplicit == eb.Ladder.TestFullRequireExplicit
+            && ea.Ladder.DiagnoseFilesCsScope == eb.Ladder.DiagnoseFilesCsScope
+            && ea.Ladder.DiagnoseFilesGitDirtyMaxFiles == eb.Ladder.DiagnoseFilesGitDirtyMaxFiles
+            && ea.Ladder.DiagnoseFilesIncludeWarmupCs == eb.Ladder.DiagnoseFilesIncludeWarmupCs
+            && ea.Ladder.DiagnoseFilesWarmupMaxFiles == eb.Ladder.DiagnoseFilesWarmupMaxFiles
+            && ea.Ladder.TestScopedTouchedTestsOnly == eb.Ladder.TestScopedTouchedTestsOnly
+            && ea.DevServices.RequireConfigOverride == eb.DevServices.RequireConfigOverride
+            && ea.DevServices.GateTestScopedOnViolation == eb.DevServices.GateTestScopedOnViolation
             && ea.TimeAccounting.ShowInChat == eb.TimeAccounting.ShowInChat
             && ea.TimeAccounting.PfdInstrumentEnabled == eb.TimeAccounting.PfdInstrumentEnabled
             && ea.TimeAccounting.ShowTaskProgressInChat == eb.TimeAccounting.ShowTaskProgressInChat

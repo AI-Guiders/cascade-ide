@@ -1,3 +1,5 @@
+using CascadeIDE.Features.Agent.Environment;
+
 namespace CascadeIDE.Cockpit.Composition.HostSurface;
 
 internal readonly record struct InstrumentPlacementRule(
@@ -33,6 +35,9 @@ internal static class CockpitInstrumentPlacementRules
                     "main_window_docked_grid",
                     "main_window_plus_mfd_host_top_level"),
                 new AllowedSlotSpecification(CockpitSlotIds.Pfd),
-                new AllowedSafetyLevelsSpecification("L1", "L2", "L3")))
+                new AllowedSafetyLevelsSpecification(
+                    AgentSafetyLevel.Observe,
+                    AgentSafetyLevel.Confirm,
+                    AgentSafetyLevel.Autonomous)))
     ];
 }

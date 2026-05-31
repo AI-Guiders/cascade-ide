@@ -45,7 +45,7 @@ public sealed class AgentEnvironmentService : IAgentEnvironmentService
     private readonly AgentSandboxManager _sandbox;
     private readonly AgentWorktreeSandbox? _worktree;
     private readonly AgentVerifyEpochTracker _epoch;
-    private readonly AgentRoslynL0Diagnostics _l0;
+    private readonly AgentRoslynDiagnoseFilesDiagnostics _diagnoseFiles;
     private readonly AgentOrchestrator _orchestrator;
     private readonly AgentIdleUserTracker _idleUser;
     private readonly AgentAeeRoslynBridge _roslynBridge;
@@ -63,24 +63,24 @@ public sealed class AgentEnvironmentService : IAgentEnvironmentService
         CSharpLanguageService? languageService = null,
         Func<IReadOnlyList<(string Path, string Content)>>? openCsDocuments = null,
         IGitCommandRunner? gitRunner = null,
-        Func<string?>? getWorkspaceRootForL0Git = null,
+        Func<string?>? getWorkspaceRootForSnapshot = null,
         Func<string?>? getSolutionPathForOrchestrator = null,
         Func<IReadOnlyList<string>>? getWarmupCsFilePaths = null)
     {
         _dataBus = dataBus;
         _settings = settings;
         _gitRunner = gitRunner;
-        _getWorkspaceRootForSnapshot = getWorkspaceRootForL0Git;
+        _getWorkspaceRootForSnapshot = getWorkspaceRootForSnapshot;
         _sandbox = new AgentSandboxManager();
         _epoch = new AgentVerifyEpochTracker(dataBus);
         _coordinator = buildTestJobService?.Coordinator ?? new BuildTestJobCoordinator();
         _buildTestHost = BuildTestHostFactory.Create(settings, _coordinator);
-        _l0 = new AgentRoslynL0Diagnostics(
+        _diagnoseFiles = new AgentRoslynDiagnoseFilesDiagnostics(
             languageService,
             openCsDocuments,
             settings.Ladder,
             gitRunner,
-            getWorkspaceRootForL0Git,
+            getWorkspaceRootForSnapshot,
             getWarmupCsFilePaths);
         _ladder = CreateLadder();
         _worktree = gitRunner is null ? null : new AgentWorktreeSandbox(gitRunner);
@@ -314,7 +314,7 @@ public sealed class AgentEnvironmentService : IAgentEnvironmentService
         new(
             _dataBus,
             _buildTestHost,
-            _l0,
+            _diagnoseFiles,
             _settings,
             _sandbox,
             _gitRunner,

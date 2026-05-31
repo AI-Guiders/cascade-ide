@@ -32,24 +32,24 @@ public sealed class AgentEnvironmentSettings
 
 public sealed class AgentEnvironmentLadderSettings
 {
-    public bool L0Enabled { get; set; } = true;
+    public bool DiagnoseFilesEnabled { get; set; } = true;
 
-    public bool L4RequireExplicit { get; set; } = true;
+    public bool TestFullRequireExplicit { get; set; } = true;
 
-    /// <summary>open_tabs | open_tabs_and_git_dirty_cs — см. <c>AgentL0CsScopeParser</c> (ADR 0148 L0).</summary>
-    public string L0CsScope { get; set; } = "open_tabs_and_git_dirty_cs";
+    /// <summary>open_tabs | open_tabs_and_git_dirty_cs — см. <c>AgentDiagnoseFilesCsScopeParser</c> (ADR 0148).</summary>
+    public string DiagnoseFilesCsScope { get; set; } = "open_tabs_and_git_dirty_cs";
 
     /// <summary>Макс. доп. <c>.cs</c>-файлов из git diff (рабочее дерево + индекс).</summary>
-    public int L0GitDirtyMaxFiles { get; set; } = 48;
+    public int DiagnoseFilesGitDirtyMaxFiles { get; set; } = 48;
 
-    /// <summary>Добавлять в L0 пути из solution warm-up (открытые/активный .cs), читая с диска если не во вкладках.</summary>
-    public bool L0IncludeWarmupCs { get; set; } = true;
+    /// <summary>Добавлять в diagnose.files пути из solution warm-up (открытые/активный .cs), читая с диска если не во вкладках.</summary>
+    public bool DiagnoseFilesIncludeWarmupCs { get; set; } = true;
 
     /// <summary>Лимит доп. warmup-путей; 0 = как <c>solution_warmup.max_open_document_files</c>.</summary>
-    public int L0WarmupMaxFiles { get; set; }
+    public int DiagnoseFilesWarmupMaxFiles { get; set; }
 
-    /// <summary>L3: только тесты, затронутые git-dirty <c>.cs</c> (ADR 0148 F).</summary>
-    public bool L3TouchedTestsOnly { get; set; } = true;
+    /// <summary>test.scoped: только тесты, затронутые git-dirty <c>.cs</c> (ADR 0148 F).</summary>
+    public bool TestScopedTouchedTestsOnly { get; set; } = true;
 }
 
 public sealed class AgentEnvironmentTimeAccountingSettings

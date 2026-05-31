@@ -4,18 +4,19 @@ using Microsoft.CodeAnalysis;
 
 namespace CascadeIDE.Features.Agent.Environment;
 
-public sealed record L0DiagnosticsOutcome(
+public sealed record DiagnoseFilesOutcome(
     bool Green,
     int ErrorCount,
     int WarningCount,
     string Detail);
 
 /// <summary>
-/// L0 Roslyn in-proc (ADR 0148): синтаксис/лексика через парсер (как <see cref="CSharpLanguageService.GetDiagnosticsForFile"/>).
-/// По умолчанию — открытые вкладки; при <c>l0_cs_scope = open_tabs_and_git_dirty_cs</c> добавляются <c>.cs</c> из
-/// <c>git diff --name-only</c> и staged (<c>--cached</c>) в пределах workspace.
+/// In-proc Roslyn diagnostics for <see cref="VerifyRung.DiagnoseFiles"/> (ADR 0148): syntax/lexis via parser
+/// (as <see cref="CSharpLanguageService.GetDiagnosticsForFile"/>).
+/// Default — open tabs; when <c>diagnose_files_cs_scope = open_tabs_and_git_dirty_cs</c> adds <c>.cs</c> from
+/// <c>git diff --name-only</c> and staged (<c>--cached</c>) within workspace.
 /// </summary>
-public sealed class AgentRoslynL0Diagnostics
+public sealed class AgentRoslynDiagnoseFilesDiagnostics
 {
     private readonly CSharpLanguageService? _language;
     private readonly Func<IReadOnlyList<(string Path, string Content)>>? _openCsDocuments;
@@ -24,7 +25,7 @@ public sealed class AgentRoslynL0Diagnostics
     private readonly Func<string?>? _getWorkspaceRoot;
     private readonly Func<IReadOnlyList<string>>? _getWarmupCsFilePaths;
 
-    public AgentRoslynL0Diagnostics(
+    public AgentRoslynDiagnoseFilesDiagnostics(
         CSharpLanguageService? language,
         Func<IReadOnlyList<(string Path, string Content)>>? openCsDocuments,
         AgentEnvironmentLadderSettings? ladderSettings = null,
@@ -40,21 +41,21 @@ public sealed class AgentRoslynL0Diagnostics
         _getWarmupCsFilePaths = getWarmupCsFilePaths;
     }
 
-    public async Task<L0DiagnosticsOutcome> RunAsync(CancellationToken cancellationToken = default)
+    public async Task<DiagnoseFilesOutcome> RunAsync(CancellationToken cancellationToken = default)
     {
         if (_language is null || _openCsDocuments is null)
-            return new(true, 0, 0, "L0 skipped (no language service)");
+            return new(true, 0, 0, $"{VerifyRung.DiagnoseFiles} skipped (no language service)");
 
         var docsDict = BuildDocumentMap(await CollectPathsAndContentAsync(cancellationToken).ConfigureAwait(false));
 
         if (docsDict.Count == 0)
         {
-            var scopeNote = AgentL0CsScopeParser.IncludesGitDirtyWorktreeCs(_ladder.L0CsScope)
+            var scopeNote = AgentDiagnoseFilesCsScopeParser.IncludesGitDirtyWorktreeCs(_ladder.DiagnoseFilesCsScope)
                 ? "; no open .cs and git scope yielded none"
-                : _ladder.L0IncludeWarmupCs
+                : _ladder.DiagnoseFilesIncludeWarmupCs
                     ? "; no open .cs and warmup scope yielded none"
                     : "";
-            return new(true, 0, 0, $"L0 skipped (no .cs inputs{scopeNote})");
+            return new(true, 0, 0, $"{VerifyRung.DiagnoseFiles} skipped (no .cs inputs{scopeNote})");
         }
 
         var errors = 0;
@@ -89,7 +90,7 @@ public sealed class AgentRoslynL0Diagnostics
         }
 
         var green = errors == 0;
-        var detail = $"L0: {errors} errors, {warnings} warnings ({docsDict.Count} file(s))";
+        var detail = $"{VerifyRung.DiagnoseFiles}: {errors} errors, {warnings} warnings ({docsDict.Count} file(s))";
         return new(green, errors, warnings, detail);
     }
 
@@ -100,7 +101,7 @@ public sealed class AgentRoslynL0Diagnostics
         var list = resolver();
         var merged = new List<(string Path, string Content)>(list ?? []);
 
-        if (AgentL0CsScopeParser.IncludesGitDirtyWorktreeCs(_ladder.L0CsScope)
+        if (AgentDiagnoseFilesCsScopeParser.IncludesGitDirtyWorktreeCs(_ladder.DiagnoseFilesCsScope)
             && _gitRunner is not null
             && _getWorkspaceRoot is not null)
         {
@@ -109,7 +110,7 @@ public sealed class AgentRoslynL0Diagnostics
                 await AppendGitDirtyCsFromDiskAsync(merged, ws, cancellationToken).ConfigureAwait(false);
         }
 
-        if (_ladder.L0IncludeWarmupCs && _getWarmupCsFilePaths is not null)
+        if (_ladder.DiagnoseFilesIncludeWarmupCs && _getWarmupCsFilePaths is not null)
             await AppendWarmupCsFromDiskAsync(merged, cancellationToken).ConfigureAwait(false);
 
         return merged;
@@ -127,16 +128,16 @@ public sealed class AgentRoslynL0Diagnostics
 
         var unstaged = await GitNameOnlyAsync(wsFull, ["diff", "--name-only"], cancellationToken).ConfigureAwait(false);
         var staged = await GitNameOnlyAsync(wsFull, ["diff", "--name-only", "--cached"], cancellationToken).ConfigureAwait(false);
-        var relCs = AgentL0CsScopeParser.MergeGitNameOnlyOutputs(unstaged, staged);
+        var relCs = AgentDiagnoseFilesCsScopeParser.MergeGitNameOnlyOutputs(unstaged, staged);
 
-        var cap = Math.Max(1, _ladder.L0GitDirtyMaxFiles);
+        var cap = Math.Max(1, _ladder.DiagnoseFilesGitDirtyMaxFiles);
         var taken = 0;
         foreach (var rel in relCs)
         {
             if (taken >= cap)
                 break;
 
-            if (!AgentL0CsScopeParser.TryResolveWorkspaceCs(wsFull, rel, out var full))
+            if (!AgentDiagnoseFilesCsScopeParser.TryResolveWorkspaceCs(wsFull, rel, out var full))
                 continue;
             if (!seen.Add(full))
                 continue;
@@ -168,8 +169,8 @@ public sealed class AgentRoslynL0Diagnostics
             merged.Select(t => Path.GetFullPath(t.Path)),
             StringComparer.OrdinalIgnoreCase);
 
-        var cap = _ladder.L0WarmupMaxFiles > 0
-            ? Math.Max(1, _ladder.L0WarmupMaxFiles)
+        var cap = _ladder.DiagnoseFilesWarmupMaxFiles > 0
+            ? Math.Max(1, _ladder.DiagnoseFilesWarmupMaxFiles)
             : Math.Max(1, paths.Count);
 
         var taken = 0;

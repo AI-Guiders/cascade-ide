@@ -88,7 +88,7 @@ public static class VerifySnapshot
             if (!unstaged.Success && !staged.Success)
                 return null;
 
-            var merged = AgentL0CsScopeParser.MergeGitNameOnlyOutputs(unstaged.Output, staged.Output);
+            var merged = AgentDiagnoseFilesCsScopeParser.MergeGitNameOnlyOutputs(unstaged.Output, staged.Output);
             if (merged.Count == 0)
                 return "clean";
 

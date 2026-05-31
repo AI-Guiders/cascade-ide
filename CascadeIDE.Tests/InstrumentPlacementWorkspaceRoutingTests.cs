@@ -4,6 +4,8 @@ using CascadeIDE.Models;
 using CascadeIDE.Services.Presentation;
 using Xunit;
 
+using CascadeIDE.Features.Agent.Environment;
+
 namespace CascadeIDE.Tests;
 
 public sealed class InstrumentPlacementWorkspaceRoutingTests
@@ -36,7 +38,7 @@ public sealed class InstrumentPlacementWorkspaceRoutingTests
                     ExpandedMfdWidthPixels: 300,
                     CollapsedMfdWidthPixels: 12,
                     DisplaySettings: new DisplaySettings { PreferRepoInstruments = true },
-                    SafetyLevel: "L2"));
+                    SafetyLevel: AgentSafetyLevel.Confirm));
 
             Assert.Single(frame.Instruments);
             Assert.Equal(CockpitStandardInstrumentIds.WorkspaceNavigationMap, frame.Instruments[0].InstrumentId);

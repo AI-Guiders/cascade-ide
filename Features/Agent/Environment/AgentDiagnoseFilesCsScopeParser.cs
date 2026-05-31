@@ -1,6 +1,6 @@
 namespace CascadeIDE.Features.Agent.Environment;
 
-internal static class AgentL0CsScopeParser
+internal static class AgentDiagnoseFilesCsScopeParser
 {
     public const string OpenTabsOnly = "open_tabs";
 

@@ -110,25 +110,25 @@ public sealed class AgentEnvironmentServiceTests
             shell_escape_tier = "l3_only"
 
             [agent.environment.ladder]
-            l0_enabled = false
+            diagnose_files_enabled = false
             """;
         var s = CascadeIDE.Services.CascadeTomlSerializer.Deserialize<CascadeIdeSettings>(toml)!;
         Assert.Equal("strict", s.Agent.Environment.DefaultVerifyPolicy);
         Assert.Equal(2000, s.Agent.Environment.CoalesceWindowMs);
         Assert.Equal("l3_only", s.Agent.Environment.ShellEscapeTier);
-        Assert.False(s.Agent.Environment.Ladder.L0Enabled);
+        Assert.False(s.Agent.Environment.Ladder.DiagnoseFilesEnabled);
     }
 
     [Fact]
-    public void SettingsToml_DeserializesL0CsScopeAndCap()
+    public void SettingsToml_DeserializesDiagnoseFilesCsScopeAndCap()
     {
         const string toml = """
             [agent.environment.ladder]
-            l0_cs_scope = "open_tabs"
-            l0_git_dirty_max_files = 12
+            diagnose_files_cs_scope = "open_tabs"
+            diagnose_files_git_dirty_max_files = 12
             """;
         var s = CascadeIDE.Services.CascadeTomlSerializer.Deserialize<CascadeIdeSettings>(toml)!;
-        Assert.Equal("open_tabs", s.Agent.Environment.Ladder.L0CsScope);
-        Assert.Equal(12, s.Agent.Environment.Ladder.L0GitDirtyMaxFiles);
+        Assert.Equal("open_tabs", s.Agent.Environment.Ladder.DiagnoseFilesCsScope);
+        Assert.Equal(12, s.Agent.Environment.Ladder.DiagnoseFilesGitDirtyMaxFiles);
     }
 }

@@ -1,4 +1,5 @@
 using CommunityToolkit.Mvvm.Input;
+using CascadeIDE.Features.Agent.Environment;
 
 namespace CascadeIDE.Features.Shell;
 
@@ -6,11 +7,11 @@ namespace CascadeIDE.Features.Shell;
 public sealed partial class ShellChromeViewModel
 {
     [RelayCommand]
-    private void SetSafetyL1() => _host.SafetyLevel = "L1";
+    private void SetSafetyObserve() => _host.SafetyLevel = AgentSafetyLevel.Observe;
 
     [RelayCommand]
-    private void SetSafetyL2() => _host.SafetyLevel = "L2";
+    private void SetSafetyConfirm() => _host.SafetyLevel = AgentSafetyLevel.Confirm;
 
     [RelayCommand]
-    private void SetSafetyL3() => _host.SafetyLevel = "L3";
+    private void SetSafetyAutonomous() => _host.SafetyLevel = AgentSafetyLevel.Autonomous;
 }

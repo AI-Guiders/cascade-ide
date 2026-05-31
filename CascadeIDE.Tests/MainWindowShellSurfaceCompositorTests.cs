@@ -3,6 +3,8 @@ using CascadeIDE.Models;
 using CascadeIDE.Services.Presentation;
 using Xunit;
 
+using CascadeIDE.Features.Agent.Environment;
+
 namespace CascadeIDE.Tests;
 
 public sealed class MainWindowShellSurfaceCompositorTests
@@ -26,7 +28,7 @@ public sealed class MainWindowShellSurfaceCompositorTests
                 ExpandedMfdWidthPixels: 340,
                 CollapsedMfdWidthPixels: 8,
                 DisplaySettings: new DisplaySettings(),
-                SafetyLevel: "L2"));
+                SafetyLevel: AgentSafetyLevel.Confirm));
 
         Assert.True(c.PfdSurfaceVisible);
         Assert.True(c.MfdSurfaceExpanded);
@@ -50,7 +52,7 @@ public sealed class MainWindowShellSurfaceCompositorTests
                 ExpandedMfdWidthPixels: 300,
                 CollapsedMfdWidthPixels: 12,
                 DisplaySettings: new DisplaySettings(),
-                SafetyLevel: "L2"));
+                SafetyLevel: AgentSafetyLevel.Confirm));
 
         Assert.True(c.MfdSurfaceExpanded);
         Assert.True(c.MfdColumnVisibleInMainGrid);
@@ -73,7 +75,7 @@ public sealed class MainWindowShellSurfaceCompositorTests
                 ExpandedMfdWidthPixels: 340,
                 CollapsedMfdWidthPixels: 8,
                 DisplaySettings: new DisplaySettings(),
-                SafetyLevel: "L2"));
+                SafetyLevel: AgentSafetyLevel.Confirm));
 
         Assert.False(c.PfdSurfaceVisible);
         Assert.False(c.MfdColumnVisibleInMainGrid);

@@ -109,11 +109,11 @@ public partial class MainWindowViewModel
 
     public IRelayCommand ReopenClosedDocumentCommand => Documents.ReopenClosedDocumentCommand;
 
-    public IRelayCommand SetSafetyL1Command => Shell.SetSafetyL1Command;
+    public IRelayCommand SetSafetyObserveCommand => Shell.SetSafetyObserveCommand;
 
-    public IRelayCommand SetSafetyL2Command => Shell.SetSafetyL2Command;
+    public IRelayCommand SetSafetyConfirmCommand => Shell.SetSafetyConfirmCommand;
 
-    public IRelayCommand SetSafetyL3Command => Shell.SetSafetyL3Command;
+    public IRelayCommand SetSafetyAutonomousCommand => Shell.SetSafetyAutonomousCommand;
 
     public IRelayCommand ShowMarkdownPreviewPageCommand => Shell.ShowMarkdownPreviewPageCommand;
 

@@ -3,6 +3,7 @@ using CascadeIDE.Cockpit.Cds;
 using CascadeIDE.Cockpit.Composition.HostSurface;
 using CascadeIDE.Cockpit.Composition.Shell;
 using CascadeIDE.Contracts;
+using CascadeIDE.Features.Agent.Environment;
 using CascadeIDE.Features.UiChrome;
 using CascadeIDE.Lang;
 using CascadeIDE.Models;
@@ -112,9 +113,9 @@ public static class MainWindowPresentationSurfaceProjection
     public static string SafetyLevelDescription(string safetyLevel) =>
         safetyLevel switch
         {
-            "L1" => Resources.Safety_Description_L1,
-            "L2" => Resources.Safety_Description_L2,
-            "L3" => Resources.Safety_Description_L3,
+            AgentSafetyLevel.Observe => Resources.Safety_Description_L1,
+            AgentSafetyLevel.Confirm => Resources.Safety_Description_L2,
+            AgentSafetyLevel.Autonomous => Resources.Safety_Description_L3,
             _ => "",
         };
 

@@ -3,6 +3,8 @@ using CascadeIDE.Models;
 using CascadeIDE.Services.Presentation;
 using Xunit;
 
+using CascadeIDE.Features.Agent.Environment;
+
 namespace CascadeIDE.Tests;
 
 public sealed class MainWindowHostSurfaceProjectionTests
@@ -35,7 +37,7 @@ public sealed class MainWindowHostSurfaceProjectionTests
             IsPfdHostWindowShellOpen = true,
             IsMfdHostWindowShellOpen = false,
             DisplaySettings = display,
-            SafetyLevel = "L1",
+            SafetyLevel = AgentSafetyLevel.Observe,
         };
 
         var input = MainWindowHostSurfaceProjection.BuildShellInput(host, expandedMfdWidthPixels: 400, collapsedMfdWidthPixels: 8);
@@ -48,6 +50,6 @@ public sealed class MainWindowHostSurfaceProjectionTests
         Assert.Equal(400, input.ExpandedMfdWidthPixels);
         Assert.Equal(8, input.CollapsedMfdWidthPixels);
         Assert.Same(display, input.DisplaySettings);
-        Assert.Equal("L1", input.SafetyLevel);
+        Assert.Equal(AgentSafetyLevel.Observe, input.SafetyLevel);
     }
 }

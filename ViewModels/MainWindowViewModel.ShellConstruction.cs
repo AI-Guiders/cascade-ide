@@ -118,11 +118,11 @@ public partial class MainWindowViewModel
             _settings.Agent.Environment,
             _buildTestJobService,
             _csharpLanguageService,
-            GetOpenCsDocumentsForAgentL0,
+            GetOpenCsDocumentsForDiagnoseFiles,
             _gitRunner,
             () => WorkspaceDirectoryFromSolutionPath.Resolve(Workspace.SolutionPath),
             () => Workspace.SolutionPath,
-            GetAgentL0WarmupCsFilePaths);
+            GetDiagnoseFilesWarmupCsFilePaths);
 
         BuildOutputPanel = new BuildOutputPanelViewModel();
         TerminalPanel = new TerminalPanelViewModel(() => Workspace.SolutionPath);
@@ -256,7 +256,7 @@ public partial class MainWindowViewModel
         EnsureAgentEnvironmentWiring();
     }
 
-    private IReadOnlyList<(string Path, string Content)> GetOpenCsDocumentsForAgentL0()
+    private IReadOnlyList<(string Path, string Content)> GetOpenCsDocumentsForDiagnoseFiles()
     {
         var list = new List<(string Path, string Content)>();
         foreach (var doc in Documents.OpenDocuments)
@@ -269,10 +269,10 @@ public partial class MainWindowViewModel
         return list;
     }
 
-    private IReadOnlyList<string> GetAgentL0WarmupCsFilePaths()
+    private IReadOnlyList<string> GetDiagnoseFilesWarmupCsFilePaths()
     {
         var warmup = _settings.SolutionWarmup;
-        return Features.Agent.Environment.AgentL0WarmupPathCollector.Collect(
+        return Features.Agent.Environment.AgentDiagnoseFilesWarmupPathCollector.Collect(
             warmup.Enabled,
             warmup.WarmActiveFileOnSolutionOpen,
             warmup.WarmOpenDocuments,

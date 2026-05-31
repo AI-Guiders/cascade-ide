@@ -14,9 +14,9 @@ public sealed class AgentAeeRoslynBridge
 
     public bool IsAvailable => _language is not null;
 
-    /// <summary>Сейчас делегирует в L0 runner; идеал — один IPC round-trip на шаг.</summary>
-    public Task<L0DiagnosticsOutcome> DiagnoseOpenAndDirtyAsync(
-        AgentRoslynL0Diagnostics l0,
+    /// <summary>Сейчас делегирует в diagnose.files runner; идеал — один IPC round-trip на шаг.</summary>
+    public Task<DiagnoseFilesOutcome> DiagnoseOpenAndDirtyAsync(
+        AgentRoslynDiagnoseFilesDiagnostics diagnoseFiles,
         CancellationToken cancellationToken = default) =>
-        l0.RunAsync(cancellationToken);
+        diagnoseFiles.RunAsync(cancellationToken);
 }

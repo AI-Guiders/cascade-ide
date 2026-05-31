@@ -6,6 +6,7 @@ using CascadeIDE.Cockpit.ComputingUnits.IdeHealth;
 using CascadeIDE.Cockpit.Composition;
 using CascadeIDE.Cockpit.Composition.HostSurface;
 using CascadeIDE.Cockpit.Composition.Shell;
+using CascadeIDE.Features.Agent.Environment;
 using CascadeIDE.Features.Shell.Application;
 using CascadeIDE.Features.UiChrome;
 using CascadeIDE.Models;
@@ -122,7 +123,7 @@ public partial class MainWindowViewModel
     public bool AgentOperationsPanel => Capabilities.AgentOperationsPanel;
     public bool AgentTrace => Capabilities.AgentTrace;
     public bool AutonomousAgentTelemetry => Capabilities.AutonomousAgentTelemetry;
-    /// <summary>Карточка уровня безопасности: в Power — крупные L1–L3; в Focus/Balanced — компактные кнопки (разметка в ChatPanelView).</summary>
+    /// <summary>Карточка уровня безопасности: в Power — safety.observe/confirm/autonomous; в Focus/Balanced — компактные кнопки (разметка в ChatPanelView).</summary>
     public bool ShowSafetyControls => true;
     public bool ShowTelemetryHiddenHint => UiModeGateSpecifications.ShowTelemetryHiddenHint.IsSatisfiedBy(
         new UiModeGateContext(UiModeFamily, AutonomousAgentTelemetry, IsTerminalVisible, HasDebugSession));
@@ -187,23 +188,23 @@ public partial class MainWindowViewModel
     /// <summary>Пункт меню для док-панели инструментирования (можно отключить и в Focus).</summary>
     public bool ShowInstrumentationLayoutMenu => true;
 
-    public bool IsSafetyL1 =>
-        MainWindowPresentationCapabilitiesProjection.IsSafetyLevel(SafetyLevel, "L1");
-    public bool IsSafetyL2 =>
-        MainWindowPresentationCapabilitiesProjection.IsSafetyLevel(SafetyLevel, "L2");
-    public bool IsSafetyL3 =>
-        MainWindowPresentationCapabilitiesProjection.IsSafetyLevel(SafetyLevel, "L3");
+    public bool IsSafetyObserve =>
+        MainWindowPresentationCapabilitiesProjection.IsSafetyLevel(SafetyLevel, AgentSafetyLevel.Observe);
+    public bool IsSafetyConfirm =>
+        MainWindowPresentationCapabilitiesProjection.IsSafetyLevel(SafetyLevel, AgentSafetyLevel.Confirm);
+    public bool IsSafetyAutonomous =>
+        MainWindowPresentationCapabilitiesProjection.IsSafetyLevel(SafetyLevel, AgentSafetyLevel.Autonomous);
 
     /// <summary>Подпись режима безопасности (как на мокапе Power).</summary>
     public string SafetyLevelDescription =>
         MainWindowPresentationSurfaceProjection.SafetyLevelDescription(SafetyLevel);
 
-    public double SafetyL1Opacity =>
-        MainWindowPresentationSurfaceProjection.SafetyBadgeOpacity(IsSafetyL1);
-    public double SafetyL2Opacity =>
-        MainWindowPresentationSurfaceProjection.SafetyBadgeOpacity(IsSafetyL2);
-    public double SafetyL3Opacity =>
-        MainWindowPresentationSurfaceProjection.SafetyBadgeOpacity(IsSafetyL3);
+    public double SafetyObserveOpacity =>
+        MainWindowPresentationSurfaceProjection.SafetyBadgeOpacity(IsSafetyObserve);
+    public double SafetyConfirmOpacity =>
+        MainWindowPresentationSurfaceProjection.SafetyBadgeOpacity(IsSafetyConfirm);
+    public double SafetyAutonomousOpacity =>
+        MainWindowPresentationSurfaceProjection.SafetyBadgeOpacity(IsSafetyAutonomous);
 
     public bool HasFocusPlanItems => FocusPlanItems.Count > 0;
 

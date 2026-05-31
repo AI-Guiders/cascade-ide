@@ -29,7 +29,7 @@ public sealed class AgentAeeW3ToW6Tests
         {
             var bundle = AgentSandboxSubstrate.Allocate(dir);
             var lease = new AgentSandboxLease("r", AgentSandboxProfile.AgentEphemeral, dir, dir, bundle);
-            var result = AgentDevServiceContractValidator.ValidateForL3(
+            var result = AgentDevServiceContractValidator.ValidateForTestScoped(
                 new AgentDevServiceContractSettings(),
                 AgentSandboxProfile.AgentEphemeral,
                 lease);
@@ -46,8 +46,8 @@ public sealed class AgentAeeW3ToW6Tests
     public void DevServiceContractValidator_FailsWithoutSubstrateWhenGated()
     {
         var lease = new AgentSandboxLease("r", AgentSandboxProfile.AgentEphemeral, "x", "x", Substrate: null);
-        var result = AgentDevServiceContractValidator.ValidateForL3(
-            new AgentDevServiceContractSettings { GateL3OnViolation = true },
+        var result = AgentDevServiceContractValidator.ValidateForTestScoped(
+            new AgentDevServiceContractSettings { GateTestScopedOnViolation = true },
             AgentSandboxProfile.AgentEphemeral,
             lease);
 
@@ -55,19 +55,22 @@ public sealed class AgentAeeW3ToW6Tests
     }
 
     [Fact]
-    public void SettingsToml_DeserializesDevServicesAndL3Filter()
+    public void SettingsToml_DeserializesDevServicesAndTestScopedFilter()
     {
         const string toml = """
             [agent.environment.dev_services]
             require_config_override = false
-            gate_l3_on_violation = false
+            gate_test_scoped_on_violation = false
 
             [agent.environment.ladder]
-            l3_touched_tests_only = false
+            test_scoped_touched_tests_only = false
+            diagnose_files_enabled = true
             """;
         var s = CascadeIDE.Services.CascadeTomlSerializer.Deserialize<CascadeIdeSettings>(toml)!;
         Assert.False(s.Agent.Environment.DevServices.RequireConfigOverride);
-        Assert.False(s.Agent.Environment.Ladder.L3TouchedTestsOnly);
+        Assert.False(s.Agent.Environment.DevServices.GateTestScopedOnViolation);
+        Assert.False(s.Agent.Environment.Ladder.TestScopedTouchedTestsOnly);
+        Assert.True(s.Agent.Environment.Ladder.DiagnoseFilesEnabled);
     }
 
     [Fact]

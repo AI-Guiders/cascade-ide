@@ -6,16 +6,16 @@ using Xunit;
 namespace CascadeIDE.Tests;
 
 [Trait("Category", "AgentEnvironment")]
-public sealed class AgentRoslynL0DiagnosticsTests
+public sealed class AgentRoslynDiagnoseFilesDiagnosticsTests
 {
     [Fact]
     public async Task RunAsync_skipped_when_language_or_resolver_missing()
     {
-        var noLang = new AgentRoslynL0Diagnostics(null, () => []);
+        var noLang = new AgentRoslynDiagnoseFilesDiagnostics(null, () => []);
         var outcome = await noLang.RunAsync();
         Assert.Contains("no language service", outcome.Detail, StringComparison.Ordinal);
 
-        var noResolver = new AgentRoslynL0Diagnostics(new CSharpLanguageService(), null);
+        var noResolver = new AgentRoslynDiagnoseFilesDiagnostics(new CSharpLanguageService(), null);
         outcome = await noResolver.RunAsync();
         Assert.Contains("no language service", outcome.Detail, StringComparison.Ordinal);
     }
@@ -23,16 +23,16 @@ public sealed class AgentRoslynL0DiagnosticsTests
     [Fact]
     public async Task RunAsync_open_tabs_detects_syntax_error()
     {
-        var path = Path.Combine(Path.GetTempPath(), "cide-l0-open-" + Guid.NewGuid().ToString("N") + ".cs");
+        var path = Path.Combine(Path.GetTempPath(), "cide-diagnose-open-" + Guid.NewGuid().ToString("N") + ".cs");
         try
         {
             var broken = "class Broken { void M( { }";
-            var l0 = new AgentRoslynL0Diagnostics(
+            var diagnose = new AgentRoslynDiagnoseFilesDiagnostics(
                 new CSharpLanguageService(),
                 () => [(path, broken)],
-                new AgentEnvironmentLadderSettings { L0CsScope = AgentL0CsScopeParser.OpenTabsOnly });
+                new AgentEnvironmentLadderSettings { DiagnoseFilesCsScope = AgentDiagnoseFilesCsScopeParser.OpenTabsOnly });
 
-            var outcome = await l0.RunAsync();
+            var outcome = await diagnose.RunAsync();
 
             Assert.False(outcome.Green);
             Assert.True(outcome.ErrorCount > 0);
@@ -47,7 +47,7 @@ public sealed class AgentRoslynL0DiagnosticsTests
     [Fact]
     public async Task RunAsync_git_dirty_loads_cs_from_disk_when_not_open()
     {
-        var dir = Directory.CreateTempSubdirectory("cide-l0-git-");
+        var dir = Directory.CreateTempSubdirectory("cide-diagnose-git-");
         try
         {
             var onlyGit = Path.Combine(dir.FullName, "OnlyGit.cs");
@@ -58,14 +58,14 @@ public sealed class AgentRoslynL0DiagnosticsTests
                 UnstagedOutput = "OnlyGit.cs\nreadme.txt",
             };
 
-            var l0 = new AgentRoslynL0Diagnostics(
+            var diagnose = new AgentRoslynDiagnoseFilesDiagnostics(
                 new CSharpLanguageService(),
                 () => [],
-                new AgentEnvironmentLadderSettings { L0CsScope = AgentL0CsScopeParser.OpenTabsAndGitDirtyCs },
+                new AgentEnvironmentLadderSettings { DiagnoseFilesCsScope = AgentDiagnoseFilesCsScopeParser.OpenTabsAndGitDirtyCs },
                 git,
                 () => dir.FullName);
 
-            var outcome = await l0.RunAsync();
+            var outcome = await diagnose.RunAsync();
 
             Assert.True(outcome.Green);
             Assert.Contains("1 file", outcome.Detail, StringComparison.Ordinal);
@@ -80,21 +80,21 @@ public sealed class AgentRoslynL0DiagnosticsTests
     [Fact]
     public async Task RunAsync_open_tab_buffer_overrides_disk_for_same_path()
     {
-        var dir = Directory.CreateTempSubdirectory("cide-l0-priority-");
+        var dir = Directory.CreateTempSubdirectory("cide-diagnose-priority-");
         try
         {
             var cs = Path.Combine(dir.FullName, "Same.cs");
             await File.WriteAllTextAsync(cs, "namespace T; public class Ok { }");
 
             var git = new GitNameOnlyRunner { UnstagedOutput = "Same.cs" };
-            var l0 = new AgentRoslynL0Diagnostics(
+            var diagnose = new AgentRoslynDiagnoseFilesDiagnostics(
                 new CSharpLanguageService(),
                 () => [(cs, "class Broken { void M( { }")],
-                new AgentEnvironmentLadderSettings { L0CsScope = AgentL0CsScopeParser.OpenTabsAndGitDirtyCs },
+                new AgentEnvironmentLadderSettings { DiagnoseFilesCsScope = AgentDiagnoseFilesCsScopeParser.OpenTabsAndGitDirtyCs },
                 git,
                 () => dir.FullName);
 
-            var outcome = await l0.RunAsync();
+            var outcome = await diagnose.RunAsync();
 
             Assert.False(outcome.Green);
             Assert.True(outcome.ErrorCount > 0);
@@ -108,7 +108,7 @@ public sealed class AgentRoslynL0DiagnosticsTests
     [Fact]
     public async Task RunAsync_git_dirty_respects_max_files_cap()
     {
-        var dir = Directory.CreateTempSubdirectory("cide-l0-cap-");
+        var dir = Directory.CreateTempSubdirectory("cide-diagnose-cap-");
         try
         {
             for (var i = 0; i < 5; i++)
@@ -119,18 +119,18 @@ public sealed class AgentRoslynL0DiagnosticsTests
                 UnstagedOutput = "F0.cs\nF1.cs\nF2.cs\nF3.cs\nF4.cs",
             };
 
-            var l0 = new AgentRoslynL0Diagnostics(
+            var diagnose = new AgentRoslynDiagnoseFilesDiagnostics(
                 new CSharpLanguageService(),
                 () => [],
                 new AgentEnvironmentLadderSettings
                 {
-                    L0CsScope = AgentL0CsScopeParser.OpenTabsAndGitDirtyCs,
-                    L0GitDirtyMaxFiles = 2,
+                    DiagnoseFilesCsScope = AgentDiagnoseFilesCsScopeParser.OpenTabsAndGitDirtyCs,
+                    DiagnoseFilesGitDirtyMaxFiles = 2,
                 },
                 git,
                 () => dir.FullName);
 
-            var outcome = await l0.RunAsync();
+            var outcome = await diagnose.RunAsync();
 
             Assert.True(outcome.Green);
             Assert.Contains("2 file", outcome.Detail, StringComparison.Ordinal);
@@ -145,14 +145,14 @@ public sealed class AgentRoslynL0DiagnosticsTests
     public async Task RunAsync_open_tabs_only_does_not_call_git()
     {
         var git = new GitNameOnlyRunner { UnstagedOutput = "Ghost.cs" };
-        var l0 = new AgentRoslynL0Diagnostics(
+        var diagnose = new AgentRoslynDiagnoseFilesDiagnostics(
             new CSharpLanguageService(),
             () => [],
-            new AgentEnvironmentLadderSettings { L0CsScope = AgentL0CsScopeParser.OpenTabsOnly },
+            new AgentEnvironmentLadderSettings { DiagnoseFilesCsScope = AgentDiagnoseFilesCsScopeParser.OpenTabsOnly },
             git,
             () => @"C:\any");
 
-        var outcome = await l0.RunAsync();
+        var outcome = await diagnose.RunAsync();
 
         Assert.Empty(git.Invocations);
         Assert.Contains("no .cs inputs", outcome.Detail, StringComparison.Ordinal);
@@ -161,19 +161,19 @@ public sealed class AgentRoslynL0DiagnosticsTests
     [Fact]
     public async Task RunAsync_warmup_loads_cs_from_disk_when_not_open()
     {
-        var dir = Directory.CreateTempSubdirectory("cide-l0-warmup-");
+        var dir = Directory.CreateTempSubdirectory("cide-diagnose-warmup-");
         try
         {
             var onlyWarmup = Path.Combine(dir.FullName, "WarmOnly.cs");
             await File.WriteAllTextAsync(onlyWarmup, "namespace T; public class Warm { }");
 
-            var l0 = new AgentRoslynL0Diagnostics(
+            var diagnose = new AgentRoslynDiagnoseFilesDiagnostics(
                 new CSharpLanguageService(),
                 () => [],
-                new AgentEnvironmentLadderSettings { L0IncludeWarmupCs = true },
+                new AgentEnvironmentLadderSettings { DiagnoseFilesIncludeWarmupCs = true },
                 getWarmupCsFilePaths: () => [onlyWarmup]);
 
-            var outcome = await l0.RunAsync();
+            var outcome = await diagnose.RunAsync();
 
             Assert.True(outcome.Green);
             Assert.Contains("1 file", outcome.Detail, StringComparison.Ordinal);
@@ -187,7 +187,7 @@ public sealed class AgentRoslynL0DiagnosticsTests
     [Fact]
     public async Task RunAsync_warmup_respects_max_files_cap()
     {
-        var dir = Directory.CreateTempSubdirectory("cide-l0-warmup-cap-");
+        var dir = Directory.CreateTempSubdirectory("cide-diagnose-warmup-cap-");
         try
         {
             var paths = new List<string>();
@@ -198,17 +198,17 @@ public sealed class AgentRoslynL0DiagnosticsTests
                 paths.Add(p);
             }
 
-            var l0 = new AgentRoslynL0Diagnostics(
+            var diagnose = new AgentRoslynDiagnoseFilesDiagnostics(
                 new CSharpLanguageService(),
                 () => [],
                 new AgentEnvironmentLadderSettings
                 {
-                    L0IncludeWarmupCs = true,
-                    L0WarmupMaxFiles = 2,
+                    DiagnoseFilesIncludeWarmupCs = true,
+                    DiagnoseFilesWarmupMaxFiles = 2,
                 },
                 getWarmupCsFilePaths: () => paths);
 
-            var outcome = await l0.RunAsync();
+            var outcome = await diagnose.RunAsync();
 
             Assert.True(outcome.Green);
             Assert.Contains("2 file", outcome.Detail, StringComparison.Ordinal);
