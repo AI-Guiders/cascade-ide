@@ -13,7 +13,7 @@ using CommunityToolkit.Mvvm.Input;
 namespace CascadeIDE.ViewModels;
 
 /// <summary>
-/// Компактная полоса статуса над PFD/Forward: индексация HCI и solution warm-up (ADR 0141).
+/// Компактная полоса статуса над PFD/Forward: Verify Epoch (AEE W3) и solution warm-up (ADR 0141).
 /// </summary>
 public partial class MainWindowViewModel
 {
@@ -25,13 +25,17 @@ public partial class MainWindowViewModel
     private DateTimeOffset _pfdStatusVisibleSinceUtc;
     private IDisposable? _pfdStatusHideTimer;
     private IDisposable? _pfdAgentEnvironmentTaskSubscription;
-    private string? _pfdAgentEnvironmentTaskDetail;
+    private DispatcherTimer? _verifyEpochActiveTicker;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(ShowPfdBackgroundStatusBar))]
+    [NotifyPropertyChangedFor(nameof(ShowWorkspaceBackgroundStatusOnPfd))]
+    [NotifyPropertyChangedFor(nameof(ShowWorkspaceBackgroundStatusOnForward))]
     private string? _pfdBackgroundStatusText;
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ShowPfdAgentEnvironmentCancel))]
+    [NotifyPropertyChangedFor(nameof(ShowPfdVerifyEpochRetry))]
     private bool _isPfdBackgroundStatusCaution;
 
     [ObservableProperty]
@@ -41,9 +45,15 @@ public partial class MainWindowViewModel
     public bool ShowPfdAgentEnvironmentCancel =>
         ShowPfdBackgroundStatusBar && PfdAgentEnvironmentCancelVisible;
 
+    public bool ShowPfdVerifyEpochRetry =>
+        ShowPfdBackgroundStatusBar && _verifyEpochInstrument.ShowRetry;
+
+    public bool ShowPfdVerifyEpochExpandToggle => _verifyEpochInstrument.IsVisible;
+
     public bool ShowPfdBackgroundStatusBar =>
         _settings.SolutionWarmup.ShowBackgroundStatusOnPfd
-        && !string.IsNullOrWhiteSpace(PfdBackgroundStatusText);
+        && (!string.IsNullOrWhiteSpace(PfdBackgroundStatusText)
+            || ShowPfdVerifyEpochExpandedPanel);
 
     /// <summary>Полоса на PFD: master + <c>pfd_status_strip</c> в <c>[display.instruments]</c>.</summary>
     public bool ShowWorkspaceBackgroundStatusOnPfd =>
@@ -94,39 +104,11 @@ public partial class MainWindowViewModel
             return;
         }
 
-        if (_settings.Agent.Environment.TimeAccounting.PfdInstrumentEnabled)
+        if (_settings.Agent.Environment.TimeAccounting.PfdInstrumentEnabled
+            && TryApplyVerifyEpochPfdStatus())
         {
-            var agentStatus = _agentEnvironment.GetStatus();
-            var epochStale = _agentEnvironment.EpochTracker.IsUiStale
-                || agentStatus.WritesInvalidatedVerifyEpoch;
-            PfdAgentEnvironmentCancelVisible = false;
-
-            if (epochStale)
-            {
-                StopPfdStatusHideTimer();
-                _pfdStatusVisibleSinceUtc = DateTimeOffset.UtcNow;
-                PfdBackgroundStatusText = "⚠ AEE verify устарел — перезапусти /agent verify";
-                IsPfdBackgroundStatusCaution = true;
-                NotifyWorkspaceBackgroundStatusStripPlacement();
-                return;
-            }
-
-            if (agentStatus.IsActive)
-            {
-                StopPfdStatusHideTimer();
-                _pfdStatusVisibleSinceUtc = DateTimeOffset.UtcNow;
-                var detail = string.IsNullOrWhiteSpace(_pfdAgentEnvironmentTaskDetail)
-                    ? ""
-                    : $" · {_pfdAgentEnvironmentTaskDetail}";
-                PfdBackgroundStatusText =
-                    $"AEE verify {agentStatus.RunId![..8]}… · {agentStatus.Policy}{detail}";
-                IsPfdBackgroundStatusCaution = false;
-                PfdAgentEnvironmentCancelVisible = true;
-                NotifyWorkspaceBackgroundStatusStripPlacement();
-                return;
-            }
-
-            _pfdAgentEnvironmentTaskDetail = null;
+            NotifyWorkspaceBackgroundStatusStripPlacement();
+            return;
         }
 
         var workspaceRoot = WorkspaceDirectoryFromSolutionPath.Resolve(Workspace.SolutionPath ?? "");
@@ -154,6 +136,7 @@ public partial class MainWindowViewModel
             _pfdStatusVisibleSinceUtc = DateTimeOffset.UtcNow;
             PfdBackgroundStatusText = snap.Text;
             IsPfdBackgroundStatusCaution = snap.IsCaution;
+            PfdAgentEnvironmentCancelVisible = false;
             NotifyWorkspaceBackgroundStatusStripPlacement();
             return;
         }
@@ -168,23 +151,36 @@ public partial class MainWindowViewModel
         applyPfdStatusHidden(immediate: true);
     }
 
+    private bool TryApplyVerifyEpochPfdStatus()
+    {
+        var snap = _verifyEpochInstrument.Snapshot();
+        if (!snap.IsVisible && string.IsNullOrWhiteSpace(snap.CompactLine))
+            return false;
+
+        StopPfdStatusHideTimer();
+        _pfdStatusVisibleSinceUtc = DateTimeOffset.UtcNow;
+        PfdBackgroundStatusText = snap.CompactLine;
+        IsPfdBackgroundStatusCaution = snap.IsCaution;
+        PfdAgentEnvironmentCancelVisible = snap.ShowCancel;
+        EnsureVerifyEpochActiveTicker();
+
+        if (!snap.IsVisible && !snap.IsCaution)
+        {
+            schedulePfdStatusHide(TimeSpan.FromMilliseconds(PfdStatusMinVisibleMs));
+            return true;
+        }
+
+        return true;
+    }
+
     internal void EnsurePfdAgentEnvironmentTaskSubscription()
     {
         if (_pfdAgentEnvironmentTaskSubscription is not null)
             return;
 
-        _pfdAgentEnvironmentTaskSubscription = _ideDataBus.Subscribe<AgentEnvironmentTaskChanged>(evt =>
+        _pfdAgentEnvironmentTaskSubscription = _ideDataBus.Subscribe<AgentEnvironmentTaskChanged>(_ =>
         {
-            if (evt.State is not (AgentEnvironmentTaskState.Running or AgentEnvironmentTaskState.Queued))
-                return;
-
-            UiScheduler.Default.Post(() =>
-            {
-                _pfdAgentEnvironmentTaskDetail = string.IsNullOrWhiteSpace(evt.ProgressMessage)
-                    ? evt.Kind
-                    : $"{evt.Kind}: {evt.ProgressMessage}";
-                RefreshPfdBackgroundStatusBar();
-            }, DispatcherPriority.Background);
+            UiScheduler.Default.Post(RefreshPfdBackgroundStatusBar, DispatcherPriority.Background);
         });
     }
 
@@ -196,8 +192,52 @@ public partial class MainWindowViewModel
     }
 
     [RelayCommand]
+    private void RetryPfdAgentEnvironmentVerify()
+    {
+        var solutionPath = Workspace.SolutionPath;
+        if (string.IsNullOrWhiteSpace(solutionPath))
+            return;
+
+        _agentEnvironment.StartVerify(solutionPath, AgentVerifyPolicy.Standard);
+        RefreshPfdBackgroundStatusBar();
+    }
+
+    private void EnsureVerifyEpochActiveTicker()
+    {
+        if (!_verifyEpochInstrument.IsActive)
+        {
+            StopVerifyEpochActiveTicker();
+            return;
+        }
+
+        if (_verifyEpochActiveTicker is not null)
+            return;
+
+        _verifyEpochActiveTicker = new DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
+        _verifyEpochActiveTicker.Tick += (_, _) =>
+            UiScheduler.Default.Post(RefreshPfdBackgroundStatusBar, DispatcherPriority.Background);
+        _verifyEpochActiveTicker.Start();
+    }
+
+    private void StopVerifyEpochActiveTicker()
+    {
+        if (_verifyEpochActiveTicker is null)
+            return;
+
+        _verifyEpochActiveTicker.Stop();
+        _verifyEpochActiveTicker = null;
+    }
+
+    [RelayCommand]
     private void OpenPfdBackgroundStatusDetails()
     {
+        if (_settings.Agent.Environment.TimeAccounting.PfdInstrumentEnabled
+            && _verifyEpochInstrument.IsVisible)
+        {
+            TogglePfdVerifyEpochExpandedCommand.Execute(null);
+            return;
+        }
+
         if (!string.IsNullOrWhiteSpace(HybridIndexLast?.LastError)
             || _hciReindexPending
             || HybridIndexLast is null)
@@ -216,6 +256,7 @@ public partial class MainWindowViewModel
         _pfdStatusHideTimer = DispatcherTimer.RunOnce(() =>
         {
             _pfdStatusHideTimer = null;
+            _verifyEpochInstrument.HideAfterIdle();
             applyPfdStatusHidden(immediate: true);
         }, delay);
     }
@@ -226,8 +267,11 @@ public partial class MainWindowViewModel
             return;
 
         StopPfdStatusHideTimer();
+        StopVerifyEpochActiveTicker();
         PfdBackgroundStatusText = null;
         IsPfdBackgroundStatusCaution = false;
+        PfdAgentEnvironmentCancelVisible = false;
+        IsPfdVerifyEpochExpanded = false;
         NotifyWorkspaceBackgroundStatusStripPlacement();
     }
 

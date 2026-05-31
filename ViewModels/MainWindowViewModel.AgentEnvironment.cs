@@ -6,19 +6,37 @@ using CascadeIDE.Features.Agent.Environment;
 using CascadeIDE.Features.Chat;
 using CascadeIDE.ViewModels;
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 
 namespace CascadeIDE.ViewModels;
 
-/// <summary>AEE: PFD status strip, chat trace, epoch stale on write (ADR 0148 W3–W5).</summary>
+/// <summary>AEE: PFD Verify Epoch instrument, chat trace, epoch stale on write (ADR 0148 W3–W5).</summary>
 public partial class MainWindowViewModel
 {
+    private readonly AgentVerifyEpochInstrument _verifyEpochInstrument = new();
     private IDisposable? _agentEnvironmentBusSubscription;
+    private IDisposable? _verifyEpochDataBusBridge;
     private IDisposable? _agentEnvironmentChatProjection;
     private IDisposable? _agentEnvironmentChatProgressProjection;
     private IDisposable? _agentEnvironmentWarmupBridge;
     private IDisposable? _agentEnvironmentEpochStaleChatProjection;
 
     public Features.Agent.Environment.IAgentEnvironmentService AgentEnvironment => _agentEnvironment;
+
+    public AgentVerifyEpochInstrument VerifyEpochInstrument => _verifyEpochInstrument;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(PfdBackgroundStatusText))]
+    [NotifyPropertyChangedFor(nameof(ShowPfdBackgroundStatusBar))]
+    [NotifyPropertyChangedFor(nameof(ShowPfdVerifyEpochExpandedPanel))]
+    private bool _isPfdVerifyEpochExpanded;
+
+    public bool ShowPfdVerifyEpochExpandedPanel =>
+        IsPfdVerifyEpochExpanded
+        && _settings.Agent.Environment.TimeAccounting.PfdInstrumentEnabled
+        && !string.IsNullOrWhiteSpace(PfdVerifyEpochExpandedText);
+
+    public string PfdVerifyEpochExpandedText => _verifyEpochInstrument.ExpandedText;
 
     internal void EnsureAgentEnvironmentWiring()
     {
@@ -27,7 +45,12 @@ public partial class MainWindowViewModel
 
         var accounting = _settings.Agent.Environment.TimeAccounting;
 
+        EnsurePfdBackgroundStatusSubscription();
         EnsurePfdAgentEnvironmentTaskSubscription();
+
+        _verifyEpochInstrument.Changed += OnVerifyEpochInstrumentChanged;
+
+        _verifyEpochDataBusBridge = new AgentVerifyEpochDataBusBridge(_ideDataBus, _verifyEpochInstrument);
 
         _agentEnvironmentBusSubscription = new AgentEnvironmentBusComposite(
             _ideDataBus.Subscribe<AgentEnvironmentTaskChanged>(_ =>
@@ -58,6 +81,19 @@ public partial class MainWindowViewModel
         _agentEnvironmentWarmupBridge = new AgentEnvironmentWarmupBridge(_ideDataBus, _agentEnvironment);
     }
 
+    private void OnVerifyEpochInstrumentChanged()
+    {
+        UiScheduler.Default.Post(() =>
+        {
+            OnPropertyChanged(nameof(PfdVerifyEpochExpandedText));
+            OnPropertyChanged(nameof(ShowPfdVerifyEpochExpandedPanel));
+            OnPropertyChanged(nameof(ShowPfdVerifyEpochRetry));
+            OnPropertyChanged(nameof(ShowPfdVerifyEpochExpandToggle));
+            RefreshPfdBackgroundStatusBar();
+            EnsureVerifyEpochActiveTicker();
+        }, DispatcherPriority.Background);
+    }
+
     internal void NotifyAgentEnvironmentDocumentWrite(string? filePath)
     {
         _agentEnvironment.EpochTracker.NotifyWrite(filePath);
@@ -84,6 +120,10 @@ public partial class MainWindowViewModel
 
     /// <summary>MainWindow: применить dim к активному редактору.</summary>
     internal event Action<bool>? RefreshActiveEditorEpochDimRequested;
+
+    [RelayCommand]
+    private void TogglePfdVerifyEpochExpanded() =>
+        IsPfdVerifyEpochExpanded = !IsPfdVerifyEpochExpanded;
 
     private void AppendAgentEnvironmentChatTrace(string text, bool green)
     {
