@@ -242,20 +242,20 @@
 | **H2 whole file** | `[diagram.png]`, `[appsettings.json]` | Когда важен файл, не символ |
 | **M0 positional** | `[Foo.cs 50 100]`, `[Foo.cs L:50 100]` | Агент, paste, нет символа, legacy |
 
-**L2 field record** *(агент/MCP)*: `[F:…; M:…; L:…]` — тот же canonical anchor; в ленте для человека рендер **H1**.
+**`anchor.notation.canonical`** *(агент/MCP; legacy «L2 field record»)*: `[F:…; M:…; L:…]` — тот же canonical anchor; в ленте для человека рендер **H1**.
 
 | Слой | Пример ввода | Кто печатает | После send |
 |------|----------------|--------------|------------|
 | **H0–H2** | см. выше | человек | `memberKey` / selection + **resolved** `file` + lines |
 | **M0** | `[Foo.cs 50 100]` | агент, power user | `text-range` без member |
-| **L2** | `[F:Foo.cs; M:GetUserAsync]` | агент, шаблоны | то же canonical; UI как H1 |
+| **`anchor.notation.canonical`** | `[F:Foo.cs; M:GetUserAsync]` | агент, шаблоны | то же canonical; UI как H1 |
 
-**Рекомендация по форме L1/L2 (один канон, не два):**
+**Рекомендация по форме readable / canonical (один канон, не два):** см. [naming-layers-v1.md](../design/naming-layers-v1.md) §5.
 
 - Ключи **`F` `M` `L` `T`** (File, Member, Lines, Type) — **опциональные**, порядок **не важен**; разделитель полей — **`;`** или **пробел между парами `Key:value`** (выбрать **один** в ADR).
 - **Не** смешивать в продукте две нотации «через запятую `T:, M:`» и «через точку с запятой `type; member:`» — парсер и подсказки раздвоатся.
-- Пример **L1** (читаемо в чате): `[Foo.cs M:GetUserAsync]` · `[Foo.cs L:50 100]` · комбо `[Foo.cs M:GetUserAsync L:50 100]` (lines — уточнение, если member размазан по partial).
-- Пример **L2** (машинный, тот же parse tree): `[F:Foo.cs; M:GetUserAsync; L:50-100]` — для агента; в UI ленты рендерить как `Foo.cs › GetUserAsync`.
+- Пример **`anchor.notation.readable`** (legacy intercom «L1»): `[Foo.cs M:GetUserAsync]` · `[Foo.cs L:50 100]` · комбо `[Foo.cs M:GetUserAsync L:50 100]` (lines — уточнение, если member размазан по partial).
+- Пример **`anchor.notation.canonical`**: `[F:Foo.cs; M:GetUserAsync; L:50-100]` — для агента; в UI ленты рендерить как `Foo.cs › GetUserAsync`.
 
 | Поле | Смысл | Заметка |
 |------|--------|---------|

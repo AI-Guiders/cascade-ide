@@ -10,7 +10,7 @@
 
 | ADR | Роль |
 |-----|------|
-| [0038](0038-agent-facade-ai-provider-and-tool-orchestration.md) | Фасад LLM, автономный JSON-цикл, L1/L2/L3 safety; **техдолг:** нет единого оркестратора — закрывает этот ADR |
+| [0038](0038-agent-facade-ai-provider-and-tool-orchestration.md) | Фасад LLM, автономный JSON-цикл, `safety.*`; **техдолг:** нет единого оркестратора — закрывает этот ADR |
 | [0008](0008-mcp-contracts-and-testable-infrastructure.md) | Контракты MCP, тестируемость, `IIdeMcpActions` |
 | [0002](0002-debug-human-agent-parity.md) | Паритет человек ↔ агент на общих поверхностях |
 | [0019](0019-shared-git-core-ide-and-git-mcp.md) | Git через shared core, не raw shell |
@@ -32,6 +32,8 @@
 | [debug-human-agent-parity-v1.md](../debug-human-agent-parity-v1.md) | Паритет отладки |
 | [north-star-cursor-mcp-cascade-workbench-v1.md](../design/north-star-cursor-mcp-cascade-workbench-v1.md) | Standalone CIDE vs Cursor shell |
 | [playbook-agent-environment-v1.md](../design/playbook-agent-environment-v1.md) | Краткий playbook: два такта, W1, анти-паттерны |
+| [naming-layers-v1.md](../design/naming-layers-v1.md) | Semantic ids: verify rungs, safety, Endsley SA, trace, anchor, CASA |
+| [agent-verify-epoch-view-v1.md](../design/agent-verify-epoch-view-v1.md) | UX: Verify Epoch block, PFD instrument, green rule |
 
 ## Резюме
 
@@ -41,7 +43,7 @@
 - **Идеал:** reasoning и verify **пайплайнятся**; warm substrate из [0141](0141-solution-scoped-warmup-orchestration.md); batch native API; изолированные dev-сервисы; тот же AEE для человека (CCL) и агента ([0002](0002-debug-human-agent-parity.md)).
 - **Enabler:** C# / solution verify — **library-first open stack** (.NET MIT/Apache): Roslyn in-proc, MSBuild/VSTest через **supervised host** или библиотеки — не форк `dotnet.exe` (§2.3, §5.2).
 
-**Нормативно:** shell — escape hatch. External MCP ([0008](0008-mcp-contracts-and-testable-infrastructure.md)) — L3/polyglot; C# / solution — **native AEE** (§5, §5.2).
+**Нормативно:** shell — escape hatch. External MCP ([0008](0008-mcp-contracts-and-testable-infrastructure.md)) — polyglot at `safety.autonomous`; C# / solution — **native AEE** (§5, §5.2).
 
 ---
 
@@ -90,12 +92,12 @@ North-star: [north-star-cursor-mcp-cascade-workbench-v1.md](../design/north-star
 | Runtime, host (`hostfxr`) | [dotnet/runtime](https://github.com/dotnet/runtime) | MIT | Host in-proc tools |
 | SDK / `dotnet` CLI | [dotnet/sdk](https://github.com/dotnet/sdk) | MIT | Escape hatch; не primary |
 | Сборка SDK «целиком» (VMR) | [dotnet/dotnet](https://github.com/dotnet/dotnet) | MIT | Дистрибьюторы (Red Hat, Canonical); **не** цель CIDE как IDE |
-| MSBuild | [dotnet/msbuild](https://github.com/dotnet/msbuild) | MIT | L1–L2 `msbuild.compile` |
-| Roslyn (compile, analyze, **format**) | [dotnet/roslyn](https://github.com/dotnet/roslyn) | MIT | L0; format in-proc |
+| MSBuild | [dotnet/msbuild](https://github.com/dotnet/msbuild) | MIT | `compile.project`–`build.affected` |
+| Roslyn (compile, analyze, **format**) | [dotnet/roslyn](https://github.com/dotnet/roslyn) | MIT | `diagnose.files`; format in-proc |
 | `dotnet format` (код) | в [dotnet/sdk](https://github.com/dotnet/sdk) ([dotnet/format](https://github.com/dotnet/format) archived) | MIT | Референс; **не** subprocess default |
 | NuGet client | [NuGet/NuGet.Client](https://github.com/NuGet/NuGet.Client) | Apache 2.0 | Restore в runner |
-| VSTest | [microsoft/vstest](https://github.com/microsoft/vstest) | MIT | L3 `test.run_filter` |
-| Managed debugger | [Samsung/netcoredbg](https://github.com/Samsung/netcoredbg) | MIT | L2+ attach ([0002](0002-debug-human-agent-parity.md)) |
+| VSTest | [microsoft/vstest](https://github.com/microsoft/vstest) | MIT | `test.scoped` |
+| Managed debugger | [Samsung/netcoredbg](https://github.com/Samsung/netcoredbg) | MIT | `build.affected`+ attach ([0002](0002-debug-human-agent-parity.md)) |
 
 **Нормативно — три уровня стратегии (не равны по cost):**
 
@@ -127,7 +129,7 @@ North-star: [north-star-cursor-mcp-cascade-workbench-v1.md](../design/north-star
 | Solution warm-up | [0141](0141-solution-scoped-warmup-orchestration.md) | UX агента не подписан; нет verify |
 | DataBus | [0099](0099-ide-databus-typed-events-and-projections.md) | Нет каноничных `AgentEnvironment*` events |
 | Pre-flight / review | [0042](0042-pre-flight-planned-changes-and-review-before-apply.md) | Про **намерение правок**, не build/test ladder |
-| L1/L2/L3 safety | [0038](0038-agent-facade-ai-provider-and-tool-orchestration.md) §5 | Про **IDE commands**, не verify depth |
+| `safety.observe`…`safety.autonomous` | [0038](0038-agent-facade-ai-provider-and-tool-orchestration.md) §5 | Про **IDE commands**, не verify depth |
 
 ---
 
@@ -154,7 +156,7 @@ North-star: [north-star-cursor-mcp-cascade-workbench-v1.md](../design/north-star
 | **AEE** (Agent Execution Environment) | Подсистема CIDE: native tools + runner + ladder + sandbox + observability. **Не** LLM-провайдер. |
 | **Agent run** | Одна сессия работы агента (chat turn chain, autonomous task, slash job) с `run_id`. |
 | **Environment task** | Единица работы среды: `roslyn_diagnose`, `build_project`, `test_filter`, `git_status`, `process_supervise`, … |
-| **Verification ladder** | Упорядоченные **rungs** (L0…L4): cheap → expensive; policy какая rung **достаточна** для «green». |
+| **Verification ladder** | Упорядоченные **rungs** (`diagnose.files` … `test.full`): cheap → expensive; policy какая rung **достаточна** для «green». Legacy `L0…L4` — deprecated alias ([naming-layers-v1.md](../design/naming-layers-v1.md) §1). |
 | **Native tool** | In-process API AEE (`IAeeTool`), без обязательного MCP/stdio. |
 | **External tool** | MCP или shell — **tier E** (escape). |
 | **Sandbox profile** | Именованный набор правил изоляции side effects (`operator`, `agent_ephemeral`, `agent_worktree`). |
@@ -205,55 +207,67 @@ flowchart TB
 | Ответственность | Содержание |
 |-----------------|------------|
 | **Step model** | Один шаг = `{ plan?, tool_calls[], verify_policy?, sandbox_profile }` — общий для chat-autonomous и server-side jobs |
-| **Tool routing** | Native first → DAL → external MCP (L3) → shell (E, deny by default) |
+| **Tool routing** | Native first → DAL → external MCP (`safety.autonomous`) → shell (E, deny by default) |
 | **Verify gate** | После mutate-tools: автоматический climb ladder до policy-green или явный fail |
 | **Epoch contract** | Не treat green на snapshot **S** как валидный для правок **S′**; ждать `AgentRunCompleted` или stale (§8.2) |
 | **Trace** | Append-only шаги в event log ([0045](0045-agent-chat-persistence-event-log-and-projections.md)) + optional export |
-| **Safety** | Наследует L1/L2/L3 [0038](0038-agent-facade-ai-provider-and-tool-orchestration.md); high-risk → [0042](0042-pre-flight-planned-changes-and-review-before-apply.md) |
+| **Safety** | Наследует `safety.*` [0038](0038-agent-facade-ai-provider-and-tool-orchestration.md); high-risk → [0042](0042-pre-flight-planned-changes-and-review-before-apply.md) |
 
 **Не цель:** заменить `AiProviderManager` — orchestrator **ниже** LLM, **выше** AEE.
+
+### 2.1. Layer naming (verify vs другие «L»)
+
+Голые `L0…L4` в verify-контексте **deprecated**. Канон — semantic **`verify_rung`**; реестр всех «L» в стеке (safety, Endsley SA, trace, Intercom anchor, CASA memory): [naming-layers-v1.md](../design/naming-layers-v1.md). UX verify epoch: [agent-verify-epoch-view-v1.md](../design/agent-verify-epoch-view-v1.md).
+
+| verify_rung (канон) | Legacy | Alias id (миграция) |
+|---------------------|--------|---------------------|
+| `diagnose.files` | L0 | `roslyn_file` |
+| `compile.project` | L1 | `roslyn_project` |
+| `build.affected` | L2 | `build_project` |
+| `test.scoped` | L3 | `test_filtered` |
+| `test.full` | L4 | `test_full`, `integration` |
 
 ### 3. Verification Ladder (нормативно)
 
 **Принято:** каждый agent run задаёт **`verify_policy`**; default — **`standard`** (см. таблицу).
 
-| Rung | Id | Действие | Типичная latency | Когда «достаточно» |
-|------|-----|----------|------------------|---------------------|
-| L0 | `roslyn_file` | Diagnostics по **затронутым** `.cs` | 100 ms – 2 s | Syntax/types в edited files |
-| L1 | `roslyn_project` | Compile / semantic model **affected projects** | 2–15 s | Локальная правка без cross-project ripple |
-| L2 | `build_project` | `dotnet build` **project(s)**, не whole solution | 5–30 s | NuGet/refs изменились |
-| L3 | `test_filtered` | `dotnet test --filter` по **trait/namespace/class** | 10–60 s | Behavior change, unit scope |
-| L4 | `test_full` / `integration` | Full suite, multi-project, dockerized deps | минуты | Release gate, explicit human/agent ask |
+| verify_rung | Действие | Типичная latency | Когда «достаточно» |
+|-------------|----------|------------------|---------------------|
+| `diagnose.files` | Diagnostics по **затронутым** `.cs` | 100 ms – 2 s | Syntax/types в edited files |
+| `compile.project` | Compile / semantic model **affected projects** | 2–15 s | Локальная правка без cross-project ripple |
+| `build.affected` | `dotnet build` **project(s)**, не whole solution | 5–30 s | NuGet/refs изменились |
+| `test.scoped` | `dotnet test --filter` по **trait/namespace/class** | 10–60 s | Behavior change, unit scope |
+| `test.full` | Full suite, multi-project, dockerized deps | минуты | Release gate, explicit human/agent ask |
 
 **Policy presets** (TOML `[agent.environment]`):
 
 | Policy | Max rung без escalate | Escalate |
 |--------|----------------------|----------|
-| `minimal` | L0 | Только по явному запросу |
-| `standard` (**default**) | L2 | L3 если L2 green и были test-touching paths |
-| `strict` | L3 | L4 перед «done» на main branches |
-| `ci_parity` | L4 | — |
+| `minimal` | `diagnose.files` | Только по явному запросу |
+| `standard` (**default**) | `build.affected` | `test.scoped` если `build.affected` green и были test-touching paths |
+| `strict` | `test.scoped` | `test.full` перед «done» на main branches |
+| `ci_parity` | `test.full` | — |
 
 **Правила:**
 
-1. **Monotonic climb:** L0 fail → не запускать L4 «на удачу»; fix или stop.
-2. **Coalesce:** N правок за T секунд → **один** L1/L2, не N.
+1. **Monotonic climb:** `diagnose.files` fail → не запускать `test.full` «на удачу»; fix или stop.
+2. **Coalesce:** N правок за T секунд → **один** `compile.project`/`build.affected`, не N.
 3. **Verify epoch (одна цепочка):** в MLP **не более одного** активного verify run на workspace scope; новый verify после `coalesce_window_ms` → **implicit cancel predecessor** (§8.2).
 4. **Incremental graph:** affected projects из Roslyn/MSBuild — **не** rebuild whole solution по умолчанию.
 5. **Human parity:** `/agent verify quick|standard|strict` ([0138](0138-cockpit-command-line-and-parametric-ranges.md)) вызывает **тот же** ladder API.
 
 ```mermaid
 stateDiagram-v2
-  [*] --> L0
-  L0 --> L1: policy allows and (L0 fail or cross-file)
-  L1 --> L2: policy allows and L1 fail
-  L2 --> L3: policy allows and behavior paths
-  L3 --> L4: explicit strict/ci
-  L0 --> Green: pass
-  L1 --> Green: pass
-  L2 --> Green: pass
-  L3 --> Green: pass
-  L4 --> Green: pass
+  [*] --> DiagnoseFiles
+  DiagnoseFiles --> CompileProject: policy allows and (fail or cross-file)
+  CompileProject --> BuildAffected: policy allows and compile fail
+  BuildAffected --> TestScoped: policy allows and behavior paths
+  TestScoped --> TestFull: explicit strict/ci
+  DiagnoseFiles --> Green: pass
+  CompileProject --> Green: pass
+  BuildAffected --> Green: pass
+  TestScoped --> Green: pass
+  TestFull --> Green: pass
   Green --> [*]
 ```
 
@@ -276,9 +290,9 @@ stateDiagram-v2
 
 | `task_kind` | Описание |
 |-------------|----------|
-| `roslyn.diagnose` | L0 |
-| `msbuild.compile` | L1/L2 (через **build host**, §5.2) |
-| `dotnet.test` | L3/L4 (через **test host** или supervised VSTest, §5.2) |
+| `roslyn.diagnose` | `diagnose.files` |
+| `msbuild.compile` | `compile.project` / `build.affected` (через **build host**, §5.2) |
+| `dotnet.test` | `test.scoped` / `test.full` (через **test host** или supervised VSTest, §5.2) |
 | `git.*` | через [0019](0019-shared-git-core-ide-and-git-mcp.md) |
 | `process.supervise` | local `intercom-service`, tools with ports |
 | `shell.escape` | **E-tier**, audit log + confirm L2+ |
@@ -304,12 +318,12 @@ External MCP остаётся для: polyglot LSP, tinvest, telegram, **third-p
 
 | Rung / task | Subprocess (legacy / E-tier) | **MLP (норма)** | Идеал / опция |
 |-------------|------------------------------|-----------------|---------------|
-| L0 `roslyn.diagnose` | Roslyn MCP stdio | **In-proc** shared workspace | — |
-| L0 format / cleanup | `dotnet format` | **In-proc** `Formatter` + code fixes | — |
-| L1 `msbuild.compile` | cold `dotnet build` | **Supervised build host** (§5.2) | MSBuild in-proc / `BuildManager` |
-| L2 affected graph | full solution build | build host + incremental closure | in-proc graph cache |
-| L3 `test.run_filter` | cold `dotnet test --filter` | **Supervised test host** (§5.2) | VSTest OM in-proc |
-| L2+ debug | external DAP | netcoredbg / [0002](0002-debug-human-agent-parity.md) | — |
+| `diagnose.files` | Roslyn MCP stdio | **In-proc** shared workspace | — |
+| format / cleanup | `dotnet format` | **In-proc** `Formatter` + code fixes | — |
+| `compile.project` | cold `dotnet build` | **Supervised build host** (§5.2) | MSBuild in-proc / `BuildManager` |
+| `build.affected` graph | full solution build | build host + incremental closure | in-proc graph cache |
+| `test.scoped` | cold `dotnet test --filter` | **Supervised test host** (§5.2) | VSTest OM in-proc |
+| debug attach | external DAP | netcoredbg / [0002](0002-debug-human-agent-parity.md) | — |
 
 **Правило:** для C# / solution **сначала** библиотечный API (Roslyn, MSBuild, VSTest) — не fork SDK (§2.3). **Где MSBuild/VSTest** — MLP предпочитает **долгоживущий supervised worker** (named pipe / gRPC / stdio JSON), а не загрузку MSBuild-тасков в процесс Avalonia: warm graph и structured DTO без cold CLI, но **изоляция** от крашей/утечек компиляции.
 
@@ -373,9 +387,9 @@ External MCP остаётся для: polyglot LSP, tinvest, telegram, **third-p
 | Зона риска | Норма (W1–MLP) | Не в MLP |
 |------------|----------------|----------|
 | **Stale context** | `verify_snapshot_id` (HEAD + dirty set) + coalesce 1.5 s; orchestrator: green на **S** ≠ green на **S′**; implicit cancel predecessor | Auto-rollback operator tree; worktree на каждый verify |
-| **State bleeding** | **Fresh substrate bundle** per L3+ task (data dir + ports + temp); recreate/wipe | Rollback transaction как единственный механизм |
+| **State bleeding** | **Fresh substrate bundle** per `test.scoped`+ task (data dir + ports + temp); recreate/wipe | Rollback transaction как единственный механизм |
 | **Metrics** | `reasoning` \| `environment` \| `blocked` (только при активном env task) | `idle_user`, психометрия фокуса — **W3+** |
-| **Source generators** | SG-aware Roslyn L0; stale SG → L1 supervised host, не отдельный GeneratorDriver в CIDE | Дублировать 0141 warm отдельным драйвером |
+| **Source generators** | SG-aware `diagnose.files`; stale SG → `compile.project` supervised host | Дублировать 0141 warm отдельным драйвером |
 
 **MLP must-have:**
 
@@ -383,10 +397,10 @@ External MCP остаётся для: polyglot LSP, tinvest, telegram, **third-p
 Agent run a1b2…
   Reasoning:           4.2s
   Environment:        16.8s
-    roslyn L0:         0.8s  ✓
-    build IntercomService: 9.1s  ✓
-    test filtered:     6.9s  ✓
-  Status: green (standard policy)
+    diagnose.files:    0.8s  ✓
+    build.affected:    9.1s  ✓  (IntercomService)
+    test.scoped:       6.9s  ✓
+  Status: green (standard policy) · max rung: build.affected
 ```
 
 | Sink | Назначение |
@@ -483,9 +497,9 @@ Namespace: `CascadeIDE.Agent.Environment`.
 | `AgentEnvironmentTaskCompleted` | `task_id`, `result_summary`, `duration_ms` |
 | `AgentEnvironmentTaskDied` | `task_id`, `host_kind`, `exit_code?`, `stderr_tail?` |
 | `AgentVerifyEpochStale` | `run_id`, `verify_snapshot_id`, `reason`: write_in_epoch \| superseded \| cancel |
-| `AgentRunCompleted` | `run_id`, `green`, `max_rung_reached`, `time_slices[]` |
+| `AgentRunCompleted` | `run_id`, `green`, `max_rung_reached` (semantic `verify_rung`), `time_slices[]` |
 
-Projections: PFD instrument, chat strip glyph ([0140](0140-tci-slash-status-glyphs-and-args-counter.md) family).
+Projections: PFD `AgentEnvironmentInstrument`, chat Verify Epoch block ([agent-verify-epoch-view-v1.md](../design/agent-verify-epoch-view-v1.md)), strip glyph ([0140](0140-tci-slash-status-glyphs-and-args-counter.md) family).
 
 ### 11. Settings TOML ([0028](0028-user-settings-toml-localappdata-and-secrets.md))
 
@@ -498,8 +512,9 @@ coalesce_window_ms = 1500
 shell_escape_tier = "deny"   # deny | l3_only | allow_with_audit
 
 [agent.environment.ladder]
-l0_enabled = true
-l4_require_explicit = true
+diagnose_files_enabled = true
+test_full_require_explicit = true
+# legacy aliases (read until removal): l0_enabled, l4_require_explicit
 
 [agent.environment.time_accounting]
 show_in_chat = true
@@ -514,8 +529,9 @@ Roslyn limits — по-прежнему [0058](0058-agent-roslyn-mcp-coupling-se
 |---------|---------|-------|
 | Verify ladder | `/agent verify`, palette | orchestrator auto + tool |
 | Cancel | `/agent cancel`, instrument | `run.cancel` |
-| Diagnostics | Error list / F8 | L0 native |
-| Debug attach | Debug strip [0002](0002-debug-human-agent-parity.md) | `debug_attach` native (L2+) |
+| Diagnostics | Error list / F8 | `diagnose.files` native |
+| Debug attach | Debug strip [0002](0002-debug-human-agent-parity.md) | `debug_attach` native (`build.affected`+) |
+| Verify epoch UI | Chat Verify Epoch + PFD instrument | Same projection ([agent-verify-epoch-view-v1.md](../design/agent-verify-epoch-view-v1.md)) |
 
 **Правило:** если агент может вызвать — человек имеет **эквивалентную** UI/CCL команду без MCP.
 
@@ -525,7 +541,7 @@ Roslyn limits — по-прежнему [0058](0058-agent-roslyn-mcp-coupling-se
 
 | Capability | **MLP** (shippable) | **Идеал** (полный AEE) |
 |------------|---------------------|-------------------------|
-| Verification ladder L0–L3 | ✓ | L4 + ci_parity |
+| Verification ladder through `test.scoped` | ✓ | `test.full` + ci_parity |
 | Task runner + cancel + progress | ✓ | Dedup + priority lanes |
 | Time accounting in chat | ✓ | PFD instrument + baselines |
 | Native Roslyn + filtered test | ✓ | Full MSBuild graph cache |
@@ -559,7 +575,7 @@ Roslyn limits — по-прежнему [0058](0058-agent-roslyn-mcp-coupling-se
 |------|-----------|-------------------|
 | **W1** | **В коде** | `EnvironmentTaskRunner`, `IEnvironmentJobBackend`, DataBus-события, time slices |
 | **W2** | **В коде** | `VerificationLadder`, `AgentRoslynL0Diagnostics`, `BuildTestHostFactory` (`supervised-inproc` \| `supervised-worker-process` \| `supervised-worker-daemon`), `CascadeIDE.BuildVerifyWorker` |
-| **W3** | **Частично** | `AgentEnvironmentService`, slash `/agent verify\|cancel\|status\|last` (`ChatSlashAgentActions`); PFD instrument / verify epoch UX — нет |
+| **W3** | **Частично** | `AgentEnvironmentService`, slash `/agent verify\|cancel\|status\|last` (`ChatSlashAgentActions`); PFD instrument + Verify Epoch UI — spec [agent-verify-epoch-view-v1.md](../design/agent-verify-epoch-view-v1.md), **не в коде** |
 | **W4** | **Частично** | `AgentSandboxManager` (ephemeral substrate); dev-service config contract — не полный |
 | **W5** | **Частично** | L0 warmup paths из solution warm-up (`AgentL0WarmupPathCollector`, `[agent.environment]` в TOML) |
 | **W6** | **Частично** | `StartVerifyBatch`, `AgentWorktreeSandbox`; batch native API / политики — не MLP-complete |
@@ -639,4 +655,5 @@ Roslyn limits — по-прежнему [0058](0058-agent-roslyn-mcp-coupling-se
 | 2026-05-25 | Review: §5.2 supervised build/test host (MLP, не MSBuild in UI); §6 dev-service config contract; W2/risks/open Q обновлены |
 | 2026-05-24 | §2.2–2.3: когнитивный vs средовой такт; открытый .NET stack (enabler, три уровня A/B/C, границы); §5.1 ladder→API; техдолг subprocess |
 | 2026-05-27 | **Accepted · In progress:** W1–W2 + частично W3–W6 в `Features/Agent/Environment/`; статус синхронизирован с README |
+| 2026-05-31 | Semantic `verify_rung` ids; naming registry [naming-layers-v1.md](../design/naming-layers-v1.md); Verify Epoch UX spec; legacy L0–L4 deprecated in normative prose |
 | 2026-05-24 | Proposed: AEE, ladder, runner, MLP vs ideal; мотивация 0144/0147 wall-clock |
