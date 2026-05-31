@@ -509,7 +509,7 @@ default_verify_policy = "standard"
 default_sandbox_profile = "agent_ephemeral"
 runner_max_concurrency = 2
 coalesce_window_ms = 1500
-shell_escape_tier = "deny"   # deny | l3_only | allow_with_audit
+shell_escape_tier = "deny"   # deny | tests_only | allow_with_audit
 
 [agent.environment.ladder]
 diagnose_files_enabled = true

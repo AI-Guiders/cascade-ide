@@ -354,10 +354,10 @@
 | `refresh_workspace_snapshot` | Обновить снимок рабочего состояния (Power cockpit). returns: text. |
 | `resume_autonomous` | Продолжить автономный режим после паузы. returns: text. |
 | `rollback_trace_step` | Откатить состояние по шагу трассы. args: step_index:integer; returns: text; example: {"step_index":0}. |
+| `safety.autonomous` | Установить safety.autonomous. returns: text. |
+| `safety.confirm` | Установить safety.confirm. returns: text. |
+| `safety.observe` | Установить safety.observe. returns: text. |
 | `send_chat` | Чат: args: message?:string, role?:string. role assistant — только строка ассистента из MCP; иначе user и отправка; при ai.mode = mcp_only встроенный LLM не вызывается. returns: text; example: {"message":"hello"}. |
-| `set_safety_l1` | Установить Safety L1. returns: text. |
-| `set_safety_l2` | Установить Safety L2. returns: text. |
-| `set_safety_l3` | Установить Safety L3. returns: text. |
 | `start_autonomous` | Запустить автономный режим (agent run). returns: text. |
 | `submit_chat_clarification_response` | Отправить structured clarification response для активного batch. args: response_json:string. returns: text; example: {"response_json":"{\"batchId\":\"...\",\"answersByItemId\":{\"scope\":\"mfd\"}}"}. |
 

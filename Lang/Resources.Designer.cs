@@ -37,12 +37,12 @@ public static class Resources
     public static string ChatPanel_TraceEmptyHint => GetString(nameof(ChatPanel_TraceEmptyHint));
     public static string ChatPanel_TraceRollback => GetString(nameof(ChatPanel_TraceRollback));
     public static string ChatPanel_SafetyDockTitlePower => GetString(nameof(ChatPanel_SafetyDockTitlePower));
-    public static string ChatPanel_SafetyTierL1 => GetString(nameof(ChatPanel_SafetyTierL1));
-    public static string ChatPanel_SafetyTierL2 => GetString(nameof(ChatPanel_SafetyTierL2));
-    public static string ChatPanel_SafetyTierL3 => GetString(nameof(ChatPanel_SafetyTierL3));
-    public static string ChatPanel_SafetyTierL1Subtitle => GetString(nameof(ChatPanel_SafetyTierL1Subtitle));
-    public static string ChatPanel_SafetyTierL2Subtitle => GetString(nameof(ChatPanel_SafetyTierL2Subtitle));
-    public static string ChatPanel_SafetyTierL3Subtitle => GetString(nameof(ChatPanel_SafetyTierL3Subtitle));
+    public static string ChatPanel_SafetyTierObserve => GetString(nameof(ChatPanel_SafetyTierObserve));
+    public static string ChatPanel_SafetyTierConfirm => GetString(nameof(ChatPanel_SafetyTierConfirm));
+    public static string ChatPanel_SafetyTierAutonomous => GetString(nameof(ChatPanel_SafetyTierAutonomous));
+    public static string ChatPanel_SafetyTierObserveSubtitle => GetString(nameof(ChatPanel_SafetyTierObserveSubtitle));
+    public static string ChatPanel_SafetyTierConfirmSubtitle => GetString(nameof(ChatPanel_SafetyTierConfirmSubtitle));
+    public static string ChatPanel_SafetyTierAutonomousSubtitle => GetString(nameof(ChatPanel_SafetyTierAutonomousSubtitle));
     public static string ChatPanel_SafetyCompactHeader => GetString(nameof(ChatPanel_SafetyCompactHeader));
     public static string ChatPanel_EmergencyStopCompact => GetString(nameof(ChatPanel_EmergencyStopCompact));
     public static string ChatPanel_ChatExpandButton => GetString(nameof(ChatPanel_ChatExpandButton));
@@ -59,7 +59,7 @@ public static class Resources
     public static string Lang_Menu_Russian => GetString(nameof(Lang_Menu_Russian));
     public static string Lang_Menu_English => GetString(nameof(Lang_Menu_English));
     public static string Lang_Menu_FollowSystem => GetString(nameof(Lang_Menu_FollowSystem));
-    public static string Safety_Description_L1 => GetString(nameof(Safety_Description_L1));
-    public static string Safety_Description_L2 => GetString(nameof(Safety_Description_L2));
-    public static string Safety_Description_L3 => GetString(nameof(Safety_Description_L3));
+    public static string Safety_Description_Observe => GetString(nameof(Safety_Description_Observe));
+    public static string Safety_Description_Confirm => GetString(nameof(Safety_Description_Confirm));
+    public static string Safety_Description_Autonomous => GetString(nameof(Safety_Description_Autonomous));
 }

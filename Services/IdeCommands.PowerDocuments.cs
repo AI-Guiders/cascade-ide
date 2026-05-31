@@ -22,12 +22,12 @@ public static partial class IdeCommands
     public const string ExplainTraceStep = "explain_trace_step";
     /// <summary>Откатить состояние по шагу трассы. args: step_index:integer; returns: text; example: {"step_index":0}.</summary>
     public const string RollbackTraceStep = "rollback_trace_step";
-    /// <summary>Установить Safety L1. returns: text.</summary>
-    public const string SetSafetyL1 = "set_safety_l1";
-    /// <summary>Установить Safety L2. returns: text.</summary>
-    public const string SetSafetyL2 = "set_safety_l2";
-    /// <summary>Установить Safety L3. returns: text.</summary>
-    public const string SetSafetyL3 = "set_safety_l3";
+    /// <summary>Установить safety.observe. returns: text.</summary>
+    public const string SetSafetyObserve = "safety.observe";
+    /// <summary>Установить safety.confirm. returns: text.</summary>
+    public const string SetSafetyConfirm = "safety.confirm";
+    /// <summary>Установить safety.autonomous. returns: text.</summary>
+    public const string SetSafetyAutonomous = "safety.autonomous";
     /// <summary>Запустить автономный режим (agent run). returns: text.</summary>
     public const string StartAutonomous = "start_autonomous";
     /// <summary>Поставить автономный режим на паузу. returns: text.</summary>

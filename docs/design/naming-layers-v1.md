@@ -117,6 +117,10 @@ Hippo episodic: **H0–H3** (`H1_surface` …) — отдельная ось, н
 | `tool.external_mcp` | L3 external (0148 prose) | Polyglot MCP — при `safety.autonomous` |
 | `tool.shell_escape` | E-tier | Deny by default; audit |
 
+**`shell_escape_tier` (TOML):** `deny` | `tests_only` (legacy `l3_only`) | `allow_with_audit`.
+
+**IDE commands (MCP):** `safety.observe` | `safety.confirm` | `safety.autonomous` (legacy `set_safety_l1`…`l3`).
+
 ---
 
 ## 8. Миграция
@@ -128,6 +132,8 @@ Hippo episodic: **H0–H3** (`H1_surface` …) — отдельная ось, н
 | DataBus | `max_rung_reached: "build.affected"` |
 | Chat trace | `✓ diagnose.files 0.8s` |
 | Safety UI / autonomous | `safety.observe` … `safety.autonomous` |
+| IDE MCP safety set | `safety.observe` … `safety.autonomous` (same ids as `AgentSafetyLevel`) |
+| Shell escape tier | `deny` / `tests_only` / `allow_with_audit` |
 
 ---
 

@@ -133,9 +133,9 @@ public static class UiThemeApply
         public const string PowerCockpitPanelBackground = "CascadeTheme.PowerCockpitPanelBackground";
         public const string PowerSafetyDockBackground = "CascadeTheme.PowerSafetyDockBackground";
         public const string PowerWorkspaceHealthStripBackground = "CascadeTheme.PowerWorkspaceHealthStripBackground";
-        public const string PowerSafetyL1 = "CascadeTheme.PowerSafetyL1";
-        public const string PowerSafetyL2 = "CascadeTheme.PowerSafetyL2";
-        public const string PowerSafetyL3 = "CascadeTheme.PowerSafetyL3";
+        public const string PowerSafetyObserve = "CascadeTheme.PowerSafetyObserve";
+        public const string PowerSafetyConfirm = "CascadeTheme.PowerSafetyConfirm";
+        public const string PowerSafetyAutonomous = "CascadeTheme.PowerSafetyAutonomous";
         public const string PowerEmergency = "CascadeTheme.PowerEmergency";
     }
 
@@ -219,9 +219,9 @@ public static class UiThemeApply
                 Set(res, Keys.PowerCockpitPanelBackground, GetColorFrom(pc, "panel_background"));
                 Set(res, Keys.PowerSafetyDockBackground, GetColorFrom(pc, "safety_dock_background"));
                 Set(res, Keys.PowerWorkspaceHealthStripBackground, GetColorFrom(pc, "workspace_health_strip_background"));
-                Set(res, Keys.PowerSafetyL1, GetColorFrom(pc, "safety_l1"));
-                Set(res, Keys.PowerSafetyL2, GetColorFrom(pc, "safety_l2"));
-                Set(res, Keys.PowerSafetyL3, GetColorFrom(pc, "safety_l3"));
+                Set(res, Keys.PowerSafetyObserve, GetColorFrom(pc, "safety_observe"));
+                Set(res, Keys.PowerSafetyConfirm, GetColorFrom(pc, "safety_confirm"));
+                Set(res, Keys.PowerSafetyAutonomous, GetColorFrom(pc, "safety_autonomous"));
                 Set(res, Keys.PowerEmergency, GetColorFrom(pc, "emergency"));
             }
 

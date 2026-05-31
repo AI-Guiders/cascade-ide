@@ -57,7 +57,7 @@ internal static class UiThemeDeepSnapshot
         "ModeBadge",
         "UiModeBloomOverlay",
         "IntercomSkiaSurface",
-        "TerminalInputBox"
+        "IntegratedTerminalControl"
     ];
 
     public static void MergeIntoJsonRoot(JsonObject root, Application app)

@@ -135,7 +135,7 @@ default_verify_policy = "standard"
 default_sandbox_profile = "agent_ephemeral"
 runner_max_concurrency = 2
 coalesce_window_ms = 1500
-# deny | l3_only | allow_with_audit
+# deny | tests_only | allow_with_audit
 shell_escape_tier = "deny"
 
 # agent_worktree | agent_ephemeral | in_place — для batch/long autonomous verify (W6)
@@ -147,19 +147,19 @@ build_verify_host = "supervised-inproc"
 
 [agent.environment.dev_services]
 require_config_override = true
-gate_l3_on_violation = true
+gate_test_scoped_on_violation = true
 
 [agent.environment.ladder]
-l0_enabled = true
-l4_require_explicit = true
-l3_touched_tests_only = true
-# open_tabs — только вкладки; open_tabs_and_git_dirty_cs — + .cs из git diff / --cached в workspace (парсер L0).
-l0_cs_scope = "open_tabs_and_git_dirty_cs"
-l0_git_dirty_max_files = 48
+diagnose_files_enabled = true
+test_full_require_explicit = true
+test_scoped_touched_tests_only = true
+# open_tabs — только вкладки; open_tabs_and_git_dirty_cs — + .cs из git diff / --cached в workspace.
+diagnose_files_cs_scope = "open_tabs_and_git_dirty_cs"
+diagnose_files_git_dirty_max_files = 48
 # + .cs из solution warm-up (открытые/активный), с диска если не во вкладке
-l0_include_warmup_cs = true
+diagnose_files_include_warmup_cs = true
 # 0 = как solution_warmup.max_open_document_files
-l0_warmup_max_files = 0
+diagnose_files_warmup_max_files = 0
 
 [agent.environment.time_accounting]
 show_in_chat = true

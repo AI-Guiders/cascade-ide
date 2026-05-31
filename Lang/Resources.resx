@@ -65,12 +65,12 @@
   <data name="ChatPanel_TraceEmptyHint" xml:space="preserve"><value>Трасса шагов пока пуста — шаги добавят агент или MCP (AppendAgentTraceStep).</value></data>
   <data name="ChatPanel_TraceRollback" xml:space="preserve"><value>Откат</value></data>
   <data name="ChatPanel_SafetyDockTitlePower" xml:space="preserve"><value>Уровень безопасности · L1 · L2 · L3</value></data>
-  <data name="ChatPanel_SafetyTierL1" xml:space="preserve"><value>L1</value></data>
-  <data name="ChatPanel_SafetyTierL2" xml:space="preserve"><value>L2</value></data>
-  <data name="ChatPanel_SafetyTierL3" xml:space="preserve"><value>L3</value></data>
-  <data name="ChatPanel_SafetyTierL1Subtitle" xml:space="preserve"><value>READ-ONLY</value></data>
-  <data name="ChatPanel_SafetyTierL2Subtitle" xml:space="preserve"><value>CONFIRM</value></data>
-  <data name="ChatPanel_SafetyTierL3Subtitle" xml:space="preserve"><value>AUTONOMOUS</value></data>
+  <data name="ChatPanel_SafetyTierObserve" xml:space="preserve"><value>observe</value></data>
+  <data name="ChatPanel_SafetyTierConfirm" xml:space="preserve"><value>confirm</value></data>
+  <data name="ChatPanel_SafetyTierAutonomous" xml:space="preserve"><value>autonomous</value></data>
+  <data name="ChatPanel_SafetyTierObserveSubtitle" xml:space="preserve"><value>READ-ONLY</value></data>
+  <data name="ChatPanel_SafetyTierConfirmSubtitle" xml:space="preserve"><value>CONFIRM</value></data>
+  <data name="ChatPanel_SafetyTierAutonomousSubtitle" xml:space="preserve"><value>AUTONOMOUS</value></data>
   <data name="ChatPanel_SafetyCompactHeader" xml:space="preserve"><value>Безопасность · уровень L1–L3</value></data>
   <data name="ChatPanel_EmergencyStopCompact" xml:space="preserve"><value>Аварийная остановка</value></data>
   <data name="ChatPanel_ChatExpandButton" xml:space="preserve"><value>▶ Чат с агентом</value></data>
@@ -87,7 +87,7 @@
   <data name="Lang_Menu_Russian" xml:space="preserve"><value>Русский</value></data>
   <data name="Lang_Menu_English" xml:space="preserve"><value>English</value></data>
   <data name="Lang_Menu_FollowSystem" xml:space="preserve"><value>Как в системе</value></data>
-  <data name="Safety_Description_L1" xml:space="preserve"><value>Только чтение: без автоматических правок файлов.</value></data>
-  <data name="Safety_Description_L2" xml:space="preserve"><value>Правки после явного подтверждения.</value></data>
-  <data name="Safety_Description_L3" xml:space="preserve"><value>Автономный режим: цепочка шагов без запроса.</value></data>
+  <data name="Safety_Description_Observe" xml:space="preserve"><value>Только чтение: без автоматических правок файлов.</value></data>
+  <data name="Safety_Description_Confirm" xml:space="preserve"><value>Правки после явного подтверждения.</value></data>
+  <data name="Safety_Description_Autonomous" xml:space="preserve"><value>Автономный режим: цепочка шагов без запроса.</value></data>
 </root>

@@ -158,9 +158,9 @@ public static class UiThemeSnapshot
                 panel_background = H(res, UiThemeApply.Keys.PowerCockpitPanelBackground),
                 safety_dock_background = H(res, UiThemeApply.Keys.PowerSafetyDockBackground),
                 workspace_health_strip_background = H(res, UiThemeApply.Keys.PowerWorkspaceHealthStripBackground),
-                safety_l1 = H(res, UiThemeApply.Keys.PowerSafetyL1),
-                safety_l2 = H(res, UiThemeApply.Keys.PowerSafetyL2),
-                safety_l3 = H(res, UiThemeApply.Keys.PowerSafetyL3),
+                safety_observe = H(res, UiThemeApply.Keys.PowerSafetyObserve),
+                safety_confirm = H(res, UiThemeApply.Keys.PowerSafetyConfirm),
+                safety_autonomous = H(res, UiThemeApply.Keys.PowerSafetyAutonomous),
                 emergency = H(res, UiThemeApply.Keys.PowerEmergency)
             },
             solution_explorer_tree_power = new
@@ -265,9 +265,9 @@ public static class UiThemeSnapshot
                 panel_background = "#070E18",
                 safety_dock_background = "#020814",
                 workspace_health_strip_background = "#040A14",
-                safety_l1 = "#1A5088",
-                safety_l2 = "#9A7818",
-                safety_l3 = "#6230B0",
+                safety_observe = "#1A5088",
+                safety_confirm = "#9A7818",
+                safety_autonomous = "#6230B0",
                 emergency = "#FF3355"
             },
             solution_explorer_tree_power = (object?)null,

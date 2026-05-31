@@ -11,7 +11,7 @@ public sealed class AgentEnvironmentSettings
 
     public int CoalesceWindowMs { get; set; } = 1500;
 
-    /// <summary>deny | l3_only | allow_with_audit</summary>
+    /// <summary>deny | tests_only | allow_with_audit</summary>
     public string ShellEscapeTier { get; set; } = "deny";
 
     /// <summary>agent_ephemeral | agent_worktree | in_place — для длинных autonomous run (W6).</summary>

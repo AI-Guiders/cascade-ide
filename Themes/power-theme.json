@@ -58,9 +58,9 @@
     "panel_background": "#070E18",
     "safety_dock_background": "#020814",
     "workspace_health_strip_background": "#040A14",
-    "safety_l1": "#1A5088",
-    "safety_l2": "#9A7818",
-    "safety_l3": "#6230B0",
+    "safety_observe": "#1A5088",
+    "safety_confirm": "#9A7818",
+    "safety_autonomous": "#6230B0",
     "emergency": "#FF3355"
   }
 }

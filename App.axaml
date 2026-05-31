@@ -62,6 +62,8 @@
             <SolidColorBrush x:Key="CascadeTheme.TerminalBackground">#1E1E1E</SolidColorBrush>
             <SolidColorBrush x:Key="CascadeTheme.TerminalForeground">#CCC</SolidColorBrush>
             <SolidColorBrush x:Key="CascadeTheme.TerminalInputBackground">#2D2D2D</SolidColorBrush>
+            <x:String x:Key="AvaloniaTerminalFontFamily">Cascadia Mono, Consolas, monospace</x:String>
+            <x:Double x:Key="AvaloniaTerminalFontSize">12</x:Double>
             <SolidColorBrush x:Key="CascadeTheme.McpBannerBackground">#E3F2FD</SolidColorBrush>
             <SolidColorBrush x:Key="CascadeTheme.McpBannerForeground">#1565C0</SolidColorBrush>
             <!-- Тултипы IDE: спокойный тёмный хром (не «жёлтый Win95») -->
@@ -95,9 +97,9 @@
             <!-- Отдельный «док» уровней L1–L3 (темнее тела чата, по концепту cockpit) -->
             <SolidColorBrush x:Key="CascadeTheme.PowerSafetyDockBackground">#060A14</SolidColorBrush>
             <SolidColorBrush x:Key="CascadeTheme.PowerWorkspaceHealthStripBackground">#080E18</SolidColorBrush>
-            <SolidColorBrush x:Key="CascadeTheme.PowerSafetyL1">#2A5A8A</SolidColorBrush>
-            <SolidColorBrush x:Key="CascadeTheme.PowerSafetyL2">#8A6A1A</SolidColorBrush>
-            <SolidColorBrush x:Key="CascadeTheme.PowerSafetyL3">#5A2A8A</SolidColorBrush>
+            <SolidColorBrush x:Key="CascadeTheme.PowerSafetyObserve">#2A5A8A</SolidColorBrush>
+            <SolidColorBrush x:Key="CascadeTheme.PowerSafetyConfirm">#8A6A1A</SolidColorBrush>
+            <SolidColorBrush x:Key="CascadeTheme.PowerSafetyAutonomous">#5A2A8A</SolidColorBrush>
             <SolidColorBrush x:Key="CascadeTheme.PowerEmergency">#E02040</SolidColorBrush>
             <!-- Градиентные каймы «островов» Power cockpit (концепт: редактор cyan→blue, чат purple→pink) -->
             <LinearGradientBrush x:Key="CascadeTheme.PowerEditorIslandFrameBrush" StartPoint="0%,0%" EndPoint="100%,100%">
@@ -145,6 +147,7 @@
         <!-- SukiUI: пакет 6.0.3 не совместим с Avalonia 12 (MissingMethodException в SukiTheme/TextBox.axaml). Вернуть после релиза Suki под v12. -->
         <StyleInclude Source="avares://Dock.Avalonia.Themes.Fluent/DockFluentTheme.axaml"/>
         <StyleInclude Source="avares://AvaloniaEdit/Themes/Fluent/AvaloniaEdit.xaml" />
+        <StyleInclude Source="avares://AvaloniaTerminal/Styles/Colors.axaml" />
         <!-- Заголовки панелей: полоса + разделитель + акцент (концепт Power cockpit) -->
         <Style Selector="Border.panelChromeHeaderStrip">
             <Setter Property="Background" Value="{DynamicResource CascadeTheme.PanelChromeHeaderBackground}"/>

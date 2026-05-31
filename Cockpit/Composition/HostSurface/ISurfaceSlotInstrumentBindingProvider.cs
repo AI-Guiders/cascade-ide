@@ -13,7 +13,7 @@ public interface ISurfaceSlotInstrumentBindingProvider
 
 /// <param name="Shell">Уже посчитанная оболочка (видимость колонок, ширина Mfd).</param>
 /// <param name="SurfaceId"><c>main_window_docked_grid</c> или <c>main_window_plus_mfd_host_top_level</c>.</param>
-/// <param name="SafetyLevel">Уровень безопасности канала (L1/L2/L3).</param>
+/// <param name="SafetyLevel">Уровень безопасности канала (safety.observe … safety.autonomous).</param>
 public readonly record struct SurfaceSlotInstrumentBindingContext(
     MainWindowShellSurfaceComposition Shell,
     string SurfaceId,

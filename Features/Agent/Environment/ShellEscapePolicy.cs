@@ -17,14 +17,14 @@ public static class ShellEscapePolicy
         if (!IsBypassingAeeDotnetCommand(commandId))
             return null;
 
-        var t = (tier ?? "deny").Trim();
-        if (string.Equals(t, "allow_with_audit", StringComparison.OrdinalIgnoreCase))
+        var t = (tier ?? ShellEscapeTier.Deny).Trim();
+        if (string.Equals(t, ShellEscapeTier.AllowWithAudit, StringComparison.OrdinalIgnoreCase))
         {
-            Trace.TraceInformation("[AEE] shell_escape_tier=allow_with_audit command={0}", commandId);
+            Trace.TraceInformation("[AEE] shell_escape_tier={0} command={1}", ShellEscapeTier.AllowWithAudit, commandId);
             return null;
         }
 
-        if (string.Equals(t, "l3_only", StringComparison.OrdinalIgnoreCase))
+        if (string.Equals(t, ShellEscapeTier.TestsOnly, StringComparison.OrdinalIgnoreCase))
         {
             if (IsTestOnlyCommand(commandId))
                 return null;
@@ -32,10 +32,10 @@ public static class ShellEscapePolicy
             return BlockPayload(
                 tier: t,
                 commandId,
-                "Tier l3_only: разрешены только run_tests/run_affected_tests; сборка/format — через ide_agent_verify или смените shell_escape_tier.");
+                $"Tier {ShellEscapeTier.TestsOnly}: разрешены только run_tests/run_affected_tests; сборка/format — через ide_agent_verify или смените shell_escape_tier.");
         }
 
-        if (string.Equals(t, "deny", StringComparison.OrdinalIgnoreCase))
+        if (string.Equals(t, ShellEscapeTier.Deny, StringComparison.OrdinalIgnoreCase))
             return BlockPayload(
                 tier: t,
                 commandId,

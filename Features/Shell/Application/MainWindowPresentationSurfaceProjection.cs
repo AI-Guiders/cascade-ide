@@ -113,9 +113,9 @@ public static class MainWindowPresentationSurfaceProjection
     public static string SafetyLevelDescription(string safetyLevel) =>
         safetyLevel switch
         {
-            AgentSafetyLevel.Observe => Resources.Safety_Description_L1,
-            AgentSafetyLevel.Confirm => Resources.Safety_Description_L2,
-            AgentSafetyLevel.Autonomous => Resources.Safety_Description_L3,
+            AgentSafetyLevel.Observe => Resources.Safety_Description_Observe,
+            AgentSafetyLevel.Confirm => Resources.Safety_Description_Confirm,
+            AgentSafetyLevel.Autonomous => Resources.Safety_Description_Autonomous,
             _ => "",
         };
 

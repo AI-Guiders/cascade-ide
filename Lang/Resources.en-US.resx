@@ -65,12 +65,12 @@
   <data name="ChatPanel_TraceEmptyHint" xml:space="preserve"><value>Trace is empty — the agent or MCP will add steps (AppendAgentTraceStep).</value></data>
   <data name="ChatPanel_TraceRollback" xml:space="preserve"><value>Roll back</value></data>
   <data name="ChatPanel_SafetyDockTitlePower" xml:space="preserve"><value>Safety level · L1 · L2 · L3</value></data>
-  <data name="ChatPanel_SafetyTierL1" xml:space="preserve"><value>L1</value></data>
-  <data name="ChatPanel_SafetyTierL2" xml:space="preserve"><value>L2</value></data>
-  <data name="ChatPanel_SafetyTierL3" xml:space="preserve"><value>L3</value></data>
-  <data name="ChatPanel_SafetyTierL1Subtitle" xml:space="preserve"><value>READ-ONLY</value></data>
-  <data name="ChatPanel_SafetyTierL2Subtitle" xml:space="preserve"><value>CONFIRM</value></data>
-  <data name="ChatPanel_SafetyTierL3Subtitle" xml:space="preserve"><value>AUTONOMOUS</value></data>
+  <data name="ChatPanel_SafetyTierObserve" xml:space="preserve"><value>observe</value></data>
+  <data name="ChatPanel_SafetyTierConfirm" xml:space="preserve"><value>confirm</value></data>
+  <data name="ChatPanel_SafetyTierAutonomous" xml:space="preserve"><value>autonomous</value></data>
+  <data name="ChatPanel_SafetyTierObserveSubtitle" xml:space="preserve"><value>READ-ONLY</value></data>
+  <data name="ChatPanel_SafetyTierConfirmSubtitle" xml:space="preserve"><value>CONFIRM</value></data>
+  <data name="ChatPanel_SafetyTierAutonomousSubtitle" xml:space="preserve"><value>AUTONOMOUS</value></data>
   <data name="ChatPanel_SafetyCompactHeader" xml:space="preserve"><value>Safety · level L1–L3</value></data>
   <data name="ChatPanel_EmergencyStopCompact" xml:space="preserve"><value>Emergency stop</value></data>
   <data name="ChatPanel_ChatExpandButton" xml:space="preserve"><value>▶ Agent chat</value></data>
@@ -87,7 +87,7 @@
   <data name="Lang_Menu_Russian" xml:space="preserve"><value>Russian</value></data>
   <data name="Lang_Menu_English" xml:space="preserve"><value>English</value></data>
   <data name="Lang_Menu_FollowSystem" xml:space="preserve"><value>Use system language</value></data>
-  <data name="Safety_Description_L1" xml:space="preserve"><value>Read-only: no automatic file edits.</value></data>
-  <data name="Safety_Description_L2" xml:space="preserve"><value>Edits after explicit confirmation.</value></data>
-  <data name="Safety_Description_L3" xml:space="preserve"><value>Autonomous mode: step chain without prompts.</value></data>
+  <data name="Safety_Description_Observe" xml:space="preserve"><value>Read-only: no automatic file edits.</value></data>
+  <data name="Safety_Description_Confirm" xml:space="preserve"><value>Edits after explicit confirmation.</value></data>
+  <data name="Safety_Description_Autonomous" xml:space="preserve"><value>Autonomous mode: step chain without prompts.</value></data>
 </root>

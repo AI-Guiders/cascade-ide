@@ -107,7 +107,7 @@ public sealed class AgentEnvironmentServiceTests
             [agent.environment]
             default_verify_policy = "strict"
             coalesce_window_ms = 2000
-            shell_escape_tier = "l3_only"
+            shell_escape_tier = "tests_only"
 
             [agent.environment.ladder]
             diagnose_files_enabled = false
@@ -115,7 +115,7 @@ public sealed class AgentEnvironmentServiceTests
         var s = CascadeIDE.Services.CascadeTomlSerializer.Deserialize<CascadeIdeSettings>(toml)!;
         Assert.Equal("strict", s.Agent.Environment.DefaultVerifyPolicy);
         Assert.Equal(2000, s.Agent.Environment.CoalesceWindowMs);
-        Assert.Equal("l3_only", s.Agent.Environment.ShellEscapeTier);
+        Assert.Equal("tests_only", s.Agent.Environment.ShellEscapeTier);
         Assert.False(s.Agent.Environment.Ladder.DiagnoseFilesEnabled);
     }
 

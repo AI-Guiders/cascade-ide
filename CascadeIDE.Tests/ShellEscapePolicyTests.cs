@@ -23,15 +23,15 @@ public sealed class ShellEscapePolicyTests
     }
 
     [Fact]
-    public void L3Only_Allows_RunTests()
+    public void TestsOnly_Allows_RunTests()
     {
-        Assert.Null(ShellEscapePolicy.TryBlockJson(IdeCommands.RunTests, "l3_only"));
+        Assert.Null(ShellEscapePolicy.TryBlockJson(IdeCommands.RunTests, ShellEscapeTier.TestsOnly));
     }
 
     [Fact]
-    public void L3Only_Block_Build()
+    public void TestsOnly_Block_Build()
     {
-        var json = ShellEscapePolicy.TryBlockJson(IdeCommands.BuildStructured, "l3_only");
+        var json = ShellEscapePolicy.TryBlockJson(IdeCommands.BuildStructured, ShellEscapeTier.TestsOnly);
         Assert.NotNull(json);
         Assert.Contains("shell_escape_blocked", json, StringComparison.Ordinal);
     }

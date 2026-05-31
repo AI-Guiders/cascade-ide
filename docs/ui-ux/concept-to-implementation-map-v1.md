@@ -40,7 +40,7 @@ This map is intended to drive incremental alignment work with clear acceptance c
 | Agent panel (plan / next / confirmation) | `ChatPanelView` rows 0–1, 3 | `FocusPlanItems`, `NextActionSummary`, confirm commands | ✅ | Отдельные карточки в Focus; полный блок «Agent Operations» — в Balanced (`ShowAgentOperationsBlock`). |
 | Bottom status pills (Build/Test/Debug/Git) | `IdeHealthStripView` (`UiModeFamilyNe` + `Power`) | `IdeHealthBuildText`, `IdeHealthTestsText`, `IdeHealthDebugText`, `WorkspaceHealthGitText` (хром) | ✅ | Компактная полоса под редактором, когда семья **не** Power (Focus/Balanced/AgentChat/Debug и т.д.). |
 | Док инструментирования (События / Тесты / Отладка) | страницы MFD в `MfdShellPageStack` (`EventsMfdPageView`, `TestsMfdPageView`, `DebugStackMfdPageView`, …) | `ShowInstrumentationTabs`, `IsInstrumentationDockVisible` | ✅ | В Focus доступны при включённом доке (меню «Док инструментирования»); сводка — полоса IDE Health. |
-| Карточка Safety L1–L3 | `ChatPanelView` row 5 (`modeCard` / Power: `safetyLevelIsland`) | `ShowSafetyControls`, `SetSafetyL*Command` | ✅ | Focus/Balanced — компактные кнопки; Power — отдельная панель-док, объёмные L1–L3 с тенью. |
+| Карточка safety (observe/confirm/autonomous) | `ChatPanelView` row 5 (`modeCard` / Power: `safetyLevelIsland`) | `ShowSafetyControls`, `SetSafety*Command` | ✅ | Focus/Balanced — компактные кнопки; Power — отдельная панель-док с semantic ids. |
 
 ---
 
