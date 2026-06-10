@@ -72,6 +72,7 @@ public sealed partial class WorkspaceNavigationMapViewModel
         }
 
         WorkspaceReverseAnchorItems.Clear();
+        var workspaceToml = RepositoryWorkspaceTomlLoader.TryLoad(workspaceRoot);
         if (string.IsNullOrWhiteSpace(workspaceRoot) || string.IsNullOrWhiteSpace(navigationPath))
         {
             WorkspaceReverseAnchorsStatus = adrDocRepoPaths.Length == 0
@@ -80,7 +81,6 @@ public sealed partial class WorkspaceNavigationMapViewModel
             return;
         }
 
-        var workspaceToml = RepositoryWorkspaceTomlLoader.TryLoad(workspaceRoot);
         var explicitAnchors = WorkspaceCorrespondenceCodeAnchorsLoader.LoadFromWorkspaceToml(workspaceToml, workspaceRoot);
         var reverse = DocReverseAnchorResolver.Resolve(workspaceRoot, navigationPath, adrDocRepoPaths, explicitAnchors);
         foreach (var m in reverse)
@@ -95,11 +95,27 @@ public sealed partial class WorkspaceNavigationMapViewModel
             });
         }
 
-        WorkspaceReverseAnchorsStatus = reverse.Count == 0
+        var anchorRel = WorkspaceAdrMapResolver.TryComputeRepoRelativePath(workspaceRoot, navigationPath);
+        if (!string.IsNullOrWhiteSpace(anchorRel))
+        {
+            foreach (var forgeItem in ForgeLensCorrespondenceClient.TryLoadForFile(workspaceToml, workspaceRoot, anchorRel))
+            {
+                WorkspaceReverseAnchorItems.Add(new WorkspaceReverseAnchorItemVm
+                {
+                    DocPath = forgeItem.Url,
+                    DisplayTitle = forgeItem.DisplayTitle,
+                    Excerpt = forgeItem.Status,
+                    Provenance = ForgeLensCorrespondenceClient.Provenance,
+                });
+            }
+        }
+
+        var forgeCount = WorkspaceReverseAnchorItems.Count - reverse.Count;
+        WorkspaceReverseAnchorsStatus = reverse.Count == 0 && forgeCount == 0
             ? (adrDocRepoPaths.Length > 0
                 ? "Reverse anchors: в связанных ADR явных ссылок на этот файл не найдено (bracket / scan)."
                 : "")
-            : $"Reverse anchors: {reverse.Count}";
+            : $"Reverse anchors: {reverse.Count}" + (forgeCount > 0 ? $", forge: {forgeCount}" : "");
     }
 
     private void OpenRepoDocumentInMarkdownPreview(string docPath, int? scrollToLine = null)

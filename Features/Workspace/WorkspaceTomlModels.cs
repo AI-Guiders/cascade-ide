@@ -34,7 +34,19 @@ public sealed class RepositoryWorkspaceSectionToml
     public RepositoryDocsTemplatesToml? DocsTemplates { get; set; }
     public RepositoryCorrespondenceToml? Correspondence { get; set; }
 
+    public RepositoryForgeToml? Forge { get; set; }
+
     public RepositoryCasaFieldToml? CasaField { get; set; }
+}
+
+/// <summary>Forge Lens overlay (<c>[workspace.forge]</c>, ADR 0158 / FORGE-ADR-0003).</summary>
+public sealed class RepositoryForgeToml
+{
+    public string? BaseUrl { get; set; }
+    public string? Repo { get; set; }
+
+    /// <summary>DEV override: env name для Bearer (<c>api_token_env</c>, ADR 0149). Канон — device login / secrets (ADR 0158).</summary>
+    public string? ApiTokenEnv { get; set; }
 }
 
 /// <summary>Explicit doc↔code anchors (<c>[[workspace.correspondence.code_anchors]]</c>, ADR 0156 §2.5).</summary>

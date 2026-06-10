@@ -254,6 +254,9 @@
 | `debug_stop` | Завершить сессию отладки (dispose DAP). returns: text. |
 | `debug_variables` | Переменные кадра. args: frame_index?:integer; returns: text; example: {"frame_index":0}. |
 | `fetch_web_public_url` | Загрузить публичный HTTPS-документ по URL и вернуть тело как читаемый текст (HTML упрощается до текста, поле extraction в JSON). Запрос из машины оператора; только https; локальные/частные хосты блокируются базово (не полная SSRF-защита). args: url:string, max_chars?:integer; returns: json; example: {\"url\":\"https://learn.microsoft.com/en-us/dotnet/\"}. |
+| `forge_lens.auth_status` | Статус Forge Lens auth для host. args: base_url?:string; returns: text; example: {"base_url":"http://127.0.0.1:8770"}. |
+| `forge_lens.connect` | Device login к forge (браузер + approve, как Intercom OAuth). args: base_url?:string; returns: text; example: {"base_url":"http://127.0.0.1:8770"}. |
+| `forge_lens.disconnect` | Удалить сохранённый Bearer для forge host. args: base_url?:string; returns: text; example: {"base_url":"http://127.0.0.1:8770"}. |
 | `get_colors_under_cursor` | Цвета под курсором (прямые и effective). returns: json. |
 | `get_control_appearance` | Снимок внешнего вида контрола (под курсором или по имени). args: name?:string; returns: json; example: {"name":"BuildButton"}. |
 | `get_debug_snapshot` | JSON: канонический снимок встроенной DAP-сессии (ADR 0002). returns: json. |

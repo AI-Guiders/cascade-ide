@@ -297,6 +297,39 @@ internal static class IdeMcpToolCatalogFull
             },
             new()
             {
+                Name = "ide_forge_lens_connect",
+                Description = "Device login к Agent Forge для CRS Lens (ADR 0158). base_url из [workspace.forge] если не задан.",
+                InputSchema = Schema(new
+                {
+                    type = "object",
+                    properties = new { base_url = new { type = "string" } },
+                    required = Array.Empty<string>()
+                })
+            },
+            new()
+            {
+                Name = "ide_forge_lens_disconnect",
+                Description = "Удалить Forge Lens credentials для forge host.",
+                InputSchema = Schema(new
+                {
+                    type = "object",
+                    properties = new { base_url = new { type = "string" } },
+                    required = Array.Empty<string>()
+                })
+            },
+            new()
+            {
+                Name = "ide_forge_lens_auth_status",
+                Description = "Статус Forge Lens auth (CIDE secrets / ~/.forge).",
+                InputSchema = Schema(new
+                {
+                    type = "object",
+                    properties = new { base_url = new { type = "string" } },
+                    required = Array.Empty<string>()
+                })
+            },
+            new()
+            {
                 Name = "ide_intercom_reveal_attachment",
                 Description = "Reveal из Intercom по AttachmentAnchor (ADR 0128 §8): re-resolve member/scope (Roslyn), transient highlight; select=true — выделить.",
                 InputSchema = Schema(new

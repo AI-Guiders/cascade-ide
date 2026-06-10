@@ -38,6 +38,7 @@
     <!-- Contracts project lives inside repo; exclude its sources from main app compilation (use ProjectReference). -->
     <Compile Remove="CascadeIDE.Contracts\**\*.cs" />
     <Compile Remove="CasaField.Core\**\*.cs" />
+    <Compile Remove="CasaField.Core.Bench\**\*.cs" />
     <!-- Внешний субмодуль/вендор: не компилировать в IDE (иначе sandbox с top-level Main перехватывает входную точку). -->
     <Compile Remove="externals\**\*.cs" />
     <AvaloniaXaml Remove="externals\**\*.axaml" />
@@ -92,6 +93,7 @@
   </ItemGroup>
   <ItemGroup>
     <!-- 2.1: локальный Core в open/; иначе NuGet AIGuiders.AgentNotes.Core 2.1.2+ (multi-root, registry prefix — ADR 015/016) -->
+    <PackageReference Include="AvaloniaTerminal" Version="1.0.0" />
     <PackageReference Include="Topten.RichTextKit" Version="0.4.167" />
     <ProjectReference Include="..\agent-notes-core\AgentNotes.Core.csproj" Condition="Exists('..\agent-notes-core\AgentNotes.Core.csproj')" />
     <PackageReference Include="AIGuiders.AgentNotes.Core" Version="2.1.2" Condition="!Exists('..\agent-notes-core\AgentNotes.Core.csproj')" />
@@ -529,10 +531,7 @@
       <_BuildVerifyWorkerDest Condition="'$(PublishDir)' != ''">$([MSBuild]::EnsureTrailingSlash('$(PublishDir)'))</_BuildVerifyWorkerDest>
       <_BuildVerifyWorkerDest Condition="'$(_BuildVerifyWorkerDest)' == ''">$([MSBuild]::EnsureTrailingSlash('$(OutputPath)'))</_BuildVerifyWorkerDest>
     </PropertyGroup>
-    <MSBuild
-      Projects="tools\CascadeIDE.BuildVerifyWorker\CascadeIDE.BuildVerifyWorker.csproj"
-      Targets="Build"
-      Properties="Configuration=$(Configuration);RuntimeIdentifier=$(RuntimeIdentifier)" />
+    <MSBuild Projects="tools\CascadeIDE.BuildVerifyWorker\CascadeIDE.BuildVerifyWorker.csproj" Targets="Build" Properties="Configuration=$(Configuration);RuntimeIdentifier=$(RuntimeIdentifier)" />
     <ItemGroup>
       <_BuildVerifyWorkerFiles Include="$(_BuildVerifyWorkerBin)\*.*" />
     </ItemGroup>
