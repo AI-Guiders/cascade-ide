@@ -17,6 +17,7 @@
 | AIGuiders.AvaloniaEdit | 12.0.1-cascade.1 | MIT | https://www.nuget.org/packages/AIGuiders.AvaloniaEdit |
 | AIGuiders.AvaloniaEdit.TextMate | 12.0.1-cascade.1 | MIT | https://www.nuget.org/packages/AIGuiders.AvaloniaEdit.TextMate |
 | Avalonia | 12.0.1 | MIT | https://www.nuget.org/packages/Avalonia |
+| AvaloniaTerminal | 1.0.0 | MIT | https://www.nuget.org/packages/AvaloniaTerminal |
 | Avalonia.Controls.WebView | 12.0.0 | MIT | https://www.nuget.org/packages/Avalonia.Controls.WebView |
 | Avalonia.Desktop | 12.0.1 | MIT | https://www.nuget.org/packages/Avalonia.Desktop |
 | Avalonia.Headless | 12.0.1 | MIT | https://www.nuget.org/packages/Avalonia.Headless |

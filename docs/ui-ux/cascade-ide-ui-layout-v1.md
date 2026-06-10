@@ -87,7 +87,7 @@
 | Сетка | `MainGrid` |
 | Чат (страница MFD) | внутри `ChatMfdPageView` / стека |
 | Ввод в чат | `ChatInputBox` (на странице чата) |
-| Терминал (ввод) | `TerminalInputBox` (`TerminalMfdPageView`) |
+| Терминал (консоль) | `TerminalView` (`TerminalMfdPageView`, AvaloniaTerminal) |
 | Подсветка агента | `AgentHighlightOverlay` на `AgentHighlightLayer` |
 
 `ide_set_panel_size` и аналоги — по актуальному контракту MCP; геометрия сейчас опирается на **сплиттеры трёх колонок** и настройки из `workspace.toml` / capabilities.

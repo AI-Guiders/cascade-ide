@@ -142,7 +142,6 @@ public partial class MainWindow : PointerTrackingWindow
             vm.SetPanelSizeProvider = (panel, width, height) => Services.UiPanelResize.Resize(this, panel, width, height);
             UpdateChatColumnWidth(vm);
             UpdateSolutionColumnWidth(vm.IsPfdColumnVisible);
-            SetupTerminalKeyHandler();
             SetupEditorAndTextMate();
             TryApplyHotkeys();
             ApplyMainGridColumnDefinitions(vm);

@@ -86,7 +86,7 @@ Page switching is via VM/commands/menu — there is **no** separate full-width b
 | Grid | `MainGrid` |
 | Chat (MFD page) | inside `ChatMfdPageView` / stack |
 | Chat input | `ChatInputBox` (on chat page) |
-| Terminal input | `TerminalInputBox` (`TerminalMfdPageView`) |
+| Terminal input | `TerminalView` (`TerminalMfdPageView`, AvaloniaTerminal) |
 | Agent highlight | `AgentHighlightOverlay` on `AgentHighlightLayer` |
 
 `ide_set_panel_size` and similar follow the current MCP contract; geometry uses **three column splitters** and `workspace.toml` / capabilities.

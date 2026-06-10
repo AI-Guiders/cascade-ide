@@ -94,18 +94,29 @@ Human tiers **H0–H2**, positional **M0** — без переименовани
 
 ## 6. CASA / KB memory lattices (CASA-ADR-0002 · вне CIDE repo)
 
-**Namespace:** `memory.lattice` · физические id решёток **сохраняются** (`L2_word_07`, …); semantic layer — для docs и routing.
+**Namespace:** dotted semantic id · physical lattice ids **unchanged** (`L2_word_07`, `F0_schema`, …).  
+**SSOT:** `casa-ontology-payload/design/naming-memory-layers-v0.md` · stacks `design/prisms/*/stack.v0.json`.
 
-| Semantic layer | Legacy lattice prefix | Роль |
-|----------------|----------------------|------|
-| `memory.grapheme` | L0_grapheme | Grapheme / always-on |
-| `memory.syllable` | L1_syllable | Syllable / fast loop |
-| `memory.lexicon` | L2_word_* | Lexicon shards |
-| `memory.phrase` | L3_phrase | Phrase / semantic routing |
+| Semantic id | Legacy axes | Physical examples |
+|-------------|-------------|-------------------|
+| `memory.grapheme` | L0, **B0**, T0 | `L0_grapheme_*` |
+| `memory.syllable` | L1, **B1**, T1 | `L1_syllable` |
+| `memory.lexicon` | L2, **B2**, T2 | `L2_word_*`, `words-ru-*` |
+| `memory.phrase` | L3, **B3**, T3 | `L3_phrase` |
+| `memory.math.schema` | **F0** | `F0_schema` |
+| `memory.math.compose` | **F1** | `F1_compose` |
+| `memory.math.quantity` | **F2** | `F2_quantity` |
+| `episodic.io` | **H0** (buffer) | `H0_io` |
+| `episodic.surface` | **H1**, legacy `H0_episode` | `H1_surface` |
+| `episodic.rule` | **H2** | `H2_rule` |
+| `episodic.scene` | **H3** | `H3_scene` |
+| `sensory.audio.*` | **A*** | `A1_phon`, … |
+| `sensory.vis.*` | **V*** | `V1_object`, … |
+| `sensory.spatial.*` | **S*** | `S0_disparity`, … |
+| `control.*` | `lattice_*` | `lattice_dmn`, `lattice_predict`, … |
 
-Hippo episodic: **H0–H3** (`H1_surface` …) — отдельная ось, не смешивать с prism L*.
-
-Подробнее: `casa-ontology-payload/design/naming-memory-layers-v0.md`.
+**B0…B3** = bukvar curriculum steps → same semantic layers as `memory.*` (not separate lattices).  
+**Prose:** qualify domain — never bare «F2» / «B0» / «H1» without semantic id.
 
 ---
 
@@ -147,6 +158,9 @@ Hippo episodic: **H0–H3** (`H1_surface` …) — отдельная ось, н
 | Chat «thinking stream» | **trace** `reasoning` |
 | Intercom `[F:…; M:…]` | **anchor** `canonical` |
 | CASA `L2_word_07` | **memory** `lexicon` shard |
+| CASA `F0_schema` | **memory.math** `schema` |
+| CASA bukvar **B0** | **memory** `grapheme` (curriculum step) |
+| CASA `H1_surface` | **episodic** `surface` |
 
 ---
 
@@ -155,3 +169,4 @@ Hippo episodic: **H0–H3** (`H1_surface` …) — отдельная ось, н
 | Дата | Изменение |
 |------|-----------|
 | 2026-05-31 | v1: registry; verify semantic ids; Endsley/safety/trace/anchor/CASA layers |
+| 2026-05-31 | §6: CASA F/B/H/A/V/S + memory.math + episodic semantic ids (cross-ref casa naming v1) |
