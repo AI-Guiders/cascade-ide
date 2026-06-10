@@ -2,7 +2,9 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="using:CascadeIDE.ViewModels"
              xmlns:feat="using:CascadeIDE.Features.Instrumentation"
+             xmlns:term="using:CascadeIDE.Features.Terminal"
              xmlns:views="using:CascadeIDE.Views"
+             xmlns:terminal="using:AvaloniaTerminal"
              x:Class="CascadeIDE.Views.TerminalMfdPageView"
              x:DataType="vm:MainWindowViewModel">
     <DockPanel>
@@ -41,31 +43,18 @@
                 </StackPanel>
             </StackPanel>
         </Border>
-        <DockPanel DataContext="{Binding TerminalPanel}">
-            <views:PanelChromeHeader DockPanel.Dock="Top" Classes="terminal" Title="Консоль · ввод и вывод" UppercaseTitle="True"/>
-            <TextBox x:Name="TerminalInputBox"
-                     DockPanel.Dock="Bottom"
-                     Text="{Binding TerminalInput, Mode=TwoWay}"
-                     PlaceholderText="Команда (Enter — выполнить)"
-                     FontFamily="Consolas,monospace"
-                     FontSize="12"
-                     Background="{DynamicResource CascadeTheme.TerminalInputBackground}"
-                     Foreground="{DynamicResource CascadeTheme.TerminalForeground}"
-                     Margin="0,4,0,0">
-                <TextBox.KeyBindings>
-                    <KeyBinding Gesture="Enter" Command="{Binding RunTerminalCommandCommand}"/>
-                </TextBox.KeyBindings>
-            </TextBox>
-            <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" MinHeight="96">
-                <TextBox Text="{Binding TerminalOutput, Mode=OneWay}"
-                         IsReadOnly="True"
-                         TextWrapping="NoWrap"
-                         FontFamily="Consolas,monospace"
-                         FontSize="12"
-                         Background="Transparent"
-                         Foreground="{DynamicResource CascadeTheme.TerminalForeground}"
-                         BorderThickness="0"/>
-            </ScrollViewer>
+        <DockPanel DataContext="{Binding TerminalPanel}" x:DataType="term:TerminalPanelViewModel">
+            <views:PanelChromeHeader DockPanel.Dock="Top" Classes="terminal" Title="Консоль · интерактивная shell" UppercaseTitle="True"/>
+            <Border x:Name="TerminalHostChrome"
+                    MinHeight="96"
+                    Background="{DynamicResource CascadeTheme.TerminalBackground}"
+                    Padding="2">
+                <terminal:TerminalControl x:Name="TerminalView"
+                                          Model="{Binding TerminalModel}"
+                                          FontFamily="{DynamicResource AvaloniaTerminalFontFamily}"
+                                          FontSize="{DynamicResource AvaloniaTerminalFontSize}"
+                                          RightClickAction="CopyOrPaste"/>
+            </Border>
         </DockPanel>
     </DockPanel>
 </UserControl>

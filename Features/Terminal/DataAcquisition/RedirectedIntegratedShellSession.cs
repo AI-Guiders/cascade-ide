@@ -58,7 +58,7 @@ internal sealed class RedirectedIntegratedShellSession(ShellLaunchConfiguration 
             if (inputStream?.CanWrite != true)
                 return;
 
-            var normalizedInput = IntegratedShellLaunch.NormalizeStandardInput(input);
+            var normalizedInput = IntegratedShellLaunch.NormalizeStandardInput(input, launch.DisplayName);
             inputStream.Write(normalizedInput, 0, normalizedInput.Length);
             inputStream.Flush();
         }

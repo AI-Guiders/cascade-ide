@@ -77,13 +77,8 @@ internal static class IntegratedShellLaunch
         environment["DOTNET_CLI_UI_LANGUAGE"] = "en-US";
     }
 
-    private static readonly string[] PwshLaunchArguments =
-    [
-        "-NoLogo",
-        "-NoExit",
-        "-Command",
-        "[Console]::InputEncoding=[Console]::OutputEncoding=[System.Text.UTF8Encoding]::new($false); chcp 65001 | Out-Null",
-    ];
+    /// <summary>pwsh 7: UTF-8 по умолчанию; chcp/-Command ломали буфер (BOM, nested host).</summary>
+    private static readonly string[] PwshLaunchArguments = ["-NoLogo", "-NoExit"];
 
     private static readonly string[] CmdLaunchArguments = ["/K", "chcp 65001>nul"];
 
@@ -126,11 +121,16 @@ internal static class IntegratedShellLaunch
         return Environment.CurrentDirectory;
     }
 
-    public static byte[] NormalizeStandardInput(byte[] input)
+    public static byte[] NormalizeStandardInput(byte[] input, string? shellDisplayName = null)
     {
         if (input.Length == 0)
             return input;
 
+        input = IntegratedShellStreamSanitizer.StripLeadingUtf8Bom(input).ToArray();
+        if (input.Length == 0)
+            return input;
+
+        var mapDelToBackspace = ShouldMapDelToBackspace();
         var normalized = new List<byte>(input.Length + 4);
         var newline = Encoding.UTF8.GetBytes(Environment.NewLine);
 
@@ -151,10 +151,33 @@ internal static class IntegratedShellLaunch
                 continue;
             }
 
+            // XTerm/AvaloniaTerminal: Backspace → DEL (0x7F). ConPTY + Windows (pwsh PSReadLine, cmd) ждут BS (0x08).
+            if (mapDelToBackspace && current == 0x7F)
+            {
+                normalized.Add(0x08);
+                continue;
+            }
+
             normalized.Add(current);
         }
 
         return normalized.ToArray();
+    }
+
+    internal static bool ShouldMapDelToBackspace() => OperatingSystem.IsWindows();
+
+    internal static bool IsPureBackspaceInput(ReadOnlySpan<byte> input)
+    {
+        if (input.IsEmpty)
+            return false;
+
+        foreach (var b in input)
+        {
+            if (b is not (0x7F or 0x08))
+                return false;
+        }
+
+        return true;
     }
 
     internal static bool ShouldApplyResize((int cols, int rows)? lastResize, int cols, int rows, out (int cols, int rows) normalized)

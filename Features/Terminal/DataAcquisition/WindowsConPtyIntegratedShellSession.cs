@@ -88,7 +88,8 @@ internal sealed class WindowsConPtyIntegratedShellSession(ShellLaunchConfigurati
             if (_inputStream?.CanWrite != true)
                 return;
 
-            _inputStream.Write(input, 0, input.Length);
+            var normalizedInput = IntegratedShellLaunch.NormalizeStandardInput(input, launch.DisplayName);
+            _inputStream.Write(normalizedInput, 0, normalizedInput.Length);
             _inputStream.Flush();
         }
         catch (IOException)

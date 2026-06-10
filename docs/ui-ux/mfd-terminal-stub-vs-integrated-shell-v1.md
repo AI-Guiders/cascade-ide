@@ -1,32 +1,25 @@
-# MFD: «терминал»-заглушка и отдельный трек Integrated Shell (v1)
+# MFD: интегрированная shell-консоль (v1)
 
-**Не ADR** — рабочая заметка, чтобы не путать нынешний UI с полноценной встроенной оболочкой. Код — источник правды.
+**Не ADR** — рабочая заметка по текущему терминалу в кабине. Код — источник правды.
 
 ## Что в продукте сейчас
 
-- **Страница MFD:** `Views/TerminalMfdPageView.axaml` — read-only `TextBox` (вывод) + однострочный `TextBox` (ввод, Enter → команда). Это **не** эмулятор терминала: нет PTY, нет рендера escape-последовательностей, нет интерактивной сессии shell.
-- Макет главного окна **без** отдельной нижней полосы вкладок: терминал — **страница MFD** (`TerminalMfdPageView` в стеке `MfdShellPageStack`). Тот же `TerminalPanel` / `TerminalInputBox` (см. [cascade-ide-ui-layout-v1.md](cascade-ide-ui-layout-v1.md)).
-- **Логика:** `Features/Terminal/TerminalPanelViewModel.cs` — **интерактивная shell-сессия** через `IntegratedShellLaunch` (ConPTY на Windows, redirected fallback). Команды уходят в живой pwsh/cmd; вывод — поток UTF-8. Старый `cmd /c` one-shot удалён.
+- **Страница MFD:** `Views/TerminalMfdPageView.axaml` — `AvaloniaTerminal.TerminalControl` (ANSI, сетка, scrollback, выделение, сырой TTY-ввод).
+- Макет главного окна **без** отдельной нижней полосы вкладок: терминал — **страница MFD** (`TerminalMfdPageView` в стеке `MfdShellPageStack`). См. [cascade-ide-ui-layout-v1.md](cascade-ide-ui-layout-v1.md).
+- **Логика:** `Features/Terminal/TerminalPanelViewModel.cs` — `TerminalControlModel` + `IntegratedShellLaunch` (ConPTY на Windows, redirected fallback). Поток shell → `Feed(byte[])`; ввод пользователя → `UserInput` → PTY. ACP/агент дописывает вывод через `AppendOutput(string)`.
+- **DAL:** `Features/Terminal/DataAcquisition/*` — адаптировано из MIT-примеров AvaloniaTerminal.
 
-## Чем это не является (без сарказма к коду)
+## Что ещё не заявлено
 
-- **Не** встроенный **PowerShell** (или иной **интерактивный** REPL) с сессией, табами, профилями, PSReadline.
-- **Не** **Pseudo Console (ConPTY)** / **PTY**-уровень: нет нормального TTY, курсорной сетки, цветов по ANSI, сырого ввода для интерактивных CLI.
-- **Не** заявленный **VS Code Integrated Terminal**-класс по UX: прокрутка, копипаст, выделение, интеграция с задачами — в основном **ещё впереди** как отдельный объём.
+- Вкладки сессий, профили shell, интеграция с задачами сборки как в VS Code Integrated Terminal.
+- Кроссплатформенный ConPTY-уровень вне Windows (сейчас redirected fallback).
 
-Иными словами: это **заглушка / «личинка»** площадки «консоль» в кабине, а не готовый продуктовой терминал.
+## Связанные ADR / паттерны
 
-## Зачем так можно было сделать
-
-- Дать **точку вывода** и **одиночные команды** в каталоге решения без внедрения всего стека ConPTY+рендер+кроссплатформа.
-- Сохранить **точку в MFD** (страница) под будущий нормальный shell.
-
-## Куда смотреть, когда будем делать «по-взрослому»
-
-- Транспорт **потока текста** в UI без рвани — паттерн из [ADR 0094](../adr/0094-ingestion-bus-afdx-analogy-and-threading-channels.md) (`Channel<T>`, батчинг, backpressure; для журнала сборки уже принят; терминал — **отдельный** срез, когда появится реальный поток).
-- **Граница кокпит / shell** — [ADR 0066](../adr/0066-cockpit-ui-vs-ide-presentation-layer.md) (приборы и deck vs хром/оболочка IDE).
-- **Модель MFD** — [ADR 0021](../adr/0021-pfd-mfd-cockpit-attention-model.md) (страница «терминал» — навигация вторичного контура, а не зона = страница).
+- Транспорт потока текста — [ADR 0094](../adr/0094-ingestion-bus-afdx-analogy-and-threading-channels.md) (для журнала сборки уже принят; терминал — отдельный срез).
+- **Граница кокпит / shell** — [ADR 0066](../adr/0066-cockpit-ui-vs-ide-presentation-layer.md).
+- **Модель MFD** — [ADR 0021](../adr/0021-pfd-mfd-cockpit-attention-model.md).
 
 ## Итог одной строкой
 
-**Текущий «Терминал» в Cascade IDE — площадка и сценарий «одна команда → вывод в текст**;** Integrated Shell (хотя бы уровня PS + нормальный UX) — **отдельная крупная линия**, а не доработка существующих двух `TextBox`.
+**Терминал в Cascade IDE — интерактивная shell-сессия с ANSI-рендером (AvaloniaTerminal + ConPTY);** расширения UX (вкладки, задачи) — отдельные срезы.

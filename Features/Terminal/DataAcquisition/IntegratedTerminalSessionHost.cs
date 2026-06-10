@@ -1,4 +1,3 @@
-using System.Text;
 using CascadeIDE.Contracts;
 
 namespace CascadeIDE.Features.Terminal.DataAcquisition;
@@ -14,7 +13,7 @@ internal sealed class IntegratedTerminalSessionHost : IDisposable
     public IntegratedTerminalSessionHost(Func<string?> getSolutionPath) =>
         _getSolutionPath = getSolutionPath;
 
-    public event Action<string>? OutputReceived;
+    public event Action<byte[]>? OutputReceived;
 
     public event Action<int>? SessionExited;
 
@@ -35,13 +34,23 @@ internal sealed class IntegratedTerminalSessionHost : IDisposable
         _session.Exited += OnSessionExited;
     }
 
-    public void SendCommandLine(string commandLine)
+    public void SendInput(byte[] input)
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
-        EnsureStarted();
+        if (input.Length == 0)
+            return;
 
-        var payload = Encoding.UTF8.GetBytes(commandLine + Environment.NewLine);
-        _session!.Send(payload);
+        EnsureStarted();
+        _session!.Send(input);
+    }
+
+    public void Resize(int cols, int rows)
+    {
+        ObjectDisposedException.ThrowIf(_disposed, this);
+        if (_session is null || cols <= 0 || rows <= 0)
+            return;
+
+        _session.Resize(cols, rows);
     }
 
     public void Dispose()
@@ -64,7 +73,7 @@ internal sealed class IntegratedTerminalSessionHost : IDisposable
         if (data.Length == 0)
             return;
 
-        OutputReceived?.Invoke(Encoding.UTF8.GetString(data));
+        OutputReceived?.Invoke(data);
     }
 
     private void OnSessionExited(int exitCode)
