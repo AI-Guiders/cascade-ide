@@ -256,6 +256,8 @@
 | `fetch_web_public_url` | Загрузить публичный HTTPS-документ по URL и вернуть тело как читаемый текст (HTML упрощается до текста, поле extraction в JSON). Запрос из машины оператора; только https; локальные/частные хосты блокируются базово (не полная SSRF-защита). args: url:string, max_chars?:integer; returns: json; example: {\"url\":\"https://learn.microsoft.com/en-us/dotnet/\"}. |
 | `forge_lens.auth_status` | Статус Forge Lens auth для host. args: base_url?:string; returns: text; example: {"base_url":"http://127.0.0.1:8770"}. |
 | `forge_lens.connect` | Device login к forge (браузер + approve, как Intercom OAuth). args: base_url?:string; returns: text; example: {"base_url":"http://127.0.0.1:8770"}. |
+| `forge_lens.create_issue` | Создать issue в Forge (write gate B). args: title:string, body?:string, repo?:string, base_url?:string, file_path?:string, line_start?:integer, line_end?:integer, member_key?:string; returns: text; example: {"title":"Zone leak","file_path":"src/Zones.cs","line_start":10}. |
+| `forge_lens.create_merge_request` | Создать merge request в Forge. args: title:string, source_branch:string, target_branch?:string, repo?:string, base_url?:string, file_path?:string, line_start?:integer, line_end?:integer; returns: text; example: {"title":"feat: zones","source_branch":"feat/zones"}. |
 | `forge_lens.disconnect` | Удалить сохранённый Bearer для forge host. args: base_url?:string; returns: text; example: {"base_url":"http://127.0.0.1:8770"}. |
 | `get_colors_under_cursor` | Цвета под курсором (прямые и effective). returns: json. |
 | `get_control_appearance` | Снимок внешнего вида контрола (под курсором или по имени). args: name?:string; returns: json; example: {"name":"BuildButton"}. |

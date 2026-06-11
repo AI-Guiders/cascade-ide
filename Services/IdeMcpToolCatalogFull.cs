@@ -330,6 +330,48 @@ internal static class IdeMcpToolCatalogFull
             },
             new()
             {
+                Name = "ide_forge_lens_create_issue",
+                Description = "Создать issue в Agent Forge (write gate). base_url/repo из [workspace.forge] если не заданы.",
+                InputSchema = Schema(new
+                {
+                    type = "object",
+                    properties = new
+                    {
+                        title = new { type = "string" },
+                        body = new { type = "string" },
+                        repo = new { type = "string" },
+                        base_url = new { type = "string" },
+                        file_path = new { type = "string", description = "Repo-relative path for code anchor." },
+                        line_start = new { type = "integer" },
+                        line_end = new { type = "integer" },
+                        member_key = new { type = "string" }
+                    },
+                    required = new[] { "title" }
+                })
+            },
+            new()
+            {
+                Name = "ide_forge_lens_create_merge_request",
+                Description = "Создать merge request в Agent Forge.",
+                InputSchema = Schema(new
+                {
+                    type = "object",
+                    properties = new
+                    {
+                        title = new { type = "string" },
+                        source_branch = new { type = "string" },
+                        target_branch = new { type = "string" },
+                        repo = new { type = "string" },
+                        base_url = new { type = "string" },
+                        file_path = new { type = "string" },
+                        line_start = new { type = "integer" },
+                        line_end = new { type = "integer" }
+                    },
+                    required = new[] { "title", "source_branch" }
+                })
+            },
+            new()
+            {
                 Name = "ide_intercom_reveal_attachment",
                 Description = "Reveal из Intercom по AttachmentAnchor (ADR 0128 §8): re-resolve member/scope (Roslyn), transient highlight; select=true — выделить.",
                 InputSchema = Schema(new

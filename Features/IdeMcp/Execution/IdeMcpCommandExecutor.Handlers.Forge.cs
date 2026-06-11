@@ -49,6 +49,74 @@ internal sealed partial class IdeMcpCommandExecutor
             var envHint = repo is not null ? $" workspace repo={repo}" : "";
             return $"Forge Lens: not logged in for {baseUrl}.{envHint} Run forge_lens.connect or forge auth login.";
         });
+
+        add(IdeCommands.ForgeLensCreateIssue, async (args, ct) =>
+        {
+            var title = McpCommandJsonArgs.String(args, "title")?.Trim() ?? "";
+            if (title.Length == 0)
+                return "Error: title required.";
+
+            var ctx = ResolveForgeWriteContext(args);
+            if (ctx is null)
+                return "Error: укажи base_url+repo или [workspace.forge] в .cascade/workspace.toml.";
+
+            var (ok, message) = await ForgeLensWriteClient.CreateIssueAsync(
+                ctx.BaseUrl,
+                ctx.Repo,
+                ctx.ApiToken,
+                title,
+                McpCommandJsonArgs.String(args, "body"),
+                BuildForgeAnchors(args),
+                ct).ConfigureAwait(false);
+            return ok ? message : "Error: " + message;
+        });
+
+        add(IdeCommands.ForgeLensCreateMergeRequest, async (args, ct) =>
+        {
+            var title = McpCommandJsonArgs.String(args, "title")?.Trim() ?? "";
+            var sourceBranch = McpCommandJsonArgs.String(args, "source_branch")?.Trim() ?? "";
+            if (title.Length == 0)
+                return "Error: title required.";
+            if (sourceBranch.Length == 0)
+                return "Error: source_branch required.";
+
+            var ctx = ResolveForgeWriteContext(args);
+            if (ctx is null)
+                return "Error: укажи base_url+repo или [workspace.forge] в .cascade/workspace.toml.";
+
+            var (ok, message) = await ForgeLensWriteClient.CreateMergeRequestAsync(
+                ctx.BaseUrl,
+                ctx.Repo,
+                ctx.ApiToken,
+                title,
+                sourceBranch,
+                McpCommandJsonArgs.String(args, "target_branch"),
+                BuildForgeAnchors(args),
+                ct).ConfigureAwait(false);
+            return ok ? message : "Error: " + message;
+        });
+    }
+
+    private ForgeLensWriteContext? ResolveForgeWriteContext(IReadOnlyDictionary<string, JsonElement>? args) =>
+        ForgeLensWriteClient.TryResolveContext(
+            TryGetWorkspaceRoot(_actions),
+            ResolveForgeBaseUrl(args),
+            McpCommandJsonArgs.String(args, "repo"));
+
+    private static IReadOnlyList<ForgeLensAnchorPayload>? BuildForgeAnchors(IReadOnlyDictionary<string, JsonElement>? args)
+    {
+        var file = McpCommandJsonArgs.String(args, "file_path")?.Trim().Replace('\\', '/');
+        if (string.IsNullOrWhiteSpace(file))
+            return null;
+
+        var lineStart = McpCommandJsonArgs.Int(args, "line_start", 0);
+        if (lineStart <= 0)
+            return null;
+
+        var lineEndRaw = McpCommandJsonArgs.Int(args, "line_end", 0);
+        int? lineEnd = lineEndRaw > 0 ? lineEndRaw : null;
+        var memberKey = McpCommandJsonArgs.String(args, "member_key");
+        return [new ForgeLensAnchorPayload(file, lineStart, lineEnd, memberKey)];
     }
 
     private string? ResolveForgeBaseUrl(IReadOnlyDictionary<string, JsonElement>? args)
