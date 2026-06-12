@@ -22,6 +22,8 @@
 | FORGE-ADR-0010 | `forge auth login`, `~/.forge/credentials.json` |
 | [0157](0157-cide-magic-link-protocol.md) | `cide://`; `forge://` — в FORGE-ADR-0003 |
 | FORGE-ADR-0003 | Lens API, CodeAnchor, MCP-first write |
+| [0159](0159-bracket-forge-artifact-reference.md) | Bracket `[FRG:…]` + code-bracket display |
+| FORGE-ADR-0012 | Forge storage / thin web round-trip |
 
 ---
 
