@@ -17,4 +17,7 @@ public static partial class IdeCommands
 
     /// <summary>Создать merge request в Forge. args: title:string, source_branch:string, target_branch?:string, repo?:string, base_url?:string, file_path?:string, line_start?:integer, line_end?:integer; returns: text; example: {"title":"feat: zones","source_branch":"feat/zones"}.</summary>
     public const string ForgeLensCreateMergeRequest = "forge_lens.create_merge_request";
+
+    /// <summary>Открыть forge artifact по bracket <c>[FRG:…]</c>. args: bracket:string, base_url?:string, select_code?:boolean; returns: text; example: {"bracket":"[FRG:issue:1]","select_code":true}.</summary>
+    public const string ForgeLensOpen = "forge_lens.open";
 }

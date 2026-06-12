@@ -5,6 +5,7 @@ using Avalonia.Threading;
 using CascadeIDE.Features.Workspace;
 using CascadeIDE.Features.WorkspaceNavigation.Application;
 using CascadeIDE.Models;
+using CascadeIDE.Services.Forge;
 using CascadeIDE.Services.Intercom;
 using CascadeIDE.Services.MarkdownPreview;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -95,6 +96,12 @@ public abstract partial class MarkdownPreviewSurfaceViewModel : ObservableObject
             return;
         }
 
+        if (trimmed.StartsWith(MarkdownCodeAnchorPreviewExpander.ForgeUriScheme, StringComparison.OrdinalIgnoreCase))
+        {
+            TryOpenForgeArtifact(trimmed);
+            return;
+        }
+
         if (trimmed.StartsWith("http://", StringComparison.OrdinalIgnoreCase)
             || trimmed.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
         {
@@ -172,6 +179,48 @@ public abstract partial class MarkdownPreviewSurfaceViewModel : ObservableObject
             return;
 
         var ws = TryGetWorkspaceRoot();
+        if (!BracketCodeReferenceParser.TryToAttachmentAnchor(
+                reference,
+                _editorVm.CurrentFilePath,
+                ws,
+                _editorVm.Workspace.SolutionPath,
+                indexDirectoryRelative: null,
+                out var anchor,
+                out _))
+        {
+            return;
+        }
+
+        var absolute = ResolveAnchorAbsolutePath(anchor.File, ws);
+        if (string.IsNullOrWhiteSpace(absolute))
+            return;
+
+        var line = anchor.LineStart is > 0 ? anchor.LineStart.Value : 1;
+        var endLine = anchor.LineEnd is > 0 ? anchor.LineEnd.Value : line;
+        _editorVm.IdeMcp.GoToPosition(absolute, line, 1, endLine, null);
+    }
+
+    internal void TryOpenForgeArtifact(string forgeArtifactUrl)
+    {
+        var inner = Uri.UnescapeDataString(
+            forgeArtifactUrl[MarkdownCodeAnchorPreviewExpander.ForgeUriScheme.Length..]);
+        if (!BracketForgeReferenceParser.TryParse(inner, out var artifact, out _))
+            return;
+
+        var ws = TryGetWorkspaceRoot();
+        var (baseUrl, _) = ForgeLensWorkspaceConfig.TryResolve(ws);
+        if (string.IsNullOrWhiteSpace(baseUrl))
+            baseUrl = "http://127.0.0.1:8770";
+
+        var viewUrl = ForgeLensOpenService.BuildViewUrl(baseUrl, artifact);
+        TryOpenExternalUrl(viewUrl);
+
+        if (string.IsNullOrWhiteSpace(artifact.CodeBracket) || _editorVm is null)
+            return;
+
+        if (!BracketCodeReferenceParser.TryParse(artifact.CodeBracket, out var reference, out _))
+            return;
+
         if (!BracketCodeReferenceParser.TryToAttachmentAnchor(
                 reference,
                 _editorVm.CurrentFilePath,

@@ -1,6 +1,7 @@
 #nullable enable
 
 using System.Text;
+using CascadeIDE.Services.Forge;
 using CascadeIDE.Services.Intercom;
 
 namespace CascadeIDE.Services.MarkdownPreview;
@@ -12,6 +13,7 @@ namespace CascadeIDE.Services.MarkdownPreview;
 public static class MarkdownCodeAnchorPreviewExpander
 {
     public const string UriScheme = "cascade-code-anchor:";
+    public const string ForgeUriScheme = "cascade-forge-artifact:";
 
     public static string Expand(string markdown)
     {
@@ -49,6 +51,22 @@ public static class MarkdownCodeAnchorPreviewExpander
                 && BracketCodeReferenceParser.TryReadBracketSpan(markdown, i, out var closeBracket))
             {
                 var inner = markdown.Substring(i + 1, closeBracket - i - 1);
+                if (inner.TrimStart().StartsWith("FRG:", StringComparison.Ordinal)
+                    && BracketForgeReferenceParser.TryParse("[" + inner + "]", out var forgeRef, out _)
+                    && !BracketCodeReferenceParser.IsMarkdownLinkAfter(markdown, closeBracket))
+                {
+                    var label = forgeRef.Kind switch
+                    {
+                        Models.Forge.ForgeArtifactKind.Issue => $"issue #{forgeRef.Number} · {forgeRef.Repo}",
+                        Models.Forge.ForgeArtifactKind.MergeRequest => $"mr #{forgeRef.Number} · {forgeRef.Repo}",
+                        _ => forgeRef.Repo,
+                    };
+                    var url = ForgeUriScheme + Uri.EscapeDataString("[" + inner.Trim() + "]");
+                    sb.Append('[').Append(EscapeMarkdownLinkLabel(label)).Append("](").Append(url).Append(')');
+                    i = closeBracket + 1;
+                    continue;
+                }
+
                 if (BracketCodeReferenceParser.TryParse(inner, out var reference, out _)
                     && !string.IsNullOrWhiteSpace(reference.File)
                     && !BracketCodeReferenceParser.IsMarkdownLinkAfter(markdown, closeBracket))

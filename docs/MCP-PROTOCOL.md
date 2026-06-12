@@ -259,6 +259,7 @@
 | `forge_lens.create_issue` | Создать issue в Forge (write gate B). args: title:string, body?:string, repo?:string, base_url?:string, file_path?:string, line_start?:integer, line_end?:integer, member_key?:string; returns: text; example: {"title":"Zone leak","file_path":"src/Zones.cs","line_start":10}. |
 | `forge_lens.create_merge_request` | Создать merge request в Forge. args: title:string, source_branch:string, target_branch?:string, repo?:string, base_url?:string, file_path?:string, line_start?:integer, line_end?:integer; returns: text; example: {"title":"feat: zones","source_branch":"feat/zones"}. |
 | `forge_lens.disconnect` | Удалить сохранённый Bearer для forge host. args: base_url?:string; returns: text; example: {"base_url":"http://127.0.0.1:8770"}. |
+| `forge_lens.open` | Открыть forge artifact по bracket `[FRG:…]`. args: bracket:string, base_url?:string, select_code?:boolean; returns: text; example: {"bracket":"[FRG:issue:1]","select_code":true}. |
 | `get_colors_under_cursor` | Цвета под курсором (прямые и effective). returns: json. |
 | `get_control_appearance` | Снимок внешнего вида контрола (под курсором или по имени). args: name?:string; returns: json; example: {"name":"BuildButton"}. |
 | `get_debug_snapshot` | JSON: канонический снимок встроенной DAP-сессии (ADR 0002). returns: json. |

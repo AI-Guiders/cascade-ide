@@ -1,6 +1,7 @@
 using System.Text.Json;
 using CascadeIDE.Features.WorkspaceNavigation.Application;
 using CascadeIDE.Services;
+using CascadeIDE.Services.Forge;
 
 namespace CascadeIDE.Features.IdeMcp.Execution;
 
@@ -94,6 +95,54 @@ internal sealed partial class IdeMcpCommandExecutor
                 BuildForgeAnchors(args),
                 ct).ConfigureAwait(false);
             return ok ? message : "Error: " + message;
+        });
+
+        add(IdeCommands.ForgeLensOpen, async (args, _) =>
+        {
+            var bracket = McpCommandJsonArgs.String(args, "bracket")?.Trim() ?? "";
+            if (bracket.Length == 0)
+                return "Error: bracket required (e.g. [FRG:pilot/issues/1]).";
+
+            if (!BracketForgeReferenceParser.TryParse(bracket, out var artifact, out var parseError))
+                return "Error: " + parseError;
+
+            var baseUrl = ResolveForgeBaseUrl(args);
+            if (string.IsNullOrWhiteSpace(baseUrl))
+            {
+                var (cfgBase, _) = ForgeLensWorkspaceConfig.TryResolve(TryGetWorkspaceRoot(_actions));
+                baseUrl = cfgBase;
+            }
+
+            if (string.IsNullOrWhiteSpace(baseUrl))
+                return "Error: base_url or [workspace.forge] required.";
+
+            var viewUrl = ForgeLensOpenService.BuildViewUrl(baseUrl, artifact);
+            if (!ForgeLensOpenService.TryOpenExternal(viewUrl, out var openError))
+                return "Error: " + openError;
+
+            var select = McpCommandJsonArgs.Bool(args, "select_code", defaultValue: true);
+            if (!string.IsNullOrWhiteSpace(artifact.CodeBracket))
+            {
+                var ws = TryGetWorkspaceRoot(_actions);
+                var solutionPath = TryGetAttachSolutionPath();
+                var indexDir = CascadeIDE.Features.HybridIndex.Application.HybridIndexIndexDirectoryRelative.ResolveOrDefault(
+                    _vm.GetCascadeSettingsForExecutor().HybridIndex.IndexDir);
+                if (!ForgeLensOpenService.TryNavigateCodeTail(
+                        artifact,
+                        ws,
+                        activeFilePath: null,
+                        solutionPath,
+                        indexDir,
+                        _actions,
+                        _vm.GetCascadeSettingsForExecutor().Intercom,
+                        select,
+                        out var navError))
+                {
+                    return $"Opened {viewUrl}. Code navigation failed: {navError}";
+                }
+            }
+
+            return await Task.FromResult($"Opened {viewUrl}" + (artifact.CodeBracket is not null ? " and navigated to code anchor." : "."));
         });
     }
 

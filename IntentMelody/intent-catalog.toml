@@ -160,6 +160,30 @@ help = "Показать фрагмент по bracket без изменения
 group = "Editor"
 arg_tail = "required"
 
+# ==============================================================================
+# Forge Lens (ADR 0158, 0159)
+# ==============================================================================
+
+# forge_lens.open — открыть forge artifact по [FRG:…]
+[[command]]
+command_id = "forge_lens.open"
+melody_slug = "fgo"
+melody_shape = "parametric"
+melody_tail_signature = "<bracket:bracket>"
+melody_wire_class = "bracket_code_ref"
+melody_chord_commit = "enter"
+melody_palette_usage_hint = "c:fgo:[FRG:pilot/issues/1] — открыть issue/MR в браузере (+ code tail → editor)"
+melody_palette_usage_category = "Forge -> Lens"
+
+[[command.slash]]
+path = "/forge goto"
+domain = "forge"
+object = "artifact"
+intent = "goto"
+help = "Открыть forge artifact по bracket [FRG:repo/issues/N] или compound с F:… code tail."
+group = "Forge"
+arg_tail = "required"
+
 # attach_selection — прикрепить выделение в редакторе (ADR 0128)
 [[command]]
 

@@ -372,6 +372,22 @@ internal static class IdeMcpToolCatalogFull
             },
             new()
             {
+                Name = "ide_forge_lens_open",
+                Description = "Открыть forge artifact по bracket [FRG:…] в браузере; compound code tail → editor (ADR-0159).",
+                InputSchema = Schema(new
+                {
+                    type = "object",
+                    properties = new
+                    {
+                        bracket = new { type = "string", description = "Bracket string, e.g. [FRG:pilot/issues/1]." },
+                        base_url = new { type = "string" },
+                        select_code = new { type = "boolean", description = "Navigate code tail with selection (default true)." }
+                    },
+                    required = new[] { "bracket" }
+                })
+            },
+            new()
+            {
                 Name = "ide_intercom_reveal_attachment",
                 Description = "Reveal из Intercom по AttachmentAnchor (ADR 0128 §8): re-resolve member/scope (Roslyn), transient highlight; select=true — выделить.",
                 InputSchema = Schema(new
