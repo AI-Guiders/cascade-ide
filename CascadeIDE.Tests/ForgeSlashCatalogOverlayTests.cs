@@ -77,4 +77,25 @@ public sealed class ForgeSlashCatalogOverlayTests
         ForgeSlashCatalogOverlay.Clear();
         Assert.False(SlashLineResolver.TryResolveSlashLine("/forge issue open 1", out _));
     }
+
+    [Fact]
+    public void Overlay_resolves_forge_artifact_goto()
+    {
+        ForgeSlashCatalogOverlay.ApplyForTests(
+        [
+            new ForgeCapabilitiesCommand
+            {
+                Object = "artifact",
+                Intent = "goto",
+                CommandId = "forge.artifact.goto",
+                Path = "/artifact goto",
+                PathAliases = ["/forge artifact goto"],
+                Help = "Open [FRG:…] artifact.",
+                ArgTail = "required",
+            },
+        ]);
+
+        Assert.True(ChatSlashCommandCatalog.TryResolveInput("/forge artifact goto [FRG:pilot/issues/1]", out var descriptor, out _));
+        Assert.Equal("forge.artifact.goto", descriptor.CommandId);
+    }
 }

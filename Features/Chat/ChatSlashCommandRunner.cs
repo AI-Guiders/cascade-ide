@@ -221,6 +221,41 @@ public sealed class ChatSlashCommandRunner
 
         if (descriptor.ExecutionKind == ChatSlashCommandExecutionKind.ForgeCommand)
         {
+            if (string.Equals(descriptor.CommandId, "forge.artifact.goto", StringComparison.Ordinal))
+            {
+                if (_executeIdeCommand is null)
+                {
+                    return new ChatSlashCommandRunResult(
+                        true,
+                        false,
+                        displayPath,
+                        argsTail,
+                        "IDE command bridge недоступен для forge.artifact.goto.");
+                }
+
+                if (string.IsNullOrWhiteSpace(argsTail))
+                {
+                    return new ChatSlashCommandRunResult(
+                        true,
+                        false,
+                        displayPath,
+                        argsTail,
+                        "Bracket [FRG:…] required.");
+                }
+
+                var gotoArgs = new Dictionary<string, JsonElement>(StringComparer.Ordinal)
+                {
+                    ["bracket"] = JsonSerializer.SerializeToElement(argsTail.Trim()),
+                    ["select_code"] = JsonSerializer.SerializeToElement(true),
+                };
+                var gotoMessage = await _executeIdeCommand(
+                    IdeCommands.ForgeArtifactGoto,
+                    gotoArgs,
+                    cancellationToken).ConfigureAwait(false);
+                var gotoOk = !gotoMessage.StartsWith("Error", StringComparison.OrdinalIgnoreCase);
+                return new ChatSlashCommandRunResult(true, gotoOk, displayPath, argsTail, gotoMessage);
+            }
+
             var ctx = ForgeLensWriteClient.TryResolveContext(
                 _getWorkspaceRoot?.Invoke(),
                 baseUrlArg: null,

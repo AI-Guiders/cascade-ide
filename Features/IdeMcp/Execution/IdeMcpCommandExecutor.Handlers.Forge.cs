@@ -101,7 +101,7 @@ internal sealed partial class IdeMcpCommandExecutor
             return ok ? message : "Error: " + message;
         });
 
-        add(IdeCommands.ForgeLensOpen, async (args, _) =>
+        add(IdeCommands.ForgeArtifactGoto, async (args, _) =>
         {
             var bracket = McpCommandJsonArgs.String(args, "bracket")?.Trim() ?? "";
             if (bracket.Length == 0)
