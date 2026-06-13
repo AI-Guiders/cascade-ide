@@ -9,4 +9,5 @@ public enum ChatSlashCommandExecutionKind
     LocalReport,
     LocalIntercom,
     LocalAgent,
+    ForgeCommand,
 }

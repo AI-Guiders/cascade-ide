@@ -65,7 +65,14 @@ public static class SlashLineResolver
                 out var path,
                 out var argTail,
                 out var isExactPath,
-                out var endsWithSpaceAfterPath))
+                out var endsWithSpaceAfterPath)
+            && !CascadeIDE.Services.Forge.ForgeSlashCatalogOverlay.TryResolveLongestPrefix(
+                tokens,
+                endsWithSpace,
+                out path,
+                out argTail,
+                out isExactPath,
+                out endsWithSpaceAfterPath))
         {
             return false;
         }

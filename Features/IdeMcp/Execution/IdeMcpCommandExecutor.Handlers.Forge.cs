@@ -18,7 +18,10 @@ internal sealed partial class IdeMcpCommandExecutor
                 return "Error: укажи base_url или [workspace.forge] в .cascade/workspace.toml.";
 
             var (ok, message) = await ForgeLensConnect.ConnectAsync(baseUrl, ct).ConfigureAwait(false);
-            return ok ? message : "Error: " + message;
+            if (ok)
+                return message;
+
+            return "Error: " + message;
         });
 
         add(IdeCommands.ForgeLensDisconnect, async (args, _) =>
@@ -27,6 +30,7 @@ internal sealed partial class IdeMcpCommandExecutor
             if (string.IsNullOrWhiteSpace(baseUrl))
                 return "Error: base_url required.";
 
+            ForgeSlashCatalogOverlay.Clear(baseUrl);
             return ForgeLensSecretsStorage.RemoveHost(baseUrl)
                 ? $"Forge Lens: credentials removed for {baseUrl}."
                 : $"Forge Lens: no credentials for {baseUrl}.";

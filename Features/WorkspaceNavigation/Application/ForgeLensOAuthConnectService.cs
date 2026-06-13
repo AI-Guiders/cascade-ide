@@ -5,6 +5,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 using CascadeIDE.Services;
+using CascadeIDE.Services.Forge;
 
 namespace CascadeIDE.Features.WorkspaceNavigation.Application;
 
@@ -58,6 +59,7 @@ public sealed class ForgeLensOAuthConnectService
             return (false, string.IsNullOrWhiteSpace(error) ? "OAuth не удался." : error);
 
         ForgeLensSecretsStorage.SetToken(normalized, token, tokenName);
+        await ForgeSlashCatalogRefresh.RefreshAfterConnectAsync(normalized, ct).ConfigureAwait(false);
         return (true, $"Forge Lens: OAuth ({tokenName ?? "github"}).");
     }
 

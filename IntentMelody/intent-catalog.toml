@@ -176,7 +176,7 @@ melody_palette_usage_hint = "c:fgo:[FRG:pilot/issues/1] — открыть issue
 melody_palette_usage_category = "Forge -> Lens"
 
 [[command.slash]]
-path = "/forge goto"
+path = "/forge artifact goto"
 domain = "forge"
 object = "artifact"
 intent = "goto"

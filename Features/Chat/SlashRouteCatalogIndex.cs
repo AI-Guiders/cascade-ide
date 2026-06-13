@@ -9,8 +9,13 @@ internal static class SlashRouteCatalogIndex
 {
     private static readonly Lazy<Snapshot> Lazy = new(static () => Build(IntentSlashCatalog.SlashRoutes));
 
-    public static bool TryGetRoute(string slashPath, out SlashRouteEntry route) =>
-        Lazy.Value.ByPath.TryGetValue(IntentSlashCatalog.NormalizeSlashPath(slashPath), out route);
+    public static bool TryGetRoute(string slashPath, out SlashRouteEntry route)
+    {
+        if (Lazy.Value.ByPath.TryGetValue(IntentSlashCatalog.NormalizeSlashPath(slashPath), out route))
+            return true;
+
+        return CascadeIDE.Services.Forge.ForgeSlashCatalogOverlay.TryGetRoute(slashPath, out route);
+    }
 
     public static bool IsKnownIntercomInnerVerb(string group, string verb)
     {
@@ -22,11 +27,17 @@ internal static class SlashRouteCatalogIndex
 
     public static SlashArgTailKind GetArgTailKind(string slashPath)
     {
+        if (CascadeIDE.Services.Forge.ForgeSlashCatalogOverlay.TryGetRoute(slashPath, out var overlayRoute))
+            return overlayRoute.ArgTailKindExplicit ?? SlashArgTailKind.None;
+
         var key = IntentSlashCatalog.NormalizeSlashPath(slashPath);
         if (SlashRouteCatalogPathsGenerated.TryGetArgTailKind(key, out var generated))
             return (SlashArgTailKind)generated;
 
-        return Lazy.Value.ArgTailKind.TryGetValue(key, out var kind) ? kind : SlashArgTailKind.None;
+        if (Lazy.Value.ArgTailKind.TryGetValue(key, out var kind))
+            return kind;
+
+        return SlashArgTailKind.None;
     }
 
     public static bool RouteRequiresArgTail(string slashPath) =>

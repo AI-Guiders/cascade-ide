@@ -19,10 +19,11 @@ public static partial class ChatSlashCommandCatalog
     {
         descriptor = null!;
         var path = IntentSlashCatalog.NormalizeSlashPath(canonicalPath);
-        if (path.Length == 0 || !Snapshot.ByPath.TryGetValue(path, out descriptor))
-            return false;
+        if (Snapshot.ByPath.TryGetValue(path, out descriptor)
+            || CascadeIDE.Services.Forge.ForgeSlashCatalogOverlay.TryGetDescriptor(path, out descriptor))
+            return satisfiesArgTailPolicy(path, argTail);
 
-        return satisfiesArgTailPolicy(path, argTail);
+        return false;
     }
 
     /// <summary>Единая точка резолва строки слэша: longest-path из intent-catalog (<see cref="SlashLineResolver"/>).</summary>
@@ -41,7 +42,8 @@ public static partial class ChatSlashCommandCatalog
             return false;
 
         var path = IntentSlashCatalog.NormalizeSlashPath(line.CanonicalPath);
-        if (!Snapshot.ByPath.TryGetValue(path, out descriptor))
+        if (!Snapshot.ByPath.TryGetValue(path, out descriptor)
+            && !CascadeIDE.Services.Forge.ForgeSlashCatalogOverlay.TryGetDescriptor(path, out descriptor))
             return false;
 
         resolvedArgTail = ChatSlashCommandPresentation.NormalizeArgsTail(line.ArgTail);
@@ -58,7 +60,7 @@ public static partial class ChatSlashCommandCatalog
     }
 
     public static IReadOnlyList<ChatSlashSuggestion> AllSuggestions() =>
-        OrderDescriptors(Snapshot.Descriptors)
+        OrderDescriptors(Snapshot.Descriptors.Concat(ForgeOverlayDescriptors()))
             .Select(e => new ChatSlashSuggestion(
                 e.SlashPath,
                 e.SlashPath,
@@ -129,6 +131,9 @@ public static partial class ChatSlashCommandCatalog
 
     internal static bool TryGetRoute(string slashPath, out SlashRouteEntry route) =>
         SlashRouteCatalogIndex.TryGetRoute(slashPath, out route);
+
+    private static IEnumerable<ChatSlashCommandDescriptor> ForgeOverlayDescriptors() =>
+        CascadeIDE.Services.Forge.ForgeSlashCatalogOverlay.AllRoutes.Select(ToDescriptor);
 
     private static CatalogSnapshot BuildSnapshot()
     {

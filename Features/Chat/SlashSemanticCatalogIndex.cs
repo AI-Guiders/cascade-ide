@@ -382,6 +382,22 @@ internal static class SlashSemanticCatalogIndex
             matchedPath = route.SlashPath;
         }
 
+        foreach (var route in CascadeIDE.Services.Forge.ForgeSlashCatalogOverlay.AllRoutes)
+        {
+            var pathSegs = splitPath(route.SlashPath);
+            if (pathSegs.Count == 0)
+                continue;
+
+            if (!pathPrefixMatches(pathSegs, tokens, endsWithSpace))
+                continue;
+
+            if (pathSegs.Count <= bestLen)
+                continue;
+
+            bestLen = pathSegs.Count;
+            matchedPath = route.SlashPath;
+        }
+
         return bestLen >= 0;
     }
 

@@ -1,7 +1,9 @@
 #nullable enable
 using System.Text.Json;
 using CascadeIDE.Features.Agent.Environment;
+using CascadeIDE.Features.WorkspaceNavigation.Application;
 using CascadeIDE.Services;
+using CascadeIDE.Services.Forge;
 
 namespace CascadeIDE.Features.Chat;
 
@@ -215,6 +217,33 @@ public sealed class ChatSlashCommandRunner
                 displayPath,
                 argsTail,
                 agent.Message);
+        }
+
+        if (descriptor.ExecutionKind == ChatSlashCommandExecutionKind.ForgeCommand)
+        {
+            var ctx = ForgeLensWriteClient.TryResolveContext(
+                _getWorkspaceRoot?.Invoke(),
+                baseUrlArg: null,
+                repoArg: null);
+            if (ctx is null)
+            {
+                return new ChatSlashCommandRunResult(
+                    true,
+                    false,
+                    displayPath,
+                    argsTail,
+                    "Укажи [workspace.forge] (base_url + repo) или подключись через forge_lens.connect.");
+            }
+
+            var (ok, message) = await ForgeCommandExecuteClient.ExecuteAsync(
+                ctx.BaseUrl,
+                ctx.ApiToken,
+                descriptor.SlashPath,
+                argsTail,
+                ctx.Repo,
+                cancellationToken).ConfigureAwait(false);
+
+            return new ChatSlashCommandRunResult(true, ok, displayPath, argsTail, message);
         }
 
         var validationError = ValidateRequiredArgs(descriptor, argsTail);

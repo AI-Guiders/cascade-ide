@@ -2,6 +2,7 @@ using System.Diagnostics;
 using System.Net.Http.Json;
 using System.Text.Json;
 using CascadeIDE.Services;
+using CascadeIDE.Services.Forge;
 
 namespace CascadeIDE.Features.WorkspaceNavigation.Application;
 
@@ -68,6 +69,7 @@ public sealed class ForgeLensDeviceConnectService
                     ? nameElement.GetString()
                     : null;
                 ForgeLensSecretsStorage.SetToken(normalized, token, tokenName);
+                await ForgeSlashCatalogRefresh.RefreshAfterConnectAsync(normalized, ct).ConfigureAwait(false);
                 return (true, $"Forge Lens: вход выполнен ({tokenName ?? userCode}).");
             }
 
