@@ -1,7 +1,7 @@
 using CascadeIDE.Features.Workspace;
 using CascadeIDE.Features.Workspace.DataAcquisition;
 
-namespace CascadeIDE.Features.WorkspaceNavigation.Application;
+namespace CascadeIDE.Features.Forge.Lens;
 
 internal static class ForgeLensWorkspaceConfig
 {

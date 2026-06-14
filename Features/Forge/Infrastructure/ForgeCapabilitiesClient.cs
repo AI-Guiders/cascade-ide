@@ -5,7 +5,7 @@ using System.Net.Http.Json;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace CascadeIDE.Services.Forge;
+namespace CascadeIDE.Features.Forge.Infrastructure;
 
 /// <summary>Runtime import of forge DOI slash catalog (FORGE-ADR-0015 Phase D).</summary>
 public static class ForgeCapabilitiesClient

@@ -1,5 +1,5 @@
 using CascadeIDE.Models.Forge;
-using CascadeIDE.Services.Forge;
+using CascadeIDE.Features.Forge.Infrastructure;
 using Xunit;
 
 namespace CascadeIDE.Tests;

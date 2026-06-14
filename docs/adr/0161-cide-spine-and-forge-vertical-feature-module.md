@@ -23,12 +23,12 @@ CIDE — **второй клиент** того же DOI-каталога, не 
 
 | Область | Путь сегодня |
 |---------|----------------|
-| Connect (OAuth/device) | `Features/WorkspaceNavigation/Application/ForgeLens*Connect*.cs` |
-| CRS Lens client | `Features/WorkspaceNavigation/Application/ForgeLensCorrespondenceClient.cs` |
-| Capabilities + overlay + execute | `Services/Forge/Forge*.cs` |
+| Connect (OAuth/device) | ~~`Features/WorkspaceNavigation/Application/ForgeLens*Connect*.cs`~~ → `Features/Forge/Lens/` |
+| CRS Lens client | ~~`Features/WorkspaceNavigation/Application/ForgeLensCorrespondenceClient.cs`~~ → `Features/Forge/Lens/` |
+| Capabilities + overlay + execute | ~~`Services/Forge/Forge*.cs`~~ → `Features/Forge/Infrastructure/` |
 | Slash merge | `Features/Chat/SlashLineResolver.cs`, `ChatSlashCommandCatalog.cs` |
-| MCP forge handlers | `Features/IdeMcp/Execution/IdeMcpCommandExecutor.Handlers.Forge.cs` |
-| Bracket `[FRG:…]` | `Services/Forge/BracketForgeReferenceParser.cs` ([0159](0159-bracket-forge-artifact-reference.md)) |
+| MCP forge handlers | ~~`Features/IdeMcp/...Handlers.Forge.cs`~~ → `Features/Forge/Mcp/ForgeMcpHandlers.cs` (spine dispatches via `ForgeFeatureModule`) |
+| Bracket `[FRG:…]` | `Features/Forge/Infrastructure/BracketForgeReferenceParser.cs` |
 
 Без явного **vertical module** следующий zoo-контур (Intercom-style) снова размажет handlers.
 
@@ -102,12 +102,12 @@ public interface ICascadeFeatureModule
 
 | Phase | Deliverable |
 |-------|-------------|
-| **F0** | ADR 0160 + wire overlay — **done** (`Services/Forge`, Chat merge) |
-| **F1** | `Features/Forge/README.md` ownership map; ADR 0161 (this) |
-| **F2** | Move `Services/Forge/*` → `Features/Forge/Infrastructure/` (namespace only; tests green) |
-| **F3** | Move `ForgeLens*` from `WorkspaceNavigation` → `Features/Forge/Lens/` |
-| **F4** | `ForgeFeatureModule : ICascadeFeatureModule` — single registration site |
-| **F5** | Architecture analyzer rule: forge REST types only under `Features/Forge` |
+| **F0** | ADR 0160 + wire overlay — **done** (`Features/Forge/Infrastructure`, Chat merge) |
+| **F1** | `Features/Forge/README.md` ownership map; ADR 0161 (this) — **done** |
+| **F2** | Move `Services/Forge/*` → `Features/Forge/Infrastructure/` — **done** |
+| **F3** | Move `ForgeLens*` from `WorkspaceNavigation` → `Features/Forge/Lens/` — **done** |
+| **F4** | `ForgeFeatureModule : ICascadeFeatureModule` — single registration site — **done** |
+| **F5** | Architecture analyzer **CASCOPE043**: forge client namespaces only from allowlisted hooks — **done** |
 
 **Не блокер:** F2–F5 можно параллелить с cockpit; overlay уже работает в F0.
 
@@ -131,8 +131,8 @@ public interface ICascadeFeatureModule
 
 ### Negative / trade-offs
 
-- F2–F3 — churn namespaces/imports.
-- До F4 регистрация forge остаётся разнесённой (connect в WorkspaceNavigation).
+- F2–F3 — churn namespaces/imports (**done** 2026-06-13).
+- До полного wire capability-map forge MCP уже централизован в `ForgeFeatureModule`; descriptor registration — по мере 0025.
 
 ---
 

@@ -1,4 +1,4 @@
-namespace CascadeIDE.Services;
+namespace CascadeIDE.Features.Forge.Infrastructure;
 
 internal static class ForgeLensHostUrl
 {

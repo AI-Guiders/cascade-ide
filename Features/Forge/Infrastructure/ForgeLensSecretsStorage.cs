@@ -1,6 +1,7 @@
-using CascadeIDE.Models;
+using CascadeIDE.Features.Forge.Models;
+using CascadeIDE.Services;
 
-namespace CascadeIDE.Services;
+namespace CascadeIDE.Features.Forge.Infrastructure;
 
 /// <summary>Forge Lens Bearer tokens (не коммитить). ADR 0158 §3.</summary>
 public static class ForgeLensSecretsStorage

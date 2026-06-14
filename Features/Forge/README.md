@@ -6,25 +6,25 @@
 
 CIDE **client** for forge: connect, server-driven slash overlay, command execute, CRS Lens, MCP handlers, bracket refs — **not** forge host.
 
-## Ownership map (migration target)
+## Layout (F2–F5 done)
 
-| Concern | Current path | Target |
-|---------|--------------|--------|
-| Capabilities fetch | `Services/Forge/ForgeCapabilitiesClient.cs` | `Features/Forge/` |
-| Slash overlay | `Services/Forge/ForgeSlashCatalogOverlay.cs` | `Features/Forge/` |
-| Command execute | `Services/Forge/ForgeCommandExecuteClient.cs` | `Features/Forge/` |
-| Connect | `Features/WorkspaceNavigation/Application/ForgeLens*Connect*.cs` | `Features/Forge/Lens/` |
-| CRS client | `Features/WorkspaceNavigation/Application/ForgeLensCorrespondenceClient.cs` | `Features/Forge/Lens/` |
-| MCP handlers | `Features/IdeMcp/Execution/IdeMcpCommandExecutor.Handlers.Forge.cs` | `Features/Forge/Mcp/` |
-| Bracket refs | `Services/Forge/BracketForgeReferenceParser.cs` | `Features/Forge/` |
-| Slash merge hook | `Features/Chat/SlashLineResolver.cs` | spine (calls overlay API) |
-
-**F0 (done):** overlay + execute wired. **F2–F5:** physical move per [0161 §5](../../docs/adr/0161-cide-spine-and-forge-vertical-feature-module.md).
+| Path | Concern |
+|------|---------|
+| `Infrastructure/` | Capabilities fetch, slash overlay, execute, secrets, bracket parsers, open/nav |
+| `Lens/` | Connect (OAuth/device), CRS client, workspace config, write API |
+| `Mcp/` | `ForgeMcpHandlers` — all `forge_*` / `forge.artifact.goto` MCP tools |
+| `Models/` | `ForgeLensSecrets` TOML model |
+| `ForgeFeatureModule.cs` | `ICascadeFeatureModule` — single MCP registration site |
+| `CascadeFeatureModules.cs` | Explicit module list (no MEF, ADR 0005) |
 
 ## Spine vs vertical
 
 - **Spine:** bundled `intent-catalog.toml`, `SlashLineResolver`, chat slash UI — **no** `/forge *` entries when using overlay ([0160](../../docs/adr/0160-forge-slash-catalog-runtime-overlay.md)).
 - **Vertical:** everything that talks to forge HTTP/MCP for this workspace.
+
+## Guardrail
+
+**CASCOPE043** — `using CascadeIDE.Features.Forge.Infrastructure|Lens` only from this tree + allowlisted hooks (`Features/Chat`, `IdeMcp`, `WorkspaceNavigation`, bracket consumers).
 
 ## Config
 

@@ -5,9 +5,9 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 using CascadeIDE.Services;
-using CascadeIDE.Services.Forge;
+using CascadeIDE.Features.Forge.Infrastructure;
 
-namespace CascadeIDE.Features.WorkspaceNavigation.Application;
+namespace CascadeIDE.Features.Forge.Lens;
 
 /// <summary>OAuth Sign in to forge (FORGE-ADR-0011, Intercom ADR 0144 pattern).</summary>
 public sealed class ForgeLensOAuthConnectService

@@ -1,6 +1,6 @@
 using CascadeIDE.Models.Forge;
 
-namespace CascadeIDE.Services.Forge;
+namespace CascadeIDE.Features.Forge.Infrastructure;
 
 /// <summary>Parse <c>[FRG:repo/issues/N]</c> and optional compound code tail (ADR-0159).</summary>
 public static class BracketForgeReferenceParser

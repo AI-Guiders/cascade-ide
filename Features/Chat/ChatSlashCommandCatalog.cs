@@ -20,7 +20,7 @@ public static partial class ChatSlashCommandCatalog
         descriptor = null!;
         var path = IntentSlashCatalog.NormalizeSlashPath(canonicalPath);
         if (Snapshot.ByPath.TryGetValue(path, out descriptor)
-            || CascadeIDE.Services.Forge.ForgeSlashCatalogOverlay.TryGetDescriptor(path, out descriptor))
+            || CascadeIDE.Features.Forge.Infrastructure.ForgeSlashCatalogOverlay.TryGetDescriptor(path, out descriptor))
             return satisfiesArgTailPolicy(path, argTail);
 
         return false;
@@ -43,7 +43,7 @@ public static partial class ChatSlashCommandCatalog
 
         var path = IntentSlashCatalog.NormalizeSlashPath(line.CanonicalPath);
         if (!Snapshot.ByPath.TryGetValue(path, out descriptor)
-            && !CascadeIDE.Services.Forge.ForgeSlashCatalogOverlay.TryGetDescriptor(path, out descriptor))
+            && !CascadeIDE.Features.Forge.Infrastructure.ForgeSlashCatalogOverlay.TryGetDescriptor(path, out descriptor))
             return false;
 
         resolvedArgTail = ChatSlashCommandPresentation.NormalizeArgsTail(line.ArgTail);
@@ -133,7 +133,7 @@ public static partial class ChatSlashCommandCatalog
         SlashRouteCatalogIndex.TryGetRoute(slashPath, out route);
 
     private static IEnumerable<ChatSlashCommandDescriptor> ForgeOverlayDescriptors() =>
-        CascadeIDE.Services.Forge.ForgeSlashCatalogOverlay.AllRoutes.Select(ToDescriptor);
+        CascadeIDE.Features.Forge.Infrastructure.ForgeSlashCatalogOverlay.AllRoutes.Select(ToDescriptor);
 
     private static CatalogSnapshot BuildSnapshot()
     {

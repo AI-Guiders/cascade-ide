@@ -4,7 +4,7 @@ using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text.Json;
 
-namespace CascadeIDE.Services.Forge;
+namespace CascadeIDE.Features.Forge.Infrastructure;
 
 public static class ForgeCommandExecuteClient
 {

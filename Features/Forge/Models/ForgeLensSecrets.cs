@@ -1,4 +1,4 @@
-namespace CascadeIDE.Models;
+namespace CascadeIDE.Features.Forge.Models;
 
 /// <summary>API tokens Forge Lens per forge host. Файл: forge-lens-secrets.toml (ADR 0028, 0158).</summary>
 public sealed class ForgeLensSecrets

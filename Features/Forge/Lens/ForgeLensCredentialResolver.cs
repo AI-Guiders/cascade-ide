@@ -1,6 +1,6 @@
-using CascadeIDE.Services;
+using CascadeIDE.Features.Forge.Infrastructure;
 
-namespace CascadeIDE.Features.WorkspaceNavigation.Application;
+namespace CascadeIDE.Features.Forge.Lens;
 
 /// <summary>Резолв Bearer для Forge Lens (ADR 0158 §3, образец Intercom secrets + FORGE-ADR-0010).</summary>
 public static class ForgeLensCredentialResolver

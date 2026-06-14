@@ -4,7 +4,7 @@ using CascadeIDE.Features.Chat;
 using CascadeIDE.Models.Intercom;
 using CascadeIDE.Services;
 
-namespace CascadeIDE.Services.Forge;
+namespace CascadeIDE.Features.Forge.Infrastructure;
 
 /// <summary>Runtime overlay of forge <c>capabilities.commands[]</c> into CIDE slash catalog (Phase D).</summary>
 public static class ForgeSlashCatalogOverlay

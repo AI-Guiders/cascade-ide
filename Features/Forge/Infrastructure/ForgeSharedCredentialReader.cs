@@ -1,6 +1,6 @@
 using System.Text.Json;
 
-namespace CascadeIDE.Services;
+namespace CascadeIDE.Features.Forge.Infrastructure;
 
 /// <summary>Interop с <c>forge auth login</c> → <c>~/.forge/credentials.json</c> (FORGE-ADR-0010).</summary>
 public static class ForgeSharedCredentialReader

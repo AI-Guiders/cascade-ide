@@ -1,9 +1,9 @@
 #nullable enable
 using System.Text.Json;
 using CascadeIDE.Features.Agent.Environment;
-using CascadeIDE.Features.WorkspaceNavigation.Application;
+using CascadeIDE.Features.Forge.Lens;
 using CascadeIDE.Services;
-using CascadeIDE.Services.Forge;
+using CascadeIDE.Features.Forge.Infrastructure;
 
 namespace CascadeIDE.Features.Chat;
 

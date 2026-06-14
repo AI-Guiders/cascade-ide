@@ -20,4 +20,3 @@ public interface ICascadeFeatureModule
     /// </summary>
     void Register(ICapabilityRegistry registry);
 }
-

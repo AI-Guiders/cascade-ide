@@ -1,7 +1,7 @@
 using CascadeIDE.Models.Forge;
 using CascadeIDE.Services.Intercom;
 
-namespace CascadeIDE.Services.Forge;
+namespace CascadeIDE.Features.Forge.Infrastructure;
 
 public enum BracketReferenceKind
 {

@@ -1,8 +1,8 @@
 #nullable enable
 
-using CascadeIDE.Features.WorkspaceNavigation.Application;
+using CascadeIDE.Features.Forge.Lens;
 
-namespace CascadeIDE.Services.Forge;
+namespace CascadeIDE.Features.Forge.Infrastructure;
 
 public static class ForgeSlashCatalogRefresh
 {

@@ -13,10 +13,19 @@ public sealed class SimpleCapabilityRegistry : ICapabilityRegistry
     private readonly List<ServiceCapabilityDescriptor> _services = [];
     private readonly List<CommandCapabilityDescriptor> _commands = [];
     private readonly List<UiSurfaceCapabilityDescriptor> _uiSurfaces = [];
+    private readonly List<Action<IMcpHandlerRegistrar>> _mcpHandlerRegistrations = [];
 
     public void RegisterService(ServiceCapabilityDescriptor descriptor) => _services.Add(descriptor);
     public void RegisterCommand(CommandCapabilityDescriptor descriptor) => _commands.Add(descriptor);
     public void RegisterUiSurface(UiSurfaceCapabilityDescriptor descriptor) => _uiSurfaces.Add(descriptor);
+    public void RegisterMcpHandlers(Action<IMcpHandlerRegistrar> register) => _mcpHandlerRegistrations.Add(register);
+
+    /// <summary>Invoke stored MCP handler registrations (spine executor).</summary>
+    public void InvokeMcpHandlerRegistrations(IMcpHandlerRegistrar registrar)
+    {
+        foreach (var registration in _mcpHandlerRegistrations)
+            registration(registrar);
+    }
 
     public CapabilityMap BuildMap()
     {

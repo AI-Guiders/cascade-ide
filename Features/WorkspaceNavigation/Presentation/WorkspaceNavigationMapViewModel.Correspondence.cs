@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CascadeIDE.Features.Workspace;
 using CascadeIDE.Features.Workspace.DataAcquisition;
+using CascadeIDE.Features.Forge.Lens;
 using CascadeIDE.Features.WorkspaceNavigation.Application;
 using CascadeIDE.Models;
 using CascadeIDE.Services;

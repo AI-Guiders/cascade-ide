@@ -2,9 +2,9 @@ using System.Diagnostics;
 using System.Net.Http.Json;
 using System.Text.Json;
 using CascadeIDE.Services;
-using CascadeIDE.Services.Forge;
+using CascadeIDE.Features.Forge.Infrastructure;
 
-namespace CascadeIDE.Features.WorkspaceNavigation.Application;
+namespace CascadeIDE.Features.Forge.Lens;
 
 /// <summary>Forge Lens connect: OAuth first, device fallback (FORGE-ADR-0011 / 0010).</summary>
 public sealed class ForgeLensDeviceConnectService

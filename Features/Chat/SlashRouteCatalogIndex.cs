@@ -14,7 +14,7 @@ internal static class SlashRouteCatalogIndex
         if (Lazy.Value.ByPath.TryGetValue(IntentSlashCatalog.NormalizeSlashPath(slashPath), out route))
             return true;
 
-        return CascadeIDE.Services.Forge.ForgeSlashCatalogOverlay.TryGetRoute(slashPath, out route);
+        return CascadeIDE.Features.Forge.Infrastructure.ForgeSlashCatalogOverlay.TryGetRoute(slashPath, out route);
     }
 
     public static bool IsKnownIntercomInnerVerb(string group, string verb)
@@ -27,7 +27,7 @@ internal static class SlashRouteCatalogIndex
 
     public static SlashArgTailKind GetArgTailKind(string slashPath)
     {
-        if (CascadeIDE.Services.Forge.ForgeSlashCatalogOverlay.TryGetRoute(slashPath, out var overlayRoute))
+        if (CascadeIDE.Features.Forge.Infrastructure.ForgeSlashCatalogOverlay.TryGetRoute(slashPath, out var overlayRoute))
             return overlayRoute.ArgTailKindExplicit ?? SlashArgTailKind.None;
 
         var key = IntentSlashCatalog.NormalizeSlashPath(slashPath);

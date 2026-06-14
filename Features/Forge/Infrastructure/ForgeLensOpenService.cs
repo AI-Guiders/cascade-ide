@@ -1,12 +1,10 @@
 using System.Diagnostics;
-using CascadeIDE.Features.WorkspaceNavigation.Application;
 using CascadeIDE.Models;
 using CascadeIDE.Models.Forge;
-using CascadeIDE.Models.Intercom;
 using CascadeIDE.Services;
 using CascadeIDE.Services.Intercom;
 
-namespace CascadeIDE.Services.Forge;
+namespace CascadeIDE.Features.Forge.Infrastructure;
 
 /// <summary>Open forge artifact from <c>[FRG:…]</c>; optional code tail → editor (ADR-0159 phase 3).</summary>
 public static class ForgeLensOpenService

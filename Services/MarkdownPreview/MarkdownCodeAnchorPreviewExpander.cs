@@ -1,7 +1,7 @@
 #nullable enable
 
 using System.Text;
-using CascadeIDE.Services.Forge;
+using CascadeIDE.Features.Forge.Infrastructure;
 using CascadeIDE.Services.Intercom;
 
 namespace CascadeIDE.Services.MarkdownPreview;

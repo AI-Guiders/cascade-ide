@@ -4,7 +4,7 @@ using System.Net.Http;
 using System.Text.Json;
 using CascadeIDE.Features.Workspace;
 
-namespace CascadeIDE.Features.WorkspaceNavigation.Application;
+namespace CascadeIDE.Features.Forge.Lens;
 
 /// <summary>Forge Lens: issues/MR с code anchors для CRS (ADR 0158, FORGE-ADR-0003).</summary>
 public static class ForgeLensCorrespondenceClient

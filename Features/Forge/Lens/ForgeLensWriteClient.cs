@@ -5,7 +5,7 @@ using System.Text.Json;
 using CascadeIDE.Features.Workspace;
 using CascadeIDE.Features.Workspace.DataAcquisition;
 
-namespace CascadeIDE.Features.WorkspaceNavigation.Application;
+namespace CascadeIDE.Features.Forge.Lens;
 
 /// <summary>Forge Lens write: create issue / MR via HTTP API (ADR 0158, release gate B).</summary>
 public static class ForgeLensWriteClient
