@@ -537,7 +537,8 @@ public static class CodeNavigationControlFlowSubgraphBuilder
         private void AddEdges(List<string> fromIds, string toId, string kind, string relatedKind)
         {
             var provenance = _pendingBranchProvenance;
-            if (provenance is not null)
+            if (provenance is not null
+                && !string.Equals(kind, "Exit", StringComparison.Ordinal))
             {
                 kind = "ConditionalCall";
                 relatedKind = "ConditionalCall";

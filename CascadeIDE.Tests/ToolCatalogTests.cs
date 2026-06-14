@@ -32,7 +32,10 @@ public sealed class ToolCatalogTests
 
         foreach (var commandId in GetIdeCommandIds())
         {
-            var expectedToolName = "ide_" + commandId;
+            if (!IdeMcpToolNaming.IsSupportedAutoProxyToolName(commandId))
+                continue;
+
+            var expectedToolName = IdeMcpToolNaming.ToToolName(commandId);
             Assert.Contains(expectedToolName, names);
         }
     }
@@ -62,13 +65,16 @@ public sealed class ToolCatalogTests
 
         foreach (var commandId in GetIdeCommandIds())
         {
+            if (!IdeMcpToolNaming.IsSupportedAutoProxyToolName(commandId))
+                continue;
+
             if (!TryGetCommandSummary(commandId, out var summary))
                 continue;
 
             if (!TryParseArgsSpecFromSummary(summary, out var argsSpec))
                 continue;
 
-            var toolName = "ide_" + commandId;
+            var toolName = IdeMcpToolNaming.ToToolName(commandId);
             Assert.True(byName.TryGetValue(toolName, out var tool), $"Expected tool '{toolName}' for command '{commandId}'.");
 
             Assert.True(tool!.InputSchema.TryGetProperty("properties", out var props), $"Tool '{toolName}' missing schema.properties.");

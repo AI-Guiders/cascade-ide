@@ -330,7 +330,11 @@ public static class IntentMelodyAliases
         var list = new List<string>(a.Count);
         foreach (var x in a)
         {
-            if (x is string s && !string.IsNullOrWhiteSpace(s))
+            if (x is not string s || s.Length == 0)
+                continue;
+
+            // Preserve single-char separators such as space in between_slots_any_of.
+            if (s.Length == 1 || !string.IsNullOrWhiteSpace(s))
                 list.Add(s);
         }
         return list.Count == 0 ? null : list.ToArray();

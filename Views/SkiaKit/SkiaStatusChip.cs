@@ -59,7 +59,11 @@ internal static class SkiaStatusChip
         var chipW = ComputeContentWidth(labelWidth, iconPlacement);
         var chipH = Math.Max(lineHeight + PadY * 2f, MinHeight);
         var chipTop = textTop + (lineHeight - chipH) * 0.5f;
-        var chipLeft = textLeft - PadX;
+        var chipLeft = iconPlacement switch
+        {
+            SkiaStatusChipIconPlacement.Left => textLeft - PadX - IconBox - IconGap,
+            _ => textLeft - PadX,
+        };
         return new SKRect(chipLeft, chipTop, chipLeft + chipW, chipTop + chipH);
     }
 

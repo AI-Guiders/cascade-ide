@@ -110,7 +110,7 @@ public sealed class CodeNavigationMapWorkspaceInstrumentBlockCompositorTests
             ],
             Edges = [new GraphEdge { FromId = "n0", ToId = "n1", Kind = "Call" }]
         };
-        var r = c.Compose(doc, CodeNavigationMapLevelKind.ControlFlow, 500, 400);
+        var r = c.Compose(doc, CodeNavigationMapLevelKind.ControlFlow, 500, 400, CodeNavigationMapDetailLevel.Inspect);
         Assert.NotEmpty(r.CodeNavigationMapInstrumentBlocks);
         Assert.Equal(2, r.CodeNavigationMapInstrumentBlocks.Count);
         Assert.Contains(r.CodeNavigationMapInstrumentBlocks, b => b.Id == CodeNavigationMapInstrumentBlockIds.Graph);

@@ -111,4 +111,12 @@ public sealed class IntentMelodyCatalogWireTests
     {
         Assert.Equal("wai-url", ParametricIntentMelody.ResolvePaletteHintKey("wai"));
     }
+
+    [Fact]
+    public void Bundled_int_chain_colon_space_supports_space_after_slug()
+    {
+        Assert.True(IntentMelodyCatalog.TryGetTailWireClass("int_chain_colon_space", out var wire));
+        Assert.Contains(wire.BetweenSlotsSeparators, s => s.Length == 1 && s[0] == ' ');
+        Assert.True(ParametricIntentMelody.TryParseLineRangeTail("els 7", out _));
+    }
 }

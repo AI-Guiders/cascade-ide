@@ -9,11 +9,19 @@ public sealed class WorkspaceDocumentFileIoTests
     [Fact]
     public void TryResolvePath_RejectsOutsideWorkspace()
     {
-        var root = Path.GetTempPath();
-        var outside = Path.GetFullPath(Path.Combine(root, "cide-outside-" + Guid.NewGuid().ToString("N"), "a.txt"));
+        var root = Path.Combine(Path.GetTempPath(), "cide-wsio-root-" + Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(root);
+        var outside = Path.GetFullPath(Path.Combine(Path.GetDirectoryName(root)!, "cide-outside-" + Guid.NewGuid().ToString("N"), "a.txt"));
 
-        Assert.False(WorkspaceDocumentFileIo.TryResolvePath(root, [root], outside, out _, out var error));
-        Assert.Contains("outside", error, StringComparison.OrdinalIgnoreCase);
+        try
+        {
+            Assert.False(WorkspaceDocumentFileIo.TryResolvePath(root, [root], outside, out _, out var error));
+            Assert.Contains("outside", error, StringComparison.OrdinalIgnoreCase);
+        }
+        finally
+        {
+            try { Directory.Delete(root, recursive: true); } catch { /* ignore */ }
+        }
     }
 
     [Fact]
@@ -40,7 +48,7 @@ public sealed class WorkspaceDocumentFileIoTests
     public void TryReplaceTextRange_ReplacesMiddle()
     {
         const string source = "ab\ncd\n";
-        Assert.True(IdeMcpEditorOrchestrator.TryReplaceTextRange(source, 2, 1, 2, 2, "X", out var updated));
+        Assert.True(IdeMcpEditorOrchestrator.TryReplaceTextRange(source, 2, 1, 2, 3, "X", out var updated));
         Assert.Equal("ab\nX\n", updated);
     }
 }

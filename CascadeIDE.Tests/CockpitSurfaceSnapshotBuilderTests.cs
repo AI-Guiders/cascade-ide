@@ -30,7 +30,7 @@ public sealed class CockpitSurfaceSnapshotBuilderTests
         {
             Assert.Contains(
                 state.Instruments,
-                x => x.InstrumentId == CockpitStandardInstrumentIds.SolutionExplorerTree && x.SlotId == CockpitSlotIds.Pfd);
+                x => x.InstrumentId == CockpitStandardInstrumentIds.WorkspaceNavigationMap && x.SlotId == CockpitSlotIds.Pfd);
         }
 
         Assert.Equal(vm.EffectivePresentationLine, state.PresentationEffectiveLine);

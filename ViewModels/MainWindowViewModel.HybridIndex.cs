@@ -39,6 +39,7 @@ public partial class MainWindowViewModel
         nameof(HybridIndexLampItem),
         nameof(HybridIndexMsgLine1),
         nameof(HybridIndexMsgLine2),
+        nameof(ShowPfdBackgroundStatusBar),
     ];
 
     [ObservableProperty]
