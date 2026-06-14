@@ -8,6 +8,7 @@
 - **`Build/`** — вкладка Build output: `BuildOutputPanelViewModel.cs`.
 - **`Terminal/`** — вкладка Terminal: AvaloniaTerminal + ConPTY/redirected integrated shell (`Features/Terminal/DataAcquisition/*`), `TerminalPanelViewModel.cs`.
 - **`Chat/`** — правая колонка: чат с LLM — `ChatPanelViewModel.cs`.
+- **`Forge/`** — **vertical client** agent-forge: overlay slash catalog, execute, Lens/CRS, MCP ([ADR 0161](../docs/adr/0161-cide-spine-and-forge-vertical-feature-module.md)); код пока частично в `Services/Forge/` и `WorkspaceNavigation` — см. [Forge/README](Forge/README.md).
 - **`Instrumentation/`** — трасса агента, таймлайн событий, очередь задач Power, лог тестов, стек/переменные MCP-отладки — `InstrumentationPanelViewModel.cs`.
 
 Корневой неймспейс: `CascadeIDE.Features.<Имя>`.

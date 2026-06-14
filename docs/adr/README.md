@@ -75,7 +75,7 @@
 | 0134 | [prepare-pipeline](0134-intercom-message-prepare-pipeline-v1.md) — **In progress** (MCP fast path @ send) |
 | 0135 | [symbol cache + HCI sidecar](0135-intercom-attach-symbol-cache-and-hci-sidecar.md) — **In progress** (L1 parse cache, L2 SQLite @ HCI reindex) |
 | 0136 | [gutter + `/intercom` namespace](0136-intercom-feed-gutter-and-slash-namespace.md) — **In progress** (select ПКМ/slash, без старых `/topic`) |
-| 0150, 0153–0158 | [slash резолв](0150-slash-line-canonical-resolution.md) · [catalog-only](0153-slash-catalog-only-resolution.md) · [domain/object/intent](0154-slash-catalog-domain-object-intent.md) · [**док ↔ код / drift**](0155-documentation-code-correspondence-and-architectural-drift.md) · [CRS / reverse anchors](0156-correspondence-mfd-surface-and-reverse-code-anchors.md) · [`cide://`](0157-cide-magic-link-protocol.md) · [**Forge Lens CRS**](0158-forge-lens-crs-overlay.md) |
+| 0150, 0153–0161 | [slash резолв](0150-slash-line-canonical-resolution.md) · [catalog-only](0153-slash-catalog-only-resolution.md) · [domain/object/intent](0154-slash-catalog-domain-object-intent.md) · [**док ↔ код / drift**](0155-documentation-code-correspondence-and-architectural-drift.md) · [CRS / reverse anchors](0156-correspondence-mfd-surface-and-reverse-code-anchors.md) · [`cide://`](0157-cide-magic-link-protocol.md) · [**Forge Lens CRS**](0158-forge-lens-crs-overlay.md) · [bracket FRG](0159-bracket-forge-artifact-reference.md) · [**forge slash overlay**](0160-forge-slash-catalog-runtime-overlay.md) · [**spine + Forge vertical**](0161-cide-spine-and-forge-vertical-feature-module.md) |
 | 0138 | [Cockpit Command Line](0138-cockpit-command-line-and-parametric-ranges.md) — **Accepted** (парсер + slash multi-select; CCL UI — фаза A) |
 | 0141 | [прогрев при open solution](0141-solution-scoped-warmup-orchestration.md) — **Implemented** (v1 оркестратор; AEE L0 warmup — [0148](0148-agent-execution-environment-verification-ladder-and-native-tooling.md)) |
 | 0148 | [Agent Execution Environment](0148-agent-execution-environment-verification-ladder-and-native-tooling.md) — **In progress** (W1–W2 в коде; supervised build worker; MLP на target hardware) |
@@ -240,6 +240,9 @@
 | [0156](0156-correspondence-mfd-surface-and-reverse-code-anchors.md) | **CRS:** страница Correspondence на MFD; reverse anchors через CodeAnchor | Accepted |
 | [0157](0157-cide-magic-link-protocol.md) | Magic Link **`cide://`** из браузера/доков в IDE | Accepted |
 | [0158](0158-forge-lens-crs-overlay.md) | **Forge Lens:** issues/MR по файлу в CRS; `[workspace.forge]`; без глобального env-fallback | Accepted · Implemented |
+| [0159](0159-bracket-forge-artifact-reference.md) | Bracket `[FRG:…]` + code-bracket display для forge artifacts | Accepted |
+| [0160](0160-forge-slash-catalog-runtime-overlay.md) | **Forge slash overlay:** `capabilities.commands[]` после connect; execute API; no bundled `/forge *` | Accepted · Implemented |
+| [0161](0161-cide-spine-and-forge-vertical-feature-module.md) | **Spine + vertical `Features/Forge`:** ownership map; 0024 module; migration F2–F5 | Accepted |
 
 ## Сборка в один документ (HTML, TXT, PDF)
 

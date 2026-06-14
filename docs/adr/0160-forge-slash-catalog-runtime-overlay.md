@@ -2,7 +2,7 @@
 
 **Status:** Accepted  
 **Date:** 2026-06-13  
-**Related:** [0153](0153-slash-catalog-only-resolution.md), [0158](0158-forge-lens-crs-overlay.md), [0159](0159-bracket-forge-artifact-reference.md), FORGE-ADR-0015 (agent-forge)
+**Related:** [0153](0153-slash-catalog-only-resolution.md), [0158](0158-forge-lens-crs-overlay.md), [0159](0159-bracket-forge-artifact-reference.md), [0161](0161-cide-spine-and-forge-vertical-feature-module.md), FORGE-ADR-0015 (agent-forge)
 
 ## Context
 
