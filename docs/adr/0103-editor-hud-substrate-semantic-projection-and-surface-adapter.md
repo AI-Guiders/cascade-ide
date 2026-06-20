@@ -89,7 +89,7 @@
 ### 2.3 Веб-стек и нативный редактор Forward
 
 - **WebView2** в хосте Avalonia/Win32 **не** равен «втаскиваем **Electron**» (нет оболочки Chromium+Node как приложения). **Иная** ведомость: встроенный рендерер, interop, доверие.
-- **Продуктовый baseline** для **редактора кода** во Forward остаётся **нативный** (AvaloniaEdit). **Monaco в WebView2** (и аналоги) **не** молчаливый default: **сравнение** / **отклонён** для Forward по политике продукта; см. [editor-surface-candidates-comparison-v1](../design/editor-surface-candidates-comparison-v1.md).
+- **Продуктовый baseline** для **редактора кода** во Forward остаётся **нативный** (AvaloniaEdit). **Monaco в WebView2** (и аналоги) **не** молчаливый default: опциональная линия — [0162](0162-monaco-forward-editor-webview2-host.md); сравнение — [editor-surface-candidates-comparison-v1](../design/editor-surface-candidates-comparison-v1.md).
 - Опциональные веб-поверхности **MFD** — по [0035](0035-mfd-embedded-webview-external-llm-and-mcp-boundary.md) / [0093](0093-mfd-embedded-browser-for-launch-url.md); **вторичные** инструменты, не тезис «редактор = браузер».
 
 <a id="adr0103-invariants"></a>

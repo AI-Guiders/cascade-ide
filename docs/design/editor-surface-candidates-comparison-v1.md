@@ -1,7 +1,8 @@
 # Сравнение кандидатов на поверхность редактора (v1)
 
 **Статус:** чертеж-компаньон к [ADR 0103](../adr/0103-editor-hud-substrate-semantic-projection-and-surface-adapter.md)  
-**Дата:** 2026-04-26
+**Дата:** 2026-04-26  
+**Обновлено:** 2026-06-20 — нормативная линия Monaco: [ADR 0162](../adr/0162-monaco-forward-editor-webview2-host.md)
 
 **Связь:** [0085](../adr/0085-editor-hud-inline-layer-and-hud-banner.md), [0098](../adr/0098-semantic-first-document-as-projection.md), [0035](../adr/0035-mfd-embedded-webview-external-llm-and-mcp-boundary.md), [concept-to-implementation-map-v1](../ui-ux/concept-to-implementation-map-v1.md), [LANGUAGE-SERVICES-PLAN.md](../LANGUAGE-SERVICES-PLAN.md)
 
@@ -64,4 +65,4 @@
 |----------|-------------|
 | **Редактор кода Forward по умолчанию** | **AvaloniaEdit** + слои [0103](../adr/0103-editor-hud-substrate-semantic-projection-and-surface-adapter.md) |
 | **MFD / URL запуска / внешний LLM** | WebView2 по **0035 / 0093** — не замена ядра редактора без отдельного ADR |
-| **Исследование «replacement-first»** | Опциональный спайк **после** первого вертикального среза AvaloniaEdit; явный sign-off рисков |
+| **Monaco / WebView2 Forward** | [ADR 0162](../adr/0162-monaco-forward-editor-webview2-host.md): strangler `monaco_webview2`, не Photino-shell; фазы M0–M6 |
