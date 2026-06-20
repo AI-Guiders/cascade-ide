@@ -1,0 +1,26 @@
+# Profile: cide-intent-catalog
+# Самодостаточная проверка bundled intent-catalog (структура + семантика CIDE).
+#
+# CI / локально:
+#   dotnet test --filter "FullyQualifiedName~IntentCatalogProfile"
+#
+# Опционально (когда установлен aig-toml-check):
+#   dotnet tool run aig-toml-check -- check IntentMelody/intent-catalog.toml
+
+name = "cide-intent-catalog"
+description = "JSON Schema (#:schema) + prod loader semantics"
+
+[[step]]
+id = "schema"
+kind = "note"
+text = "Bundled catalog header declares #:schema → docs/schemas/intent-catalog.schema.json"
+
+[[step]]
+id = "schema-test"
+kind = "dotnet-test"
+filter = "FullyQualifiedName~IntentCatalogProfileSemanticsTests.Bundled_catalog_matches_json_schema"
+
+[[step]]
+id = "semantic"
+kind = "dotnet-test"
+filter = "FullyQualifiedName~IntentCatalogProfileSemanticsTests"

@@ -1,4 +1,5 @@
-﻿# intent-catalog.toml — command-first каталог форм ввода (ADR 0109, 0119)
+﻿#:schema ../docs/schemas/intent-catalog.schema.json
+# intent-catalog.toml — command-first каталог форм ввода (ADR 0109, 0119)
 # Оверлей: IntentMelody/intent-catalog.toml рядом с exe (legacy: intent-melody-aliases.toml).
 #
 # Cookbook:

@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cascade-ide.local/schemas/intent-catalog.schema.json",
+  "title": "CIDE intent-catalog.toml",
+  "description": "Root-level structural checks for IntentMelody/intent-catalog.toml. TOML array-of-tables layout and CIDE semantics (command_id registry, wire_class, arg_tail) — IntentCatalogProfileSemanticsTests.",
+  "type": "object",
+  "required": ["intent_catalog_schema_version", "command"],
+  "properties": {
+    "intent_catalog_schema_version": { "type": "integer", "const": 2 },
+    "melody_catalog_schema_version": { "type": "integer" },
+    "slash_catalog_schema_version": { "type": "integer" },
+    "aliases": {
+      "type": "object",
+      "additionalProperties": { "type": "string" }
+    },
+    "command": {
+      "type": "array",
+      "minItems": 1
+    },
+    "tail_wire_class": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/tail_wire_class" }
+    }
+  },
+  "additionalProperties": true,
+  "$defs": {
+    "tail_wire_class": {
+      "type": "object",
+      "required": ["id", "kind"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "kind": { "enum": ["single_remainder", "delimited_slots"] },
+        "between_slots_any_of": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      },
+      "additionalProperties": true
+    }
+  }
+}
