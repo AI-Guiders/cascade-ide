@@ -3,6 +3,7 @@
              xmlns:vm="using:CascadeIDE.ViewModels"
              xmlns:ae="using:AvaloniaEdit"
              xmlns:ed="using:CascadeIDE.Features.Editor.Application.Presentation"
+             xmlns:monaco="using:CascadeIDE.Features.Editor.Presentation"
              x:Class="CascadeIDE.Views.DockDocumentView"
              x:DataType="vm:DockDocumentViewModel">
 
@@ -37,6 +38,8 @@
                            FontFamily="Consolas,Cascadia Code,monospace"
                            FontSize="13"
                            Padding="{x:Static ed:EditorForwardDocumentChrome.DocumentPadding}"/>
+            <monaco:MonacoEditorHostControl x:Name="MonacoHost"
+                                            IsVisible="False"/>
         </Grid>
     </Grid>
 </UserControl>

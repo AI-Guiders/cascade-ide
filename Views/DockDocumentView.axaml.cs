@@ -86,6 +86,13 @@ public partial class DockDocumentView : UserControl
             return;
 
         _editor = this.FindControl<TextEditor>("Editor");
+
+        if (_vm.GetCascadeSettingsForExecutor().Editor.ResolveForwardHost() == EditorForwardHostKind.MonacoWebView2)
+        {
+            TrySetupMonacoForward();
+            return;
+        }
+
         if (_editor is null)
             return;
         _stickyScrollHost = this.FindControl<Border>("StickyScrollHost");
@@ -206,6 +213,8 @@ public partial class DockDocumentView : UserControl
 
     private void Teardown()
     {
+        TeardownMonacoForward();
+
         if (_editorThemeSubscribed)
         {
             UiThemeApply.ThemeApplied -= OnThemeAppliedRefreshEditorSelection;

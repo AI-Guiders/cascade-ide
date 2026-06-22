@@ -285,6 +285,10 @@ gutter_family = "Cascadia Mono,Consolas"
 size_pt = 14
 family = "Consolas,Cascadia Code,monospace"
 
+# Forward editor host (ADR 0162): avalonia_edit | monaco_webview2
+[editor]
+forward_host = "monaco_webview2"
+
 [editor.inline_hints]
 enabled = true
 parameter_names = true

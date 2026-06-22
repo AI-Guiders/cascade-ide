@@ -1,0 +1,8 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:awv="clr-namespace:Avalonia.Controls;assembly=Avalonia.Controls.WebView"
+             x:Class="CascadeIDE.Features.Editor.Presentation.MonacoEditorHostControl">
+    <awv:NativeWebView x:Name="WebView"
+                       NavigationCompleted="OnNavigationCompleted"
+                       WebMessageReceived="OnWebMessageReceived" />
+</UserControl>

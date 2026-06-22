@@ -3,6 +3,13 @@ namespace CascadeIDE.Models;
 /// <summary>Настройки редактора. TOML: <c>[editor]</c>.</summary>
 public sealed class EditorSettings
 {
+    /// <summary>
+    /// Forward host: <c>avalonia_edit</c> (default) | <c>monaco_webview2</c> (ADR 0162).
+    /// </summary>
+    public string ForwardHost { get; set; } = EditorForwardHostKindParser.MonacoWebView2Toml;
+
+    public EditorForwardHostKind ResolveForwardHost() => EditorForwardHostKindParser.Parse(ForwardHost);
+
     /// <summary>Inlay hints: включение и детализация. TOML: <c>[editor.inline_hints]</c>.</summary>
     public EditorInlineHintsSettings InlineHints { get; set; } = new();
 
