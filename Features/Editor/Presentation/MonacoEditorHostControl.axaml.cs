@@ -89,6 +89,71 @@ public partial class MonacoEditorHostControl : UserControl
         await DispatchAsync(CideEditorBridgeTypes.SetDecorations, payload, cancellationToken).ConfigureAwait(true);
     }
 
+    public async Task PushStickyScrollAsync(string? label, CancellationToken cancellationToken = default)
+    {
+        await EnsureReadyAsync(cancellationToken).ConfigureAwait(true);
+        await DispatchAsync(
+            CideEditorBridgeTypes.SetStickyScroll,
+            new CideEditorStickyScrollMessage(label),
+            cancellationToken).ConfigureAwait(true);
+    }
+
+    public async Task PushGutterGlyphsAsync(
+        IReadOnlyList<CideEditorGutterGlyph> glyphs,
+        CancellationToken cancellationToken = default)
+    {
+        await EnsureReadyAsync(cancellationToken).ConfigureAwait(true);
+        await DispatchAsync(
+            CideEditorBridgeTypes.SetGutterGlyphs,
+            new CideEditorSetGutterGlyphsMessage(glyphs),
+            cancellationToken).ConfigureAwait(true);
+    }
+
+    public async Task PushIntelligenceEnabledAsync(bool enabled, CancellationToken cancellationToken = default)
+    {
+        await EnsureReadyAsync(cancellationToken).ConfigureAwait(true);
+        await DispatchAsync(
+            CideEditorBridgeTypes.SetIntelligence,
+            new CideEditorSetIntelligenceMessage(enabled),
+            cancellationToken).ConfigureAwait(true);
+    }
+
+    public async Task PushCompletionResultAsync(
+        int requestId,
+        IReadOnlyList<CideEditorCompletionItem> items,
+        CancellationToken cancellationToken = default)
+    {
+        await EnsureReadyAsync(cancellationToken).ConfigureAwait(true);
+        await DispatchAsync(
+            CideEditorBridgeTypes.CompletionResult,
+            new CideEditorCompletionResultMessage(requestId, items),
+            cancellationToken).ConfigureAwait(true);
+    }
+
+    public async Task PushHoverResultAsync(
+        int requestId,
+        string? markdown,
+        CancellationToken cancellationToken = default)
+    {
+        await EnsureReadyAsync(cancellationToken).ConfigureAwait(true);
+        await DispatchAsync(
+            CideEditorBridgeTypes.HoverResult,
+            new CideEditorHoverResultMessage(requestId, markdown),
+            cancellationToken).ConfigureAwait(true);
+    }
+
+    public async Task PushSignatureResultAsync(
+        int requestId,
+        string? signature,
+        CancellationToken cancellationToken = default)
+    {
+        await EnsureReadyAsync(cancellationToken).ConfigureAwait(true);
+        await DispatchAsync(
+            CideEditorBridgeTypes.SignatureResult,
+            new CideEditorSignatureResultMessage(requestId, signature),
+            cancellationToken).ConfigureAwait(true);
+    }
+
     private async Task EnsureReadyAsync(CancellationToken cancellationToken)
     {
         if (_ready)

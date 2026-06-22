@@ -10,9 +10,21 @@ public static class CideEditorBridgeTypes
     public const string ApplyEdits = "editor/applyEdits";
     public const string SetDecorations = "editor/setDecorations";
     public const string SetTheme = "editor/setTheme";
+    public const string SetStickyScroll = "editor/setStickyScroll";
+    public const string SetGutterGlyphs = "editor/setGutterGlyphs";
+    public const string SetIntelligence = "editor/setIntelligence";
+
     public const string DidChange = "editor/didChange";
     public const string DidChangeCursorSelection = "editor/didChangeCursorSelection";
+    public const string DidScroll = "editor/didScroll";
     public const string Ready = "editor/ready";
+
+    public const string RequestCompletion = "editor/requestCompletion";
+    public const string CompletionResult = "editor/completionResult";
+    public const string RequestHover = "editor/requestHover";
+    public const string HoverResult = "editor/hoverResult";
+    public const string RequestSignature = "editor/requestSignature";
+    public const string SignatureResult = "editor/signatureResult";
 }
 
 public sealed record CideEditorSetModelMessage(
@@ -40,13 +52,48 @@ public sealed record CideEditorSetDecorationsMessage(
     string SetId,
     IReadOnlyList<CideEditorDecoration> Decorations);
 
+public sealed record CideEditorStickyScrollMessage(string? Label);
+
+public sealed record CideEditorGutterGlyph(
+    int LineOneBased,
+    string TextGlyph,
+    string? ToolTip,
+    string VisualKind);
+
+public sealed record CideEditorSetGutterGlyphsMessage(
+    IReadOnlyList<CideEditorGutterGlyph> Glyphs);
+
+public sealed record CideEditorSetIntelligenceMessage(bool Enabled);
+
+public sealed record CideEditorCompletionItem(
+    string Label,
+    string InsertText,
+    string? Detail);
+
+public sealed record CideEditorCompletionResultMessage(
+    int RequestId,
+    IReadOnlyList<CideEditorCompletionItem> Items);
+
+public sealed record CideEditorHoverResultMessage(
+    int RequestId,
+    string? Markdown);
+
+public sealed record CideEditorSignatureResultMessage(
+    int RequestId,
+    string? Signature);
+
 public sealed record CideEditorInboundMessage(
     string Type,
     [property: JsonPropertyName("version")] int? Version,
     [property: JsonPropertyName("text")] string? Text,
     [property: JsonPropertyName("caretOffset")] int? CaretOffset,
     [property: JsonPropertyName("selectionStart")] int? SelectionStart,
-    [property: JsonPropertyName("selectionLength")] int? SelectionLength);
+    [property: JsonPropertyName("selectionLength")] int? SelectionLength,
+    [property: JsonPropertyName("requestId")] int? RequestId,
+    [property: JsonPropertyName("line")] int? Line,
+    [property: JsonPropertyName("column")] int? Column,
+    [property: JsonPropertyName("topLine")] int? TopLine,
+    [property: JsonPropertyName("error")] string? Error);
 
 public static class CideEditorBridgeJson
 {
@@ -70,18 +117,27 @@ public static class CideEditorBridgeJson
             if (!root.TryGetProperty("type", out var typeEl))
                 return null;
             var type = typeEl.GetString() ?? "";
-            int? version = root.TryGetProperty("version", out var v) && v.TryGetInt32(out var vi) ? vi : null;
+            int? version = TryInt(root, "version");
             string? text = root.TryGetProperty("text", out var t) ? t.GetString() : null;
-            int? caret = root.TryGetProperty("caretOffset", out var c) && c.TryGetInt32(out var ci) ? ci : null;
-            int? selStart = root.TryGetProperty("selectionStart", out var ss) && ss.TryGetInt32(out var ssi) ? ssi : null;
-            int? selLen = root.TryGetProperty("selectionLength", out var sl) && sl.TryGetInt32(out var sli) ? sli : null;
-            return new CideEditorInboundMessage(type, version, text, caret, selStart, selLen);
+            int? caret = TryInt(root, "caretOffset");
+            int? selStart = TryInt(root, "selectionStart");
+            int? selLen = TryInt(root, "selectionLength");
+            int? requestId = TryInt(root, "requestId");
+            int? line = TryInt(root, "line");
+            int? column = TryInt(root, "column");
+            int? topLine = TryInt(root, "topLine");
+            string? error = root.TryGetProperty("error", out var err) ? err.GetString() : null;
+            return new CideEditorInboundMessage(
+                type, version, text, caret, selStart, selLen, requestId, line, column, topLine, error);
         }
         catch
         {
             return null;
         }
     }
+
+    private static int? TryInt(JsonElement root, string name) =>
+        root.TryGetProperty(name, out var el) && el.TryGetInt32(out var value) ? value : null;
 }
 
 public static class CideEditorLanguageIds
@@ -113,23 +169,38 @@ public static class CideEditorLanguageIds
             _ => "plaintext",
         };
     }
+
+    public static bool SupportsRoslynIntelligence(string? filePath) =>
+        string.Equals(Path.GetExtension(filePath), ".cs", StringComparison.OrdinalIgnoreCase)
+        || string.Equals(Path.GetExtension(filePath), ".csx", StringComparison.OrdinalIgnoreCase);
 }
 
 public static class MonacoEditorAssetLocator
 {
-    public static string GetIndexHtmlPath()
+    public static string GetCideEditorRoot()
     {
         var baseDir = AppContext.BaseDirectory;
-        var candidate = Path.Combine(baseDir, "Assets", "cide-editor", "index.html");
-        if (File.Exists(candidate))
+        var candidate = Path.Combine(baseDir, "Assets", "cide-editor");
+        if (Directory.Exists(candidate))
             return candidate;
 
-        // Development: repo layout next to project output.
-        var dev = Path.GetFullPath(Path.Combine(baseDir, "..", "..", "..", "Assets", "cide-editor", "index.html"));
-        if (File.Exists(dev))
+        var dev = Path.GetFullPath(Path.Combine(baseDir, "..", "..", "..", "Assets", "cide-editor"));
+        if (Directory.Exists(dev))
             return dev;
 
         return candidate;
+    }
+
+    public static string GetIndexHtmlPath()
+    {
+        var path = Path.Combine(GetCideEditorRoot(), "index.html");
+        return File.Exists(path) ? path : path;
+    }
+
+    public static string GetMonacoVsPath()
+    {
+        var local = Path.Combine(GetCideEditorRoot(), "monaco", "min", "vs");
+        return Directory.Exists(local) ? local.Replace('\\', '/') : "";
     }
 
     public static Uri GetIndexUri()
@@ -138,3 +209,4 @@ public static class MonacoEditorAssetLocator
         return new Uri(new Uri("file:///"), path.Replace('\\', '/'));
     }
 }
+
