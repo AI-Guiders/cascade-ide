@@ -1,7 +1,6 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="using:CascadeIDE.ViewModels"
-             xmlns:ae="using:AvaloniaEdit"
              xmlns:ed="using:CascadeIDE.Features.Editor.Application.Presentation"
              xmlns:monaco="using:CascadeIDE.Features.Editor.Presentation"
              x:Class="CascadeIDE.Views.DockDocumentView"
@@ -29,17 +28,7 @@
         <Grid Grid.Row="1"
               x:Name="EditorContentGrid"
               Margin="0">
-            <!-- Inline hover / ToolTip: EditorInlineHoverChrome.ApplyToolTipServiceTo в code-behind (один источник). -->
-            <ae:TextEditor
-                           x:Name="Editor"
-                           Classes="EditorBox"
-                           Cursor="IBeam"
-                           ShowLineNumbers="True"
-                           FontFamily="Consolas,Cascadia Code,monospace"
-                           FontSize="13"
-                           Padding="{x:Static ed:EditorForwardDocumentChrome.DocumentPadding}"/>
-            <monaco:MonacoEditorHostControl x:Name="MonacoHost"
-                                            IsVisible="False"/>
+            <monaco:MonacoEditorHostControl x:Name="MonacoHost"/>
         </Grid>
     </Grid>
 </UserControl>

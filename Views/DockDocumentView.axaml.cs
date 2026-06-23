@@ -1,21 +1,10 @@
-using System;
 using System.ComponentModel;
-using System.Linq;
 using Avalonia;
 using Avalonia.Controls;
-using Avalonia.Controls.ApplicationLifetimes;
-using Avalonia.Input;
-using Avalonia.Media;
 using Avalonia.Threading;
 using Avalonia.VisualTree;
-using AvaloniaEdit;
-using AvaloniaEdit.Document;
-using AvaloniaEdit.Rendering;
 using CascadeIDE.Features.Documents;
 using CascadeIDE.Features.Editor.Application;
-using CascadeIDE.Features.Editor.Application.Presentation;
-using CascadeIDE.Models;
-using CascadeIDE.Services;
 using CascadeIDE.Features.WorkspaceNavigation.Presentation;
 using CascadeIDE.ViewModels;
 using Microsoft.CodeAnalysis;
@@ -26,27 +15,15 @@ namespace CascadeIDE.Views;
 
 public partial class DockDocumentView : UserControl
 {
-    private bool _suppress;
-    private TextEditor? _editor;
     private MainWindowViewModel? _vm;
     private DockDocumentViewModel? _docVm;
     private PropertyChangedEventHandler? _vmHandler;
     private PropertyChangedEventHandler? _navigationMapHandler;
     private PropertyChangedEventHandler? _documentsHandler;
 
-    private bool _renderersInstalled;
-    private EditorDocumentBackgroundVisualsHandle? _backgroundVisuals;
-    private Action? _diagHubHandler;
-    private bool _diagPointerHooked;
-    private bool _inlineKeyHooked;
-    private EditorInlineHoverToolTipController? _inlineHoverToolTip;
-    private bool _editorThemeSubscribed;
     private Border? _stickyScrollHost;
     private TextBlock? _stickyScrollText;
-    private IBackgroundRenderer? _controlFlowGutterGlyphRenderer;
-    private ControlFlowVirtualSpacingElementGenerator? _controlFlowSpacingGenerator;
 
-    // ADR 0103: hi-freq → bounded + throttle на уровне MainWindowViewModel, не DataBus
     private IEditorSurfaceAdapter? _editorSurface;
     private readonly EditorDocumentHudLayer _documentHudLayer = new();
     private Action<EditorInputDelta>? _stabilizedHudAction;
@@ -67,7 +44,6 @@ public partial class DockDocumentView : UserControl
         if (_docVm is null)
             return;
 
-        // Avalonia 12: VisualRoot может быть не Window; DataContext главного окна всё равно нужен для документа и TextMate.
         var top = TopLevel.GetTopLevel(this);
         _vm = top?.DataContext as MainWindowViewModel;
         if (_vm is null)
@@ -85,114 +61,9 @@ public partial class DockDocumentView : UserControl
         if (_vm is null)
             return;
 
-        _editor = this.FindControl<TextEditor>("Editor");
-
-        if (_vm.GetCascadeSettingsForExecutor().Editor.ResolveForwardHost() == EditorForwardHostKind.MonacoWebView2)
-        {
-            TrySetupMonacoForward();
-            return;
-        }
-
-        if (_editor is null)
-            return;
         _stickyScrollHost = this.FindControl<Border>("StickyScrollHost");
         _stickyScrollText = this.FindControl<TextBlock>("StickyScrollText");
-
-        if (!_editorThemeSubscribed)
-        {
-            UiThemeApply.ThemeApplied += OnThemeAppliedRefreshEditorSelection;
-            _editorThemeSubscribed = true;
-        }
-
-        EditorSelectionChrome.Apply(_editor);
-        EditorTextChrome.Apply(_editor);
-        EditorHelpers.ApplyEditorFontFromSettings(_editor, _vm.GetCascadeSettingsForExecutor().Fonts.Editor);
-
-        EditorInlineHoverChrome.ApplyToolTipServiceTo(_editor);
-
-        _suppress = true;
-        try
-        {
-            var fromModel = _docVm.Doc.Content ?? "";
-            if (!string.Equals(_editor.Document.Text, fromModel, StringComparison.Ordinal))
-                _editor.Document.Text = fromModel;
-        }
-        finally
-        {
-            _suppress = false;
-        }
-
-        _editor.Document.Changed += OnEditorDocumentChanged;
-        _editor.TextArea.Caret.PositionChanged += OnEditorCaretOrSelectionChanged;
-        _editor.TextArea.SelectionChanged += OnEditorCaretOrSelectionChanged;
-        _editor.TextArea.TextView.VisualLinesChanged += OnEditorViewportChanged;
-        _editor.TextArea.TextView.ScrollOffsetChanged += OnEditorViewportChanged;
-
-        _vmHandler = (_, args) =>
-        {
-            if (args.PropertyName is nameof(MainWindowViewModel.EditorText)
-                or nameof(MainWindowViewModel.CurrentFilePath))
-            {
-                SyncFromVmIfActive();
-                UpdateMcpProvidersIfActive();
-            }
-
-            if (args.PropertyName == nameof(MainWindowViewModel.CurrentFilePath))
-                UpdateStabilizedHudRegistration();
-
-
-            if (args.PropertyName is nameof(MainWindowViewModel.BreakpointLinesInCurrentFile)
-                or nameof(MainWindowViewModel.AllBreakpointLinesInCurrentFile)
-                or nameof(MainWindowViewModel.DebugCurrentLineInCurrentFile)
-                or nameof(MainWindowViewModel.DebugPositionFile)
-                or nameof(MainWindowViewModel.DebugPositionLine))
-            {
-                if (_editor is not null)
-                    _editor.TextArea.TextView.Redraw();
-            }
-        };
-        _vm.PropertyChanged += _vmHandler;
-
-        _navigationMapHandler = (_, args) =>
-        {
-            if (args.PropertyName is nameof(WorkspaceNavigationMapViewModel.CodeNavigationMapGraphScene)
-                or nameof(WorkspaceNavigationMapViewModel.CodeNavigationMapLevel)
-                or nameof(WorkspaceNavigationMapViewModel.WorkspaceNavigationMapCfAnchorFullPath))
-            {
-                if (_editor is not null)
-                    _editor.TextArea.TextView.Redraw();
-            }
-        };
-        _vm.NavigationMap.PropertyChanged += _navigationMapHandler;
-
-        _documentsHandler = (_, args) =>
-        {
-            if (args.PropertyName == nameof(DocumentsWorkspaceViewModel.DockActiveDocument))
-            {
-                SyncFromVmIfActive();
-                UpdateMcpProvidersIfActive();
-                UpdateStabilizedHudRegistration();
-            }
-        };
-        _vm.Documents.PropertyChanged += _documentsHandler;
-
-        if (Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime { MainWindow: MainWindow mainWindow })
-        {
-            mainWindow.EnsureDockEditorTextMate(_editor, _docVm.Doc.FilePath);
-            if (IsActive())
-                mainWindow.AttachTextMateWhenEditorReady();
-        }
-
-        SyncFromVmIfActive();
-        InstallVisualAdornersOnce();
-        UpdateMcpProvidersIfActive();
-        UpdateStickyScroll();
-
-        _editorSurface = new AvaloniaEditSurfaceAdapter(_editor, _docVm.Doc.FilePath);
-        _documentHudLayer.ConfigureDiagnostics(p => _vm!.WorkspaceDiagnostics.GetStripsForFile(p));
-        UpdateStabilizedHudRegistration();
-        if (_vm is not null)
-            _vm.UpdateCodeNavigationMapCaretOffset(_editorSurface.CaretOffset);
+        TrySetupMonacoForward();
     }
 
     private Action<EditorInputDelta> StabilizedHudAction =>
@@ -201,7 +72,7 @@ public partial class DockDocumentView : UserControl
     private void OnStabilizedHud(EditorInputDelta d) =>
         _vm?.SetStabilizedEditorHudContext(_documentHudLayer.BuildStabilizedContext(d));
 
-    private void UpdateStabilizedHudRegistration()
+    internal void UpdateStabilizedHudRegistration()
     {
         if (_vm is null)
             return;
@@ -214,66 +85,6 @@ public partial class DockDocumentView : UserControl
     private void Teardown()
     {
         TeardownMonacoForward();
-
-        if (_editorThemeSubscribed)
-        {
-            UiThemeApply.ThemeApplied -= OnThemeAppliedRefreshEditorSelection;
-            _editorThemeSubscribed = false;
-        }
-
-        if (_editor is not null)
-        {
-            if (_inlineKeyHooked)
-            {
-                _editor.TextArea.KeyDown -= OnTextAreaKeyDown;
-                _inlineKeyHooked = false;
-            }
-
-            if (_diagPointerHooked && _inlineHoverToolTip is not null)
-            {
-                _inlineHoverToolTip.StopDebounce();
-                _editor.TextArea.PointerMoved -= _inlineHoverToolTip.OnPointerMoved;
-                _editor.TextArea.PointerExited -= _inlineHoverToolTip.OnPointerExited;
-                _diagPointerHooked = false;
-            }
-
-            _inlineHoverToolTip?.Dispose();
-            _inlineHoverToolTip = null;
-
-            if (_editor is not null)
-            {
-                if (_controlFlowGutterGlyphRenderer is not null)
-                {
-                    _editor.TextArea.TextView.BackgroundRenderers.Remove(_controlFlowGutterGlyphRenderer);
-                    _controlFlowGutterGlyphRenderer = null;
-                }
-
-                if (_controlFlowSpacingGenerator is not null)
-                {
-                    ControlFlowEditorVisualsRegistry.RemoveSpacingGenerator(
-                        _editor.TextArea.TextView,
-                        _controlFlowSpacingGenerator);
-                    _controlFlowSpacingGenerator = null;
-                }
-            }
-
-            _backgroundVisuals?.Dispose();
-            _backgroundVisuals = null;
-
-            var doc = _editor.Document;
-            if (doc is not null)
-                doc.Changed -= OnEditorDocumentChanged;
-
-            var textArea = _editor.TextArea!;
-            textArea.Caret.PositionChanged -= OnEditorCaretOrSelectionChanged;
-            textArea.SelectionChanged -= OnEditorCaretOrSelectionChanged;
-            textArea.TextView.VisualLinesChanged -= OnEditorViewportChanged;
-            textArea.TextView.ScrollOffsetChanged -= OnEditorViewportChanged;
-
-            if (_vm?.WorkspaceDiagnostics is not null && _diagHubHandler is not null)
-                _vm.WorkspaceDiagnostics.DiagnosticsChanged -= _diagHubHandler;
-            _diagHubHandler = null;
-        }
 
         if (_vm is not null)
         {
@@ -294,17 +105,15 @@ public partial class DockDocumentView : UserControl
         _documentHudLayer.ConfigureDiagnostics(null);
         _editorSurface = null;
 
-        _editor = null;
         _vm = null;
         _docVm = null;
         _vmHandler = null;
         _documentsHandler = null;
-        _renderersInstalled = false;
         _stickyScrollHost = null;
         _stickyScrollText = null;
     }
 
-    private bool IsActive()
+    internal bool IsActive()
     {
         if (_vm is null || _docVm is null)
             return false;
@@ -313,177 +122,16 @@ public partial class DockDocumentView : UserControl
                || string.Equals(_vm.CurrentFilePath, _docVm.Doc.FilePath, StringComparison.OrdinalIgnoreCase);
     }
 
-    private void InstallVisualAdornersOnce()
+    internal void PostStabilizedEditorInputIfActive(EditorInputDeltaKind kind)
     {
-        if (_renderersInstalled || _vm is null || _editor is null || _docVm is null)
+        if (!IsActive() || _vm is null || _editorSurface is null)
             return;
-
-        _backgroundVisuals = EditorInlineHudLayer.InstallDocumentBackgroundVisuals(
-            _editor,
-            () => _vm.GetAllBreakpointLinesForFile(_docVm.Doc.FilePath),
-            () => _vm.GetDebugCurrentLineForFile(_docVm.Doc.FilePath),
-            () => _vm.WorkspaceDiagnostics.GetStripsForFile(_docVm.Doc.FilePath),
-            () => _vm.GetEditorInlineHintsForFile(_docVm.Doc.FilePath, _editor.Document.Text ?? ""),
-            () => _vm.GetEditorDebugHintsForFile(_docVm.Doc.FilePath, _editor.Document.Text ?? ""));
-
-        _controlFlowSpacingGenerator = ControlFlowEditorVisualsRegistry.GetOrCreateSpacingGenerator(
-            _editor.TextArea.TextView);
-        _controlFlowSpacingGenerator.SetActiveCheck(
-            () => _vm.NavigationMap.IsControlFlowEditorVirtualSpacingActiveForFile(_docVm.Doc.FilePath));
-        _controlFlowSpacingGenerator.SetLineVisualsProvider(
-            () => _vm.NavigationMap.GetControlFlowGutterLineVisualsForFile(_docVm.Doc.FilePath));
-        ControlFlowEditorVisualsRegistry.InstallSpacingGenerator(
-            _editor.TextArea.TextView,
-            _controlFlowSpacingGenerator);
-
-        _controlFlowGutterGlyphRenderer = new EditorControlFlowGutterGlyphBackgroundRenderer(
-            () => _docVm.Doc.FilePath,
-            fp => _vm.NavigationMap.GetControlFlowGutterLineVisualsForFile(fp),
-            fp => _vm.NavigationMap.IsControlFlowEditorVirtualSpacingActiveForFile(fp));
-        _editor.TextArea.TextView.BackgroundRenderers.Add(_controlFlowGutterGlyphRenderer);
-
-        _diagHubHandler = () =>
-        {
-            if (_editor is not null)
-                _editor.TextArea.TextView.Redraw();
-        };
-        _vm.WorkspaceDiagnostics.DiagnosticsChanged += _diagHubHandler;
-
-        _inlineHoverToolTip = new EditorInlineHoverToolTipController(
-            _editor,
-            EditorInlineHoverChrome.PointerPositionDebounce,
-            () => _docVm.Doc.FilePath,
-            () => _vm.WorkspaceDiagnostics.GetStripsForFile(_docVm.Doc.FilePath),
-            (path, text, line, col, ct) => _vm.GetEditorQuickInfoAsync(path, text, line, col, ct),
-            (path, text, line, col) => _vm.CSharpLanguage.GetQuickInfo(path, text, line, col),
-            static p => p.EndsWith(".cs", StringComparison.OrdinalIgnoreCase));
-
-        if (!_diagPointerHooked)
-        {
-            _editor.TextArea.PointerMoved += _inlineHoverToolTip.OnPointerMoved;
-            _editor.TextArea.PointerExited += _inlineHoverToolTip.OnPointerExited;
-            _diagPointerHooked = true;
-        }
-
-        if (!_inlineKeyHooked)
-        {
-            _editor.TextArea.KeyDown += OnTextAreaKeyDown;
-            _inlineKeyHooked = true;
-        }
-
-        _renderersInstalled = true;
+        _editorSurface.GetSelection(out var selStart, out var selLen);
+        var d = new EditorInputDelta(_docVm?.Doc.FilePath, _editorSurface.CaretOffset, selStart, selLen, kind);
+        _vm.TryPostEditorStabilizedInput(d);
     }
 
-    private void OnTextAreaKeyDown(object? sender, KeyEventArgs e)
-    {
-        if (e.Key != Key.Escape)
-            return;
-        _inlineHoverToolTip?.DismissToolTip();
-    }
-
-    private void SyncFromVmIfActive()
-    {
-        if (!IsActive() || _vm is null || _editor is null)
-            return;
-
-        var vmText = _vm.EditorText ?? "";
-        if (string.Equals(_editor.Document.Text, vmText, StringComparison.Ordinal))
-            return;
-
-        _suppress = true;
-        try
-        {
-            _editor.Document.Text = vmText;
-        }
-        finally
-        {
-            _suppress = false;
-        }
-    }
-
-    private void OnEditorDocumentChanged(object? sender, EventArgs e)
-    {
-        if (_suppress || _vm is null || _docVm is null || _editor is null)
-            return;
-        if (!IsActive())
-            return;
-
-        var newText = _editor.Document.Text ?? "";
-        if (!string.Equals(_vm.EditorText, newText, StringComparison.Ordinal))
-            _vm.EditorText = newText;
-        UpdateStickyScroll();
-        PostStabilizedEditorInputIfActive(EditorInputDeltaKind.DocumentText);
-    }
-
-    private void OnEditorCaretOrSelectionChanged(object? sender, EventArgs e)
-    {
-        UpdateStickyScroll();
-        PostStabilizedEditorInputIfActive(EditorInputDeltaKind.CaretOrSelection);
-    }
-
-    private void OnEditorViewportChanged(object? sender, EventArgs e) => UpdateStickyScroll();
-
-    private void UpdateStickyScroll()
-    {
-        if (_stickyScrollHost is null || _stickyScrollText is null || _editor is null || _docVm is null)
-            return;
-        if (!IsActive())
-        {
-            ToolTip.SetTip(_stickyScrollHost, null);
-            _stickyScrollHost.IsVisible = false;
-            return;
-        }
-
-        var filePath = _docVm.Doc.FilePath ?? "";
-        if (!filePath.EndsWith(".cs", StringComparison.OrdinalIgnoreCase))
-        {
-            ToolTip.SetTip(_stickyScrollHost, null);
-            _stickyScrollHost.IsVisible = false;
-            return;
-        }
-
-        var topLine = GetTopVisibleLineNumber(_editor);
-        var text = _editor.Document.Text ?? "";
-        var sticky = BuildStickyScrollLabel(text, topLine);
-        if (string.IsNullOrWhiteSpace(sticky))
-        {
-            ToolTip.SetTip(_stickyScrollHost, null);
-            _stickyScrollHost.IsVisible = false;
-            return;
-        }
-
-        _stickyScrollText.Text = sticky;
-        ToolTip.SetTip(_stickyScrollHost, sticky);
-        _stickyScrollHost.IsVisible = true;
-    }
-
-    /// <summary>Первая видимая сверху строка документа по прокрутке (не по каретке): иначе при скролле без двига каретки
-    /// мы оставались бы на строке каретки и sticky скрывался из-за BuildStickyScrollLabel(topLine &lt;= 1).</summary>
-    private static int GetTopVisibleLineNumber(TextEditor editor)
-    {
-        var textView = editor.TextArea.TextView;
-        if (textView.Document is null)
-            return Math.Max(1, editor.TextArea.Caret.Line);
-
-        try
-        {
-            var line = textView.GetDocumentLineByVisualTop(textView.ScrollOffset.Y);
-            return line.LineNumber;
-        }
-        catch
-        {
-            if (textView.VisualLinesValid)
-            {
-                var first = textView.VisualLines.FirstOrDefault();
-                if (first?.FirstDocumentLine is not null)
-                    return first.FirstDocumentLine.LineNumber;
-            }
-
-            return Math.Max(1, editor.TextArea.Caret.Line);
-        }
-    }
-
-    private static string? BuildStickyScrollLabel(string sourceText, int topLineOneBased)
+    internal static string? BuildStickyScrollLabel(string sourceText, int topLineOneBased)
     {
         if (topLineOneBased <= 1 || string.IsNullOrWhiteSpace(sourceText))
             return null;
@@ -540,115 +188,53 @@ public partial class DockDocumentView : UserControl
         };
     }
 
-
-    private void PostStabilizedEditorInputIfActive(EditorInputDeltaKind kind)
+    /// <summary>Reveal строк из карты намерений / MCP (ADR 0130).</summary>
+    public bool TryRevealEditorRange(int startLine, int endLine, int? durationMs)
     {
-        if (!IsActive() || _vm is null || _editorSurface is null)
-            return;
-        _editorSurface.GetSelection(out var selStart, out var selLen);
-        var d = new EditorInputDelta(_docVm?.Doc.FilePath, _editorSurface.CaretOffset, selStart, selLen, kind);
-        _vm.TryPostEditorStabilizedInput(d);
-    }
+        if (_docVm is null || _vm is null || _monacoHost is null)
+            return false;
 
-    private void UpdateMcpProvidersIfActive()
-    {
-        if (!IsActive() || _vm is null || _editor is null)
-            return;
-
-        _vm.SetEditorStateProvider(maxPreview => EditorHelpers.GetEditorState(_editor, _vm.CurrentFilePath, maxPreview));
-        _vm.SetEditorContentRangeProvider((startLine, endLine) => EditorHelpers.GetEditorContentRange(_editor, startLine, endLine));
-        _vm.SetFocusEditor(() => _editor.Focus());
-    }
-
-    private void OnThemeAppliedRefreshEditorSelection(object? sender, EventArgs e)
-    {
-        if (_editor is not null)
+        if (durationMs is > 0)
         {
-            EditorSelectionChrome.Apply(_editor);
-            EditorTextChrome.Apply(_editor);
-        }
-    }
-}
-
-internal static class EditorHelpers
-{
-    public static void ApplyEditorFontFromSettings(TextEditor editor, EditorFontsSettings fonts)
-    {
-        editor.FontSize = fonts.ResolveSizePt();
-        editor.FontFamily = new FontFamily(fonts.ResolveFamily());
-    }
-
-    public static EditorStateDto GetEditorState(TextEditor editor, string? currentFilePath, int? maxPreviewChars)
-    {
-        var doc = editor.Document;
-        var text = doc.Text ?? "";
-        var caret = editor.TextArea.Caret;
-        var offset = caret.Offset;
-        if (offset < 0 || offset > doc.TextLength)
-            offset = 0;
-        var line = doc.GetLineByOffset(offset);
-        int selStart = 0, selLen = 0;
-        var seg = editor.TextArea.Selection.Segments.FirstOrDefault();
-        if (seg is not null)
-        {
-            selStart = seg.StartOffset;
-            selLen = seg.EndOffset - seg.StartOffset;
+            _ = _monacoHost.PushAgentRevealAsync(startLine, endLine, persistent: false, durationMs);
+            return true;
         }
 
-        var selectionText = selLen > 0 ? doc.GetText(selStart, selLen) : "";
-        string? preview = null;
-        if (maxPreviewChars is > 0)
-            preview = text.Length <= maxPreviewChars.Value ? text : text[..maxPreviewChars.Value];
-
-        return new EditorStateDto
-        {
-            FilePath = currentFilePath,
-            CaretLine = line.LineNumber,
-            CaretColumn = offset - line.Offset + 1,
-            SelectionStart = selStart,
-            SelectionLength = selLen,
-            SelectionText = selectionText,
-            ContentLength = text.Length,
-            IsEmpty = text.Length == 0,
-            ContentPreview = preview
-        };
+        _ = _monacoHost.PushRevealRangeAsync(startLine, endLine);
+        return true;
     }
 
-    public static string? GetEditorContentRange(TextEditor editor, int startLine, int endLine)
+    public void FocusMonacoEditor() => _monacoHost?.Focus();
+
+    public Task GotoLineColumnAsync(int line, int column) =>
+        _monacoHost is { IsReady: true } host
+            ? host.PushRevealRangeAsync(line, line, column)
+            : Task.CompletedTask;
+
+    public Task SetSelectionAsync(int start, int length) =>
+        _monacoHost is { IsReady: true } host
+            ? host.PushSetSelectionAsync(start, length)
+            : Task.CompletedTask;
+
+    public Task SetEpochDimAsync(bool dimmed) =>
+        _monacoHost is { IsReady: true } host
+            ? host.PushEpochDimAsync(dimmed)
+            : Task.CompletedTask;
+
+    public Task RevealAgentRangeAsync(int startLine, int endLine, bool persistent) =>
+        _monacoHost is { IsReady: true } host
+            ? host.PushAgentRevealAsync(startLine, endLine, persistent, durationMs: persistent ? null : 3000)
+            : Task.CompletedTask;
+
+    public void ClearAgentReveal() => _ = ClearAgentRevealAsync();
+
+    internal Task PushMonacoDebugVisualsAsync() => PushMonacoDebugOverlayAsync();
+
+    internal string GetEditorTextSnapshot()
     {
-        var text = editor.Document.Text ?? "";
-        if (text.Length == 0)
-            return "";
-
-        var lines = text.Split('\n');
-        var oneBased = startLine >= 1 && endLine >= 1 && startLine <= endLine;
-        if (!oneBased || lines.Length == 0)
-            return "";
-
-        var from = Math.Max(1, Math.Min(startLine, lines.Length));
-        var to = Math.Max(from, Math.Min(endLine, lines.Length));
-        return string.Join("\n", lines.Skip(from - 1).Take(to - from + 1));
-    }
-
-    public static void ApplyEditInEditor(
-        TextEditor editor,
-        MainWindowViewModel vm,
-        string filePath,
-        int startLine,
-        int startColumn,
-        int endLine,
-        int endColumn,
-        string newText)
-    {
-        if (vm.CurrentFilePath != filePath)
-            return;
-
-        var text = editor.Document.Text;
-        int start = EditorTextCoordinateUtilities.LineColumnToOffset(text, startLine, startColumn);
-        int end = EditorTextCoordinateUtilities.LineColumnToOffset(text, endLine, endColumn);
-        if (start < 0 || end < 0)
-            return;
-
-        editor.Document.Replace(start, end - start, newText);
+        if (_monacoHost is null)
+            return _vm?.EditorText ?? _docVm?.Doc.Content ?? "";
+        _monacoHost.Session.ReadSnapshot(out _, out var text, out _, out _, out _);
+        return text;
     }
 }

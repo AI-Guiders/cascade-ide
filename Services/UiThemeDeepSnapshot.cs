@@ -7,8 +7,8 @@ using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Media;
 using Avalonia.VisualTree;
-using AvaloniaEdit;
 using CascadeIDE.Features.Documents;
+using CascadeIDE.Features.Editor.Presentation;
 using CascadeIDE.ViewModels;
 using CascadeIDE.Views;
 
@@ -16,7 +16,7 @@ namespace CascadeIDE.Services;
 
 /// <summary>
 /// Расширенный слой для <see cref="UiThemeSnapshot"/>: разрешённые ресурсы под текущей темой,
-/// рамка главного окна, именованные регионы лэйаута, открытые документы дока и смонтированные TextEditor.
+/// рамка главного окна, именованные регионы лэйаута, открытые документы дока и смонтированные Monaco host.
 /// </summary>
 internal static class UiThemeDeepSnapshot
 {
@@ -193,7 +193,7 @@ internal static class UiThemeDeepSnapshot
         {
             if (v is not DockDocumentView dockView)
                 continue;
-            if (dockView.FindControl<TextEditor>("Editor") is not { } ed)
+            if (dockView.FindControl<MonacoEditorHostControl>("MonacoHost") is not { } host)
                 continue;
             if (dockView.DataContext is not DockDocumentViewModel dvm)
                 continue;
@@ -203,32 +203,33 @@ internal static class UiThemeDeepSnapshot
             var isActivePath = !string.IsNullOrEmpty(currentPath)
                                && string.Equals(doc.FilePath, currentPath, StringComparison.OrdinalIgnoreCase);
             var modelLen = doc.Content?.Length ?? 0;
-            var editorLen = ed.Document.TextLength;
-            var (effBg, effFg) = UiControlAppearance.GetEffectiveColors(ed);
+            host.Session.ReadSnapshot(out _, out var editorText, out _, out _, out _);
+            var editorLen = editorText.Length;
+            var (effBg, effFg) = UiControlAppearance.GetEffectiveColors(host);
 
-            double x = 0, y = 0, w = ed.Bounds.Width, h = ed.Bounds.Height;
-            var topLeft = ed.TranslatePoint(new Point(0, 0), root);
+            double x = 0, y = 0, w = host.Bounds.Width, h = host.Bounds.Height;
+            var topLeft = host.TranslatePoint(new Point(0, 0), root);
             if (topLeft is { } p)
             {
                 x = p.X;
                 y = p.Y;
             }
 
-            var text = ed.Document.Text ?? "";
-            var preview = text.Length <= DockTextPreviewMaxChars
-                ? text
-                : text[..DockTextPreviewMaxChars] + "…";
+            var preview = editorLen <= DockTextPreviewMaxChars
+                ? editorText
+                : editorText[..DockTextPreviewMaxChars] + "…";
+            var lineCount = editorLen == 0 ? 0 : editorText.Split('\n').Length;
 
             list.Add(new Dictionary<string, object?>
             {
                 ["file_path"] = doc.FilePath,
                 ["dock_title"] = dvm.Title,
                 ["matches_main_window_current_file"] = isActivePath,
-                ["editor_visible"] = ed.IsVisible,
+                ["editor_visible"] = host.IsVisible,
                 ["document_length"] = editorLen,
                 ["model_content_length"] = modelLen,
                 ["length_matches_model"] = editorLen == modelLen,
-                ["line_count"] = ed.Document.LineCount,
+                ["line_count"] = lineCount,
                 ["bounds"] = new Dictionary<string, double>
                 {
                     ["x"] = Math.Round(x, 1),
@@ -236,11 +237,11 @@ internal static class UiThemeDeepSnapshot
                     ["w"] = Math.Round(w, 1),
                     ["h"] = Math.Round(h, 1)
                 },
-                ["name"] = (ed as StyledElement)?.Name ?? "",
-                ["font_family"] = ed.FontFamily?.ToString(),
-                ["font_size"] = ed.FontSize,
-                ["foreground"] = UiThemeSnapshot.FormatBrushForJson(ed.Foreground),
-                ["background"] = UiThemeSnapshot.FormatBrushForJson(ed.Background),
+                ["name"] = (host as StyledElement)?.Name ?? "",
+                ["font_family"] = null,
+                ["font_size"] = 0.0,
+                ["foreground"] = UiThemeSnapshot.FormatBrushForJson(host.Foreground),
+                ["background"] = UiThemeSnapshot.FormatBrushForJson(host.Background),
                 ["effective_background"] = effBg,
                 ["effective_foreground"] = effFg,
                 ["text_preview"] = preview
@@ -252,7 +253,7 @@ internal static class UiThemeDeepSnapshot
 
     /// <summary>
     /// Все открытые вкладки из <see cref="DocumentsWorkspaceViewModel.DockDocuments"/> (модель дока).
-    /// Неактивные вкладки часто без <see cref="TextEditor"/> в визуальном дереве — смотри <c>editor_in_visual_tree</c>.
+    /// Неактивные вкладки часто без Monaco host в визуальном дереве — смотри <c>editor_in_visual_tree</c>.
     /// </summary>
     private static List<Dictionary<string, object?>> BuildDockOpenDocuments(MainWindowViewModel? vm, HashSet<string> editorMaterializedPaths)
     {

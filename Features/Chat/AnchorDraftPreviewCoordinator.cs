@@ -1,6 +1,5 @@
 #nullable enable
 
-using AvaloniaEdit;
 using CascadeIDE.Services;
 using CascadeIDE.Services.Intercom;
 
@@ -17,10 +16,11 @@ public sealed class AnchorDraftPreviewCoordinator
     private readonly Func<string> _getWorkspaceRoot;
     private readonly Func<string?> _getSolutionPath;
     private readonly Func<string?> _getIndexDirectoryRelative;
-    private readonly Func<string?, TextEditor?> _getEditorForAbsoluteFilePath;
+    private readonly Func<string?, int, int, Task>? _revealAgentRange;
+    private readonly Action<string?>? _clearAgentReveal;
 
     private CancellationTokenSource? _debounceCts;
-    private TextEditor? _lastEditor;
+    private string? _lastRevealPath;
     private int _generation;
 
     public AnchorDraftPreviewCoordinator(
@@ -28,17 +28,22 @@ public sealed class AnchorDraftPreviewCoordinator
         Func<string> getWorkspaceRoot,
         Func<string?> getSolutionPath,
         Func<string?> getIndexDirectoryRelative,
-        Func<string?, TextEditor?> getEditorForAbsoluteFilePath)
+        Func<string?, int, int, Task>? revealAgentRange,
+        Action<string?>? clearAgentReveal)
     {
         _getActiveFilePath = getActiveFilePath;
         _getWorkspaceRoot = getWorkspaceRoot;
         _getSolutionPath = getSolutionPath;
         _getIndexDirectoryRelative = getIndexDirectoryRelative;
-        _getEditorForAbsoluteFilePath = getEditorForAbsoluteFilePath;
+        _revealAgentRange = revealAgentRange;
+        _clearAgentReveal = clearAgentReveal;
     }
 
     public void Schedule(string? composerText, int caretIndex, int debounceMs = DefaultDebounceMs)
     {
+        if (_revealAgentRange is null)
+            return;
+
         _debounceCts?.Cancel();
         _debounceCts = new CancellationTokenSource();
         var cts = _debounceCts;
@@ -119,7 +124,7 @@ public sealed class AnchorDraftPreviewCoordinator
             return;
         }
 
-        await UiScheduler.Default.InvokeAsync(() =>
+        await UiScheduler.Default.InvokeAsync(async () =>
         {
             if (generation != _generation || cts.IsCancellationRequested)
                 return;
@@ -130,18 +135,20 @@ public sealed class AnchorDraftPreviewCoordinator
                 return;
             }
 
-            var editor = _getEditorForAbsoluteFilePath(preview.AbsoluteFilePath);
-            if (editor is null)
+            if (_revealAgentRange is null)
             {
                 clearEditorHighlight();
                 return;
             }
 
-            if (_lastEditor is not null && !ReferenceEquals(_lastEditor, editor))
-                EditorAgentRangeReveal.Hide(_lastEditor);
+            if (_lastRevealPath is not null
+                && !string.Equals(_lastRevealPath, preview.AbsoluteFilePath, StringComparison.OrdinalIgnoreCase))
+            {
+                _clearAgentReveal?.Invoke(_lastRevealPath);
+            }
 
-            _lastEditor = editor;
-            EditorAgentRangeReveal.ShowPersistent(editor, preview.StartLine, preview.EndLine);
+            _lastRevealPath = preview.AbsoluteFilePath;
+            await _revealAgentRange(preview.AbsoluteFilePath, preview.StartLine, preview.EndLine).ConfigureAwait(true);
         }).ConfigureAwait(false);
     }
 
@@ -161,10 +168,10 @@ public sealed class AnchorDraftPreviewCoordinator
 
     private void clearEditorHighlight()
     {
-        if (_lastEditor is null)
+        if (_lastRevealPath is null)
             return;
 
-        EditorAgentRangeReveal.Hide(_lastEditor);
-        _lastEditor = null;
+        _clearAgentReveal?.Invoke(_lastRevealPath);
+        _lastRevealPath = null;
     }
 }

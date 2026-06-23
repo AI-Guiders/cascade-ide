@@ -4,7 +4,6 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:models="using:CascadeIDE.Models"
-        xmlns:ae="using:AvaloniaEdit"
         xmlns:views="using:CascadeIDE.Views"
         xmlns:chrome="using:CascadeIDE.Features.UiChrome"
         xmlns:lang="using:CascadeIDE.Lang"
@@ -44,14 +43,6 @@
         <Style Selector="Button:disabled">
             <Setter Property="Background" Value="{DynamicResource CascadeTheme.ButtonDisabledBackground}"/>
             <Setter Property="Foreground" Value="{DynamicResource CascadeTheme.ButtonDisabledForeground}"/>
-        </Style>
-        <Style Selector="ae|TextEditor.EditorBox">
-            <Setter Property="Background" Value="{DynamicResource CascadeTheme.EditorBackground}"/>
-            <Setter Property="Foreground" Value="{DynamicResource CascadeTheme.EditorForeground}"/>
-        </Style>
-        <Style Selector="ae|TextEditor.EditorBox:focus">
-            <Setter Property="Background" Value="{DynamicResource CascadeTheme.EditorBackground}"/>
-            <Setter Property="Foreground" Value="{DynamicResource CascadeTheme.EditorForeground}"/>
         </Style>
         <Style Selector="Border#ModeBadge">
             <Setter Property="Background" Value="#29437A"/>

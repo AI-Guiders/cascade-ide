@@ -1,7 +1,6 @@
 #nullable enable
 
-using Avalonia.Controls;
-using AvaloniaEdit;
+using CascadeIDE.Features.Editor.Application.Monaco;
 using CascadeIDE.Features.Documents;
 using CascadeIDE.Features.Editor;
 using CascadeIDE.Features.HybridIndex.Application;
@@ -75,9 +74,6 @@ public partial class MainWindowViewModel
 
     void IWorkspaceNavigationMapHost.ScheduleEditorHudBannerRefresh() => ScheduleEditorHudBannerRefresh();
 
-    IEnumerable<TextEditor> IWorkspaceNavigationMapHost.EnumerateEditorsForPath(string? currentPath) =>
-        NavigationMap.EnumerateEditorsForPath(currentPath);
-
     void IWorkspaceNavigationMapHost.RevealEditorRange(string? path, int startLine, int endLine, int? column) =>
-        _revealEditorRangeAction?.Invoke(path, startLine, endLine, column);
+        EditorNavigation.TryNavigateGoTo(path, startLine, column ?? 1, endLine, column, EditorNavigationSource.NavigationMap);
 }

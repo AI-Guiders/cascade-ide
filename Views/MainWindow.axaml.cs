@@ -1,26 +1,17 @@
 using System.ComponentModel;
-using System.Runtime.CompilerServices;
+using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
-using AvaloniaEdit;
-using AvaloniaEdit.TextMate;
-using TextMateSharp.Grammars;
-using TextMateSharp.Themes;
 using CascadeIDE.Cockpit.Surface;
 
 namespace CascadeIDE.Views;
 
 public partial class MainWindow : PointerTrackingWindow
 {
-    private RegistryOptions? _registryOptions;
-    private readonly ConditionalWeakTable<TextEditor, TextMate.Installation> _textMateByEditor = new();
-    private bool _suppressEditorSync;
     private Services.CSharpLanguageService? _languageService;
-    private Services.EditorIntelligence? _editorIntelligence;
     private MarkdownPreviewWindow? _previewWindow;
     private ViewModels.MarkdownPreviewWindowViewModel? _previewVm;
-    private TextEditor? _marginPointerEditor;
     private ViewModels.MainWindowViewModel? _boundMainVm;
     private PropertyChangedEventHandler? _navigationMapHandler;
     private bool _workspaceEventsAttached;

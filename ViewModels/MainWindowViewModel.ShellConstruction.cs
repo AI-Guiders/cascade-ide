@@ -26,7 +26,9 @@ using CascadeIDE.Features.Terminal;
 using CascadeIDE.Features.UiChrome;
 using CascadeIDE.Features.Workspace.Application;
 using CascadeIDE.Models;
+using CascadeIDE.Services;
 using CascadeIDE.Services.Presentation;
+using CascadeIDE.Views;
 
 namespace CascadeIDE.ViewModels;
 
@@ -77,6 +79,7 @@ public partial class MainWindowViewModel
 
         Documents.InitializeDock();
 
+        InitializeEditorNavigation();
         InitializeWorkspaceNavigationMap();
         NavigationMap.CodeNavigationMapPresentation =
             CodeNavigationMapPresentationKind.Normalize(_settings.CodeNavigationMap.View);
@@ -162,10 +165,13 @@ public partial class MainWindowViewModel
             getEditorSelectionStart: () => EditorSelectionStart,
             getEditorSelectionLength: () => EditorSelectionLength,
             getEditorCaretOffset: () => NavigationMap.EditorCaretOffset,
-            getTextEditorForAbsoluteFilePath: path =>
-                string.IsNullOrWhiteSpace(path)
-                    ? null
-                    : EditorActiveDockResolver.TryGetEditor(this, path),
+            revealAgentRangeInEditor: (path, startLine, endLine) =>
+            {
+                var dock = EditorActiveDockResolver.TryGetDockDocumentView(this, path);
+                return dock?.RevealAgentRangeAsync(startLine, endLine, persistent: true) ?? Task.CompletedTask;
+            },
+            clearAgentRevealInEditor: path =>
+                EditorActiveDockResolver.TryGetDockDocumentView(this, path)?.ClearAgentReveal(),
             agentEnvironment: _agentEnvironment,
             getSolutionPathForAgent: () => Workspace.SolutionPath);
         ChatPanel.SetIntercomFontsSettings(_settings.Fonts.Intercom);

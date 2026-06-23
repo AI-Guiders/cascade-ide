@@ -3,7 +3,6 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.VisualTree;
-using AvaloniaEdit;
 using CascadeIDE.Models;
 using CascadeIDE.ViewModels;
 using CascadeIDE.Views;
@@ -11,48 +10,11 @@ using CascadeIDE.Views;
 namespace CascadeIDE.Services;
 
 /// <summary>
-/// Выбор видимого <see cref="TextEditor"/> при нескольких <see cref="DocumentsDockView"/>
+/// Выбор активного <see cref="DockDocumentView"/> при нескольких <see cref="DocumentsDockView"/>
 /// (Forward + Mfd + <see cref="MfdHostWindow"/>). ADR 0120/0017.
 /// </summary>
 public static class EditorActiveDockResolver
 {
-    public static TextEditor? TryGetEditor(MainWindowViewModel vm, string? filePath)
-    {
-        if (string.IsNullOrWhiteSpace(filePath))
-            return null;
-
-        TextEditor? best = null;
-        var bestScore = int.MinValue;
-
-        foreach (var window in EnumerateHostWindows())
-        {
-            if (!ReferenceEquals(window.DataContext, vm))
-                continue;
-
-            foreach (var dockView in EnumerateDescendants<DockDocumentView>(window))
-            {
-                if (dockView.DataContext is not DockDocumentViewModel dv)
-                    continue;
-
-                if (!string.Equals(dv.Doc.FilePath, filePath, StringComparison.OrdinalIgnoreCase))
-                    continue;
-
-                var editor = dockView.FindControl<TextEditor>("Editor");
-                if (editor is null)
-                    continue;
-
-                var score = Score(vm, dockView, window);
-                if (score > bestScore)
-                {
-                    bestScore = score;
-                    best = editor;
-                }
-            }
-        }
-
-        return best;
-    }
-
     public static DockDocumentView? TryGetDockDocumentView(MainWindowViewModel vm, string? filePath)
     {
         if (string.IsNullOrWhiteSpace(filePath))

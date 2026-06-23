@@ -2,6 +2,7 @@ using CascadeIDE.ViewModels;
 using CascadeIDE.Features.IdeMcp.Application;
 using CascadeIDE.Features.Workspace.DataAcquisition;
 using CascadeIDE.Models;
+using CascadeIDE.Features.Editor.Application.Monaco;
 using CascadeIDE.Services;
 
 namespace CascadeIDE.Features.IdeMcp.Application;
@@ -123,33 +124,17 @@ internal sealed partial class MainWindowIdeMcpHost
 
     public void GoToPosition(string? filePath, int line, int column, int? endLine, int? endColumn)
     {
-        this.SelectInEditor(filePath, line, column, endLine ?? line, endColumn ?? column);
+        _host.EditorNavigation.TryNavigateGoTo(filePath, line, column, endLine, endColumn, EditorNavigationSource.Mcp);
     }
 
     public void RevealEditorRange(string? filePath, int startLine, int endLine, int? durationMs)
     {
-        UiScheduler.Default.Post(() =>
-        {
-            if (!string.IsNullOrEmpty(filePath))
-            {
-                var normalized = CanonicalFilePath.Normalize(filePath);
-                if (!CanonicalFilePath.Equals(_host.CurrentFilePath, normalized) && File.Exists(normalized))
-                {
-                    _host.IsLoadingCurrentFile = true;
-                    try
-                    {
-                        _host.Documents.OpenOrActivateDocument(normalized);
-                    }
-                    finally
-                    {
-                        _host.IsLoadingCurrentFile = false;
-                    }
-                }
-            }
-
-            var path = string.IsNullOrEmpty(filePath) ? _host.CurrentFilePath : CanonicalFilePath.Normalize(filePath);
-            _host.McpRevealEditorRangeAction?.Invoke(path, startLine, endLine, durationMs);
-        });
+        _host.EditorNavigation.TryNavigateReveal(
+            filePath,
+            startLine,
+            endLine,
+            durationMs,
+            EditorNavigationSource.Mcp);
     }
 
 }

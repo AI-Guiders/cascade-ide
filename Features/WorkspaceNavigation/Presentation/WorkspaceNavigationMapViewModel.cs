@@ -6,7 +6,6 @@ using System.Linq;
 using System.Text.Json;
 using Avalonia.Controls;
 using Avalonia.Threading;
-using AvaloniaEdit;
 using CascadeIDE.Cockpit.Cds;
 using CascadeIDE.Cockpit.Channels.TraceFlow;
 using CascadeIDE.Cockpit.Composition.TraceFlow;
@@ -187,7 +186,7 @@ public sealed partial class WorkspaceNavigationMapViewModel : ObservableObject
             CodeNavigationMapGraphScene?.Nodes.Count);
 
     public bool IsControlFlowEditorVirtualSpacingActiveForFile(string? filePath) =>
-        EditorControlFlowVirtualSpacing.ShouldReserveLane(
+        EditorControlFlowLanePolicy.ShouldReserveLane(
             CodeNavigationMapLevel,
             WorkspaceNavigationMapCfAnchorFullPath,
             filePath,
@@ -332,7 +331,7 @@ public sealed partial class WorkspaceNavigationMapViewModel : ObservableObject
         if (!EditorTextCoordinateUtilities.PathsReferToSameFile(_host.CurrentFilePath, fullPath))
             return;
 
-        var text = TryCaptureLiveEditorText(_host.CurrentFilePath) ?? _host.EditorText;
+        var text = _host.EditorText;
         if (WorkspaceNavigationMapOrchestrator.TryOffsetForLine(text, lineOneBased) is int offset)
             _editorCaretOffset = offset;
     }
@@ -346,16 +345,6 @@ public sealed partial class WorkspaceNavigationMapViewModel : ObservableObject
 
         if (!EditorTextCoordinateUtilities.PathsReferToSameFile(_host.CurrentFilePath, _controlFlowGraphNavigatePath))
             return false;
-
-        foreach (var editor in EnumerateEditorsForPath(_host.CurrentFilePath))
-        {
-            var docText = editor.Document?.Text;
-            if (WorkspaceNavigationMapOrchestrator.TryOffsetForLine(docText, line) is int offset)
-            {
-                _editorCaretOffset = offset;
-                return true;
-            }
-        }
 
         if (WorkspaceNavigationMapOrchestrator.TryOffsetForLine(_host.EditorText, line) is int hostOffset)
         {

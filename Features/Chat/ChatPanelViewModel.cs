@@ -12,7 +12,6 @@ using CascadeIDE.Models.AgentChat;
 using CascadeIDE.Features.Chat.Application;
 using CascadeIDE.Features.Chat.DataAcquisition;
 using CascadeIDE.Features.Cockpit;
-using AvaloniaEdit;
 using CascadeIDE.Models.Intercom;
 using CascadeIDE.Services;
 using CascadeIDE.Services.Intercom;
@@ -109,7 +108,8 @@ public partial class ChatPanelViewModel : ViewModelBase
         Func<int?>? getEditorSelectionStart = null,
         Func<int?>? getEditorSelectionLength = null,
         Func<int?>? getEditorCaretOffset = null,
-        Func<string?, TextEditor?>? getTextEditorForAbsoluteFilePath = null,
+        Func<string?, int, int, Task>? revealAgentRangeInEditor = null,
+        Action<string?>? clearAgentRevealInEditor = null,
         SlashCommandPreviewService? slashCommandPreviewService = null,
         Features.Agent.Environment.IAgentEnvironmentService? agentEnvironment = null,
         Func<string?>? getSolutionPathForAgent = null)
@@ -132,14 +132,15 @@ public partial class ChatPanelViewModel : ViewModelBase
         _showAcpTerminal = showAcpTerminal;
         _executeIdeCommandForMafAgent = executeIdeCommandForMafAgent;
         _revealIntercomAttachmentInIde = revealIntercomAttachmentInIde;
-        _anchorDraftPreview = getTextEditorForAbsoluteFilePath is null
+        _anchorDraftPreview = revealAgentRangeInEditor is null
             ? null
             : new AnchorDraftPreviewCoordinator(
                 () => _getCurrentFilePath?.Invoke(),
                 getWorkspaceRoot,
                 () => ResolveAttachSolutionPath(),
                 ResolveAttachIndexDirectoryRelative,
-                getTextEditorForAbsoluteFilePath);
+                revealAgentRangeInEditor,
+                clearAgentRevealInEditor);
         _workspaceFileSlashCompletion = getSolutionPath is not null && getSolutionRoots is not null
             ? new WorkspaceFileSlashCompletionProvider(getSolutionPath, getSolutionRoots, getWorkspaceRoot)
             : null;

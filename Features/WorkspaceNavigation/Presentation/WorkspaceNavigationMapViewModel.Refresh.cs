@@ -1,6 +1,6 @@
 #nullable enable
 
-using AvaloniaEdit;
+using Avalonia.Controls;
 using CascadeIDE.Cockpit.Cds;
 using CascadeIDE.Cockpit.Composition.TraceFlow;
 using CascadeIDE.Cockpit.Graph;
@@ -88,11 +88,13 @@ public sealed partial class WorkspaceNavigationMapViewModel
             anchorPath = WorkspaceNavigationMapAnchorResolver.Resolve(currentPath, openDocumentPaths, rawPaths);
             solutionPath = _host.Workspace.SolutionPath;
             editorText = _host.EditorText;
-            caretOffset = TryCaptureLiveEditorCaretOffset(currentPath)
-                ?? _editorCaretOffset
+            caretOffset = _editorCaretOffset
                 ?? _host.EditorSelectionStart;
-            if (TryCaptureLiveEditorText(currentPath) is { } liveText)
-                editorText = liveText;
+            if (string.Equals(currentPath, _host.CurrentFilePath, StringComparison.OrdinalIgnoreCase)
+                && !string.IsNullOrEmpty(_host.EditorText))
+            {
+                editorText = _host.EditorText;
+            }
             navSettings = _host.Settings.CodeNavigation;
             var sm = _host.Settings.CodeNavigationMap;
             wantList = sm.WantsCodeNavigationMapList;
@@ -313,47 +315,6 @@ public sealed partial class WorkspaceNavigationMapViewModel
         return (r.FeatureLine, r.FeatureDocPaths, r.DocsCoverageLine, r.AdrLine, r.AdrFirstDocPath, r.AdrDocPaths);
     }
 
-    private int? TryCaptureLiveEditorCaretOffset(string? currentPath)
-    {
-        foreach (var editor in EnumerateEditorsForPath(currentPath))
-            return editor.TextArea.Caret.Offset;
-
-        return null;
-    }
-
-    private string? TryCaptureLiveEditorText(string? currentPath)
-    {
-        foreach (var editor in EnumerateEditorsForPath(currentPath))
-            return editor.Document.Text;
-
-        return null;
-    }
-
     private static double SanitizeMapViewportDimension(double value, double fallback) =>
         double.IsFinite(value) && value > 0 ? value : fallback;
-
-    internal IEnumerable<TextEditor> EnumerateEditorsForPath(string? currentPath)
-    {
-        if (string.IsNullOrWhiteSpace(currentPath))
-            yield break;
-
-        var direct = EditorActiveDockResolver.TryGetEditor(_host.Shell, currentPath);
-        if (direct is not null)
-        {
-            yield return direct;
-            yield break;
-        }
-
-        foreach (var doc in _host.Documents.OpenDocuments)
-        {
-            if (string.IsNullOrEmpty(doc.FilePath))
-                continue;
-            if (!EditorTextCoordinateUtilities.PathsReferToSameFile(doc.FilePath, currentPath))
-                continue;
-
-            var editor = EditorActiveDockResolver.TryGetEditor(_host.Shell, doc.FilePath);
-            if (editor is not null)
-                yield return editor;
-        }
-    }
 }

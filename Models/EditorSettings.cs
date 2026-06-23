@@ -4,7 +4,7 @@ namespace CascadeIDE.Models;
 public sealed class EditorSettings
 {
     /// <summary>
-    /// Forward host: <c>avalonia_edit</c> (default) | <c>monaco_webview2</c> (ADR 0162).
+    /// Forward host: <c>monaco_webview2</c> (ADR 0163). <c>avalonia_edit</c> — deprecated alias.
     /// </summary>
     public string ForwardHost { get; set; } = EditorForwardHostKindParser.MonacoWebView2Toml;
 

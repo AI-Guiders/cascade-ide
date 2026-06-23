@@ -1,6 +1,5 @@
 #nullable enable
 
-using AvaloniaEdit;
 using CascadeIDE.Features.HybridIndex.Application;
 using CascadeIDE.Features.Documents;
 using CascadeIDE.Features.Editor;
@@ -54,8 +53,6 @@ public interface IWorkspaceNavigationMapHost
     void SaveSettingsIfChanged();
 
     void ScheduleEditorHudBannerRefresh();
-
-    IEnumerable<TextEditor> EnumerateEditorsForPath(string? currentPath);
 
     void RevealEditorRange(string? path, int startLine, int endLine, int? column);
 }
