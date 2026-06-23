@@ -13,10 +13,16 @@ public static class CideEditorBridgeTypes
     public const string SetStickyScroll = "editor/setStickyScroll";
     public const string SetGutterGlyphs = "editor/setGutterGlyphs";
     public const string SetIntelligence = "editor/setIntelligence";
+    public const string RevealRange = "editor/revealRange";
+    public const string SetSelectionByOffset = "editor/setSelectionByOffset";
+    public const string SetAgentReveal = "editor/setAgentReveal";
+    public const string ClearAgentReveal = "editor/clearAgentReveal";
+    public const string SetEpochDim = "editor/setEpochDim";
 
     public const string DidChange = "editor/didChange";
     public const string DidChangeCursorSelection = "editor/didChangeCursorSelection";
     public const string DidScroll = "editor/didScroll";
+    public const string DidGutterClick = "editor/didGutterClick";
     public const string Ready = "editor/ready";
 
     public const string RequestCompletion = "editor/requestCompletion";
@@ -46,7 +52,19 @@ public sealed record CideEditorDecoration(
     int StartOffset,
     int Length,
     string ClassName,
-    string? HoverMessage);
+    string? HoverMessage,
+    bool IsWholeLine = false,
+    string? GlyphMarginClassName = null);
+
+public sealed record CideEditorSetSelectionMessage(int SelectionStart, int SelectionLength);
+
+public sealed record CideEditorSetAgentRevealMessage(
+    int StartLine,
+    int EndLine,
+    bool Persistent,
+    int? DurationMs);
+
+public sealed record CideEditorSetEpochDimMessage(bool Dimmed);
 
 public sealed record CideEditorSetDecorationsMessage(
     string SetId,
@@ -64,6 +82,22 @@ public sealed record CideEditorSetGutterGlyphsMessage(
     IReadOnlyList<CideEditorGutterGlyph> Glyphs);
 
 public sealed record CideEditorSetIntelligenceMessage(bool Enabled);
+
+public sealed record CideEditorRevealRangeMessage(
+    int StartLine,
+    int EndLine,
+    int? Column);
+
+public sealed record CideEditorDefinitionLocation(
+    string FilePath,
+    int Line,
+    int Column);
+
+public sealed record CideEditorDefinitionResultMessage(
+    int RequestId,
+    CideEditorDefinitionLocation? Location);
+
+public sealed record CideEditorSetThemeMessage(string ThemeName);
 
 public sealed record CideEditorCompletionItem(
     string Label,
@@ -177,6 +211,8 @@ public static class CideEditorLanguageIds
 
 public static class MonacoEditorAssetLocator
 {
+    public const string VirtualHostName = "cide-editor.local";
+
     public static string GetCideEditorRoot()
     {
         var baseDir = AppContext.BaseDirectory;
@@ -203,10 +239,13 @@ public static class MonacoEditorAssetLocator
         return Directory.Exists(local) ? local.Replace('\\', '/') : "";
     }
 
-    public static Uri GetIndexUri()
+    public static Uri GetIndexUri() =>
+        new($"https://{VirtualHostName}/index.html");
+
+    public static Uri GetFileIndexUri()
     {
-        var path = GetIndexHtmlPath();
-        return new Uri(new Uri("file:///"), path.Replace('\\', '/'));
+        var path = Path.GetFullPath(GetIndexHtmlPath());
+        return new Uri(path);
     }
 }
-
+

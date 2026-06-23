@@ -1,0 +1,28 @@
+{
+  "version": 1,
+  "setIds": {
+    "diagnostics": "diagnostics",
+    "highlights": "highlights",
+    "breakpoints": "breakpoints",
+    "debugLine": "debugLine",
+    "agentReveal": "agentReveal",
+    "cfGutter": "cfGutter"
+  },
+  "capabilities": {
+    "completion": "capability/completion",
+    "hover": "capability/hover",
+    "signatureHelp": "capability/signatureHelp",
+    "definition": "capability/definition",
+    "navigate": "capability/navigate",
+    "inlayHints": "capability/inlayHints",
+    "completionResult": "capability/completionResult",
+    "hoverResult": "capability/hoverResult",
+    "signatureResult": "capability/signatureResult",
+    "definitionResult": "capability/definitionResult"
+  },
+  "legacy": {
+    "requestCompletion": "editor/requestCompletion",
+    "requestHover": "editor/requestHover",
+    "requestSignature": "editor/requestSignature"
+  }
+}

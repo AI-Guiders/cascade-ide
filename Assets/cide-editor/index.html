@@ -1,35 +1,52 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="utf-8" />
-  <meta http-equiv="Content-Security-Policy"
-        content="default-src 'self' 'unsafe-inline' 'unsafe-eval' blob: data:; script-src 'self' 'unsafe-inline' 'unsafe-eval' blob:; style-src 'self' 'unsafe-inline'; worker-src blob:;" />
-  <title>CIDE Forward Editor</title>
-  <style>
-    html, body { margin: 0; padding: 0; height: 100%; overflow: hidden; background: #1e1e1e; }
-    #container { width: 100%; height: 100%; }
-
-    .squiggly-error { text-decoration: underline wavy #f14c4c; }
-    .squiggly-warning { text-decoration: underline wavy #cca700; }
-    .squiggly-info { text-decoration: underline wavy #3794ff; }
-    .reference-highlight { background-color: rgba(180, 220, 255, 0.35); }
-
-    .monaco-editor .margin-view-overlays .cide-cf-glyph::before {
-      display: inline-block;
-      width: 14px;
-      text-align: center;
-      font-size: 11px;
-      font-weight: 600;
-      color: #e8eef8;
-    }
-    .monaco-editor .margin-view-overlays .cide-cf-Anchor::before { color: #7ec8ff; }
-    .monaco-editor .margin-view-overlays .cide-cf-Diamond::before { color: #f5c842; }
-    .monaco-editor .margin-view-overlays .cide-cf-Exit::before { color: #b8c4d8; }
-    .monaco-editor .margin-view-overlays .cide-cf-Circle::before { color: #8fd4a8; }
-  </style>
-</head>
-<body>
-  <div id="container"></div>
-  <script src="cide-editor-bridge.js"></script>
-</body>
-</html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="Content-Security-Policy"
+        content="default-src 'self' 'unsafe-inline' 'unsafe-eval' blob: data:; script-src 'self' 'unsafe-inline' 'unsafe-eval' blob:; style-src 'self' 'unsafe-inline'; worker-src blob:;" />
+  <title>CIDE Forward Editor</title>
+  <style>
+    html, body { margin: 0; padding: 0; height: 100%; overflow: hidden; background: #1e1e1e; }
+    #container { width: 100%; height: 100%; }
+
+    .squiggly-error { text-decoration: underline wavy #f14c4c; }
+    .squiggly-warning { text-decoration: underline wavy #cca700; }
+    .squiggly-info { text-decoration: underline wavy #3794ff; }
+    .reference-highlight { background-color: rgba(180, 220, 255, 0.35); }
+
+    .monaco-editor .margin-view-overlays .cide-cf-glyph::before {
+      display: inline-block;
+      width: 14px;
+      text-align: center;
+      font-size: 11px;
+      font-weight: 600;
+      color: #e8eef8;
+    }
+    .monaco-editor .margin-view-overlays .cide-cf-Anchor::before { color: #7ec8ff; }
+    .monaco-editor .margin-view-overlays .cide-cf-Diamond::before { color: #f5c842; }
+    .monaco-editor .margin-view-overlays .cide-cf-Exit::before { color: #b8c4d8; }
+    .monaco-editor .margin-view-overlays .cide-cf-Circle::before { color: #8fd4a8; }
+
+    .cide-breakpoint-line { background-color: rgba(200, 80, 80, 0.15); }
+    .cide-debug-line { background-color: rgba(255, 200, 80, 0.24); }
+    .cide-agent-reveal-line { background-color: rgba(120, 200, 255, 0.22); outline: 1px solid rgba(120, 200, 255, 0.45); }
+
+    .monaco-editor .margin-view-overlays .cide-breakpoint-glyph::before {
+      content: '●';
+      color: #c85050;
+      font-size: 10px;
+    }
+    .monaco-editor .margin-view-overlays .cide-debug-arrow::before {
+      content: '▶';
+      color: #ffd730;
+      font-size: 9px;
+    }
+
+    #container.cide-epoch-dim { opacity: 0.55; filter: saturate(0.85); }
+  </style>
+</head>
+<body>
+  <div id="container"></div>
+  <script src="cide-editor-bridge.js"></script>
+</body>
+</html>
