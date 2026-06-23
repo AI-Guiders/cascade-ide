@@ -7,6 +7,7 @@ using CascadeIDE.Features.Editor.Application;
 using CascadeIDE.Features.Editor.Application.Monaco;
 using CascadeIDE.Features.Editor.Presentation;
 using CascadeIDE.Features.WorkspaceNavigation.Presentation;
+using CascadeIDE.Services;
 using CascadeIDE.ViewModels;
 
 namespace CascadeIDE.Views;
@@ -137,6 +138,7 @@ public partial class DockDocumentView
             await PushMonacoControlFlowGlyphsAsync().ConfigureAwait(true);
             await PushMonacoHighlightsAsync().ConfigureAwait(true);
             await PushMonacoDebugOverlayAsync().ConfigureAwait(true);
+            await PushMonacoInlayHintsAsync().ConfigureAwait(true);
             _vm.UpdateCodeNavigationMapCaretOffset(_editorSurface?.CaretOffset ?? 0);
             _vm.ScheduleWorkspaceNavigationMapRefresh();
         }
@@ -167,6 +169,7 @@ public partial class DockDocumentView
 
             PostStabilizedEditorInputIfActive(EditorInputDeltaKind.DocumentText);
             _ = PushMonacoControlFlowGlyphsAsync();
+            _ = PushMonacoInlayHintsAsync();
             return;
         }
 
@@ -187,9 +190,7 @@ public partial class DockDocumentView
         }
 
         if (CideEditorBusManifest.IsCapabilityRequest(msg.Type)
-            && msg.RequestId is int
-            && msg.Line is int
-            && msg.Column is int)
+            || CideEditorBusManifest.IsCapabilitySideChannel(msg.Type))
         {
             var ctx = BuildCapabilityContext();
             if (ctx is not null)
@@ -230,7 +231,13 @@ public partial class DockDocumentView
             WorkspaceDiagnostics = _vm.WorkspaceDiagnostics,
             ResolveQuickInfoAsync = (path, text, line, column, ct) =>
                 _vm.GetEditorQuickInfoAsync(path, text, line, column, ct),
-            LspReady = false,
+            CSharpLspHost = _vm.CSharpLspHost,
+            GetInlineHintsForFile = _vm.GetEditorInlineHintsForFile,
+            GetCodeLensesForFile = path =>
+                MonacoEditorCodeLensComposer.FromNavigationScene(
+                    path,
+                    _vm.NavigationMap.CodeNavigationMapGraphScene),
+            TryNavigateCodeLens = lensId => _vm.TryNavigateCodeLens(lensId),
         };
     }
 
@@ -261,6 +268,28 @@ public partial class DockDocumentView
         catch (Exception ex)
         {
             System.Diagnostics.Debug.WriteLine("Monaco diagnostics: " + ex.Message);
+        }
+    }
+
+    private async Task PushMonacoInlayHintsAsync()
+    {
+        if (_monacoHost is null || !_monacoHost.IsReady || _docVm is null || _vm is null || !IsActive())
+            return;
+
+        var filePath = _docVm.Doc.FilePath ?? "";
+        if (!CideEditorLanguageIds.SupportsRoslynIntelligence(filePath))
+            return;
+
+        _monacoHost.Session.ReadSnapshot(out _, out var text, out _, out _, out _);
+        var parts = _vm.GetEditorInlineHintsForFile(filePath, text);
+        var hints = MonacoEditorInlayMapper.ToHints(text, parts);
+        try
+        {
+            await _monacoHost.PushInlayHintsAsync(hints).ConfigureAwait(true);
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine("Monaco inlay hints: " + ex.Message);
         }
     }
 
@@ -304,15 +333,19 @@ public partial class DockDocumentView
             return;
 
         var filePath = _docVm.Doc.FilePath ?? "";
-        if (!_vm.NavigationMap.IsControlFlowEditorVirtualSpacingActiveForFile(filePath))
+        var laneActive = _vm.NavigationMap.IsControlFlowEditorVirtualSpacingActiveForFile(filePath);
+        if (!laneActive)
         {
             await _monacoHost.PushGutterGlyphsAsync([]).ConfigureAwait(true);
+            await _monacoHost.PushCfContentLaneAsync(false, 0).ConfigureAwait(true);
             return;
         }
 
         var visuals = _vm.NavigationMap.GetControlFlowGutterLineVisualsForFile(filePath);
         try
         {
+            await _monacoHost.PushCfContentLaneAsync(true, EditorControlFlowLanePolicy.LaneWidthPixels)
+                .ConfigureAwait(true);
             await _monacoHost.PushGutterGlyphsAsync(MonacoEditorGutterMapper.ToGlyphs(visuals)).ConfigureAwait(true);
         }
         catch (Exception ex)

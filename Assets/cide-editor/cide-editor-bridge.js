@@ -17,10 +17,15 @@
       hover: 'capability/hover',
       signatureHelp: 'capability/signatureHelp',
       definition: 'capability/definition',
+      inlayHints: 'capability/inlayHints',
+      codeLens: 'capability/codeLens',
+      codeLensClick: 'capability/codeLensClick',
       completionResult: 'capability/completionResult',
       hoverResult: 'capability/hoverResult',
       signatureResult: 'capability/signatureResult',
       definitionResult: 'capability/definitionResult',
+      inlayHintsResult: 'capability/inlayHintsResult',
+      codeLensResult: 'capability/codeLensResult',
     },
   };
 
@@ -40,6 +45,8 @@
   const pendingRequests = new Map();
   let cfGlyphStyleEl = null;
   let disposables = [];
+  let hostInlayHints = [];
+  let cfLaneActive = false;
 
   function postToHost(msg) {
     const body = JSON.stringify(msg);
@@ -225,6 +232,26 @@
     decorationSets.set(BUS.setIds.cfGutter, handles);
   }
 
+  function applyCfContentLane(active, widthPx) {
+    cfLaneActive = !!active;
+    const dom = editor && editor.getDomNode ? editor.getDomNode() : null;
+    if (!dom) return;
+    dom.classList.toggle('cide-cf-lane-shift', cfLaneActive);
+    dom.style.setProperty('--cide-cf-lane-width', cfLaneActive ? `${widthPx || 18}px` : '0px');
+  }
+
+  function applyHostInlayHints(hints) {
+    hostInlayHints = hints || [];
+    if (editor && editor.getModel()) {
+      editor.getModel().forceTokenization(editor.getModel().getLineCount());
+    }
+  }
+
+  function mapInlayKind(kind) {
+    if (kind === 'parameter') return monaco.languages.InlayHintKind.Parameter;
+    return monaco.languages.InlayHintKind.Type;
+  }
+
   function registerIntelligenceProviders() {
     disposables.forEach((d) => d.dispose());
     disposables = [];
@@ -234,6 +261,12 @@
     function requestCapability(type, position) {
       const requestId = (Date.now() % 2000000000) + Math.floor(Math.random() * 1000);
       postToHost({ type, requestId, line: position.lineNumber, column: position.column });
+      return requestId;
+    }
+
+    function requestCapabilityAt(type, line, column) {
+      const requestId = (Date.now() % 2000000000) + Math.floor(Math.random() * 1000);
+      postToHost({ type, requestId, line, column });
       return requestId;
     }
 
@@ -307,6 +340,75 @@
         }
       },
     }));
+
+    disposables.push(monaco.languages.registerInlayHintsProvider('csharp', {
+      provideInlayHints: async (model, range) => {
+        if (hostInlayHints.length > 0) {
+          return {
+            hints: hostInlayHints
+              .filter((h) => h.line >= range.startLineNumber && h.line <= range.endLineNumber)
+              .map((h) => ({
+                position: { lineNumber: h.line, column: h.column },
+                label: h.label,
+                kind: mapInlayKind(h.kind),
+                paddingLeft: true,
+              })),
+            dispose: () => {},
+          };
+        }
+        const requestId = requestCapabilityAt(BUS.capabilities.inlayHints, range.startLineNumber, 1);
+        try {
+          const payload = await waitForHostResponse(BUS.capabilities.inlayHintsResult, requestId);
+          return {
+            hints: (payload.hints || []).map((h) => ({
+              position: { lineNumber: h.line, column: h.column },
+              label: h.label,
+              kind: mapInlayKind(h.kind),
+              paddingLeft: true,
+            })),
+            dispose: () => {},
+          };
+        } catch {
+          return { hints: [], dispose: () => {} };
+        }
+      },
+    }));
+
+    disposables.push(monaco.languages.registerCodeLensProvider('csharp', {
+      provideCodeLenses: async () => {
+        const requestId = requestCapabilityAt(BUS.capabilities.codeLens, 1, 1);
+        try {
+          const payload = await waitForHostResponse(BUS.capabilities.codeLensResult, requestId);
+          const lenses = (payload.lenses || []).map((l) => ({
+            range: new monaco.Range(l.line, l.column || 1, l.line, l.column || 1),
+            id: l.id,
+            command: {
+              id: 'cide.executeCodeLens',
+              title: l.title,
+              arguments: [l.id],
+            },
+          }));
+          return { lenses, dispose: () => {} };
+        } catch {
+          return { lenses: [], dispose: () => {} };
+        }
+      },
+    }));
+
+    registerCodeLensCommand();
+  }
+
+  function registerCodeLensCommand() {
+    disposables.push(monaco.editor.registerCommand('cide.executeCodeLens', (_ctx, lensId) => {
+      if (!lensId) return;
+      postToHost({ type: BUS.capabilities.codeLensClick, lensId: String(lensId) });
+    }));
+  }
+
+  function registerBundledMonarchGrammars() {
+    if (typeof window.cideRegisterMonarchGrammars === 'function') {
+      window.cideRegisterMonarchGrammars(monaco);
+    }
   }
 
   window.cideEditorHost = {
@@ -321,6 +423,8 @@
         case 'editor/signatureResult':
         case 'capability/signatureResult':
         case 'capability/definitionResult':
+        case 'capability/inlayHintsResult':
+        case 'capability/codeLensResult':
           resolveHostResponse(msg);
           break;
         case 'editor/setModel': {
@@ -376,6 +480,12 @@
           break;
         case 'editor/setGutterGlyphs':
           applyGutterGlyphs(payload.glyphs || []);
+          break;
+        case 'editor/setCfContentLane':
+          applyCfContentLane(payload.active, payload.widthPixels);
+          break;
+        case 'editor/setInlayHints':
+          applyHostInlayHints(payload.hints || []);
           break;
         case 'editor/setStickyScroll':
           window.cideEditorHost._stickyLabel = payload.label || null;
@@ -476,6 +586,7 @@
       }
     });
 
+    registerBundledMonarchGrammars();
     registerIntelligenceProviders();
     postToHost({ type: 'editor/ready', version: modelVersion });
   }

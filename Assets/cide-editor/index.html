@@ -43,10 +43,24 @@
     }
 
     #container.cide-epoch-dim { opacity: 0.55; filter: saturate(0.85); }
+
+    .monaco-editor.cide-cf-lane-shift .margin,
+    .monaco-editor.cide-cf-lane-shift .monaco-scrollable-element {
+      margin-left: var(--cide-cf-lane-width, 0px);
+    }
+
+    .monaco-editor .cide-inlay-hint-type {
+      color: #969696;
+      font-style: italic;
+    }
+    .monaco-editor .cide-inlay-hint-parameter {
+      color: #808080;
+    }
   </style>
 </head>
 <body>
   <div id="container"></div>
+  <script src="lang/toml.monarch.js"></script>
   <script src="cide-editor-bridge.js"></script>
 </body>
 </html>

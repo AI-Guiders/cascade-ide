@@ -36,12 +36,15 @@ public static class CideEditorBusManifest
         public const string Definition = "capability/definition";
         public const string Navigate = "capability/navigate";
         public const string InlayHints = "capability/inlayHints";
+        public const string CodeLens = "capability/codeLens";
+        public const string CodeLensClick = "capability/codeLensClick";
 
         public const string CompletionResult = "capability/completionResult";
         public const string HoverResult = "capability/hoverResult";
         public const string SignatureResult = "capability/signatureResult";
         public const string DefinitionResult = "capability/definitionResult";
         public const string InlayHintsResult = "capability/inlayHintsResult";
+        public const string CodeLensResult = "capability/codeLensResult";
     }
 
     public static class Editor
@@ -58,6 +61,8 @@ public static class CideEditorBusManifest
         public const string ClearAgentReveal = "editor/clearAgentReveal";
         public const string SetEpochDim = "editor/setEpochDim";
         public const string SetStickyScroll = "editor/setStickyScroll";
+        public const string SetCfContentLane = "editor/setCfContentLane";
+        public const string SetInlayHints = "editor/setInlayHints";
 
         public const string DidChange = "editor/didChange";
         public const string DidChangeCursorSelection = "editor/didChangeCursorSelection";
@@ -87,12 +92,15 @@ public static class CideEditorBusManifest
 
     public static bool IsCapabilityRequest(string? type) =>
         type is Capabilities.Completion or Capabilities.Hover or Capabilities.SignatureHelp
-            or Capabilities.Definition or Capabilities.InlayHints
+            or Capabilities.Definition or Capabilities.InlayHints or Capabilities.CodeLens
             or Legacy.RequestCompletion or Legacy.RequestHover or Legacy.RequestSignature;
+
+    public static bool IsCapabilitySideChannel(string? type) =>
+        type is Capabilities.CodeLensClick;
 
     public static bool IsCapabilityResult(string? type) =>
         type is Capabilities.CompletionResult or Capabilities.HoverResult
             or Capabilities.SignatureResult or Capabilities.DefinitionResult
-            or Capabilities.InlayHintsResult
+            or Capabilities.InlayHintsResult or Capabilities.CodeLensResult
             or Legacy.CompletionResult or Legacy.HoverResult or Legacy.SignatureResult;
 }

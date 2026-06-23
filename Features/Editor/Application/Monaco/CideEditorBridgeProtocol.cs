@@ -116,6 +116,22 @@ public sealed record CideEditorSignatureResultMessage(
     int RequestId,
     string? Signature);
 
+public sealed record CideEditorInlayHint(int Line, int Column, string Label, string Kind = "type");
+
+public sealed record CideEditorInlayHintsResultMessage(
+    int RequestId,
+    IReadOnlyList<CideEditorInlayHint> Hints);
+
+public sealed record CideEditorCodeLensItem(
+    string Id,
+    int Line,
+    int Column,
+    string Title);
+
+public sealed record CideEditorCodeLensResultMessage(
+    int RequestId,
+    IReadOnlyList<CideEditorCodeLensItem> Lenses);
+
 public sealed record CideEditorInboundMessage(
     string Type,
     [property: JsonPropertyName("version")] int? Version,
@@ -127,6 +143,7 @@ public sealed record CideEditorInboundMessage(
     [property: JsonPropertyName("line")] int? Line,
     [property: JsonPropertyName("column")] int? Column,
     [property: JsonPropertyName("topLine")] int? TopLine,
+    [property: JsonPropertyName("lensId")] string? LensId,
     [property: JsonPropertyName("error")] string? Error);
 
 public static class CideEditorBridgeJson
@@ -160,9 +177,10 @@ public static class CideEditorBridgeJson
             int? line = TryInt(root, "line");
             int? column = TryInt(root, "column");
             int? topLine = TryInt(root, "topLine");
+            string? lensId = root.TryGetProperty("lensId", out var lens) ? lens.GetString() : null;
             string? error = root.TryGetProperty("error", out var err) ? err.GetString() : null;
             return new CideEditorInboundMessage(
-                type, version, text, caret, selStart, selLen, requestId, line, column, topLine, error);
+                type, version, text, caret, selStart, selLen, requestId, line, column, topLine, lensId, error);
         }
         catch
         {
@@ -187,7 +205,7 @@ public static class CideEditorLanguageIds
             ".csx" => "csharp",
             ".json" => "json",
             ".md" => "markdown",
-            ".toml" => "ini",
+            ".toml" => "toml",
             ".xml" => "xml",
             ".axaml" => "xml",
             ".html" => "html",

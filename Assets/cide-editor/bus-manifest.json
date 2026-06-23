@@ -1,5 +1,5 @@
 {
-  "version": 1,
+  "version": 2,
   "setIds": {
     "diagnostics": "diagnostics",
     "highlights": "highlights",
@@ -15,10 +15,14 @@
     "definition": "capability/definition",
     "navigate": "capability/navigate",
     "inlayHints": "capability/inlayHints",
+    "codeLens": "capability/codeLens",
+    "codeLensClick": "capability/codeLensClick",
     "completionResult": "capability/completionResult",
     "hoverResult": "capability/hoverResult",
     "signatureResult": "capability/signatureResult",
-    "definitionResult": "capability/definitionResult"
+    "definitionResult": "capability/definitionResult",
+    "inlayHintsResult": "capability/inlayHintsResult",
+    "codeLensResult": "capability/codeLensResult"
   },
   "legacy": {
     "requestCompletion": "editor/requestCompletion",

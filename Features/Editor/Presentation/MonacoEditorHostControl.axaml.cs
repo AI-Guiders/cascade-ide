@@ -257,6 +257,50 @@ public partial class MonacoEditorHostControl : UserControl
             cancellationToken).ConfigureAwait(true);
     }
 
+    public async Task PushCapabilityInlayHintsResultAsync(
+        int requestId,
+        IReadOnlyList<CideEditorInlayHint> hints,
+        CancellationToken cancellationToken = default)
+    {
+        await EnsureReadyAsync(cancellationToken).ConfigureAwait(true);
+        await DispatchAsync(
+            CideEditorBusManifest.Capabilities.InlayHintsResult,
+            new CideEditorInlayHintsResultMessage(requestId, hints),
+            cancellationToken).ConfigureAwait(true);
+    }
+
+    public async Task PushCapabilityCodeLensResultAsync(
+        int requestId,
+        IReadOnlyList<CideEditorCodeLensItem> lenses,
+        CancellationToken cancellationToken = default)
+    {
+        await EnsureReadyAsync(cancellationToken).ConfigureAwait(true);
+        await DispatchAsync(
+            CideEditorBusManifest.Capabilities.CodeLensResult,
+            new CideEditorCodeLensResultMessage(requestId, lenses),
+            cancellationToken).ConfigureAwait(true);
+    }
+
+    public async Task PushInlayHintsAsync(
+        IReadOnlyList<CideEditorInlayHint> hints,
+        CancellationToken cancellationToken = default)
+    {
+        await EnsureReadyAsync(cancellationToken).ConfigureAwait(true);
+        await DispatchAsync(
+            CideEditorBusManifest.Editor.SetInlayHints,
+            new { hints },
+            cancellationToken).ConfigureAwait(true);
+    }
+
+    public async Task PushCfContentLaneAsync(bool active, double widthPixels, CancellationToken cancellationToken = default)
+    {
+        await EnsureReadyAsync(cancellationToken).ConfigureAwait(true);
+        await DispatchAsync(
+            CideEditorBusManifest.Editor.SetCfContentLane,
+            new { active, widthPixels },
+            cancellationToken).ConfigureAwait(true);
+    }
+
     public async Task PushCompletionResultAsync(
         int requestId,
         IReadOnlyList<CideEditorCompletionItem> items,
