@@ -2,6 +2,8 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using Avalonia.Threading;
+using CascadeIDE.Features.Lsp.DataAcquisition;
+using CascadeIDE.Features.Editor.Application.Monaco;
 using CascadeIDE.Services.Lsp;
 
 namespace CascadeIDE.ViewModels;
@@ -130,5 +132,24 @@ public partial class MainWindowViewModel
         }
 
         return CSharpLanguage.GetQuickInfo(filePath, sourceText, line, column, ct);
+    }
+
+    internal CSharpLspDiagnosticsHost? CSharpLspHost => _csharpLspHost;
+
+    internal bool TryNavigateCodeLens(string lensId)
+    {
+        var payload = MonacoEditorCodeLensComposer.TryResolveNavigation(
+            lensId,
+            NavigationMap.CodeNavigationMapGraphScene);
+        if (payload is null)
+            return false;
+
+        EditorNavigation.TryNavigateGoTo(
+            payload.FullPath,
+            payload.LineStart ?? 1,
+            1,
+            payload.LineEnd,
+            source: EditorNavigationSource.NavigationMap);
+        return true;
     }
 }

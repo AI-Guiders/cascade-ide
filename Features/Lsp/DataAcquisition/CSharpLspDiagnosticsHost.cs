@@ -20,7 +20,7 @@ namespace CascadeIDE.Features.Lsp.DataAcquisition;
 /// </summary>
 [IoBoundary("lsp-csharp-stdio")]
 [UiThreadMarshal("diagnostics coalesce → UI Post")]
-public sealed class CSharpLspDiagnosticsHost : ILspDiagnosticSource
+public sealed partial class CSharpLspDiagnosticsHost : ILspDiagnosticSource
 {
     private readonly ConcurrentDictionary<string, List<EditorDiagnosticStrip>> _strips = new(StringComparer.OrdinalIgnoreCase);
     private readonly ConcurrentDictionary<string, string> _syncedText = new(StringComparer.OrdinalIgnoreCase);
