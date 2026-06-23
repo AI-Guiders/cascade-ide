@@ -210,3 +210,4 @@ Per-workspace override — через существующий stack `settings.t
 | Дата | Изменение |
 |------|-----------|
 | 2026-06-20 | Proposed: Monaco Forward host, WebView2 island, anti-hype IPC/memory, strangler phases |
+| 2026-06-21 | Уточнение: ветка `feature/monaco-forward-editor-m0` убрала Avalonia `TextEditor` из dock; полный перевод и bus — [0163](0163-monaco-native-capability-bus-full-forward-migration.md) |

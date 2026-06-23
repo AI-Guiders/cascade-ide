@@ -244,6 +244,7 @@
 | [0160](0160-forge-slash-catalog-runtime-overlay.md) | **Forge slash overlay:** `capabilities.commands[]` после connect; execute API; no bundled `/forge *` | Accepted · Implemented |
 | [0161](0161-cide-spine-and-forge-vertical-feature-module.md) | **Spine + vertical `Features/Forge`:** ownership map; 0024 module; migration F2–F5 | Accepted |
 | [0162](0162-monaco-forward-editor-webview2-host.md) | **Monaco Forward host:** опциональный `IEditorSurfaceAdapter` на WebView2; Avalonia = фюзеляж; strangler dual-path; anti-hype IPC/память vs Photino/Electron | Proposed |
+| [0163](0163-monaco-native-capability-bus-full-forward-migration.md) | **Monaco-native bus:** полный перевод Forward; `ICideEditorCapabilityRouter` / CECB; Monarch+LSP; deprecation `avalonia_edit`; фазы M7–M11 | Proposed |
 
 ## Сборка в один документ (HTML, TXT, PDF)
 
