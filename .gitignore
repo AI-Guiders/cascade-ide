@@ -44,6 +44,8 @@ Data/intercom.witdb_indexes/
 
 # Локальные скрипты правок ADR (не шипить)
 docs/adr/_patch_*.py
+_tmp_*.cs
+_tmp_*.csx
 __pycache__/
 *.py[cod]
 

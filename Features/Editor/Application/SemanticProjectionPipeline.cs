@@ -1,4 +1,5 @@
 using CascadeIDE.Contracts;
+using CascadeIDE.Services;
 using Microsoft.CodeAnalysis;
 
 namespace CascadeIDE.Features.Editor.Application;

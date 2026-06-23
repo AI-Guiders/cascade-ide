@@ -1,34 +1,16 @@
-using AvaloniaEdit;
-using AvaloniaEdit.Rendering;
 using CascadeIDE.Features.WorkspaceNavigation.Application;
 using CascadeIDE.Models;
 using CascadeIDE.ViewModels;
 
 namespace CascadeIDE.Services;
 
-/// <summary>
-/// Резерв ширины слева от текста под глифы control-flow (Virtual Spacing, ADR 0152).
-/// </summary>
-public static class EditorControlFlowVirtualSpacing
+/// <summary>Control-flow virtual spacing policy (ADR 0152); Monaco uses glyphs, lane constants for future layout.</summary>
+public static class EditorControlFlowLanePolicy
 {
     public const double GlyphRadius = 6.2;
     public const double LanePadding = 3.0;
-
-    /// <summary>Полная ширина полосы: круг + отступы.</summary>
     public const double LaneWidthPixels = GlyphRadius * 2 + LanePadding * 2;
-
     public const double LaneHalfWidth = LaneWidthPixels / 2;
-
-    public static int VisualColumnsForWidth(TextView textView) =>
-        VisualColumnsForPixelWidth(textView, LaneWidthPixels);
-
-    public static int VisualColumnsForPixelWidth(TextView textView, double pixelWidth)
-    {
-        double w = textView.WideSpaceWidth;
-        if (w <= 0)
-            w = 7.0;
-        return Math.Max(1, (int)Math.Ceiling(pixelWidth / w));
-    }
 
     public static bool ShouldReserveLane(
         string? codeNavigationMapLevel,

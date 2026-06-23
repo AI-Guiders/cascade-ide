@@ -7,13 +7,13 @@ using Xunit;
 
 namespace CascadeIDE.Tests;
 
-public sealed class EditorControlFlowVirtualSpacingTests
+public sealed class EditorControlFlowLanePolicyTests
 {
     [Fact]
     public void ShouldReserveLane_false_when_not_control_flow_level()
     {
         var scene = MinimalCfScene();
-        Assert.False(EditorControlFlowVirtualSpacing.ShouldReserveLane(
+        Assert.False(EditorControlFlowLanePolicy.ShouldReserveLane(
             CodeNavigationMapLevelKind.File,
             @"D:\w\A.cs",
             @"D:\w\A.cs",
@@ -24,7 +24,7 @@ public sealed class EditorControlFlowVirtualSpacingTests
     public void ShouldReserveLane_false_when_anchor_mismatch()
     {
         var scene = MinimalCfScene();
-        Assert.False(EditorControlFlowVirtualSpacing.ShouldReserveLane(
+        Assert.False(EditorControlFlowLanePolicy.ShouldReserveLane(
             CodeNavigationMapLevelKind.ControlFlow,
             @"D:\w\A.cs",
             @"D:\w\B.cs",
@@ -36,7 +36,7 @@ public sealed class EditorControlFlowVirtualSpacingTests
     {
         const string path = @"D:\w\A.cs";
         var scene = MinimalCfScene();
-        Assert.True(EditorControlFlowVirtualSpacing.ShouldReserveLane(
+        Assert.True(EditorControlFlowLanePolicy.ShouldReserveLane(
             CodeNavigationMapLevelKind.ControlFlow,
             path,
             path,
@@ -46,9 +46,9 @@ public sealed class EditorControlFlowVirtualSpacingTests
     [Fact]
     public void LaneWidthPixels_fits_glyph_diameter_plus_padding()
     {
-        double expected = EditorControlFlowVirtualSpacing.GlyphRadius * 2
-            + EditorControlFlowVirtualSpacing.LanePadding * 2;
-        Assert.Equal(EditorControlFlowVirtualSpacing.LaneWidthPixels, expected);
+        double expected = EditorControlFlowLanePolicy.GlyphRadius * 2
+            + EditorControlFlowLanePolicy.LanePadding * 2;
+        Assert.Equal(EditorControlFlowLanePolicy.LaneWidthPixels, expected);
     }
 
     private static CodeNavigationMapGraphSceneVm MinimalCfScene() =>
