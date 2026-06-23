@@ -1,6 +1,6 @@
 # ADR 0163: Monaco-native capability bus и полный перевод Forward-редактора
 
-**Статус:** Proposed  
+**Статус:** Accepted (M7–M10 implemented on `feature/monaco-forward-editor-m0`; M11 deferred)  
 **Дата:** 2026-06-21  
 **Заменяет / уточняет:** [0162](0162-monaco-forward-editor-webview2-host.md) §2.1 (dual-path `avalonia_edit`), §5 (фазы M6 «optional default») — **направление:** единственный Forward-хост = Monaco; AvaloniaEdit **выводится из Forward**, не из всего CIDE.  
 **Дополняет:** [0103](0103-editor-hud-substrate-semantic-projection-and-surface-adapter.md), [0085](0085-editor-hud-inline-layer-and-hud-banner.md), [LANGUAGE-SERVICES-PLAN.md](../LANGUAGE-SERVICES-PLAN.md)
