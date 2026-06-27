@@ -247,7 +247,7 @@
 | [0163](0163-monaco-native-capability-bus-full-forward-migration.md) | **Monaco-native bus:** полный перевод Forward; `ICideEditorCapabilityRouter` / CECB; Monarch+LSP; deprecation `avalonia_edit`; фазы M7–M11 | Proposed |
 | [0164](0164-monaco-editor-presentation-projection-and-dock-chrome.md) | **Monaco presentation projection:** line-first CECB push, `MonacoEditorPresentationProjector`, `DecorationLayerManager`, version guard, dock chrome `*` | Accepted · Implemented |
 | [0165](0165-mcp-transport-stratification-stdio-http-and-host-matrix.md) | **MCP transport stratification:** Tier A/B/C (stdio vs HTTP-first), матрица хостов, фазы forge/notes/CIDE loopback; не переписывать тулы | Proposed |
-| [0166](0166-agent-centric-harness-model-comfort-and-pay-per-token-economics.md) | **Agent-centric harness:** «ничего о нас без нас», комфорт модели, pay-per-token, пять плоскостей, checklist §2.4, P0–P2 | Proposed |
+| [0166](0166-agent-centric-harness-model-comfort-and-pay-per-token-economics.md) | **Agent-centric harness:** «ничего о нас без нас», L0/colleague criterion, overlay vs Cursor, CIDE in-proc KB [0118], P0–P2 | Proposed |
 
 ## Сборка в один документ (HTML, TXT, PDF)
 
