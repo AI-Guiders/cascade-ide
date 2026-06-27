@@ -55,6 +55,8 @@
   let hostInlayHints = [];
   let hostSemanticLegend = null;
   let cfLaneActive = false;
+  let semanticTokensReady = false;
+  let semanticTokensDebounceTimer = null;
 
   function postToHost(msg) {
     const body = JSON.stringify(msg);
@@ -297,6 +299,18 @@
     }
   }
 
+  function scheduleSemanticTokensRefresh() {
+    semanticTokensReady = false;
+    if (semanticTokensDebounceTimer) clearTimeout(semanticTokensDebounceTimer);
+    semanticTokensDebounceTimer = setTimeout(() => {
+      semanticTokensReady = true;
+      semanticTokensDebounceTimer = null;
+      if (editor && editor.getModel()) {
+        editor.getModel().forceTokenization(editor.getModel().getLineCount());
+      }
+    }, 900);
+  }
+
   function applyHostSemanticLegend(legend) {
     if (legend && legend.tokenTypes && legend.tokenTypes.length > 0) {
       hostSemanticLegend = {
@@ -318,8 +332,12 @@
   }
 
   function mapHostInlayHint(model, h) {
-    const line = h.line;
-    const column = h.atEndOfLine ? model.getLineMaxColumn(line) : h.column;
+    const lineCount = model.getLineCount();
+    const line = Math.max(1, Math.min(h.line ?? 1, lineCount));
+    const maxColumn = model.getLineMaxColumn(line);
+    const column = h.atEndOfLine
+      ? maxColumn
+      : Math.max(1, Math.min(h.column ?? 1, maxColumn));
     const hint = {
       position: { lineNumber: line, column },
       label: h.label,
@@ -465,24 +483,15 @@
 
     disposables.push(monaco.languages.registerInlayHintsProvider('csharp', {
       provideInlayHints: async (model, range) => {
-        if (hostInlayHints.length > 0) {
-          return {
-            hints: hostInlayHints
-              .filter((h) => h.line >= range.startLineNumber && h.line <= range.endLineNumber)
-              .map((h) => mapHostInlayHint(model, h)),
-            dispose: () => {},
-          };
-        }
-        const requestId = requestCapabilityAt(BUS.capabilities.inlayHints, range.startLineNumber, 1);
-        try {
-          const payload = await waitForHostResponse(BUS.capabilities.inlayHintsResult, requestId);
-          return {
-            hints: (payload.hints || []).map((h) => mapHostInlayHint(model, h)),
-            dispose: () => {},
-          };
-        } catch {
+        if (hostInlayHints.length === 0) {
           return { hints: [], dispose: () => {} };
         }
+        return {
+          hints: hostInlayHints
+            .filter((h) => h.line >= range.startLineNumber && h.line <= range.endLineNumber)
+            .map((h) => mapHostInlayHint(model, h)),
+          dispose: () => {},
+        };
       },
     }));
 
@@ -516,6 +525,9 @@
           tokenModifiers: hostSemanticLegend.tokenModifiers || [],
         }),
         provideDocumentSemanticTokens: async () => {
+          if (!semanticTokensReady) {
+            return { data: new Uint32Array(0) };
+          }
           const requestId = requestCapabilityAt(BUS.capabilities.semanticTokens, 1, 1);
           try {
             const payload = await waitForHostResponse(BUS.capabilities.semanticTokensResult, requestId);
@@ -622,7 +634,10 @@
           applyCfContentLane(payload.active, payload.widthPixels);
           break;
         case 'editor/setInlayHints':
-          if (!versionGuard(payload.expectedModelVersion)) break;
+          if (!versionGuard(payload.expectedModelVersion)) {
+            applyHostInlayHints([]);
+            break;
+          }
           applyHostInlayHints(payload.hints || []);
           break;
         case 'editor/setSemanticTokensLegend':
@@ -691,10 +706,35 @@
       colors: {
         'editor.background': '#1e1e1e',
         'editor.foreground': '#d4d4d4',
+        'editor.lineHighlightBackground': '#2a2d2e',
+        'editor.lineHighlightBorder': '#282828',
         'editor.selectionBackground': '#264f78',
         'editor.selectionHighlightBackground': '#264f7855',
         'editor.wordHighlightBackground': '#575757b8',
         'editor.wordHighlightStrongBackground': '#004972b8',
+      },
+      semanticTokenColors: {
+        namespace: '#4ec9b0',
+        type: '#4ec9b0',
+        class: '#4ec9b0',
+        enum: '#4ec9b0',
+        interface: '#4ec9b0',
+        struct: '#4ec9b0',
+        typeParameter: '#4ec9b0',
+        parameter: '#9cdcfe',
+        variable: '#9cdcfe',
+        property: '#9cdcfe',
+        enumMember: '#dcdcaa',
+        member: '#dcdcaa',
+        function: '#dcdcaa',
+        method: '#dcdcaa',
+        macro: '#dcdcaa',
+        keyword: '#569cd6',
+        comment: '#6a9955',
+        string: '#ce9178',
+        number: '#b5cea8',
+        regexp: '#d16969',
+        operator: '#d4d4d4',
       },
     });
 
@@ -712,11 +752,16 @@
       glyphMargin: true,
       quickSuggestions: false,
       suggestOnTriggerCharacters: true,
+      // CFG CodeLens ("1: var") overlaps content in WebView2 until view-zone layout is fixed (ADR 0163).
+      codeLens: false,
+      inlayHints: { enabled: 'on', padding: true },
     });
 
     editor.onDidChangeModelContent(() => {
       if (suppressChange) return;
       modelVersion += 1;
+      applyHostInlayHints([]);
+      scheduleSemanticTokensRefresh();
       publishModelState('change');
     });
 
@@ -735,6 +780,7 @@
 
     registerBundledMonarchGrammars();
     registerIntelligenceProviders();
+    scheduleSemanticTokensRefresh();
     postToHost({ type: 'editor/ready', version: modelVersion });
   }
 
