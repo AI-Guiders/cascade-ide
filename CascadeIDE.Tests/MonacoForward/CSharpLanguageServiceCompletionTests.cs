@@ -79,6 +79,51 @@ public sealed class CSharpLanguageServiceCompletionTests
         Assert.DoesNotContain(items, i => i.DisplayText == "Outer" && i.Kind == CSharpLanguageService.CSharpCompletionKind.Method);
     }
 
+    [Fact]
+    public void ScopeCompletion_acronym_matches_types_after_new_when_text_imported()
+    {
+        const string path = @"D:\Fake\Acronym.cs";
+        var src = """
+            using System.Text;
+            class C { void M() { var x = new SB } }
+            """;
+        var (line, column) = AfterMarker(src, "SB");
+        var svc = new CSharpLanguageService();
+        var items = svc.GetCompletionItems(path, src, line, column, TestContext.Current.CancellationToken);
+
+        Assert.Contains(items, i => i.DisplayText == "StringBuilder");
+        Assert.Contains(items, i => i.DisplayText == "SByte");
+    }
+
+    [Fact]
+    public void ScopeCompletion_acronym_matches_types_in_project_with_global_usings()
+    {
+        var csproj = FindRepoFile(@"CasaField.Core\CasaField.Core.csproj");
+        var path = Path.Combine(Path.GetDirectoryName(csproj)!, "AcronymSample.cs");
+        var src = "class C { void M() { var x = new SB } }";
+        var (line, column) = AfterMarker(src, "SB");
+        var svc = new CSharpLanguageService();
+        var items = svc.GetCompletionItems(path, src, line, column, TestContext.Current.CancellationToken);
+
+        Assert.Contains(items, i => i.DisplayText == "SByte");
+    }
+
+    [Fact]
+    public void ScopeCompletion_acronym_matches_types()
+    {
+        const string path = @"D:\Fake\Acronym.cs";
+        var src = """
+            using System.Text;
+            class C { void M() { SB } }
+            """;
+        var (line, column) = AfterMarker(src, "SB");
+        var svc = new CSharpLanguageService();
+        var items = svc.GetCompletionItems(path, src, line, column, TestContext.Current.CancellationToken);
+
+        Assert.Contains(items, i => i.DisplayText == "StringBuilder");
+        Assert.Contains(items, i => i.DisplayText == "SByte");
+    }
+
     private static (int Line, int Column) AfterMarker(string source, string marker)
     {
         var index = source.IndexOf(marker, StringComparison.Ordinal);
@@ -86,5 +131,19 @@ public sealed class CSharpLanguageServiceCompletionTests
         var position = index + marker.Length;
         var location = SourceText.From(source).Lines.GetLinePosition(position);
         return (location.Line + 1, location.Character + 1);
+    }
+
+    private static string FindRepoFile(string relativePath)
+    {
+        var dir = AppContext.BaseDirectory;
+        for (var i = 0; i < 8; i++)
+        {
+            var candidate = Path.GetFullPath(Path.Combine(dir, relativePath));
+            if (File.Exists(candidate))
+                return candidate;
+            dir = Path.GetDirectoryName(dir)!;
+        }
+
+        throw new FileNotFoundException(relativePath);
     }
 }

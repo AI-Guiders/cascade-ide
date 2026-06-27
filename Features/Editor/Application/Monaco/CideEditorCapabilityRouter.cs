@@ -75,6 +75,17 @@ public sealed class CideEditorCapabilityRouter : ICideEditorCapabilityRouter
         }
 
         var text = context.GetEditorText();
+        var prefix = CSharpCompletionPrefix.Extract(text, line, column);
+
+        var roslynRaw = await Task.Run(
+            () => context.CSharpLanguage.GetCompletionItems(context.FilePath, text, line, column),
+            cancellationToken).ConfigureAwait(true);
+        var roslynItems = roslynRaw.Select(i => new CideEditorCompletionItem(
+            i.DisplayText,
+            i.InsertText,
+            i.Description,
+            CideEditorCompletionKindMapper.FromRoslyn(i.Kind))).ToList();
+
         if (context.LspReady && context.CSharpLspHost is not null)
         {
             var lspItems = await context.CSharpLspHost
@@ -82,20 +93,13 @@ public sealed class CideEditorCapabilityRouter : ICideEditorCapabilityRouter
                 .ConfigureAwait(true);
             if (lspItems.Count > 0)
             {
-                await PushCompletionAsync(context.Host, requestId, lspItems, cancellationToken).ConfigureAwait(true);
+                var merged = CideEditorCompletionMerger.Merge(lspItems, roslynItems, prefix);
+                await PushCompletionAsync(context.Host, requestId, merged, cancellationToken).ConfigureAwait(true);
                 return;
             }
         }
 
-        var items = await Task.Run(
-            () => context.CSharpLanguage.GetCompletionItems(context.FilePath, text, line, column),
-            cancellationToken).ConfigureAwait(true);
-        var mapped = items.Select(i => new CideEditorCompletionItem(
-            i.DisplayText,
-            i.InsertText,
-            i.Description,
-            CideEditorCompletionKindMapper.FromRoslyn(i.Kind))).ToList();
-        await PushCompletionAsync(context.Host, requestId, mapped, cancellationToken).ConfigureAwait(true);
+        await PushCompletionAsync(context.Host, requestId, roslynItems, cancellationToken).ConfigureAwait(true);
     }
 
     private static async Task HandleHoverAsync(

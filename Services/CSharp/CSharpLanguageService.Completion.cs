@@ -74,8 +74,10 @@ public sealed partial class CSharpLanguageService
     }
 
     private static bool MatchesPrefix(string name, string prefix) =>
-        string.IsNullOrEmpty(prefix)
-        || name.StartsWith(prefix, StringComparison.OrdinalIgnoreCase);
+        CSharpCompletionMatcher.Matches(name, prefix);
+
+    private static int CompareCompletionNames(string nameA, string nameB, string prefix) =>
+        CSharpCompletionMatcher.CompareByRelevance(nameA, nameB, prefix);
 
     private static bool TryGetMemberAccessExpression(SyntaxNode root, int position, out ExpressionSyntax expression)
     {
@@ -132,7 +134,7 @@ public sealed partial class CSharpLanguageService
                 list.Add(item);
         }
 
-        list.Sort(static (a, b) => string.Compare(a.DisplayText, b.DisplayText, StringComparison.OrdinalIgnoreCase));
+        list.Sort((a, b) => CompareCompletionNames(a.DisplayText, b.DisplayText, prefix));
         return list;
     }
 
@@ -174,7 +176,7 @@ public sealed partial class CSharpLanguageService
             list.Add(new CompletionItem(keyword, keyword, "keyword", CSharpCompletionKind.Keyword));
         }
 
-        list.Sort(static (a, b) => string.Compare(a.DisplayText, b.DisplayText, StringComparison.OrdinalIgnoreCase));
+        list.Sort((a, b) => CompareCompletionNames(a.DisplayText, b.DisplayText, prefix));
         return list;
     }
 
