@@ -23,6 +23,21 @@ public interface ICideEditorCapabilityHost
         CideEditorDefinitionLocation? location,
         CancellationToken cancellationToken = default);
 
+    Task PushCapabilityReferencesResultAsync(
+        int requestId,
+        IReadOnlyList<CideEditorReferenceLocation> locations,
+        CancellationToken cancellationToken = default);
+
+    Task PushCapabilityFormatResultAsync(
+        int requestId,
+        string? text,
+        CancellationToken cancellationToken = default);
+
+    Task PushCapabilityCodeActionResultAsync(
+        int requestId,
+        IReadOnlyList<CideEditorCodeActionItem> actions,
+        CancellationToken cancellationToken = default);
+
     Task PushCapabilityInlayHintsResultAsync(
         int requestId,
         IReadOnlyList<CideEditorInlayHint> hints,

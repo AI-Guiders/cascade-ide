@@ -28,6 +28,13 @@ public interface ICideEditorLspIntelligence
         int col1,
         CancellationToken ct);
 
+    Task<IReadOnlyList<CideEditorReferenceLocation>> RequestReferencesAsync(
+        string filePath,
+        string text,
+        int line1,
+        int col1,
+        CancellationToken ct);
+
     Task<CideEditorSemanticTokensData?> RequestSemanticTokensFullAsync(
         string filePath,
         string text,

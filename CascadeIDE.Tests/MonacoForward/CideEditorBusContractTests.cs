@@ -30,6 +30,9 @@ public sealed class CideEditorBusContractTests
         Assert.Equal(CideEditorBusManifest.Capabilities.Hover, caps.GetProperty("hover").GetString());
         Assert.Equal(CideEditorBusManifest.Capabilities.SignatureHelp, caps.GetProperty("signatureHelp").GetString());
         Assert.Equal(CideEditorBusManifest.Capabilities.Definition, caps.GetProperty("definition").GetString());
+        Assert.Equal(CideEditorBusManifest.Capabilities.References, caps.GetProperty("references").GetString());
+        Assert.Equal(CideEditorBusManifest.Capabilities.Format, caps.GetProperty("format").GetString());
+        Assert.Equal(CideEditorBusManifest.Capabilities.CodeAction, caps.GetProperty("codeAction").GetString());
         Assert.Equal(CideEditorBusManifest.Capabilities.Navigate, caps.GetProperty("navigate").GetString());
         Assert.Equal(CideEditorBusManifest.Capabilities.InlayHints, caps.GetProperty("inlayHints").GetString());
         Assert.Equal(CideEditorBusManifest.Capabilities.CodeLens, caps.GetProperty("codeLens").GetString());
@@ -39,6 +42,9 @@ public sealed class CideEditorBusContractTests
         Assert.Equal(CideEditorBusManifest.Capabilities.HoverResult, caps.GetProperty("hoverResult").GetString());
         Assert.Equal(CideEditorBusManifest.Capabilities.SignatureResult, caps.GetProperty("signatureResult").GetString());
         Assert.Equal(CideEditorBusManifest.Capabilities.DefinitionResult, caps.GetProperty("definitionResult").GetString());
+        Assert.Equal(CideEditorBusManifest.Capabilities.ReferencesResult, caps.GetProperty("referencesResult").GetString());
+        Assert.Equal(CideEditorBusManifest.Capabilities.FormatResult, caps.GetProperty("formatResult").GetString());
+        Assert.Equal(CideEditorBusManifest.Capabilities.CodeActionResult, caps.GetProperty("codeActionResult").GetString());
         Assert.Equal(CideEditorBusManifest.Capabilities.InlayHintsResult, caps.GetProperty("inlayHintsResult").GetString());
         Assert.Equal(CideEditorBusManifest.Capabilities.CodeLensResult, caps.GetProperty("codeLensResult").GetString());
         Assert.Equal(CideEditorBusManifest.Capabilities.SemanticTokensResult, caps.GetProperty("semanticTokensResult").GetString());

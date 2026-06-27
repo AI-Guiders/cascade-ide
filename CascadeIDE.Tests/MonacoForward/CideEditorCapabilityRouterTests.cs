@@ -212,6 +212,77 @@ public sealed class CideEditorCapabilityRouterTests
     }
 
     [Fact]
+    public async Task Format_returns_roslyn_formatted_text()
+    {
+        var host = new RecordingCapabilityHost();
+        var ctx = CreateContext(host, @"D:\Fake\Fmt.cs", "class C{void M(){}}");
+
+        await _router.HandleAsync(
+            Inbound(CideEditorBusManifest.Capabilities.Format, requestId: 10, line: 1, column: 1),
+            ctx,
+            TestContext.Current.CancellationToken);
+
+        var formatted = host.Formats.Single().Text;
+        Assert.False(string.IsNullOrWhiteSpace(formatted));
+        Assert.NotEqual("class C{void M(){}}", formatted);
+    }
+
+    [Fact]
+    public async Task References_falls_back_to_roslyn_in_file()
+    {
+        var host = new RecordingCapabilityHost();
+        const string path = @"D:\Fake\Refs.cs";
+        var text = """
+            class C { void M() { int count = 1; count = count + 1; } }
+            """;
+        var markerIndex = text.IndexOf("count + 1", StringComparison.Ordinal);
+        var pos = Microsoft.CodeAnalysis.Text.SourceText.From(text).Lines.GetLinePosition(markerIndex);
+        var ctx = CreateContext(host, path, text);
+
+        await _router.HandleAsync(
+            Inbound(CideEditorBusManifest.Capabilities.References, requestId: 11, line: pos.Line + 1, column: pos.Character + 1),
+            ctx,
+            TestContext.Current.CancellationToken);
+
+        Assert.True(host.References.Single().Locations.Count >= 2);
+    }
+
+    [Fact]
+    public async Task Definition_cross_file_invokes_navigate_and_null_result()
+    {
+        var host = new RecordingCapabilityHost();
+        CideEditorDefinitionLocation? navigated = null;
+        var lsp = new FakeLspIntelligence
+        {
+            Definition = new CideEditorDefinitionLocation(@"D:\Fake\Other.cs", 3, 5),
+        };
+        var ctx = new MonacoEditorCapabilityContext
+        {
+            Host = host,
+            FilePath = @"D:\Fake\Current.cs",
+            GetEditorText = () => "class A { void M() { Other(); } }",
+            CSharpLanguage = new CSharpLanguageService(),
+            WorkspaceDiagnostics = CreateDiagnostics(),
+            ResolveQuickInfoAsync = (_, _, _, _, _) => Task.FromResult<string?>(null),
+            CSharpLspHost = lsp,
+            NavigateToLocationAsync = loc =>
+            {
+                navigated = loc;
+                return Task.CompletedTask;
+            },
+        };
+
+        await _router.HandleAsync(
+            Inbound(CideEditorBusManifest.Capabilities.Definition, requestId: 12, line: 1, column: 20),
+            ctx,
+            TestContext.Current.CancellationToken);
+
+        Assert.NotNull(navigated);
+        Assert.Equal(@"D:\Fake\Other.cs", navigated!.FilePath);
+        Assert.Null(host.Definitions.Single().Location);
+    }
+
+    [Fact]
     public async Task Legacy_requestCompletion_normalizes_to_completion()
     {
         var host = new RecordingCapabilityHost();
@@ -234,7 +305,7 @@ public sealed class CideEditorCapabilityRouterTests
         int? line = null,
         int? column = null,
         string? lensId = null) =>
-        new(type, null, null, null, null, null, requestId, line, column, null, lensId, null);
+        new(type, null, null, null, null, null, requestId, line, column, null, lensId, null, null);
 
     private static MonacoEditorCapabilityContext CreateContext(
         RecordingCapabilityHost host,
@@ -258,6 +329,9 @@ public sealed class CideEditorCapabilityRouterTests
         public List<(int RequestId, string? Markdown)> Hovers { get; } = [];
         public List<(int RequestId, string? Signature)> Signatures { get; } = [];
         public List<(int RequestId, CideEditorDefinitionLocation? Location)> Definitions { get; } = [];
+        public List<(int RequestId, IReadOnlyList<CideEditorReferenceLocation> Locations)> References { get; } = [];
+        public List<(int RequestId, string? Text)> Formats { get; } = [];
+        public List<(int RequestId, IReadOnlyList<CideEditorCodeActionItem> Actions)> CodeActions { get; } = [];
         public List<(int RequestId, IReadOnlyList<CideEditorInlayHint> Hints)> InlayHints { get; } = [];
         public List<(int RequestId, IReadOnlyList<CideEditorCodeLensItem> Lenses)> CodeLenses { get; } = [];
         public List<(int RequestId, IReadOnlyList<uint> Data, string? ResultId)> SemanticTokens { get; } = [];
@@ -298,6 +372,33 @@ public sealed class CideEditorCapabilityRouterTests
             return Task.CompletedTask;
         }
 
+        public Task PushCapabilityReferencesResultAsync(
+            int requestId,
+            IReadOnlyList<CideEditorReferenceLocation> locations,
+            CancellationToken cancellationToken = default)
+        {
+            References.Add((requestId, locations));
+            return Task.CompletedTask;
+        }
+
+        public Task PushCapabilityFormatResultAsync(
+            int requestId,
+            string? text,
+            CancellationToken cancellationToken = default)
+        {
+            Formats.Add((requestId, text));
+            return Task.CompletedTask;
+        }
+
+        public Task PushCapabilityCodeActionResultAsync(
+            int requestId,
+            IReadOnlyList<CideEditorCodeActionItem> actions,
+            CancellationToken cancellationToken = default)
+        {
+            CodeActions.Add((requestId, actions));
+            return Task.CompletedTask;
+        }
+
         public Task PushCapabilityInlayHintsResultAsync(
             int requestId,
             IReadOnlyList<CideEditorInlayHint> hints,
@@ -332,6 +433,7 @@ public sealed class CideEditorCapabilityRouterTests
         public bool IsActive => true;
         public bool SupportsSemanticTokens => false;
         public IReadOnlyList<CideEditorCompletionItem> CompletionItems { get; init; } = [];
+        public CideEditorDefinitionLocation? Definition { get; init; }
         public int CompletionCalls { get; private set; }
 
         public Task<IReadOnlyList<CideEditorCompletionItem>> RequestCompletionAsync(
@@ -354,7 +456,15 @@ public sealed class CideEditorCapabilityRouterTests
             int line1,
             int col1,
             CancellationToken ct) =>
-            Task.FromResult<CideEditorDefinitionLocation?>(null);
+            Task.FromResult(Definition);
+
+        public Task<IReadOnlyList<CideEditorReferenceLocation>> RequestReferencesAsync(
+            string filePath,
+            string text,
+            int line1,
+            int col1,
+            CancellationToken ct) =>
+            Task.FromResult<IReadOnlyList<CideEditorReferenceLocation>>([]);
 
         public Task<CideEditorSemanticTokensData?> RequestSemanticTokensFullAsync(
             string filePath,

@@ -33,4 +33,6 @@ public sealed class MonacoEditorCapabilityContext
     public Func<string, IReadOnlyList<CideEditorCodeLensItem>>? GetCodeLensesForFile { get; init; }
 
     public Func<string, bool>? TryNavigateCodeLens { get; init; }
+
+    public Func<CideEditorDefinitionLocation, Task>? NavigateToLocationAsync { get; init; }
 }

@@ -242,6 +242,18 @@ public partial class DockDocumentView
             if (CideEditorBusManifest.IsCapabilityRequest(msg.Type)
                 || CideEditorBusManifest.IsCapabilitySideChannel(msg.Type))
             {
+                if (string.Equals(msg.Type, CideEditorBusManifest.Capabilities.Navigate, StringComparison.Ordinal)
+                    && !string.IsNullOrWhiteSpace(msg.FilePath)
+                    && msg.Line is int navLine)
+                {
+                    _vm.EditorNavigation.TryNavigateGoTo(
+                        msg.FilePath,
+                        navLine,
+                        msg.Column ?? 1,
+                        source: EditorNavigationSource.Other);
+                    return;
+                }
+
                 var ctx = BuildCapabilityContext();
                 if (ctx is not null)
                     _ = _capabilityRouter.HandleAsync(msg, ctx, CancellationToken.None);
@@ -393,6 +405,11 @@ public partial class DockDocumentView
                     path,
                     _vm.NavigationMap.CodeNavigationMapGraphScene),
             TryNavigateCodeLens = lensId => _vm.TryNavigateCodeLens(lensId),
+            NavigateToLocationAsync = loc =>
+            {
+                _vm.EditorNavigation.TryNavigateGoTo(loc.FilePath, loc.Line, loc.Column);
+                return Task.CompletedTask;
+            },
         };
     }
 

@@ -25,6 +25,7 @@ public sealed class MonacoEditorSessionAndApplyEditsTests
             Column: null,
             TopLine: null,
             LensId: null,
+            FilePath: null,
             Error: null));
 
         session.ReadSnapshot(out var version, out var text, out var caret, out var selStart, out var selLen);

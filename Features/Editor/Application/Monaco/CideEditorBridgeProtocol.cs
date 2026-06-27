@@ -103,6 +103,30 @@ public sealed record CideEditorDefinitionLocation(
     int Line,
     int Column);
 
+public sealed record CideEditorReferenceLocation(
+    string FilePath,
+    int Line,
+    int Column,
+    int? EndLine = null,
+    int? EndColumn = null);
+
+public sealed record CideEditorReferencesResultMessage(
+    int RequestId,
+    IReadOnlyList<CideEditorReferenceLocation> Locations);
+
+public sealed record CideEditorFormatResultMessage(
+    int RequestId,
+    string? Text);
+
+public sealed record CideEditorCodeActionItem(
+    string Title,
+    string Kind,
+    string? Text);
+
+public sealed record CideEditorCodeActionResultMessage(
+    int RequestId,
+    IReadOnlyList<CideEditorCodeActionItem> Actions);
+
 public sealed record CideEditorDefinitionResultMessage(
     int RequestId,
     CideEditorDefinitionLocation? Location);
@@ -173,6 +197,7 @@ public sealed record CideEditorInboundMessage(
     [property: JsonPropertyName("column")] int? Column,
     [property: JsonPropertyName("topLine")] int? TopLine,
     [property: JsonPropertyName("lensId")] string? LensId,
+    [property: JsonPropertyName("filePath")] string? FilePath,
     [property: JsonPropertyName("error")] string? Error);
 
 public static class CideEditorBridgeJson
@@ -207,9 +232,10 @@ public static class CideEditorBridgeJson
             int? column = TryInt(root, "column");
             int? topLine = TryInt(root, "topLine");
             string? lensId = root.TryGetProperty("lensId", out var lens) ? lens.GetString() : null;
+            string? filePath = root.TryGetProperty("filePath", out var fp) ? fp.GetString() : null;
             string? error = root.TryGetProperty("error", out var err) ? err.GetString() : null;
             return new CideEditorInboundMessage(
-                type, version, text, caret, selStart, selLen, requestId, line, column, topLine, lensId, error);
+                type, version, text, caret, selStart, selLen, requestId, line, column, topLine, lensId, filePath, error);
         }
         catch
         {

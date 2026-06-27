@@ -292,6 +292,42 @@ public partial class MonacoEditorHostControl : UserControl, ICideEditorCapabilit
             cancellationToken).ConfigureAwait(true);
     }
 
+    public async Task PushCapabilityReferencesResultAsync(
+        int requestId,
+        IReadOnlyList<CideEditorReferenceLocation> locations,
+        CancellationToken cancellationToken = default)
+    {
+        await EnsureReadyAsync(cancellationToken).ConfigureAwait(true);
+        await DispatchAsync(
+            CideEditorBusManifest.Capabilities.ReferencesResult,
+            new CideEditorReferencesResultMessage(requestId, locations),
+            cancellationToken).ConfigureAwait(true);
+    }
+
+    public async Task PushCapabilityFormatResultAsync(
+        int requestId,
+        string? text,
+        CancellationToken cancellationToken = default)
+    {
+        await EnsureReadyAsync(cancellationToken).ConfigureAwait(true);
+        await DispatchAsync(
+            CideEditorBusManifest.Capabilities.FormatResult,
+            new CideEditorFormatResultMessage(requestId, text),
+            cancellationToken).ConfigureAwait(true);
+    }
+
+    public async Task PushCapabilityCodeActionResultAsync(
+        int requestId,
+        IReadOnlyList<CideEditorCodeActionItem> actions,
+        CancellationToken cancellationToken = default)
+    {
+        await EnsureReadyAsync(cancellationToken).ConfigureAwait(true);
+        await DispatchAsync(
+            CideEditorBusManifest.Capabilities.CodeActionResult,
+            new CideEditorCodeActionResultMessage(requestId, actions),
+            cancellationToken).ConfigureAwait(true);
+    }
+
     public async Task PushCapabilityInlayHintsResultAsync(
         int requestId,
         IReadOnlyList<CideEditorInlayHint> hints,
