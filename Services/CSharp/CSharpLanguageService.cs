@@ -241,7 +241,28 @@ public sealed partial class CSharpLanguageService
     }
 
     /// <summary>Элемент автодополнения.</summary>
-    public sealed record CompletionItem(string DisplayText, string InsertText, string? Description = null);
+    public enum CSharpCompletionKind
+    {
+        Keyword,
+        Method,
+        Property,
+        Field,
+        Event,
+        EnumMember,
+        Enum,
+        Class,
+        Interface,
+        Struct,
+        Delegate,
+        Variable,
+        Other,
+    }
+
+    public sealed record CompletionItem(
+        string DisplayText,
+        string InsertText,
+        string? Description = null,
+        CSharpCompletionKind Kind = CSharpCompletionKind.Other);
 
     /// <summary>Сбросить кэш при смене решения/файла (опционально).</summary>
     public void InvalidateCache()

@@ -90,7 +90,11 @@ public sealed class CideEditorCapabilityRouter : ICideEditorCapabilityRouter
         var items = await Task.Run(
             () => context.CSharpLanguage.GetCompletionItems(context.FilePath, text, line, column),
             cancellationToken).ConfigureAwait(true);
-        var mapped = items.Select(i => new CideEditorCompletionItem(i.DisplayText, i.InsertText, i.Description)).ToList();
+        var mapped = items.Select(i => new CideEditorCompletionItem(
+            i.DisplayText,
+            i.InsertText,
+            i.Description,
+            CideEditorCompletionKindMapper.FromRoslyn(i.Kind))).ToList();
         await PushCompletionAsync(context.Host, requestId, mapped, cancellationToken).ConfigureAwait(true);
     }
 

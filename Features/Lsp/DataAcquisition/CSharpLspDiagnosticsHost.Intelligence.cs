@@ -154,7 +154,14 @@ public sealed partial class CSharpLspDiagnosticsHost
             var detail = item.TryGetProperty("detail", out var d) && d.ValueKind == JsonValueKind.String
                 ? d.GetString()
                 : null;
-            list.Add(new CideEditorCompletionItem(label, insert, detail));
+            int? lspKind = item.TryGetProperty("kind", out var k) && k.TryGetInt32(out var kindVal)
+                ? kindVal
+                : null;
+            list.Add(new CideEditorCompletionItem(
+                label,
+                insert,
+                detail,
+                CideEditorCompletionKindMapper.FromLspKind(lspKind)));
         }
 
         return list;

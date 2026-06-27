@@ -360,6 +360,38 @@
       return requestId;
     }
 
+    function mapCompletionKind(kind) {
+      switch (kind) {
+        case 'method':
+        case 'function':
+        case 'constructor':
+          return monaco.languages.CompletionItemKind.Method;
+        case 'property':
+          return monaco.languages.CompletionItemKind.Property;
+        case 'field':
+        case 'variable':
+        case 'enumMember':
+        case 'constant':
+          return monaco.languages.CompletionItemKind.Field;
+        case 'event':
+          return monaco.languages.CompletionItemKind.Event;
+        case 'class':
+          return monaco.languages.CompletionItemKind.Class;
+        case 'interface':
+          return monaco.languages.CompletionItemKind.Interface;
+        case 'struct':
+          return monaco.languages.CompletionItemKind.Struct;
+        case 'enum':
+          return monaco.languages.CompletionItemKind.Enum;
+        case 'delegate':
+          return monaco.languages.CompletionItemKind.Function;
+        case 'keyword':
+          return monaco.languages.CompletionItemKind.Keyword;
+        default:
+          return monaco.languages.CompletionItemKind.Text;
+      }
+    }
+
     disposables.push(monaco.languages.registerCompletionItemProvider('csharp', {
       triggerCharacters: ['.', '@'],
       provideCompletionItems: async (model, position) => {
@@ -368,7 +400,7 @@
           const payload = await waitForHostResponse(BUS.capabilities.completionResult, requestId);
           const items = (payload.items || []).map((item) => ({
             label: item.label,
-            kind: monaco.languages.CompletionItemKind.Member,
+            kind: mapCompletionKind(item.kind),
             insertText: item.insertText ?? item.label,
             detail: item.detail,
           }));

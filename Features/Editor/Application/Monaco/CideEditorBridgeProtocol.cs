@@ -112,7 +112,8 @@ public sealed record CideEditorSetThemeMessage(string ThemeName);
 public sealed record CideEditorCompletionItem(
     string Label,
     string InsertText,
-    string? Detail);
+    string? Detail,
+    string? Kind = null);
 
 public sealed record CideEditorCompletionResultMessage(
     int RequestId,
