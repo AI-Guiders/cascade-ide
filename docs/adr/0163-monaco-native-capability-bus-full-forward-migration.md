@@ -298,7 +298,23 @@ Origin: `https://cide-editor.local/` virtual host ([0162 §4](0162-monaco-forwar
 
 ## 4. Чеклист sign-off «Monaco вместо Avalonia Forward»
 
-Перед M10 (удаление `avalonia_edit`):
+Перед M10 (удаление `avalonia_edit`). **Автотесты:** `dotnet test --filter Category=MonacoForward` (см. `CascadeIDE.Tests/MonacoForward/`).
+
+| Пункт | Автотест | Ручной smoke |
+|-------|----------|--------------|
+| Completion / hover / signature — `.cs` с solution и без | `CideEditorCapabilityRouterTests` (+ Roslyn: `CSharpLanguageServiceQuickInfoTests`) | LSP live + solution open |
+| Diagnostics squiggles + Problems panel sync | `MonacoEditorPresentationProjectorTests`, `HitTestForToolTip` | Problems UI sync |
+| Go to definition / references (LSP или Roslyn) | `CideEditorCapabilityRouterTests` (definition); references — **нет capability** | F12 / Shift+F12 |
+| Breakpoint gutter + debug current line + DAP session | `MonacoEditorDebugMapper` (unit) | DAP session |
+| Agent `applyEdits` + version mismatch [0084](0084-agent-edits-editor-source-of-truth-presence-channel.md) | `MonacoEditorSessionAndApplyEditsTests`, `IdeMcpEditorOrchestrator.TryReplaceTextRange` | WebView apply + stale version |
+| Карта намерений: caret, reveal, CF glyphs | `EditorNavigationLineMappingTests`, `EditorControlFlowLanePolicyTests` | Map click + reveal |
+| Correspondence / anchors / CRS / MCP reveal | `AnchorDraftPreviewResolverTests`, `IdeMcpServerDispatchTests` | CRS → editor |
+| Chat bracket ghost preview | `AnchorDraftPreviewResolverTests` (resolve); reveal — guard only | Composer `[M:…]` ghost |
+| Markdown preview ← `EditorText` VM | `MarkdownPreviewRoutingTests` | MFD preview live |
+| Тема читаема (dark+ / CascadeTheme) | `MonacoEditorThemeMapper` (partial) | Visual M11 |
+| Память / latency (несколько вкладок) | — | Perf smoke |
+
+Чекбоксы ниже — **ручной sign-off**; CI закрывает регрессию brains + bus contract.
 
 - [ ] Completion / hover / signature — `.cs` с solution и без
 - [ ] Diagnostics squiggles + Problems panel sync
@@ -394,4 +410,4 @@ forward_host = "monaco_webview2"   # единственное поддержив
 | Дата | Изменение |
 |------|-----------|
 | 2026-06-21 | Proposed: полный перевод Forward на Monaco; CIDE Editor Capability Bus; Monarch/LSP стратегия; фазы M7–M11 |
-| 2026-06-21 | §2.4: Correspondence / CodeAnchor / reveal — resolve в C#, единый `capability/navigate` на bus |
+| 2026-06-25 | §4: таблица automated-by + `Category=MonacoForward` test pack (`CascadeIDE.Tests/MonacoForward/`) |

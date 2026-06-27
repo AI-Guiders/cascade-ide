@@ -1,4 +1,3 @@
-using CascadeIDE.Features.Editor.Presentation;
 using CascadeIDE.Services;
 
 namespace CascadeIDE.Features.Editor.Application.Monaco;
@@ -260,49 +259,49 @@ public sealed class CideEditorCapabilityRouter : ICideEditorCapabilityRouter
     }
 
     private static Task PushCompletionAsync(
-        MonacoEditorHostControl host,
+        ICideEditorCapabilityHost host,
         int requestId,
         IReadOnlyList<CideEditorCompletionItem> items,
         CancellationToken cancellationToken) =>
         host.PushCapabilityCompletionResultAsync(requestId, items, cancellationToken);
 
     private static Task PushHoverAsync(
-        MonacoEditorHostControl host,
+        ICideEditorCapabilityHost host,
         int requestId,
         string? markdown,
         CancellationToken cancellationToken) =>
         host.PushCapabilityHoverResultAsync(requestId, markdown, cancellationToken);
 
     private static Task PushSignatureAsync(
-        MonacoEditorHostControl host,
+        ICideEditorCapabilityHost host,
         int requestId,
         string? signature,
         CancellationToken cancellationToken) =>
         host.PushCapabilitySignatureResultAsync(requestId, signature, cancellationToken);
 
     private static Task PushDefinitionAsync(
-        MonacoEditorHostControl host,
+        ICideEditorCapabilityHost host,
         int requestId,
         CideEditorDefinitionLocation? location,
         CancellationToken cancellationToken) =>
         host.PushCapabilityDefinitionResultAsync(requestId, location, cancellationToken);
 
     private static Task PushInlayHintsAsync(
-        MonacoEditorHostControl host,
+        ICideEditorCapabilityHost host,
         int requestId,
         IReadOnlyList<CideEditorInlayHint> hints,
         CancellationToken cancellationToken) =>
         host.PushCapabilityInlayHintsResultAsync(requestId, hints, cancellationToken);
 
     private static Task PushCodeLensAsync(
-        MonacoEditorHostControl host,
+        ICideEditorCapabilityHost host,
         int requestId,
         IReadOnlyList<CideEditorCodeLensItem> lenses,
         CancellationToken cancellationToken) =>
         host.PushCapabilityCodeLensResultAsync(requestId, lenses, cancellationToken);
 
     private static Task PushSemanticTokensAsync(
-        MonacoEditorHostControl host,
+        ICideEditorCapabilityHost host,
         int requestId,
         IReadOnlyList<uint> data,
         string? resultId,

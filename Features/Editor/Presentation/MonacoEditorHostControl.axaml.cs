@@ -6,7 +6,7 @@ using CascadeIDE.Features.Editor.Application.Monaco;
 namespace CascadeIDE.Features.Editor.Presentation;
 
 /// <summary>Monaco Editor in WebView2 (ADR 0162 M0–M2).</summary>
-public partial class MonacoEditorHostControl : UserControl
+public partial class MonacoEditorHostControl : UserControl, ICideEditorCapabilityHost
 {
     private NativeWebView? _webView;
     private bool _ready;

@@ -4,6 +4,7 @@ using System.Text;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using Avalonia.Threading;
+using CascadeIDE.Features.Editor.Application.Monaco;
 using CascadeIDE.Services.Lsp;
 using Microsoft.CodeAnalysis;
 using CascadeIDE.Contracts;
@@ -20,7 +21,7 @@ namespace CascadeIDE.Features.Lsp.DataAcquisition;
 /// </summary>
 [IoBoundary("lsp-csharp-stdio")]
 [UiThreadMarshal("diagnostics coalesce → UI Post")]
-public sealed partial class CSharpLspDiagnosticsHost : ILspDiagnosticSource
+public sealed partial class CSharpLspDiagnosticsHost : ILspDiagnosticSource, ICideEditorLspIntelligence
 {
     private readonly ConcurrentDictionary<string, List<EditorDiagnosticStrip>> _strips = new(StringComparer.OrdinalIgnoreCase);
     private readonly ConcurrentDictionary<string, string> _syncedText = new(StringComparer.OrdinalIgnoreCase);
