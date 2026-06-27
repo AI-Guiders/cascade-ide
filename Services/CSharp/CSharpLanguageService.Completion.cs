@@ -47,7 +47,11 @@ public sealed partial class CSharpLanguageService
             var prefix = GetCompletionPrefix(token, position);
 
             List<CompletionItem> list;
-            if (TryGetMemberAccessExpression(root, position, out var memberTarget))
+            if (TryIsNamespaceDeclarationNamePosition(root, model.SyntaxTree, position))
+            {
+                list = CollectNamespaceNameCompletions(model, root, position, prefix, ct);
+            }
+            else if (TryGetMemberAccessExpression(root, position, out var memberTarget))
             {
                 list = CollectMemberCompletions(model, memberTarget, position, prefix, ct);
             }
@@ -104,6 +108,131 @@ public sealed partial class CSharpLanguageService
         }
 
         return false;
+    }
+
+    private static bool TryIsNamespaceDeclarationNamePosition(SyntaxNode root, SyntaxTree tree, int position)
+    {
+        var node = root.FindNode(TextSpan.FromBounds(position, position), getInnermostNodeForTie: true);
+        for (var current = node; current is not null; current = current.Parent)
+        {
+            if (current is not BaseNamespaceDeclarationSyntax nsDecl)
+                continue;
+
+            if (nsDecl is NamespaceDeclarationSyntax block
+                && position >= block.OpenBraceToken.SpanStart)
+                return false;
+
+            return position >= nsDecl.NamespaceKeyword.Span.End;
+        }
+
+        return IsIncompleteNamespaceDeclarationLine(tree, position);
+    }
+
+    private static bool IsIncompleteNamespaceDeclarationLine(SyntaxTree tree, int position)
+    {
+        var line = tree.GetText().Lines.GetLineFromPosition(position);
+        var offset = position - line.Start;
+        if (offset < 0 || offset > line.Span.Length)
+            return false;
+
+        var beforeCursor = line.ToString()[..offset].TrimStart();
+        if (!beforeCursor.StartsWith("namespace", StringComparison.Ordinal))
+            return false;
+
+        if (beforeCursor.Length == "namespace".Length)
+            return true;
+
+        if (beforeCursor.Length <= "namespace".Length || beforeCursor["namespace".Length] != ' ')
+            return false;
+
+        var namePart = beforeCursor["namespace".Length..].TrimStart();
+        var terminator = namePart.IndexOfAny(['{', ';']);
+        if (terminator >= 0)
+            namePart = namePart[..terminator].TrimEnd();
+
+        if (namePart.Length == 0)
+            return true;
+
+        foreach (var ch in namePart)
+        {
+            if (ch != '.' && ch != '_' && !char.IsLetterOrDigit(ch))
+                return false;
+        }
+
+        return true;
+    }
+
+    private static List<CompletionItem> CollectNamespaceNameCompletions(
+        SemanticModel model,
+        SyntaxNode root,
+        int position,
+        string prefix,
+        CancellationToken ct)
+    {
+        var list = new List<CompletionItem>();
+        var seen = new HashSet<string>(StringComparer.Ordinal);
+        var searchRoot = ResolveNamespaceContainer(model, root, position, ct);
+
+        foreach (var child in searchRoot.GetNamespaceMembers())
+        {
+            if (!MatchesPrefix(child.Name, prefix) || !seen.Add(child.Name))
+                continue;
+
+            list.Add(new CompletionItem(
+                child.Name,
+                child.Name,
+                child.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat),
+                CSharpCompletionKind.Other));
+        }
+
+        list.Sort((a, b) => CompareCompletionNames(a.DisplayText, b.DisplayText, prefix));
+        return list;
+    }
+
+    private static INamespaceSymbol ResolveNamespaceContainer(
+        SemanticModel model,
+        SyntaxNode root,
+        int position,
+        CancellationToken ct)
+    {
+        var token = root.FindToken(position, findInsideTrivia: true);
+        if (token.IsKind(SyntaxKind.DotToken) && token.Parent is QualifiedNameSyntax dotParent)
+            return ResolveNamespaceFromQualifiedLeft(model, dotParent.Left, position, ct)
+                ?? model.Compilation.GlobalNamespace;
+
+        var node = root.FindNode(TextSpan.FromBounds(position, position), getInnermostNodeForTie: true);
+        for (var current = node; current is not null; current = current.Parent)
+        {
+            if (current is QualifiedNameSyntax qualified
+                && position > qualified.DotToken.Span.End)
+            {
+                return ResolveNamespaceFromQualifiedLeft(model, qualified.Left, position, ct)
+                    ?? model.Compilation.GlobalNamespace;
+            }
+        }
+
+        return model.Compilation.GlobalNamespace;
+    }
+
+    private static INamespaceSymbol? ResolveNamespaceFromQualifiedLeft(
+        SemanticModel model,
+        NameSyntax left,
+        int position,
+        CancellationToken ct)
+    {
+        if (model.GetSymbolInfo(left, ct).Symbol is INamespaceSymbol ns)
+            return ns;
+
+        if (left is IdentifierNameSyntax id)
+        {
+            foreach (var symbol in model.LookupSymbols(position, name: id.Identifier.Text))
+            {
+                if (symbol is INamespaceSymbol lookupNs)
+                    return lookupNs;
+            }
+        }
+
+        return null;
     }
 
     private static List<CompletionItem> CollectMemberCompletions(

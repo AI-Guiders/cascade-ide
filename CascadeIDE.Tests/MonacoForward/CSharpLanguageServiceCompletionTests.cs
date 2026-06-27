@@ -109,6 +109,36 @@ public sealed class CSharpLanguageServiceCompletionTests
     }
 
     [Fact]
+    public void NamespaceDeclaration_lists_child_namespaces_not_statement_keywords()
+    {
+        const string path = @"D:\Fake\NsDecl.cs";
+        var src = """
+            namespace Casa.
+            class C { }
+            """;
+        var (line, column) = AfterMarker(src, "namespace Casa.");
+        var svc = new CSharpLanguageService();
+        var items = svc.GetCompletionItems(path, src, line, column, TestContext.Current.CancellationToken);
+
+        Assert.DoesNotContain(items, i => i.DisplayText == "while");
+        Assert.DoesNotContain(items, i => i.DisplayText == "class");
+        Assert.DoesNotContain(items, i => i.DisplayText == "namespace");
+    }
+
+    [Fact]
+    public void FileScopedNamespaceDeclaration_filters_prefix_without_keywords()
+    {
+        const string path = @"D:\Fake\FsNs.cs";
+        var src = "namespace Cas";
+        var (line, column) = AfterMarker(src, "Cas");
+        var svc = new CSharpLanguageService();
+        var items = svc.GetCompletionItems(path, src, line, column, TestContext.Current.CancellationToken);
+
+        Assert.DoesNotContain(items, i => i.DisplayText == "while");
+        Assert.DoesNotContain(items, i => i.DisplayText == "catch");
+    }
+
+    [Fact]
     public void ScopeCompletion_acronym_matches_types()
     {
         const string path = @"D:\Fake\Acronym.cs";

@@ -37,7 +37,7 @@ public sealed partial class CSharpLspDiagnosticsHost
 
         try
         {
-            using var doc = await _session.SendRequestAsync(msg, id, TimeSpan.FromSeconds(12), ct).ConfigureAwait(false);
+            using var doc = await _session.SendRequestAsync(msg, id, TimeSpan.FromSeconds(3), ct).ConfigureAwait(false);
             return ParseCompletionResponse(doc);
         }
         catch
@@ -115,6 +115,43 @@ public sealed partial class CSharpLspDiagnosticsHost
         catch
         {
             return null;
+        }
+    }
+
+    public async Task<IReadOnlyList<CideEditorReferenceLocation>> RequestReferencesAsync(
+        string filePath,
+        string text,
+        int line1,
+        int col1,
+        CancellationToken ct)
+    {
+        if (!IsActive || !IsCSharpPath(filePath) || _session is null || line1 < 1 || col1 < 1)
+            return [];
+
+        await SyncFullTextForRequestAsync(filePath, text, ct).ConfigureAwait(false);
+        var uri = LspFileUri.PathToFileUri(CanonicalFilePath.Normalize(filePath));
+        var id = _session.AllocateRequestId();
+        var msg = new JsonObject
+        {
+            ["jsonrpc"] = "2.0",
+            ["id"] = id,
+            ["method"] = "textDocument/references",
+            ["params"] = new JsonObject
+            {
+                ["textDocument"] = new JsonObject { ["uri"] = uri },
+                ["position"] = new JsonObject { ["line"] = line1 - 1, ["character"] = col1 - 1 },
+                ["context"] = new JsonObject { ["includeDeclaration"] = true },
+            },
+        };
+
+        try
+        {
+            using var doc = await _session.SendRequestAsync(msg, id, TimeSpan.FromSeconds(8), ct).ConfigureAwait(false);
+            return ParseReferencesResponse(doc);
+        }
+        catch
+        {
+            return [];
         }
     }
 
@@ -223,6 +260,51 @@ public sealed partial class CSharpLspDiagnosticsHost
         }
 
         return MapLocation(result);
+    }
+
+    private static IReadOnlyList<CideEditorReferenceLocation> ParseReferencesResponse(JsonDocument? doc)
+    {
+        if (doc is null)
+            return [];
+        var root = doc.RootElement;
+        if (root.TryGetProperty("error", out _))
+            return [];
+        if (!root.TryGetProperty("result", out var result) || result.ValueKind != JsonValueKind.Array)
+            return [];
+
+        var list = new List<CideEditorReferenceLocation>();
+        foreach (var loc in result.EnumerateArray())
+        {
+            var mapped = MapReferenceLocation(loc);
+            if (mapped is not null)
+                list.Add(mapped);
+        }
+
+        return list;
+    }
+
+    private static CideEditorReferenceLocation? MapReferenceLocation(JsonElement loc)
+    {
+        if (!loc.TryGetProperty("uri", out var uriEl))
+            return null;
+        var uri = uriEl.GetString();
+        if (string.IsNullOrEmpty(uri) || !LspFileUri.TryUriToPath(uri, out var path))
+            return null;
+        if (!loc.TryGetProperty("range", out var range)
+            || !range.TryGetProperty("start", out var start))
+            return null;
+        if (!TryGetPosition(start, out var line0, out var char0))
+            return null;
+
+        int? endLine = null;
+        int? endColumn = null;
+        if (range.TryGetProperty("end", out var end) && TryGetPosition(end, out var el, out var ec))
+        {
+            endLine = el + 1;
+            endColumn = ec + 1;
+        }
+
+        return new CideEditorReferenceLocation(path, line0 + 1, char0 + 1, endLine, endColumn);
     }
 
     private static CideEditorDefinitionLocation? MapLocation(JsonElement loc)

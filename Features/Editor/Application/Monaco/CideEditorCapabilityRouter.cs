@@ -5,6 +5,8 @@ namespace CascadeIDE.Features.Editor.Application.Monaco;
 /// <summary>Routes Monaco capability requests: LSP-first when ready, Roslyn fallback (ADR 0163 M8).</summary>
 public sealed class CideEditorCapabilityRouter : ICideEditorCapabilityRouter
 {
+    private static readonly TimeSpan CompletionLspBudget = TimeSpan.FromMilliseconds(1800);
+
     public bool CanHandle(CideEditorInboundMessage message) =>
         CideEditorBusManifest.IsCapabilityRequest(message.Type)
         || CideEditorBusManifest.IsCapabilitySideChannel(message.Type);
@@ -47,6 +49,20 @@ public sealed class CideEditorCapabilityRouter : ICideEditorCapabilityRouter
                     await HandleDefinitionAsync(context, requestId, dl, dc, cancellationToken).ConfigureAwait(true);
                 break;
 
+            case CideEditorBusManifest.Capabilities.References:
+                if (message.Line is int rl && message.Column is int rc)
+                    await HandleReferencesAsync(context, requestId, rl, rc, cancellationToken).ConfigureAwait(true);
+                break;
+
+            case CideEditorBusManifest.Capabilities.Format:
+                await HandleFormatAsync(context, requestId, cancellationToken).ConfigureAwait(true);
+                break;
+
+            case CideEditorBusManifest.Capabilities.CodeAction:
+                if (message.Line is int al && message.Column is int ac)
+                    await HandleCodeActionAsync(context, requestId, al, ac, cancellationToken).ConfigureAwait(true);
+                break;
+
             case CideEditorBusManifest.Capabilities.InlayHints:
                 await HandleInlayHintsAsync(context, requestId, cancellationToken).ConfigureAwait(true);
                 break;
@@ -77,29 +93,57 @@ public sealed class CideEditorCapabilityRouter : ICideEditorCapabilityRouter
         var text = context.GetEditorText();
         var prefix = CSharpCompletionPrefix.Extract(text, line, column);
 
-        var roslynRaw = await Task.Run(
+        var roslynTask = Task.Run(
             () => context.CSharpLanguage.GetCompletionItems(context.FilePath, text, line, column),
-            cancellationToken).ConfigureAwait(true);
+            cancellationToken);
+        Task<IReadOnlyList<CideEditorCompletionItem>>? lspTask = null;
+        if (context.LspReady && context.CSharpLspHost is not null)
+        {
+            lspTask = TryRequestLspCompletionAsync(context, text, line, column, cancellationToken);
+        }
+
+        var roslynRaw = await roslynTask.ConfigureAwait(true);
         var roslynItems = roslynRaw.Select(i => new CideEditorCompletionItem(
             i.DisplayText,
             i.InsertText,
             i.Description,
             CideEditorCompletionKindMapper.FromRoslyn(i.Kind))).ToList();
 
-        if (context.LspReady && context.CSharpLspHost is not null)
+        if (lspTask is not null)
         {
-            var lspItems = await context.CSharpLspHost
-                .RequestCompletionAsync(context.FilePath, text, line, column, cancellationToken)
-                .ConfigureAwait(true);
-            if (lspItems.Count > 0)
+            var completed = await Task.WhenAny(lspTask, Task.Delay(CompletionLspBudget, cancellationToken)).ConfigureAwait(true);
+            if (completed == lspTask && lspTask.IsCompletedSuccessfully)
             {
-                var merged = CideEditorCompletionMerger.Merge(lspItems, roslynItems, prefix);
-                await PushCompletionAsync(context.Host, requestId, merged, cancellationToken).ConfigureAwait(true);
-                return;
+                var lspItems = await lspTask.ConfigureAwait(true);
+                if (lspItems.Count > 0)
+                {
+                    var merged = CideEditorCompletionMerger.Merge(lspItems, roslynItems, prefix);
+                    await PushCompletionAsync(context.Host, requestId, merged, cancellationToken).ConfigureAwait(true);
+                    return;
+                }
             }
         }
 
         await PushCompletionAsync(context.Host, requestId, roslynItems, cancellationToken).ConfigureAwait(true);
+    }
+
+    private static async Task<IReadOnlyList<CideEditorCompletionItem>> TryRequestLspCompletionAsync(
+        MonacoEditorCapabilityContext context,
+        string text,
+        int line,
+        int column,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            return await context.CSharpLspHost!
+                .RequestCompletionAsync(context.FilePath, text, line, column, cancellationToken)
+                .ConfigureAwait(true);
+        }
+        catch
+        {
+            return [];
+        }
     }
 
     private static async Task HandleHoverAsync(
@@ -199,7 +243,7 @@ public sealed class CideEditorCapabilityRouter : ICideEditorCapabilityRouter
                 .ConfigureAwait(true);
             if (mapped is not null)
             {
-                await PushDefinitionAsync(context.Host, requestId, mapped, cancellationToken).ConfigureAwait(true);
+                await PushDefinitionOrNavigateAsync(context, requestId, mapped, cancellationToken).ConfigureAwait(true);
                 return;
             }
         }
@@ -210,7 +254,119 @@ public sealed class CideEditorCapabilityRouter : ICideEditorCapabilityRouter
         mapped = location is null
             ? null
             : new CideEditorDefinitionLocation(location.FilePath, location.Line, location.Column);
+        await PushDefinitionOrNavigateAsync(context, requestId, mapped, cancellationToken).ConfigureAwait(true);
+    }
+
+    private static async Task PushDefinitionOrNavigateAsync(
+        MonacoEditorCapabilityContext context,
+        int requestId,
+        CideEditorDefinitionLocation? mapped,
+        CancellationToken cancellationToken)
+    {
+        if (mapped is not null
+            && !EditorTextCoordinateUtilities.PathsReferToSameFile(context.FilePath, mapped.FilePath))
+        {
+            if (context.NavigateToLocationAsync is not null)
+                await context.NavigateToLocationAsync(mapped).ConfigureAwait(true);
+            await PushDefinitionAsync(context.Host, requestId, null, cancellationToken).ConfigureAwait(true);
+            return;
+        }
+
         await PushDefinitionAsync(context.Host, requestId, mapped, cancellationToken).ConfigureAwait(true);
+    }
+
+    private static async Task HandleReferencesAsync(
+        MonacoEditorCapabilityContext context,
+        int requestId,
+        int line,
+        int column,
+        CancellationToken cancellationToken)
+    {
+        if (!CideEditorLanguageIds.SupportsRoslynIntelligence(context.FilePath))
+        {
+            await PushReferencesAsync(context.Host, requestId, [], cancellationToken).ConfigureAwait(true);
+            return;
+        }
+
+        var text = context.GetEditorText();
+        IReadOnlyList<CideEditorReferenceLocation> locations;
+        if (context.LspReady && context.CSharpLspHost is not null)
+        {
+            locations = await context.CSharpLspHost
+                .RequestReferencesAsync(context.FilePath, text, line, column, cancellationToken)
+                .ConfigureAwait(true);
+            if (locations.Count > 0)
+            {
+                await PushReferencesAsync(context.Host, requestId, locations, cancellationToken).ConfigureAwait(true);
+                return;
+            }
+        }
+
+        var roslyn = await Task.Run(
+            () => context.CSharpLanguage.FindReferencesInFile(context.FilePath, text, line, column, cancellationToken),
+            cancellationToken).ConfigureAwait(true);
+        locations = roslyn.Select(r => new CideEditorReferenceLocation(r.FilePath, r.Line, r.Column)).ToList();
+        await PushReferencesAsync(context.Host, requestId, locations, cancellationToken).ConfigureAwait(true);
+    }
+
+    private static async Task HandleFormatAsync(
+        MonacoEditorCapabilityContext context,
+        int requestId,
+        CancellationToken cancellationToken)
+    {
+        if (!CideEditorLanguageIds.SupportsRoslynIntelligence(context.FilePath))
+        {
+            await PushFormatAsync(context.Host, requestId, null, cancellationToken).ConfigureAwait(true);
+            return;
+        }
+
+        var text = context.GetEditorText();
+        var formatted = await Task.Run(
+            () => context.CSharpLanguage.FormatDocument(context.FilePath, text, cancellationToken),
+            cancellationToken).ConfigureAwait(true);
+        await PushFormatAsync(context.Host, requestId, formatted, cancellationToken).ConfigureAwait(true);
+    }
+
+    private static async Task HandleCodeActionAsync(
+        MonacoEditorCapabilityContext context,
+        int requestId,
+        int line,
+        int column,
+        CancellationToken cancellationToken)
+    {
+        if (!CideEditorLanguageIds.SupportsRoslynIntelligence(context.FilePath))
+        {
+            await PushCodeActionsAsync(context.Host, requestId, [], cancellationToken).ConfigureAwait(true);
+            return;
+        }
+
+        var text = context.GetEditorText();
+        var actions = await Task.Run(
+            () =>
+            {
+                var list = new List<CideEditorCodeActionItem>();
+                var organized = context.CSharpLanguage.OrganizeUsings(context.FilePath, text, cancellationToken);
+                if (!string.Equals(organized, text, StringComparison.Ordinal))
+                {
+                    list.Add(new CideEditorCodeActionItem(
+                        "Organize Usings",
+                        "source.organizeImports",
+                        organized));
+                }
+
+                var formatted = context.CSharpLanguage.FormatDocument(context.FilePath, text, cancellationToken);
+                if (!string.Equals(formatted, text, StringComparison.Ordinal))
+                {
+                    list.Add(new CideEditorCodeActionItem(
+                        "Format Document",
+                        "source.formatDocument",
+                        formatted));
+                }
+
+                return (IReadOnlyList<CideEditorCodeActionItem>)list;
+            },
+            cancellationToken).ConfigureAwait(true);
+        await PushCodeActionsAsync(context.Host, requestId, actions, cancellationToken).ConfigureAwait(true);
     }
 
     private static async Task HandleInlayHintsAsync(
@@ -293,6 +449,27 @@ public sealed class CideEditorCapabilityRouter : ICideEditorCapabilityRouter
         CideEditorDefinitionLocation? location,
         CancellationToken cancellationToken) =>
         host.PushCapabilityDefinitionResultAsync(requestId, location, cancellationToken);
+
+    private static Task PushReferencesAsync(
+        ICideEditorCapabilityHost host,
+        int requestId,
+        IReadOnlyList<CideEditorReferenceLocation> locations,
+        CancellationToken cancellationToken) =>
+        host.PushCapabilityReferencesResultAsync(requestId, locations, cancellationToken);
+
+    private static Task PushFormatAsync(
+        ICideEditorCapabilityHost host,
+        int requestId,
+        string? text,
+        CancellationToken cancellationToken) =>
+        host.PushCapabilityFormatResultAsync(requestId, text, cancellationToken);
+
+    private static Task PushCodeActionsAsync(
+        ICideEditorCapabilityHost host,
+        int requestId,
+        IReadOnlyList<CideEditorCodeActionItem> actions,
+        CancellationToken cancellationToken) =>
+        host.PushCapabilityCodeActionResultAsync(requestId, actions, cancellationToken);
 
     private static Task PushInlayHintsAsync(
         ICideEditorCapabilityHost host,

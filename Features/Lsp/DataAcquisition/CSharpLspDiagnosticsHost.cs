@@ -269,6 +269,9 @@ public sealed partial class CSharpLspDiagnosticsHost : ILspDiagnosticSource, ICi
     private async Task SyncFullTextForRequestAsync(string filePath, string text, CancellationToken ct)
     {
         var key = LspFileUri.NormalizePath(filePath);
+        if (_syncedText.TryGetValue(key, out var synced) && string.Equals(synced, text, StringComparison.Ordinal))
+            return;
+
         _syncedText[key] = text;
         bool needOpen;
         lock (_gate)

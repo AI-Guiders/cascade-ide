@@ -19,6 +19,10 @@
       hover: 'capability/hover',
       signatureHelp: 'capability/signatureHelp',
       definition: 'capability/definition',
+      references: 'capability/references',
+      format: 'capability/format',
+      codeAction: 'capability/codeAction',
+      navigate: 'capability/navigate',
       inlayHints: 'capability/inlayHints',
       codeLens: 'capability/codeLens',
       codeLensClick: 'capability/codeLensClick',
@@ -27,6 +31,9 @@
       hoverResult: 'capability/hoverResult',
       signatureResult: 'capability/signatureResult',
       definitionResult: 'capability/definitionResult',
+      referencesResult: 'capability/referencesResult',
+      formatResult: 'capability/formatResult',
+      codeActionResult: 'capability/codeActionResult',
       inlayHintsResult: 'capability/inlayHintsResult',
       codeLensResult: 'capability/codeLensResult',
       semanticTokensResult: 'capability/semanticTokensResult',
@@ -93,6 +100,19 @@
     if (!editor) return;
     const topLine = Math.max(1, editor.getVisibleRanges()[0]?.startLineNumber ?? 1);
     postToHost({ type: 'editor/didScroll', topLine });
+  }
+
+  const COMPLETION_HOST_TIMEOUT_MS = 2500;
+  let activeCompletionRequestId = null;
+
+  function cancelPendingCompletion() {
+    if (activeCompletionRequestId == null) return;
+    const pending = pendingRequests.get(activeCompletionRequestId);
+    if (!pending) return;
+    clearTimeout(pending.timer);
+    pendingRequests.delete(activeCompletionRequestId);
+    pending.reject(new Error('stale_completion'));
+    activeCompletionRequestId = null;
   }
 
   function waitForHostResponse(type, requestId, timeoutMs) {
@@ -366,6 +386,31 @@
 
     if (!intelligenceEnabled) return;
 
+    function uriToHostPath(resource) {
+      if (!resource) return '';
+      if (typeof resource.fsPath === 'string' && resource.fsPath.length > 0) {
+        return resource.fsPath;
+      }
+      let path = resource.path || '';
+      if (path.startsWith('/')) path = path.slice(1);
+      return decodeURIComponent(path.replace(/\//g, '\\'));
+    }
+
+    disposables.push(monaco.editor.registerEditorOpener({
+      openCodeEditor(_source, resource, selectionOrPosition) {
+        const filePath = uriToHostPath(resource);
+        const pos = selectionOrPosition?.startPosition || selectionOrPosition;
+        if (!filePath || !pos) return Promise.resolve(undefined);
+        postToHost({
+          type: BUS.capabilities.navigate,
+          filePath,
+          line: pos.lineNumber,
+          column: pos.column,
+        });
+        return Promise.resolve(undefined);
+      },
+    }));
+
     function requestCapability(type, position) {
       const requestId = (Date.now() % 2000000000) + Math.floor(Math.random() * 1000);
       postToHost({ type, requestId, line: position.lineNumber, column: position.column });
@@ -413,9 +458,15 @@
     disposables.push(monaco.languages.registerCompletionItemProvider('csharp', {
       triggerCharacters: ['.', '@'],
       provideCompletionItems: async (model, position) => {
+        cancelPendingCompletion();
         const requestId = requestCapability(BUS.capabilities.completion, position);
+        activeCompletionRequestId = requestId;
         try {
-          const payload = await waitForHostResponse(BUS.capabilities.completionResult, requestId);
+          const payload = await waitForHostResponse(
+            BUS.capabilities.completionResult,
+            requestId,
+            COMPLETION_HOST_TIMEOUT_MS);
+          if (activeCompletionRequestId !== requestId) return { suggestions: [] };
           const items = (payload.items || []).map((item) => ({
             label: item.label,
             kind: mapCompletionKind(item.kind),
@@ -425,6 +476,8 @@
           return { suggestions: items };
         } catch {
           return { suggestions: [] };
+        } finally {
+          if (activeCompletionRequestId === requestId) activeCompletionRequestId = null;
         }
       },
     }));
@@ -467,7 +520,10 @@
       provideDefinition: async (model, position) => {
         const requestId = requestCapability(BUS.capabilities.definition, position);
         try {
-          const payload = await waitForHostResponse(BUS.capabilities.definitionResult, requestId);
+          const payload = await waitForHostResponse(
+            BUS.capabilities.definitionResult,
+            requestId,
+            4000);
           const loc = payload.location;
           if (!loc || !loc.filePath) return null;
           const uri = monaco.Uri.parse('file:///' + String(loc.filePath).replace(/\\/g, '/'));
@@ -477,6 +533,74 @@
           };
         } catch {
           return null;
+        }
+      },
+    }));
+
+    disposables.push(monaco.languages.registerReferenceProvider('csharp', {
+      provideReferences: async (model, position) => {
+        const requestId = requestCapability(BUS.capabilities.references, position);
+        try {
+          const payload = await waitForHostResponse(
+            BUS.capabilities.referencesResult,
+            requestId,
+            5000);
+          return (payload.locations || []).map((loc) => ({
+            uri: monaco.Uri.parse('file:///' + String(loc.filePath).replace(/\\/g, '/')),
+            range: new monaco.Range(
+              loc.line ?? 1,
+              loc.column ?? 1,
+              loc.endLine ?? loc.line ?? 1,
+              loc.endColumn ?? loc.column ?? 1),
+          }));
+        } catch {
+          return [];
+        }
+      },
+    }));
+
+    disposables.push(monaco.languages.registerDocumentFormattingEditProvider('csharp', {
+      provideDocumentFormattingEdits: async (model) => {
+        const requestId = requestCapabilityAt(BUS.capabilities.format, 1, 1);
+        try {
+          const payload = await waitForHostResponse(
+            BUS.capabilities.formatResult,
+            requestId,
+            5000);
+          if (!payload.text) return [];
+          return [{ range: model.getFullModelRange(), text: payload.text }];
+        } catch {
+          return [];
+        }
+      },
+    }));
+
+    disposables.push(monaco.languages.registerCodeActionProvider('csharp', {
+      providedCodeActionKinds: ['source.organizeImports', 'source.formatDocument', 'quickfix'],
+      provideCodeActions: async (model, range) => {
+        const requestId = requestCapability(BUS.capabilities.codeAction, range.getStartPosition());
+        try {
+          const payload = await waitForHostResponse(
+            BUS.capabilities.codeActionResult,
+            requestId,
+            5000);
+          const actions = (payload.actions || []).map((a) => ({
+            title: a.title,
+            kind: a.kind,
+            isPreferred: a.kind === 'source.organizeImports',
+            edit: {
+              edits: [{
+                resource: model.uri,
+                textEdit: {
+                  range: model.getFullModelRange(),
+                  text: a.text,
+                },
+              }],
+            },
+          }));
+          return { actions, dispose: () => {} };
+        } catch {
+          return { actions: [], dispose: () => {} };
         }
       },
     }));
@@ -570,6 +694,9 @@
         case 'editor/signatureResult':
         case 'capability/signatureResult':
         case 'capability/definitionResult':
+        case 'capability/referencesResult':
+        case 'capability/formatResult':
+        case 'capability/codeActionResult':
         case 'capability/inlayHintsResult':
         case 'capability/codeLensResult':
         case 'capability/semanticTokensResult':
@@ -749,8 +876,8 @@
       scrollBeyondLastLine: false,
       renderWhitespace: 'selection',
       wordBasedSuggestions: 'off',
+      quickSuggestions: { other: true, comments: false, strings: false },
       glyphMargin: true,
-      quickSuggestions: false,
       suggestOnTriggerCharacters: true,
       // CFG CodeLens ("1: var") overlaps content in WebView2 until view-zone layout is fixed (ADR 0163).
       codeLens: false,
