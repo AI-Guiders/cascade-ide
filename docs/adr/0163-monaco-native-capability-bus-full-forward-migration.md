@@ -10,6 +10,7 @@
 | ADR | Роль |
 |-----|------|
 | [0162](0162-monaco-forward-editor-webview2-host.md) | WebView2 island, `cide-editor/*` v0, `IEditorSurfaceAdapter`, strangler M0–M6 |
+| [0164](0164-monaco-editor-presentation-projection-and-dock-chrome.md) | Presentation projection, line-first push-DTO, `DecorationLayerManager`, dock chrome |
 | [0103](0103-editor-hud-substrate-semantic-projection-and-surface-adapter.md) | Субстрат HUD, hi-freq bounded-контур, адаптер поверхности |
 | [0084](0084-agent-edits-editor-source-of-truth-presence-channel.md) | Versioned buffer, applyEdits |
 | [0085](0085-editor-hud-inline-layer-and-hud-banner.md) | Inline vs HUD banner |
@@ -262,6 +263,7 @@ flowchart LR
   - `diagnostics`, `highlights`, `breakpoints`, `debugLine`, `agentReveal`, `cfGutter`, `agentEpoch` (optional)
 - Один вызов `editor.deltaDecorations` per setId — **не** смешивать слои.
 - C# mapper per concern: `MonacoEditorDiagnosticsMapper`, `MonacoEditorDebugMapper`, … → **тонкие**, без UI логики.
+- **Presentation projection:** `MonacoEditorPresentationProjector` — единая сборка HUD push; контракт line-first — [0164](0164-monaco-editor-presentation-projection-and-dock-chrome.md).
 
 **ProviderRegistry (JS):**
 
