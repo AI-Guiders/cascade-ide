@@ -55,6 +55,10 @@ public sealed class CideEditorCapabilityRouter : ICideEditorCapabilityRouter
             case CideEditorBusManifest.Capabilities.CodeLens:
                 await HandleCodeLensAsync(context, requestId, cancellationToken).ConfigureAwait(true);
                 break;
+
+            case CideEditorBusManifest.Capabilities.SemanticTokens:
+                await HandleSemanticTokensAsync(context, requestId, cancellationToken).ConfigureAwait(true);
+                break;
         }
     }
 
@@ -231,6 +235,30 @@ public sealed class CideEditorCapabilityRouter : ICideEditorCapabilityRouter
         await PushCodeLensAsync(context.Host, requestId, lenses, cancellationToken).ConfigureAwait(true);
     }
 
+    private static async Task HandleSemanticTokensAsync(
+        MonacoEditorCapabilityContext context,
+        int requestId,
+        CancellationToken cancellationToken)
+    {
+        if (!context.LspReady
+            || context.CSharpLspHost is not { SupportsSemanticTokens: true } host
+            || !CideEditorLanguageIds.SupportsRoslynIntelligence(context.FilePath))
+        {
+            await PushSemanticTokensAsync(context.Host, requestId, [], null, cancellationToken).ConfigureAwait(true);
+            return;
+        }
+
+        var text = context.GetEditorText();
+        var tokens = await host.RequestSemanticTokensFullAsync(context.FilePath, text, cancellationToken)
+            .ConfigureAwait(true);
+        await PushSemanticTokensAsync(
+            context.Host,
+            requestId,
+            tokens?.Data ?? [],
+            tokens?.ResultId,
+            cancellationToken).ConfigureAwait(true);
+    }
+
     private static Task PushCompletionAsync(
         MonacoEditorHostControl host,
         int requestId,
@@ -272,6 +300,14 @@ public sealed class CideEditorCapabilityRouter : ICideEditorCapabilityRouter
         IReadOnlyList<CideEditorCodeLensItem> lenses,
         CancellationToken cancellationToken) =>
         host.PushCapabilityCodeLensResultAsync(requestId, lenses, cancellationToken);
+
+    private static Task PushSemanticTokensAsync(
+        MonacoEditorHostControl host,
+        int requestId,
+        IReadOnlyList<uint> data,
+        string? resultId,
+        CancellationToken cancellationToken) =>
+        host.PushCapabilitySemanticTokensResultAsync(requestId, data, resultId, cancellationToken);
 
     private static int TryOffsetFromLineColumn(string text, int lineOneBased, int columnOneBased)
     {

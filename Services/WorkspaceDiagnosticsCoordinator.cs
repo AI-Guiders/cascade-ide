@@ -103,6 +103,9 @@ public sealed class WorkspaceDiagnosticsCoordinator : IDisposable
         DiagnosticsChanged?.Invoke();
     }
 
+    /// <summary>Явная постановка в очередь (Monaco: текст из WebView может опережать <see cref="OpenDocumentViewModel.Content"/>).</summary>
+    public void ScheduleDocumentText(string filePath, string text) => TrySchedule(filePath, text);
+
     public IReadOnlyList<EditorDiagnosticStrip> GetStripsForFile(string? filePath)
     {
         if (string.IsNullOrEmpty(filePath))

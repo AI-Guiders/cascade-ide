@@ -17,12 +17,14 @@
     "inlayHints": "capability/inlayHints",
     "codeLens": "capability/codeLens",
     "codeLensClick": "capability/codeLensClick",
+    "semanticTokens": "capability/semanticTokens",
     "completionResult": "capability/completionResult",
     "hoverResult": "capability/hoverResult",
     "signatureResult": "capability/signatureResult",
     "definitionResult": "capability/definitionResult",
     "inlayHintsResult": "capability/inlayHintsResult",
-    "codeLensResult": "capability/codeLensResult"
+    "codeLensResult": "capability/codeLensResult",
+    "semanticTokensResult": "capability/semanticTokensResult"
   },
   "legacy": {
     "requestCompletion": "editor/requestCompletion",

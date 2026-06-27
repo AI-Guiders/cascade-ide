@@ -48,13 +48,21 @@ public sealed record CideEditorApplyEditsMessage(
     IReadOnlyList<CideEditorApplyEdit> Edits,
     int ExpectedVersion);
 
+/// <summary>
+/// Decoration push DTO. Prefer <see cref="StartLine"/> for whole-line layers (diagnostics);
+/// use <see cref="StartOffset"/> for token spans (highlights). See monaco-presentation-projection-v1.md.
+/// </summary>
 public sealed record CideEditorDecoration(
     int StartOffset,
     int Length,
     string ClassName,
     string? HoverMessage,
     bool IsWholeLine = false,
-    string? GlyphMarginClassName = null);
+    string? GlyphMarginClassName = null,
+    int? StartLine = null,
+    int? StartColumn = null,
+    int? EndLine = null,
+    int? EndColumn = null);
 
 public sealed record CideEditorSetSelectionMessage(int SelectionStart, int SelectionLength);
 
@@ -68,7 +76,8 @@ public sealed record CideEditorSetEpochDimMessage(bool Dimmed);
 
 public sealed record CideEditorSetDecorationsMessage(
     string SetId,
-    IReadOnlyList<CideEditorDecoration> Decorations);
+    IReadOnlyList<CideEditorDecoration> Decorations,
+    int? ExpectedModelVersion = null);
 
 public sealed record CideEditorStickyScrollMessage(string? Label);
 
@@ -86,7 +95,8 @@ public sealed record CideEditorSetIntelligenceMessage(bool Enabled);
 public sealed record CideEditorRevealRangeMessage(
     int StartLine,
     int EndLine,
-    int? Column);
+    int? Column,
+    bool Select = true);
 
 public sealed record CideEditorDefinitionLocation(
     string FilePath,
@@ -116,7 +126,12 @@ public sealed record CideEditorSignatureResultMessage(
     int RequestId,
     string? Signature);
 
-public sealed record CideEditorInlayHint(int Line, int Column, string Label, string Kind = "type");
+public sealed record CideEditorInlayHint(
+    int Line,
+    int Column,
+    string Label,
+    string Kind = "type",
+    bool AtEndOfLine = false);
 
 public sealed record CideEditorInlayHintsResultMessage(
     int RequestId,
@@ -131,6 +146,19 @@ public sealed record CideEditorCodeLensItem(
 public sealed record CideEditorCodeLensResultMessage(
     int RequestId,
     IReadOnlyList<CideEditorCodeLensItem> Lenses);
+
+public sealed record CideEditorSemanticTokensLegend(
+    IReadOnlyList<string> TokenTypes,
+    IReadOnlyList<string> TokenModifiers);
+
+public sealed record CideEditorSemanticTokensData(
+    IReadOnlyList<uint> Data,
+    string? ResultId);
+
+public sealed record CideEditorSemanticTokensResultMessage(
+    int RequestId,
+    IReadOnlyList<uint> Data,
+    string? ResultId);
 
 public sealed record CideEditorInboundMessage(
     string Type,

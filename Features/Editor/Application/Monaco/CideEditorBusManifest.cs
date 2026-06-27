@@ -38,6 +38,7 @@ public static class CideEditorBusManifest
         public const string InlayHints = "capability/inlayHints";
         public const string CodeLens = "capability/codeLens";
         public const string CodeLensClick = "capability/codeLensClick";
+        public const string SemanticTokens = "capability/semanticTokens";
 
         public const string CompletionResult = "capability/completionResult";
         public const string HoverResult = "capability/hoverResult";
@@ -45,6 +46,7 @@ public static class CideEditorBusManifest
         public const string DefinitionResult = "capability/definitionResult";
         public const string InlayHintsResult = "capability/inlayHintsResult";
         public const string CodeLensResult = "capability/codeLensResult";
+        public const string SemanticTokensResult = "capability/semanticTokensResult";
     }
 
     public static class Editor
@@ -63,6 +65,7 @@ public static class CideEditorBusManifest
         public const string SetStickyScroll = "editor/setStickyScroll";
         public const string SetCfContentLane = "editor/setCfContentLane";
         public const string SetInlayHints = "editor/setInlayHints";
+        public const string SetSemanticTokensLegend = "editor/setSemanticTokensLegend";
 
         public const string DidChange = "editor/didChange";
         public const string DidChangeCursorSelection = "editor/didChangeCursorSelection";
@@ -93,6 +96,7 @@ public static class CideEditorBusManifest
     public static bool IsCapabilityRequest(string? type) =>
         type is Capabilities.Completion or Capabilities.Hover or Capabilities.SignatureHelp
             or Capabilities.Definition or Capabilities.InlayHints or Capabilities.CodeLens
+            or Capabilities.SemanticTokens
             or Legacy.RequestCompletion or Legacy.RequestHover or Legacy.RequestSignature;
 
     public static bool IsCapabilitySideChannel(string? type) =>
@@ -102,5 +106,6 @@ public static class CideEditorBusManifest
         type is Capabilities.CompletionResult or Capabilities.HoverResult
             or Capabilities.SignatureResult or Capabilities.DefinitionResult
             or Capabilities.InlayHintsResult or Capabilities.CodeLensResult
+            or Capabilities.SemanticTokensResult
             or Legacy.CompletionResult or Legacy.HoverResult or Legacy.SignatureResult;
 }

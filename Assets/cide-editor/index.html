@@ -9,10 +9,10 @@
     html, body { margin: 0; padding: 0; height: 100%; overflow: hidden; background: #1e1e1e; }
     #container { width: 100%; height: 100%; }
 
-    .squiggly-error { text-decoration: underline wavy #f14c4c; }
-    .squiggly-warning { text-decoration: underline wavy #cca700; }
-    .squiggly-info { text-decoration: underline wavy #3794ff; }
-    .reference-highlight { background-color: rgba(180, 220, 255, 0.35); }
+    .reference-highlight { background-color: rgba(55, 90, 130, 0.35); border-radius: 2px; }
+    .squiggly-error { text-decoration: underline wavy #f14c4c; text-decoration-skip-ink: none; background: transparent; }
+    .squiggly-warning { text-decoration: underline wavy #cca700; text-decoration-skip-ink: none; background: transparent; }
+    .squiggly-info { text-decoration: underline wavy #3794ff; text-decoration-skip-ink: none; background: transparent; }
 
     .monaco-editor .margin-view-overlays .cide-cf-glyph::before {
       display: inline-block;
@@ -29,7 +29,27 @@
 
     .cide-breakpoint-line { background-color: rgba(200, 80, 80, 0.15); }
     .cide-debug-line { background-color: rgba(255, 200, 80, 0.24); }
-    .cide-agent-reveal-line { background-color: rgba(120, 200, 255, 0.22); outline: 1px solid rgba(120, 200, 255, 0.45); }
+    .cide-agent-reveal-line {
+      background-color: rgba(120, 200, 255, 0.18);
+      box-sizing: border-box;
+    }
+    .cide-agent-reveal-single {
+      border: 1px solid rgba(120, 200, 255, 0.55);
+    }
+    .cide-agent-reveal-top {
+      border-top: 1px solid rgba(120, 200, 255, 0.55);
+      border-left: 1px solid rgba(120, 200, 255, 0.55);
+      border-right: 1px solid rgba(120, 200, 255, 0.55);
+    }
+    .cide-agent-reveal-middle {
+      border-left: 1px solid rgba(120, 200, 255, 0.55);
+      border-right: 1px solid rgba(120, 200, 255, 0.55);
+    }
+    .cide-agent-reveal-bottom {
+      border-bottom: 1px solid rgba(120, 200, 255, 0.55);
+      border-left: 1px solid rgba(120, 200, 255, 0.55);
+      border-right: 1px solid rgba(120, 200, 255, 0.55);
+    }
 
     .monaco-editor .margin-view-overlays .cide-breakpoint-glyph::before {
       content: '●';
@@ -44,8 +64,7 @@
 
     #container.cide-epoch-dim { opacity: 0.55; filter: saturate(0.85); }
 
-    .monaco-editor.cide-cf-lane-shift .margin,
-    .monaco-editor.cide-cf-lane-shift .monaco-scrollable-element {
+    .monaco-editor.cide-cf-lane-shift .margin {
       margin-left: var(--cide-cf-lane-width, 0px);
     }
 
@@ -60,6 +79,7 @@
 </head>
 <body>
   <div id="container"></div>
+  <script src="decoration-layer-manager.js"></script>
   <script src="lang/toml.monarch.js"></script>
   <script src="cide-editor-bridge.js"></script>
 </body>

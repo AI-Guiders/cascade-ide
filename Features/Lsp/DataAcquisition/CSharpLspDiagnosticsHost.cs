@@ -122,8 +122,9 @@ public sealed partial class CSharpLspDiagnosticsHost : ILspDiagnosticSource
                 var root = initResult.RootElement;
                 if (root.TryGetProperty("error", out _))
                     return false;
-                if (!root.TryGetProperty("result", out _))
+                if (!root.TryGetProperty("result", out var resultEl))
                     return false;
+                ApplyServerCapabilities(resultEl);
             }
 
             await SendInitializedNotificationAsync(runToken).ConfigureAwait(false);
@@ -162,7 +163,17 @@ public sealed partial class CSharpLspDiagnosticsHost : ILspDiagnosticSource
                     ["textDocument"] = new JsonObject
                     {
                         ["synchronization"] = new JsonObject { ["dynamicRegistration"] = false },
-                        ["hover"] = new JsonObject { ["dynamicRegistration"] = false }
+                        ["hover"] = new JsonObject { ["dynamicRegistration"] = false },
+                        ["semanticTokens"] = new JsonObject
+                        {
+                            ["requests"] = new JsonObject
+                            {
+                                ["full"] = new JsonObject { ["delta"] = false },
+                            },
+                            ["tokenTypes"] = new JsonArray(),
+                            ["formats"] = new JsonArray { "relative" },
+                            ["multilineTokenSupport"] = false,
+                        },
                     },
                     ["workspace"] = new JsonObject { ["workspaceFolders"] = true }
                 },
@@ -523,6 +534,7 @@ public sealed partial class CSharpLspDiagnosticsHost : ILspDiagnosticSource
     private void DisposeProcess()
     {
         _handshakeDone = false;
+        ClearSemanticTokensState();
         foreach (var kv in _debounceByPath)
         {
             if (_debounceByPath.TryRemove(kv.Key, out var c))

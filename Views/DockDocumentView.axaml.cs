@@ -206,9 +206,9 @@ public partial class DockDocumentView : UserControl
 
     public void FocusMonacoEditor() => _monacoHost?.Focus();
 
-    public Task GotoLineColumnAsync(int line, int column) =>
+    public Task GotoLineColumnAsync(int line, int column, bool select = true) =>
         _monacoHost is { IsReady: true } host
-            ? host.PushRevealRangeAsync(line, line, column)
+            ? host.PushRevealRangeAsync(line, line, column, select)
             : Task.CompletedTask;
 
     public Task SetSelectionAsync(int start, int length) =>
@@ -221,9 +221,9 @@ public partial class DockDocumentView : UserControl
             ? host.PushEpochDimAsync(dimmed)
             : Task.CompletedTask;
 
-    public Task RevealAgentRangeAsync(int startLine, int endLine, bool persistent) =>
+    public Task RevealAgentRangeAsync(int startLine, int endLine, bool persistent, int? durationMs = null) =>
         _monacoHost is { IsReady: true } host
-            ? host.PushAgentRevealAsync(startLine, endLine, persistent, durationMs: persistent ? null : 3000)
+            ? host.PushAgentRevealAsync(startLine, endLine, persistent, durationMs: persistent ? null : (durationMs ?? 3000))
             : Task.CompletedTask;
 
     public void ClearAgentReveal() => _ = ClearAgentRevealAsync();

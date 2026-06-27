@@ -18,4 +18,15 @@ public sealed class CideEditorBusManifestTests
     [InlineData(CideEditorBusManifest.Capabilities.Hover, CideEditorBusManifest.Capabilities.Hover)]
     public void NormalizeInboundType_maps_legacy_capabilities(string raw, string expected) =>
         Assert.Equal(expected, CideEditorBusManifest.NormalizeInboundType(raw));
+
+    [Theory]
+    [InlineData(CideEditorBusManifest.Capabilities.SemanticTokens, true)]
+    [InlineData(CideEditorBusManifest.Capabilities.SemanticTokensResult, false)]
+    public void IsCapabilityRequest_and_result(string type, bool isRequest)
+    {
+        if (isRequest)
+            Assert.True(CideEditorBusManifest.IsCapabilityRequest(type));
+        else
+            Assert.True(CideEditorBusManifest.IsCapabilityResult(type));
+    }
 }

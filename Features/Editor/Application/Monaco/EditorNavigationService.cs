@@ -1,5 +1,3 @@
-using CascadeIDE.Features.Documents;
-using CascadeIDE.Services;
 using CascadeIDE.ViewModels;
 using CascadeIDE.Views;
 
@@ -8,6 +6,8 @@ namespace CascadeIDE.Features.Editor.Application.Monaco;
 /// <summary>Unifies reveal/goto paths into Monaco (ADR 0163 §2.4).</summary>
 public sealed class EditorNavigationService : IEditorNavigationService
 {
+    private const int NavigationMapRevealDurationMs = 3000;
+
     private readonly MainWindowViewModel _vm;
 
     public EditorNavigationService(MainWindowViewModel vm) => _vm = vm;
@@ -19,13 +19,15 @@ public sealed class EditorNavigationService : IEditorNavigationService
 
         await UiScheduler.Default.InvokeAsync(() =>
         {
-            _vm.Documents.OpenOrActivateDocument(target.FilePath);
+            _vm.Documents.ActivateDocumentForReveal(target.FilePath);
             return true;
         }).ConfigureAwait(true);
 
         var dock = await WaitForDockAsync(_vm, target.FilePath, cancellationToken).ConfigureAwait(true);
         if (dock is null)
             return false;
+
+        await WaitForMonacoReadyAsync(dock, cancellationToken).ConfigureAwait(true);
 
         return await ApplyPresentationAsync(dock, target, cancellationToken).ConfigureAwait(true);
     }
@@ -99,6 +101,17 @@ public sealed class EditorNavigationService : IEditorNavigationService
         return null;
     }
 
+    private static async Task WaitForMonacoReadyAsync(DockDocumentView dock, CancellationToken cancellationToken)
+    {
+        for (var attempt = 0; attempt < 24; attempt++)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            if (await UiScheduler.Default.InvokeAsync(() => dock.IsMonacoReady).ConfigureAwait(true))
+                return;
+            await Task.Delay(50, cancellationToken).ConfigureAwait(false);
+        }
+    }
+
     private static async Task<bool> ApplyPresentationAsync(
         DockDocumentView dock,
         EditorNavigationTarget target,
@@ -109,21 +122,42 @@ public sealed class EditorNavigationService : IEditorNavigationService
         switch (target.Presentation)
         {
             case EditorNavigationPresentation.RevealTransient:
-                await dock.RevealAgentRangeAsync(target.StartLine, target.EndLine, persistent: false).ConfigureAwait(true);
+                await dock.GotoLineColumnAsync(target.StartLine, target.StartColumn ?? 1, select: false)
+                    .ConfigureAwait(true);
+                await dock.RevealAgentRangeAsync(
+                    target.StartLine,
+                    target.EndLine,
+                    persistent: false,
+                    durationMs: target.DurationMs ?? NavigationMapRevealDurationMs).ConfigureAwait(true);
                 return true;
 
             case EditorNavigationPresentation.RevealPersistent:
+                await dock.GotoLineColumnAsync(target.StartLine, target.StartColumn ?? 1, select: false)
+                    .ConfigureAwait(true);
                 await dock.RevealAgentRangeAsync(target.StartLine, target.EndLine, persistent: true).ConfigureAwait(true);
                 return true;
 
             case EditorNavigationPresentation.ScrollOnly:
                 await dock.GotoLineColumnAsync(
                     target.StartLine,
-                    target.StartColumn ?? 1).ConfigureAwait(true);
+                    target.StartColumn ?? 1,
+                    select: false).ConfigureAwait(true);
                 return true;
 
             case EditorNavigationPresentation.SelectAndReveal:
             default:
+                if (target.Source == EditorNavigationSource.NavigationMap)
+                {
+                    await dock.GotoLineColumnAsync(target.StartLine, target.StartColumn ?? 1, select: false)
+                        .ConfigureAwait(true);
+                    await dock.RevealAgentRangeAsync(
+                        target.StartLine,
+                        target.EndLine,
+                        persistent: false,
+                        durationMs: NavigationMapRevealDurationMs).ConfigureAwait(true);
+                    return true;
+                }
+
                 if (target.DurationMs is > 0)
                 {
                     return dock.TryRevealEditorRange(target.StartLine, target.EndLine, target.DurationMs);

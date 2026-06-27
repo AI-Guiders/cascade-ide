@@ -90,8 +90,16 @@ public partial class MonacoEditorHostControl : UserControl
             return;
         }
 
-        Session.ApplyInbound(msg);
-        Inbound?.Invoke(this, msg);
+        void HandleInbound()
+        {
+            Session.ApplyInbound(msg);
+            Inbound?.Invoke(this, msg);
+        }
+
+        if (Dispatcher.UIThread.CheckAccess())
+            HandleInbound();
+        else
+            Dispatcher.UIThread.Post(HandleInbound);
     }
 
     public async Task PushSetModelAsync(string filePath, string text, CancellationToken cancellationToken = default)
@@ -119,11 +127,37 @@ public partial class MonacoEditorHostControl : UserControl
     public async Task PushDecorationsAsync(
         string setId,
         IReadOnlyList<CideEditorDecoration> decorations,
+        int? expectedModelVersion = null,
         CancellationToken cancellationToken = default)
     {
         await EnsureReadyAsync(cancellationToken).ConfigureAwait(true);
-        var payload = new CideEditorSetDecorationsMessage(setId, decorations);
+        if (expectedModelVersion is int version && !SessionMatchesVersion(version))
+            return;
+
+        var payload = new CideEditorSetDecorationsMessage(setId, decorations, expectedModelVersion);
         await DispatchAsync(CideEditorBridgeTypes.SetDecorations, payload, cancellationToken).ConfigureAwait(true);
+    }
+
+    public async Task PushEditorHudPresentationAsync(
+        MonacoEditorPresentationProjector.Push push,
+        CancellationToken cancellationToken = default)
+    {
+        await EnsureReadyAsync(cancellationToken).ConfigureAwait(true);
+        if (!SessionMatchesVersion(push.ModelVersion))
+            return;
+
+        await PushDecorationsAsync(
+            CideEditorBusManifest.SetIds.Diagnostics,
+            push.DiagnosticDecorations,
+            push.ModelVersion,
+            cancellationToken).ConfigureAwait(true);
+        await PushInlayHintsAsync(push.InlayHints, push.ModelVersion, cancellationToken).ConfigureAwait(true);
+    }
+
+    private bool SessionMatchesVersion(int expectedVersion)
+    {
+        Session.ReadSnapshot(out var version, out _, out _, out _, out _);
+        return version == expectedVersion;
     }
 
     public async Task PushStickyScrollAsync(string? label, CancellationToken cancellationToken = default)
@@ -159,12 +193,13 @@ public partial class MonacoEditorHostControl : UserControl
         int startLine,
         int endLine,
         int? column = null,
+        bool select = true,
         CancellationToken cancellationToken = default)
     {
         await EnsureReadyAsync(cancellationToken).ConfigureAwait(true);
         await DispatchAsync(
             CideEditorBridgeTypes.RevealRange,
-            new CideEditorRevealRangeMessage(startLine, endLine, column),
+            new CideEditorRevealRangeMessage(startLine, endLine, column, select),
             cancellationToken).ConfigureAwait(true);
     }
 
@@ -281,14 +316,42 @@ public partial class MonacoEditorHostControl : UserControl
             cancellationToken).ConfigureAwait(true);
     }
 
-    public async Task PushInlayHintsAsync(
-        IReadOnlyList<CideEditorInlayHint> hints,
+    public async Task PushCapabilitySemanticTokensResultAsync(
+        int requestId,
+        IReadOnlyList<uint> data,
+        string? resultId,
         CancellationToken cancellationToken = default)
     {
         await EnsureReadyAsync(cancellationToken).ConfigureAwait(true);
         await DispatchAsync(
+            CideEditorBusManifest.Capabilities.SemanticTokensResult,
+            new CideEditorSemanticTokensResultMessage(requestId, data, resultId),
+            cancellationToken).ConfigureAwait(true);
+    }
+
+    public async Task PushSemanticTokensLegendAsync(
+        CideEditorSemanticTokensLegend legend,
+        CancellationToken cancellationToken = default)
+    {
+        await EnsureReadyAsync(cancellationToken).ConfigureAwait(true);
+        await DispatchAsync(
+            CideEditorBusManifest.Editor.SetSemanticTokensLegend,
+            legend,
+            cancellationToken).ConfigureAwait(true);
+    }
+
+    public async Task PushInlayHintsAsync(
+        IReadOnlyList<CideEditorInlayHint> hints,
+        int? expectedModelVersion = null,
+        CancellationToken cancellationToken = default)
+    {
+        await EnsureReadyAsync(cancellationToken).ConfigureAwait(true);
+        if (expectedModelVersion is int version && !SessionMatchesVersion(version))
+            return;
+
+        await DispatchAsync(
             CideEditorBusManifest.Editor.SetInlayHints,
-            new { hints },
+            new { hints, expectedModelVersion },
             cancellationToken).ConfigureAwait(true);
     }
 
@@ -363,8 +426,14 @@ public partial class MonacoEditorHostControl : UserControl
             throw new InvalidOperationException("Monaco editor host did not become ready.");
     }
 
-    private async Task DispatchAsync(string type, object payload, CancellationToken cancellationToken)
+    private Task DispatchAsync(string type, object payload, CancellationToken cancellationToken) =>
+        Dispatcher.UIThread.CheckAccess()
+            ? DispatchAsyncCore(type, payload, cancellationToken)
+            : Dispatcher.UIThread.InvokeAsync(() => DispatchAsyncCore(type, payload, cancellationToken));
+
+    private async Task DispatchAsyncCore(string type, object payload, CancellationToken cancellationToken)
     {
+        cancellationToken.ThrowIfCancellationRequested();
         _webView ??= this.FindControl<NativeWebView>("WebView");
         if (_webView is null)
             return;

@@ -2,6 +2,7 @@ using CascadeIDE.Cockpit.DataBus;
 using CascadeIDE.Features.Build.Application;
 using CascadeIDE.Features.Workspace.Application;
 using CascadeIDE.Models;
+using CascadeIDE.Services;
 using CascadeIDE.ViewModels;
 using CommunityToolkit.Mvvm.Input;
 
@@ -20,6 +21,12 @@ public sealed partial class MainWindowBuildSessionViewModel : ViewModelBase
         var prep = MainWindowBuildSolutionPrepProjection.TryCreatePrep(_host.Workspace.SolutionPath);
         if (prep is null)
             return;
+
+        await UiScheduler.Default.InvokeAsync(() =>
+        {
+            _host.Documents.SyncActiveEditorBufferFromHost();
+            _host.Documents.SaveDirtyOpenDocumentsToDisk();
+        }).ConfigureAwait(true);
 
         _host.McpPublishToIdeDataBusAndRebuild(new BuildStateChanged(true));
         _host.IsBuilding = true;

@@ -31,6 +31,7 @@ public sealed partial class DocumentsWorkspaceViewModel : ObservableObject
     private int _recentlyClosedDocumentCount;
     private bool _isSwitchingDocument;
     private IDisposable? _selectedDocumentContentSubscription;
+    private readonly Dictionary<OpenDocumentViewModel, (DockDocumentViewModel Dock, PropertyChangedEventHandler Handler)> _dockChromeBindings = new();
 
     public DocumentsWorkspaceViewModel(MainWindowViewModel host, SolutionWorkspaceViewModel workspace)
     {
@@ -99,6 +100,8 @@ public sealed partial class DocumentsWorkspaceViewModel : ObservableObject
         Group2Documents.Clear();
         Group3Documents.Clear();
         OpenDocuments.Clear();
+        foreach (var doc in _dockChromeBindings.Keys.ToList())
+            UnbindDockChrome(doc);
         DockDocuments.Clear();
         DockActiveDocument = null;
         _recentlyClosedDocumentPaths.Clear();
@@ -156,11 +159,7 @@ public sealed partial class DocumentsWorkspaceViewModel : ObservableObject
             OpenDocuments.Add(existing);
             GetGroupCollection(targetGroup).Add(existing);
 
-            DockDocuments.Add(new DockDocumentViewModel(existing)
-            {
-                Id = normalized,
-                Title = existing.DisplayTitle
-            });
+            DockDocuments.Add(CreateDockDocument(existing));
         }
         else
         {
@@ -225,6 +224,22 @@ public sealed partial class DocumentsWorkspaceViewModel : ObservableObject
             .FirstOrDefault(d => string.Equals(d.Doc.FilePath, doc.FilePath, StringComparison.OrdinalIgnoreCase));
         if (dockDoc is not null && !ReferenceEquals(DockActiveDocument, dockDoc))
             DockActiveDocument = dockDoc;
+
+        if (doc.GroupIndex != 1
+            && !EditorTextCoordinateUtilities.PathsReferToSameFile(_host.CurrentFilePath, doc.FilePath))
+        {
+            _isSwitchingDocument = true;
+            try
+            {
+                _host.CurrentFilePath = doc.FilePath;
+                if (!string.Equals(_host.EditorText, doc.Content, StringComparison.Ordinal))
+                    _host.EditorText = doc.Content ?? "";
+            }
+            finally
+            {
+                _isSwitchingDocument = false;
+            }
+        }
     }
 
     public void MoveDocumentToGroupInternal(OpenDocumentViewModel doc, int targetGroup)
@@ -281,7 +296,10 @@ public sealed partial class DocumentsWorkspaceViewModel : ObservableObject
             .OfType<DockDocumentViewModel>()
             .FirstOrDefault(d => string.Equals(d.Doc.FilePath, doc.FilePath, StringComparison.OrdinalIgnoreCase));
         if (dockDoc is not null)
+        {
+            UnbindDockChrome(doc);
             DockDocuments.Remove(dockDoc);
+        }
         _recentlyClosedDocumentPaths.Push(doc.FilePath);
         _recentlyClosedDocumentCount = _recentlyClosedDocumentPaths.Count;
         NotifyReopenClosedCanExecuteChanged();
@@ -320,15 +338,100 @@ public sealed partial class DocumentsWorkspaceViewModel : ObservableObject
 
     public bool CanReopenClosedDocument() => _recentlyClosedDocumentCount > 0;
 
-    /// <summary>При вводе в основном редакторе — обновить активный документ группы 1.</summary>
+    /// <summary>При вводе в основном редакторе — обновить активный документ (dock / current path / группа).</summary>
     public void ApplyEditorTextFromHost(string value)
     {
-        if (_isSwitchingDocument || SelectedDocument is null)
+        if (_isSwitchingDocument)
             return;
 
-        SelectedDocument.Content = value ?? "";
-        SelectedDocument.IsDirty = !string.Equals(SelectedDocument.Content, SelectedDocument.OriginalContent, StringComparison.Ordinal);
-        _host.NotifyAgentEnvironmentDocumentWrite(SelectedDocument.FilePath);
+        var doc = ResolveHostEditedDocument();
+        if (doc is null)
+            return;
+
+        ApplyEditorTextToDocument(doc, value);
+    }
+
+    /// <summary>Monaco / MCP: правка конкретной открытой вкладки по пути.</summary>
+    public void ApplyEditorTextForDocument(string filePath, string value)
+    {
+        if (_isSwitchingDocument || string.IsNullOrWhiteSpace(filePath))
+            return;
+
+        if (!SolutionTreePath.TryGetFullPath(filePath, out var normalized))
+            normalized = filePath;
+
+        var doc = FindOpenDocument(normalized);
+        if (doc is null)
+            return;
+
+        ApplyEditorTextToDocument(doc, value);
+    }
+
+    /// <summary>Monaco: правка по ссылке на открытую вкладку (без повторного resolve пути).</summary>
+    public void ApplyEditorTextToOpenDocument(OpenDocumentViewModel doc, string value)
+    {
+        if (_isSwitchingDocument)
+            return;
+
+        ApplyEditorTextToDocument(doc, value);
+    }
+
+    /// <summary>Синхронизировать <see cref="OpenDocumentViewModel.Content"/> из <see cref="MainWindowViewModel.EditorText"/> (перед сборкой и т.п.).</summary>
+    public void SyncActiveEditorBufferFromHost()
+    {
+        if (_isSwitchingDocument)
+            return;
+
+        var doc = ResolveHostEditedDocument();
+        if (doc is null)
+            return;
+
+        ApplyEditorTextToDocument(doc, _host.EditorText ?? "");
+    }
+
+    /// <summary>Записать на диск все грязные открытые вкладки (после <see cref="SyncActiveEditorBufferFromHost"/>).</summary>
+    public int SaveDirtyOpenDocumentsToDisk()
+    {
+        var saved = 0;
+        foreach (var doc in OpenDocuments)
+        {
+            if (!doc.IsDirty)
+                continue;
+            if (!WorkspaceDocumentFileIo.TryWriteText(doc.FilePath, doc.Content, createIfMissing: false, out _))
+                continue;
+            doc.ReloadContent(doc.Content);
+            _host.NotifyAgentEnvironmentDocumentWrite(doc.FilePath);
+            saved++;
+        }
+
+        return saved;
+    }
+
+    private void ApplyEditorTextToDocument(OpenDocumentViewModel doc, string value)
+    {
+        var text = value ?? "";
+        if (string.Equals(doc.Content, text, StringComparison.Ordinal))
+            return;
+
+        doc.Content = text;
+        doc.IsDirty = !string.Equals(doc.Content, doc.OriginalContent, StringComparison.Ordinal);
+        _host.NotifyAgentEnvironmentDocumentWrite(doc.FilePath);
+    }
+
+    private OpenDocumentViewModel? ResolveHostEditedDocument()
+    {
+        if (DockActiveDocument is DockDocumentViewModel dockDoc)
+            return dockDoc.Doc;
+
+        if (!string.IsNullOrEmpty(_host.CurrentFilePath))
+            return FindOpenDocument(_host.CurrentFilePath);
+
+        return ActiveEditorGroup switch
+        {
+            2 => SelectedDocumentGroup2,
+            3 => SelectedDocumentGroup3,
+            _ => SelectedDocument,
+        };
     }
 
     /// <summary>MCP <c>apply_edit</c>: правка в модели любой открытой вкладки; при необходимости открывает файл.</summary>
@@ -525,6 +628,35 @@ public sealed partial class DocumentsWorkspaceViewModel : ObservableObject
         }
 
         return "";
+    }
+
+    private DockDocumentViewModel CreateDockDocument(OpenDocumentViewModel doc)
+    {
+        var dock = new DockDocumentViewModel(doc)
+        {
+            Id = doc.FilePath,
+            Title = doc.DisplayTitle,
+        };
+        BindDockChrome(doc, dock);
+        return dock;
+    }
+
+    /// <summary>Dock tab title is a projection of <see cref="OpenDocumentViewModel.DisplayTitle"/>.</summary>
+    private void BindDockChrome(OpenDocumentViewModel doc, DockDocumentViewModel dock)
+    {
+        PropertyChangedEventHandler handler = (_, e) =>
+        {
+            if (e.PropertyName is nameof(OpenDocumentViewModel.IsDirty) or nameof(OpenDocumentViewModel.IsPinned))
+                dock.Title = doc.DisplayTitle;
+        };
+        doc.PropertyChanged += handler;
+        _dockChromeBindings[doc] = (dock, handler);
+    }
+
+    private void UnbindDockChrome(OpenDocumentViewModel doc)
+    {
+        if (_dockChromeBindings.Remove(doc, out var binding))
+            doc.PropertyChanged -= binding.Handler;
     }
 
     private static IDisposable ObservePropertyChanged(INotifyPropertyChanged obj, string propertyName, Action onChanged)

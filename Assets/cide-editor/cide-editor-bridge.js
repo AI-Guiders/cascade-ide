@@ -2,6 +2,8 @@
 (function () {
   'use strict';
 
+  const root = typeof window !== 'undefined' ? window : globalThis;
+
   const MONACO_VS = 'monaco/min/vs';
   const BUS = {
     setIds: {
@@ -20,12 +22,14 @@
       inlayHints: 'capability/inlayHints',
       codeLens: 'capability/codeLens',
       codeLensClick: 'capability/codeLensClick',
+      semanticTokens: 'capability/semanticTokens',
       completionResult: 'capability/completionResult',
       hoverResult: 'capability/hoverResult',
       signatureResult: 'capability/signatureResult',
       definitionResult: 'capability/definitionResult',
       inlayHintsResult: 'capability/inlayHintsResult',
       codeLensResult: 'capability/codeLensResult',
+      semanticTokensResult: 'capability/semanticTokensResult',
     },
   };
 
@@ -42,10 +46,14 @@
   let suppressChange = false;
   let intelligenceEnabled = true;
   const decorationSets = new Map();
+  const decorationLayerManager = root.CideDecorationLayerManager
+    ? root.CideDecorationLayerManager.create()
+    : null;
   const pendingRequests = new Map();
   let cfGlyphStyleEl = null;
   let disposables = [];
   let hostInlayHints = [];
+  let hostSemanticLegend = null;
   let cfLaneActive = false;
 
   function postToHost(msg) {
@@ -108,26 +116,64 @@
 
   let agentRevealTimer = null;
 
+  function versionGuard(expectedVersion) {
+    return expectedVersion == null || expectedVersion === modelVersion;
+  }
+
   function applyDecorations(setId, decorations) {
+    if (decorationLayerManager) {
+      decorationLayerManager.apply(setId, decorations, editor, monaco, normalizeSetId);
+      return;
+    }
     if (!editor) return;
     const model = editor.getModel();
     if (!model) return;
     const normalizedId = normalizeSetId(setId);
-    const monacoDecos = (decorations || []).map((d) => ({
-      range: monaco.Range.fromPositions(
-        model.getPositionAt(d.startOffset),
-        model.getPositionAt(d.startOffset + Math.max(0, d.length))
-      ),
-      options: {
-        className: d.className || '',
-        inlineClassName: d.className || '',
+    const maxOffset = model.getValueLength();
+    const monacoDecos = (decorations || []).map((d) => {
+      const start = Math.max(0, Math.min(d.startOffset ?? 0, maxOffset));
+      const end = Math.max(start, Math.min(start + Math.max(0, d.length ?? 0), maxOffset));
+      const className = d.className || '';
+      const options = {
         hoverMessage: d.hoverMessage ? { value: d.hoverMessage } : undefined,
-        isWholeLine: !!d.isWholeLine,
         glyphMarginClassName: d.glyphMarginClassName || undefined,
-      },
-    }));
+      };
+      let range;
+      if (d.isWholeLine) {
+        options.isWholeLine = true;
+        if (className) {
+          if (className.startsWith('squiggly-')) {
+            options.inlineClassName = className;
+          } else {
+            options.className = className;
+          }
+        }
+        const line = model.getPositionAt(start).lineNumber;
+        range = new monaco.Range(line, 1, line, model.getLineMaxColumn(line));
+      } else if (className) {
+        options.inlineClassName = className;
+        range = monaco.Range.fromPositions(
+          model.getPositionAt(start),
+          model.getPositionAt(end)
+        );
+      } else {
+        range = monaco.Range.fromPositions(
+          model.getPositionAt(start),
+          model.getPositionAt(end)
+        );
+      }
+      return { range, options };
+    });
     const handles = editor.deltaDecorations(decorationSets.get(normalizedId) || [], monacoDecos);
     decorationSets.set(normalizedId, handles);
+  }
+
+  function agentRevealClassForLine(line, startLine, endLine) {
+    const base = 'cide-agent-reveal-line';
+    if (startLine === endLine) return `${base} cide-agent-reveal-single`;
+    if (line === startLine) return `${base} cide-agent-reveal-top`;
+    if (line === endLine) return `${base} cide-agent-reveal-bottom`;
+    return `${base} cide-agent-reveal-middle`;
   }
 
   function applyAgentReveal(payload) {
@@ -140,26 +186,28 @@
     }
     const startLine = Math.max(1, payload.startLine ?? 1);
     const endLine = Math.max(startLine, payload.endLine ?? startLine);
+    const endLineClamped = Math.min(endLine, model.getLineCount());
+    const startLineClamped = Math.min(startLine, endLineClamped);
     const decos = [];
-    for (let line = startLine; line <= endLine; line++) {
-      if (line > model.getLineCount()) break;
+    for (let line = startLineClamped; line <= endLineClamped; line++) {
       decos.push({
         range: new monaco.Range(line, 1, line, model.getLineMaxColumn(line)),
         options: {
           isWholeLine: true,
-          className: 'cide-agent-reveal-line',
+          className: agentRevealClassForLine(line, startLineClamped, endLineClamped),
         },
       });
     }
     const handles = editor.deltaDecorations(decorationSets.get(BUS.setIds.agentReveal) || [], decos);
     decorationSets.set(BUS.setIds.agentReveal, handles);
-    if (!payload.persistent && payload.durationMs != null && payload.durationMs > 0) {
+    if (!payload.persistent) {
+      const durationMs = payload.durationMs != null && payload.durationMs > 0 ? payload.durationMs : 3000;
       agentRevealTimer = setTimeout(() => {
         if (!editor) return;
         const cleared = editor.deltaDecorations(decorationSets.get(BUS.setIds.agentReveal) || [], []);
         decorationSets.set(BUS.setIds.agentReveal, cleared);
         agentRevealTimer = null;
-      }, payload.durationMs);
+      }, durationMs);
     }
   }
 
@@ -242,6 +290,23 @@
 
   function applyHostInlayHints(hints) {
     hostInlayHints = hints || [];
+    if (!editor) return;
+    const action = editor.getAction('editor.action.inlayHints.refresh');
+    if (action) {
+      action.run();
+    }
+  }
+
+  function applyHostSemanticLegend(legend) {
+    if (legend && legend.tokenTypes && legend.tokenTypes.length > 0) {
+      hostSemanticLegend = {
+        tokenTypes: legend.tokenTypes,
+        tokenModifiers: legend.tokenModifiers || [],
+      };
+    } else {
+      hostSemanticLegend = null;
+    }
+    registerIntelligenceProviders();
     if (editor && editor.getModel()) {
       editor.getModel().forceTokenization(editor.getModel().getLineCount());
     }
@@ -250,6 +315,31 @@
   function mapInlayKind(kind) {
     if (kind === 'parameter') return monaco.languages.InlayHintKind.Parameter;
     return monaco.languages.InlayHintKind.Type;
+  }
+
+  function mapHostInlayHint(model, h) {
+    const line = h.line;
+    const column = h.atEndOfLine ? model.getLineMaxColumn(line) : h.column;
+    const hint = {
+      position: { lineNumber: line, column },
+      label: h.label,
+      paddingLeft: !h.atEndOfLine,
+    };
+    switch (h.kind) {
+      case 'diagnostic-error':
+        hint.fontColor = '#f48771';
+        break;
+      case 'diagnostic-warning':
+        hint.fontColor = '#cca700';
+        break;
+      case 'diagnostic-info':
+        hint.fontColor = '#3794ff';
+        break;
+      default:
+        hint.kind = mapInlayKind(h.kind);
+        break;
+    }
+    return hint;
   }
 
   function registerIntelligenceProviders() {
@@ -347,12 +437,7 @@
           return {
             hints: hostInlayHints
               .filter((h) => h.line >= range.startLineNumber && h.line <= range.endLineNumber)
-              .map((h) => ({
-                position: { lineNumber: h.line, column: h.column },
-                label: h.label,
-                kind: mapInlayKind(h.kind),
-                paddingLeft: true,
-              })),
+              .map((h) => mapHostInlayHint(model, h)),
             dispose: () => {},
           };
         }
@@ -360,12 +445,7 @@
         try {
           const payload = await waitForHostResponse(BUS.capabilities.inlayHintsResult, requestId);
           return {
-            hints: (payload.hints || []).map((h) => ({
-              position: { lineNumber: h.line, column: h.column },
-              label: h.label,
-              kind: mapInlayKind(h.kind),
-              paddingLeft: true,
-            })),
+            hints: (payload.hints || []).map((h) => mapHostInlayHint(model, h)),
             dispose: () => {},
           };
         } catch {
@@ -396,6 +476,29 @@
     }));
 
     registerCodeLensCommand();
+
+    if (hostSemanticLegend && hostSemanticLegend.tokenTypes && hostSemanticLegend.tokenTypes.length > 0) {
+      disposables.push(monaco.languages.registerDocumentSemanticTokensProvider('csharp', {
+        getLegend: () => ({
+          tokenTypes: hostSemanticLegend.tokenTypes,
+          tokenModifiers: hostSemanticLegend.tokenModifiers || [],
+        }),
+        provideDocumentSemanticTokens: async () => {
+          const requestId = requestCapabilityAt(BUS.capabilities.semanticTokens, 1, 1);
+          try {
+            const payload = await waitForHostResponse(BUS.capabilities.semanticTokensResult, requestId);
+            const arr = payload.data || [];
+            return {
+              resultId: payload.resultId || undefined,
+              data: Uint32Array.from(arr),
+            };
+          } catch {
+            return { data: new Uint32Array(0) };
+          }
+        },
+        releaseDocumentSemanticTokens: () => {},
+      }));
+    }
   }
 
   function registerCodeLensCommand() {
@@ -425,6 +528,7 @@
         case 'capability/definitionResult':
         case 'capability/inlayHintsResult':
         case 'capability/codeLensResult':
+        case 'capability/semanticTokensResult':
           resolveHostResponse(msg);
           break;
         case 'editor/setModel': {
@@ -476,6 +580,7 @@
           break;
         }
         case 'editor/setDecorations':
+          if (!versionGuard(payload.expectedModelVersion)) break;
           applyDecorations(payload.setId || 'default', payload.decorations || []);
           break;
         case 'editor/setGutterGlyphs':
@@ -485,7 +590,11 @@
           applyCfContentLane(payload.active, payload.widthPixels);
           break;
         case 'editor/setInlayHints':
+          if (!versionGuard(payload.expectedModelVersion)) break;
           applyHostInlayHints(payload.hints || []);
+          break;
+        case 'editor/setSemanticTokensLegend':
+          applyHostSemanticLegend(payload);
           break;
         case 'editor/setStickyScroll':
           window.cideEditorHost._stickyLabel = payload.label || null;
@@ -508,9 +617,11 @@
             Math.min(endLine, model.getLineCount()),
             endCol
           );
-          editor.setSelection(range);
+          if (payload.select !== false) {
+            editor.setSelection(range);
+            publishModelState('selection');
+          }
           editor.revealRangeInCenter(range, monaco.editor.ScrollType.Smooth);
-          publishModelState('selection');
           break;
         }
         case 'editor/setSelectionByOffset':
@@ -548,6 +659,10 @@
       colors: {
         'editor.background': '#1e1e1e',
         'editor.foreground': '#d4d4d4',
+        'editor.selectionBackground': '#264f78',
+        'editor.selectionHighlightBackground': '#264f7855',
+        'editor.wordHighlightBackground': '#575757b8',
+        'editor.wordHighlightStrongBackground': '#004972b8',
       },
     });
 

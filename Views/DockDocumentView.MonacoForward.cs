@@ -18,6 +18,7 @@ public partial class DockDocumentView
     private bool _monacoSuppress;
     private Action? _monacoDiagHandler;
     private DispatcherTimer? _monacoHighlightTimer;
+    private DispatcherTimer? _monacoDiagnosticsTimer;
     private CancellationTokenSource? _monacoIntelCts;
     private readonly ICideEditorCapabilityRouter _capabilityRouter = new CideEditorCapabilityRouter();
 
@@ -41,6 +42,13 @@ public partial class DockDocumentView
         {
             _monacoHighlightTimer?.Stop();
             _ = PushMonacoHighlightsAsync();
+        };
+
+        _monacoDiagnosticsTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(450) };
+        _monacoDiagnosticsTimer.Tick += (_, _) =>
+        {
+            _monacoDiagnosticsTimer?.Stop();
+            _ = PushMonacoDiagnosticsAsync();
         };
 
         _vmHandler = (_, args) =>
@@ -103,6 +111,7 @@ public partial class DockDocumentView
     {
         _monacoIntelCts?.Cancel();
         _monacoHighlightTimer?.Stop();
+        _monacoDiagnosticsTimer?.Stop();
 
         if (_monacoHost is not null)
         {
@@ -116,6 +125,8 @@ public partial class DockDocumentView
 
         _monacoHost = null;
     }
+
+    internal bool IsMonacoReady => _monacoHost?.IsReady == true;
 
     private void OnMonacoHostReady(object? sender, EventArgs e) =>
         UiScheduler.Default.Post(() => _ = InitializeMonacoDocumentAsync());
@@ -139,6 +150,7 @@ public partial class DockDocumentView
             await PushMonacoHighlightsAsync().ConfigureAwait(true);
             await PushMonacoDebugOverlayAsync().ConfigureAwait(true);
             await PushMonacoInlayHintsAsync().ConfigureAwait(true);
+            await PushMonacoSemanticTokensLegendAsync().ConfigureAwait(true);
             _vm.UpdateCodeNavigationMapCaretOffset(_editorSurface?.CaretOffset ?? 0);
             _vm.ScheduleWorkspaceNavigationMapRefresh();
         }
@@ -150,59 +162,79 @@ public partial class DockDocumentView
 
     private void OnMonacoInbound(object? sender, CideEditorInboundMessage msg)
     {
-        if (_monacoSuppress || _vm is null || _docVm is null || !IsActive())
-            return;
-
-        if (string.Equals(msg.Type, CideEditorBridgeTypes.DidChange, StringComparison.Ordinal)
-            && msg.Text is not null
-            && !string.Equals(_vm.EditorText, msg.Text, StringComparison.Ordinal))
+        try
         {
-            _monacoSuppress = true;
-            try
+            if (_monacoSuppress || _vm is null || _docVm is null || !IsActive())
+                return;
+
+            if (string.Equals(msg.Type, CideEditorBridgeTypes.DidChange, StringComparison.Ordinal)
+                && msg.Text is not null)
             {
-                _vm.EditorText = msg.Text;
+                var monacoText = msg.Text;
+                var openDoc = _docVm.Doc;
+
+                if (!string.Equals(openDoc.Content, monacoText, StringComparison.Ordinal))
+                {
+                    _vm.Documents.ApplyEditorTextToOpenDocument(openDoc, monacoText);
+                    _vm.WorkspaceDiagnostics.ScheduleDocumentText(openDoc.FilePath, monacoText);
+                }
+
+                if (!string.Equals(_vm.EditorText, monacoText, StringComparison.Ordinal))
+                {
+                    _monacoSuppress = true;
+                    try
+                    {
+                        _vm.EditorText = monacoText;
+                    }
+                    finally
+                    {
+                        _monacoSuppress = false;
+                    }
+                }
+
+                PostStabilizedEditorInputIfActive(EditorInputDeltaKind.DocumentText);
+                ScheduleMonacoDiagnosticsRefresh();
+                _ = PushMonacoControlFlowGlyphsAsync();
+                _ = PushMonacoInlayHintsAsync();
+                return;
             }
-            finally
+
+            if (string.Equals(msg.Type, CideEditorBridgeTypes.DidChangeCursorSelection, StringComparison.Ordinal))
             {
-                _monacoSuppress = false;
+                PostStabilizedEditorInputIfActive(EditorInputDeltaKind.CaretOrSelection);
+                var caret = msg.CaretOffset ?? _editorSurface?.CaretOffset ?? 0;
+                _vm.UpdateCodeNavigationMapCaretOffset(caret);
+                ScheduleMonacoHighlight();
+                _ = PushMonacoControlFlowGlyphsAsync();
+                return;
             }
 
-            PostStabilizedEditorInputIfActive(EditorInputDeltaKind.DocumentText);
-            _ = PushMonacoControlFlowGlyphsAsync();
-            _ = PushMonacoInlayHintsAsync();
-            return;
-        }
+            if (string.Equals(msg.Type, CideEditorBridgeTypes.DidScroll, StringComparison.Ordinal)
+                && msg.TopLine is int topLine)
+            {
+                UpdateMonacoStickyScroll(topLine);
+                return;
+            }
 
-        if (string.Equals(msg.Type, CideEditorBridgeTypes.DidChangeCursorSelection, StringComparison.Ordinal))
-        {
-            PostStabilizedEditorInputIfActive(EditorInputDeltaKind.CaretOrSelection);
-            _vm.UpdateCodeNavigationMapCaretOffset(_editorSurface?.CaretOffset ?? 0);
-            ScheduleMonacoHighlight();
-            _ = PushMonacoControlFlowGlyphsAsync();
-            return;
-        }
+            if (CideEditorBusManifest.IsCapabilityRequest(msg.Type)
+                || CideEditorBusManifest.IsCapabilitySideChannel(msg.Type))
+            {
+                var ctx = BuildCapabilityContext();
+                if (ctx is not null)
+                    _ = _capabilityRouter.HandleAsync(msg, ctx, CancellationToken.None);
+                return;
+            }
 
-        if (string.Equals(msg.Type, CideEditorBridgeTypes.DidScroll, StringComparison.Ordinal)
-            && msg.TopLine is int topLine)
-        {
-            UpdateMonacoStickyScroll(topLine);
-            return;
+            if (string.Equals(msg.Type, CideEditorBridgeTypes.DidGutterClick, StringComparison.Ordinal)
+                && msg.Line is int gutterLine)
+            {
+                _vm.ToggleBreakpointInFile(gutterLine);
+                _ = PushMonacoDebugOverlayAsync();
+            }
         }
-
-        if (CideEditorBusManifest.IsCapabilityRequest(msg.Type)
-            || CideEditorBusManifest.IsCapabilitySideChannel(msg.Type))
+        catch (Exception ex)
         {
-            var ctx = BuildCapabilityContext();
-            if (ctx is not null)
-                _ = _capabilityRouter.HandleAsync(msg, ctx, CancellationToken.None);
-            return;
-        }
-
-        if (string.Equals(msg.Type, CideEditorBridgeTypes.DidGutterClick, StringComparison.Ordinal)
-            && msg.Line is int gutterLine)
-        {
-            _vm.ToggleBreakpointInFile(gutterLine);
-            _ = PushMonacoDebugOverlayAsync();
+            System.Diagnostics.Debug.WriteLine("Monaco inbound: " + ex);
         }
     }
 
@@ -210,6 +242,12 @@ public partial class DockDocumentView
     {
         _monacoHighlightTimer?.Stop();
         _monacoHighlightTimer?.Start();
+    }
+
+    private void ScheduleMonacoDiagnosticsRefresh()
+    {
+        _monacoDiagnosticsTimer?.Stop();
+        _monacoDiagnosticsTimer?.Start();
     }
 
     private MonacoEditorCapabilityContext? BuildCapabilityContext()
@@ -259,11 +297,16 @@ public partial class DockDocumentView
         if (_monacoHost is null || !_monacoHost.IsReady || _docVm is null || _vm is null || !IsActive())
             return;
 
-        var strips = _vm.WorkspaceDiagnostics.GetStripsForFile(_docVm.Doc.FilePath);
-        var decos = MonacoEditorDiagnosticsMapper.ToDecorations(strips);
+        var filePath = _docVm.Doc.FilePath ?? "";
+        _monacoHost.Session.ReadSnapshot(out var version, out var text, out _, out _, out _);
+        var strips = _vm.WorkspaceDiagnostics.GetStripsForFile(filePath);
+        var varParts = CideEditorLanguageIds.SupportsRoslynIntelligence(filePath)
+            ? _vm.GetEditorInlineHintsForFile(filePath, text)
+            : [];
+        var push = MonacoEditorPresentationProjector.ProjectEditorHud(version, text, strips, varParts);
         try
         {
-            await _monacoHost.PushDecorationsAsync(CideEditorBusManifest.SetIds.Diagnostics, decos).ConfigureAwait(true);
+            await _monacoHost.PushEditorHudPresentationAsync(push).ConfigureAwait(true);
         }
         catch (Exception ex)
         {
@@ -280,12 +323,13 @@ public partial class DockDocumentView
         if (!CideEditorLanguageIds.SupportsRoslynIntelligence(filePath))
             return;
 
-        _monacoHost.Session.ReadSnapshot(out _, out var text, out _, out _, out _);
+        _monacoHost.Session.ReadSnapshot(out var version, out var text, out _, out _, out _);
+        var strips = _vm.WorkspaceDiagnostics.GetStripsForFile(filePath);
         var parts = _vm.GetEditorInlineHintsForFile(filePath, text);
-        var hints = MonacoEditorInlayMapper.ToHints(text, parts);
+        var hints = MonacoEditorPresentationProjector.MergeInlayHints(text, strips, parts);
         try
         {
-            await _monacoHost.PushInlayHintsAsync(hints).ConfigureAwait(true);
+            await _monacoHost.PushInlayHintsAsync(hints, version).ConfigureAwait(true);
         }
         catch (Exception ex)
         {
@@ -293,30 +337,53 @@ public partial class DockDocumentView
         }
     }
 
-    private async Task PushMonacoHighlightsAsync()
+    private async Task PushMonacoSemanticTokensLegendAsync()
     {
         if (_monacoHost is null || !_monacoHost.IsReady || _docVm is null || _vm is null || !IsActive())
             return;
 
         var filePath = _docVm.Doc.FilePath ?? "";
         if (!CideEditorLanguageIds.SupportsRoslynIntelligence(filePath))
-        {
-            await _monacoHost.PushDecorationsAsync(CideEditorBusManifest.SetIds.Highlights, []).ConfigureAwait(true);
             return;
-        }
 
-        _monacoHost.Session.ReadSnapshot(out _, out var text, out var caret, out _, out _);
-        var (line, column) = LineColumnFromOffset(text, caret);
-        _monacoIntelCts?.Cancel();
-        var cts = new CancellationTokenSource();
-        _monacoIntelCts = cts;
-        var spans = await Task.Run(() =>
-            _vm.CSharpLanguage.GetHighlightSpans(filePath, text, line, column, cts.Token)).ConfigureAwait(true);
-        if (cts.IsCancellationRequested)
+        var legend = _vm.CSharpLspHost?.SemanticLegend;
+        if (legend is null)
             return;
 
         try
         {
+            await _monacoHost.PushSemanticTokensLegendAsync(legend).ConfigureAwait(true);
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine("Monaco semantic legend: " + ex.Message);
+        }
+    }
+
+    private async Task PushMonacoHighlightsAsync()
+    {
+        try
+        {
+            if (_monacoHost is null || !_monacoHost.IsReady || _docVm is null || _vm is null || !IsActive())
+                return;
+
+            var filePath = _docVm.Doc.FilePath ?? "";
+            if (!CideEditorLanguageIds.SupportsRoslynIntelligence(filePath))
+            {
+                await _monacoHost.PushDecorationsAsync(CideEditorBusManifest.SetIds.Highlights, []).ConfigureAwait(true);
+                return;
+            }
+
+            _monacoHost.Session.ReadSnapshot(out _, out var text, out var caret, out _, out _);
+            var (line, column) = LineColumnFromOffset(text, caret);
+            _monacoIntelCts?.Cancel();
+            var cts = new CancellationTokenSource();
+            _monacoIntelCts = cts;
+            var spans = await Task.Run(() =>
+                _vm.CSharpLanguage.GetHighlightSpans(filePath, text, line, column, cts.Token)).ConfigureAwait(true);
+            if (cts.IsCancellationRequested || _monacoHost is null || !_monacoHost.IsReady || !IsActive())
+                return;
+
             await _monacoHost.PushDecorationsAsync(
                 CideEditorBusManifest.SetIds.Highlights,
                 MonacoEditorHighlightMapper.ToDecorations(spans)).ConfigureAwait(true);
@@ -329,21 +396,21 @@ public partial class DockDocumentView
 
     private async Task PushMonacoControlFlowGlyphsAsync()
     {
-        if (_monacoHost is null || !_monacoHost.IsReady || _docVm is null || _vm is null || !IsActive())
-            return;
-
-        var filePath = _docVm.Doc.FilePath ?? "";
-        var laneActive = _vm.NavigationMap.IsControlFlowEditorVirtualSpacingActiveForFile(filePath);
-        if (!laneActive)
-        {
-            await _monacoHost.PushGutterGlyphsAsync([]).ConfigureAwait(true);
-            await _monacoHost.PushCfContentLaneAsync(false, 0).ConfigureAwait(true);
-            return;
-        }
-
-        var visuals = _vm.NavigationMap.GetControlFlowGutterLineVisualsForFile(filePath);
         try
         {
+            if (_monacoHost is null || !_monacoHost.IsReady || _docVm is null || _vm is null || !IsActive())
+                return;
+
+            var filePath = _docVm.Doc.FilePath ?? "";
+            var laneActive = _vm.NavigationMap.IsControlFlowEditorVirtualSpacingActiveForFile(filePath);
+            if (!laneActive)
+            {
+                await _monacoHost.PushGutterGlyphsAsync([]).ConfigureAwait(true);
+                await _monacoHost.PushCfContentLaneAsync(false, 0).ConfigureAwait(true);
+                return;
+            }
+
+            var visuals = _vm.NavigationMap.GetControlFlowGutterLineVisualsForFile(filePath);
             await _monacoHost.PushCfContentLaneAsync(true, EditorControlFlowLanePolicy.LaneWidthPixels)
                 .ConfigureAwait(true);
             await _monacoHost.PushGutterGlyphsAsync(MonacoEditorGutterMapper.ToGlyphs(visuals)).ConfigureAwait(true);

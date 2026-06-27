@@ -6,6 +6,6 @@
 - **`Application/Presentation/`** — `MonacoEditorHostControl` (WebView2 + Monaco, ADR 0162 M0–M2).
 - **`Application/Presentation/`** — `EditorHudBannerTextComposer` (file-level баннер 0085); `EditorInlineHoverToolTipController` (inline hover + `DismissToolTip`/Escape); `EditorForwardDocumentChrome` (padding); **`EditorInlineHoverChrome`** (тайминги/смещения `ToolTip` на `TextEditor`, не IDS/0079); `EditorDocumentBackgroundVisualsHandle` (регистрация `IBackgroundRenderer`: squiggles, inlay, debug из `Services/`); **семантическая хрома** squiggle/MFD — `EditorHudDiagnosticsChroma` в `Services/`. **`EditorInlineHudLayer.InstallDocumentBackgroundVisuals`** — фасад (см. `docs/design/editor-hud-inline-migration-inventory-v1.md`).
 - **Презентация (данные) Editor HUD inline:** DTO `EditorDiagnosticStrip` / `EditorTrailingInlayPart` в `Services/`; хрома — `EditorHudDiagnosticsChroma`, рендер squiggle/inlay — `Services/Editor*.cs`.
-- **Норматив:** [docs/adr/0103](../../docs/adr/0103-editor-hud-substrate-semantic-projection-and-surface-adapter.md).
+- **Норматив:** [docs/adr/0103](../../docs/adr/0103-editor-hud-substrate-semantic-projection-and-surface-adapter.md), Monaco push — [0164](../../docs/adr/0164-monaco-editor-presentation-projection-and-dock-chrome.md).
 
-Вёрстка и ad-hoc inline (подсветка, tooltips) пока в `Views/DockDocumentView.*` (strangler); данные баннера и проекция — из этого слоя.
+Вёрстка Monaco push — через `MonacoEditorPresentationProjector` + `MonacoEditorHostControl`; оркестрация в `Views/DockDocumentView.MonacoForward.cs` (strangler).

@@ -70,12 +70,24 @@ public static class MonacoEditorDebugMapper
             list.Add(new CideEditorDecoration(
                 offset,
                 length,
-                "cide-agent-reveal-line",
+                AgentRevealClassForLine(line, startLine, endLine),
                 null,
                 IsWholeLine: true));
         }
 
         return list;
+    }
+
+    private static string AgentRevealClassForLine(int line, int startLine, int endLine)
+    {
+        const string baseClass = "cide-agent-reveal-line";
+        if (startLine == endLine)
+            return $"{baseClass} cide-agent-reveal-single";
+        if (line == startLine)
+            return $"{baseClass} cide-agent-reveal-top";
+        if (line == endLine)
+            return $"{baseClass} cide-agent-reveal-bottom";
+        return $"{baseClass} cide-agent-reveal-middle";
     }
 
     private static (int Offset, int Length) WholeLineSpan(string text, int lineOneBased)
