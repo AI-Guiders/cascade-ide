@@ -44,7 +44,7 @@
 | ID | ADR |
 |----|-----|
 | 0008, 0016, 0038 | [контракты MCP](0008-mcp-contracts-and-testable-infrastructure.md) · [ACP](0016-agent-client-protocol-external-agent.md) · [фасад агента](0038-agent-facade-ai-provider-and-tool-orchestration.md) |
-| 0031, 0045, 0048, 0082, 0087, 0165 | [чат](0031-agent-chat-clarification-batches-and-threading.md) · [persistence](0045-agent-chat-persistence-event-log-and-projections.md) · [Cursor parity](0048-cursor-acp-chat-ide-parity-and-mcp-tool-surface.md) · [loopback MCP](0082-acp-ide-mcp-loopback-single-process.md) · [MAF](0087-microsoft-agent-framework-builtin-agent-orchestration.md) · [**MCP transport stratification**](0165-mcp-transport-stratification-stdio-http-and-host-matrix.md) |
+| 0031, 0045, 0048, 0082, 0087, 0165, 0166 | [чат](0031-agent-chat-clarification-batches-and-threading.md) · [persistence](0045-agent-chat-persistence-event-log-and-projections.md) · [Cursor parity](0048-cursor-acp-chat-ide-parity-and-mcp-tool-surface.md) · [loopback MCP](0082-acp-ide-mcp-loopback-single-process.md) · [MAF](0087-microsoft-agent-framework-builtin-agent-orchestration.md) · [**MCP transport stratification**](0165-mcp-transport-stratification-stdio-http-and-host-matrix.md) · [**agent-centric harness**](0166-agent-centric-harness-model-comfort-and-pay-per-token-economics.md) |
 | 0105–0106, 0118, 0148 | [hybrid index](0105-hybrid-codebase-index-for-csharp-web.md) · [интеграция в CIDE](0106-hybrid-codebase-index-cascadeide-integration-and-semantic-map.md) · [agent-notes 2.0](0118-agent-notes-core-2-toml-and-knowledge-path.md) · [AEE / verify ladder](0148-agent-execution-environment-verification-ladder-and-native-tooling.md) |
 
 ### Граф, semantic map и навигация
@@ -247,6 +247,7 @@
 | [0163](0163-monaco-native-capability-bus-full-forward-migration.md) | **Monaco-native bus:** полный перевод Forward; `ICideEditorCapabilityRouter` / CECB; Monarch+LSP; deprecation `avalonia_edit`; фазы M7–M11 | Proposed |
 | [0164](0164-monaco-editor-presentation-projection-and-dock-chrome.md) | **Monaco presentation projection:** line-first CECB push, `MonacoEditorPresentationProjector`, `DecorationLayerManager`, version guard, dock chrome `*` | Accepted · Implemented |
 | [0165](0165-mcp-transport-stratification-stdio-http-and-host-matrix.md) | **MCP transport stratification:** Tier A/B/C (stdio vs HTTP-first), матрица хостов, фазы forge/notes/CIDE loopback; не переписывать тулы | Proposed |
+| [0166](0166-agent-centric-harness-model-comfort-and-pay-per-token-economics.md) | **Agent-centric harness:** «ничего о нас без нас», комфорт модели, pay-per-token, пять плоскостей, checklist §2.4, P0–P2 | Proposed |
 
 ## Сборка в один документ (HTML, TXT, PDF)
 
