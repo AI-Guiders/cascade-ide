@@ -14,19 +14,6 @@ namespace CascadeIDE.Services;
 public sealed partial class CSharpLanguageService
 {
     private static readonly MetadataReference[] DefaultReferences = BuildDefaultReferences();
-    private static readonly ConcurrentDictionary<string, SyntaxTree> GlobalUsingsTreeByDirectory = new(StringComparer.OrdinalIgnoreCase);
-    // SDK implicit usings emulation for ad-hoc single-file compilation
-    // when project-generated GlobalUsings.g.cs is unavailable.
-    private const string FallbackGlobalUsingsSource =
-        """
-        global using System;
-        global using System.Collections.Generic;
-        global using System.IO;
-        global using System.Linq;
-        global using System.Threading;
-        global using System.Threading.Tasks;
-        """;
-    private static readonly SyntaxTree DefaultGlobalUsingsTree = BuildFallbackGlobalUsingsTree();
 
     private const int CacheMaxEntries = 128;
     private const int TextHashCacheMaxEntries = 16;
@@ -104,87 +91,8 @@ public sealed partial class CSharpLanguageService
 
     private static MetadataReference[] GetDefaultReferences() => DefaultReferences;
 
-    private static SyntaxTree BuildFallbackGlobalUsingsTree() =>
-        CSharpSyntaxTree.ParseText(FallbackGlobalUsingsSource, path: "__cascade_global_usings__.g.cs");
-
-    private static string? FindNearestProjectDirectory(string filePath)
-    {
-        var dir = Path.GetDirectoryName(filePath);
-        while (!string.IsNullOrWhiteSpace(dir))
-        {
-            try
-            {
-                if (Directory.EnumerateFiles(dir, "*.csproj", SearchOption.TopDirectoryOnly).Any())
-                    return dir;
-                dir = Path.GetDirectoryName(dir);
-            }
-            catch
-            {
-                return null;
-            }
-        }
-        return null;
-    }
-
-    private static string? TryFindProjectGlobalUsingsPath(string projectDir)
-    {
-        var objDir = Path.Combine(projectDir, "obj");
-        if (!Directory.Exists(objDir))
-            return null;
-        try
-        {
-            // Prefer the common debug target first for fresh local edits.
-            var preferred = Path.Combine(objDir, "Debug", "net10.0", "GlobalUsings.g.cs");
-            if (File.Exists(preferred))
-                return preferred;
-
-            var candidates = Directory.EnumerateFiles(objDir, "GlobalUsings.g.cs", SearchOption.AllDirectories)
-                .Select(path => new FileInfo(path))
-                .OrderByDescending(info => info.LastWriteTimeUtc)
-                .ToList();
-            return candidates.Count == 0 ? null : candidates[0].FullName;
-        }
-        catch
-        {
-            return null;
-        }
-    }
-
-    private static SyntaxTree GetGlobalUsingsTreeForFile(string filePath)
-    {
-        var sourceDir = Path.GetDirectoryName(filePath);
-        if (string.IsNullOrWhiteSpace(sourceDir))
-            return DefaultGlobalUsingsTree;
-        if (GlobalUsingsTreeByDirectory.TryGetValue(sourceDir, out var cached))
-            return cached;
-
-        var projectDir = FindNearestProjectDirectory(filePath);
-        if (string.IsNullOrWhiteSpace(projectDir))
-        {
-            GlobalUsingsTreeByDirectory[sourceDir] = DefaultGlobalUsingsTree;
-            return DefaultGlobalUsingsTree;
-        }
-
-        var globalUsingsPath = TryFindProjectGlobalUsingsPath(projectDir);
-        if (string.IsNullOrWhiteSpace(globalUsingsPath) || !File.Exists(globalUsingsPath))
-        {
-            GlobalUsingsTreeByDirectory[sourceDir] = DefaultGlobalUsingsTree;
-            return DefaultGlobalUsingsTree;
-        }
-
-        try
-        {
-            var text = File.ReadAllText(globalUsingsPath);
-            var tree = CSharpSyntaxTree.ParseText(text, path: globalUsingsPath);
-            GlobalUsingsTreeByDirectory[sourceDir] = tree;
-            return tree;
-        }
-        catch
-        {
-            GlobalUsingsTreeByDirectory[sourceDir] = DefaultGlobalUsingsTree;
-            return DefaultGlobalUsingsTree;
-        }
-    }
+    private static SyntaxTree GetGlobalUsingsTreeForFile(string filePath) =>
+        CSharpProjectGlobalUsingsResolver.ResolveGlobalUsingsTree(filePath);
 
     private (CSharpCompilation comp, SyntaxTree tree) GetOrCreateCompilationAndTree(string filePath, SourceText sourceText, CancellationToken ct)
     {
@@ -273,7 +181,7 @@ public sealed partial class CSharpLanguageService
         _highlightCache.Clear();
         _quickInfoCache.Clear();
         _inlayHintCache.Clear();
-        GlobalUsingsTreeByDirectory.Clear();
+        CSharpProjectGlobalUsingsResolver.ClearCache();
         lock (_modelCacheLock)
         {
             _modelCacheOrder.Clear();
