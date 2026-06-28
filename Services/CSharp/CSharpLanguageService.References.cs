@@ -36,13 +36,17 @@ public sealed partial class CSharpLanguageService
 
             var seen = new HashSet<(int line, int col)>();
             var list = new List<ReferenceLocation>();
-        foreach (var node in root.DescendantNodes().OfType<IdentifierNameSyntax>())
-        {
-            var info = model.GetSymbolInfo(node, ct);
-            if (!SymbolEqualityComparer.Default.Equals(info.Symbol, symbol))
-                continue;
+            foreach (var node in root.DescendantNodes())
+            {
+                if (!TryGetBoundSymbol(model, node, ct, out var nodeSymbol))
+                    continue;
+                if (!SymbolEqualityComparer.Default.Equals(nodeSymbol, symbol))
+                    continue;
 
-                var span = node.Span;
+                var span = GetReferenceSpan(node);
+                if (span.Length == 0)
+                    continue;
+
                 var pos = text.Lines.GetLinePosition(span.Start);
                 var key = (pos.Line, pos.Character);
                 if (!seen.Add(key))
@@ -64,18 +68,44 @@ public sealed partial class CSharpLanguageService
         }
     }
 
+    private static TextSpan GetReferenceSpan(SyntaxNode node) =>
+        node switch
+        {
+            IdentifierNameSyntax id => id.Identifier.Span,
+            GenericNameSyntax generic => generic.Identifier.Span,
+            QualifiedNameSyntax qualified => qualified.Right.Identifier.Span,
+            MemberAccessExpressionSyntax member => member.Name.Identifier.Span,
+            TypeDeclarationSyntax typeDecl => typeDecl.Identifier.Span,
+            EnumDeclarationSyntax enumDecl => enumDecl.Identifier.Span,
+            DelegateDeclarationSyntax delegateDecl => delegateDecl.Identifier.Span,
+            _ => default,
+        };
+
+    private static bool TryGetBoundSymbol(
+        SemanticModel model,
+        SyntaxNode node,
+        CancellationToken ct,
+        out ISymbol? symbol)
+    {
+        symbol = node switch
+        {
+            BaseTypeDeclarationSyntax or DelegateDeclarationSyntax
+                => model.GetDeclaredSymbol(node, ct),
+            _ => model.GetSymbolInfo(node, ct).Symbol ?? model.GetSymbolInfo(node, ct).CandidateSymbols.FirstOrDefault(),
+        };
+        return symbol is not null;
+    }
+
     private static ISymbol? TryResolveSymbolAtPosition(
         SemanticModel model,
         SyntaxNode root,
         int position,
         CancellationToken ct)
     {
-        var token = root.FindToken(position, findInsideTrivia: true);
-        for (var node = token.Parent; node is not null; node = node.Parent)
+        var node = root.FindNode(TextSpan.FromBounds(position, position), getInnermostNodeForTie: true);
+        for (var current = node; current is not null; current = current.Parent)
         {
-            var info = model.GetSymbolInfo(node, ct);
-            var symbol = info.Symbol ?? info.CandidateSymbols.FirstOrDefault();
-            if (symbol is not null)
+            if (TryGetBoundSymbol(model, current, ct, out var symbol))
                 return symbol;
         }
 

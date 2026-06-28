@@ -40,6 +40,29 @@ public sealed class CSharpLanguageServiceFormatReferencesTests
     }
 
     [Fact]
+    public void FindReferencesInFile_on_record_declaration_finds_type_usages()
+    {
+        const string path = @"D:\Fake\FieldStateLoader.cs";
+        var src = """
+            namespace Casa;
+
+            public sealed record FieldGrid(int W, int H);
+
+            public sealed record FieldStateSnapshot(FieldGrid? Grid, int Tick);
+
+            public sealed record ClaimNavItem(string Id);
+            """;
+        var index = src.IndexOf("record FieldGrid", StringComparison.Ordinal);
+        var nameStart = index + "record ".Length;
+        var pos = SourceText.From(src).Lines.GetLinePosition(nameStart);
+        var svc = new CSharpLanguageService();
+        var refs = svc.FindReferencesInFile(path, src, pos.Line + 1, pos.Character + 1, TestContext.Current.CancellationToken);
+
+        Assert.True(refs.Count >= 2, $"Expected >=2 refs, got {refs.Count}");
+        Assert.Contains(refs, r => r.Line > 0 && r.Column > 0);
+    }
+
+    [Fact]
     public void FindReferencesInFile_finds_local_usages()
     {
         const string path = @"D:\Fake\Refs.cs";
