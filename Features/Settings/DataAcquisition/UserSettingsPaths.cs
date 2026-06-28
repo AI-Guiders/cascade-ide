@@ -20,4 +20,10 @@ public static class UserSettingsPaths
         Path.Combine(GetSettingsDirectory(), "hotkeys.toml");
 
     public static string GetBundledHotkeysFilePath() => Path.Combine(AppContext.BaseDirectory, "Hotkeys", "hotkeys.toml");
+
+    public static string GetEditorLanguagesUserFilePath() =>
+        Path.Combine(GetSettingsDirectory(), "editor-languages.toml");
+
+    public static string GetBundledEditorLanguagesFilePath() =>
+        Path.Combine(AppContext.BaseDirectory, "Settings", "editor-languages.toml");
 }

@@ -1,119 +1,48 @@
 using System.Text.Json;
+using CascadeIDE.Features.Settings.DataAcquisition;
 
 namespace CascadeIDE.Services;
 
-/// <summary>Список расширений редактора с подсветкой синтаксиса (один источник правды для маппинга, MCP и настроек).</summary>
+/// <summary>Список расширений редактора с подсветкой синтаксиса (источник: <c>Settings/editor-languages.toml</c>).</summary>
 public static class EditorLanguageSupport
 {
-    /// <summary>Пары расширение → краткое имя языка (для отображения и MCP). Расширения должны резолвиться в <see cref="TextMateSharp.Grammars.RegistryOptions"/> после той же инициализации, что в приложении (в т.ч. <see cref="TextMateTomlGrammar.TryLoadInto"/> для TOML).</summary>
-    public static IReadOnlyList<(string Extension, string LanguageName)> Supported { get; } =
-    [
-        (".bat", "Batch"),
-        (".cake", "Cake"),
-        (".cjs", "JavaScript"),
-        (".cs", "C#"),
-        (".csx", "C#"),
-        (".cshtml", "Razor"),
-        (".css", "CSS"),
-        (".go", "Go"),
-        (".htm", "HTML"),
-        (".html", "HTML"),
-        (".js", "JavaScript"),
-        (".json", "JSON"),
-        (".less", "Less"),
-        (".markdown", "Markdown"),
-        (".md", "Markdown"),
-        (".mjs", "JavaScript"),
-        (".mts", "TypeScript"),
-        (".cts", "TypeScript"),
-        (".ps1", "PowerShell"),
-        (".psd1", "PowerShell"),
-        (".psm1", "PowerShell"),
-        (".py", "Python"),
-        (".razor", "Razor"),
-        (".rs", "Rust"),
-        (".scss", "SCSS"),
-        (".sh", "Bash"),
-        (".sql", "SQL"),
-        (".toml", "TOML"),
-        (".ts", "TypeScript"),
-        (".tsx", "TypeScript React"),
-        (".xml", "XML"),
-        (".axaml", "AXAML"),
-        (".xaml", "XAML"),
-        (".csproj", "XML"),
-        (".config", "XML"),
-        (".props", "XML"),
-        (".targets", "XML"),
-        (".yaml", "YAML"),
-        (".yml", "YAML"),
-    ];
+    private readonly record struct LanguageDescriptor(
+        string Extension,
+        string DisplayName,
+        string MonacoLanguageId,
+        bool Attach);
 
-    /// <summary>Расширения файлов → расширение грамматики для GetLanguageByExtension (встроенный бандл + при необходимости шипнутые грамматики, см. TextMateGrammars).</summary>
-    public static IReadOnlyDictionary<string, string> ExtensionToGrammarExtension { get; } = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
-    {
-        [".bat"] = ".bat",
-        [".cake"] = ".cake",
-        [".cjs"] = ".cjs",
-        [".cs"] = ".cs",
-        [".csx"] = ".csx",
-        [".cshtml"] = ".cshtml",
-        [".css"] = ".css",
-        [".go"] = ".go",
-        [".htm"] = ".htm",
-        [".html"] = ".html",
-        [".js"] = ".js",
-        [".mjs"] = ".mjs",
-        [".json"] = ".json",
-        [".less"] = ".less",
-        [".md"] = ".md",
-        [".markdown"] = ".markdown",
-        [".mts"] = ".ts",
-        [".cts"] = ".ts",
-        [".ps1"] = ".ps1",
-        [".psm1"] = ".psm1",
-        [".psd1"] = ".psd1",
-        [".py"] = ".py",
-        [".razor"] = ".razor",
-        [".rs"] = ".rs",
-        [".scss"] = ".scss",
-        [".sh"] = ".sh",
-        [".sql"] = ".sql",
-        [".toml"] = ".toml",
-        [".ts"] = ".ts",
-        [".tsx"] = ".tsx",
-        [".xml"] = ".xml",
-        [".axaml"] = ".xml",
-        [".xaml"] = ".xml",
-        [".csproj"] = ".xml",
-        [".config"] = ".xml",
-        [".props"] = ".xml",
-        [".targets"] = ".xml",
-        [".yaml"] = ".yaml",
-        [".yml"] = ".yml",
-    };
+    private static Lazy<LanguageIndex> s_index = new(BuildIndex);
+
+    private static LanguageIndex Current => s_index.Value;
 
     private static readonly JsonSerializerOptions JsonOptions = new() { WriteIndented = false };
 
-    private static readonly HashSet<string> SupportedExtensionSet = new(
-        Supported.Select(static t => t.Extension),
-        StringComparer.OrdinalIgnoreCase);
+    /// <summary>Пары расширение → краткое имя языка (для отображения и MCP).</summary>
+    public static IReadOnlyList<(string Extension, string LanguageName)> Supported =>
+        Current.Supported;
 
-    /// <summary>Плоский текст без отдельной грамматики в TextMate (excerpt, attach file).</summary>
-    private static readonly HashSet<string> PlainTextExtensionsWithoutGrammar = new(StringComparer.OrdinalIgnoreCase)
+    /// <summary>Только тесты: сброс кэша индекса (manifest overlay не трогает).</summary>
+    internal static void ClearCacheForTests() => s_index = new Lazy<LanguageIndex>(BuildIndex);
+
+    /// <summary>Только тесты: сброс overlay manifest и кэша индекса.</summary>
+    internal static void ResetForTests()
     {
-        ".txt",
-        ".log",
-        ".jsx",
-    };
+        EditorLanguagesTomlLoader.ClearCacheForTests();
+        ClearCacheForTests();
+    }
 
-    /// <summary>Файл читается как текст (excerpt @ send, attach): расширение из <see cref="Supported"/> или plain-text supplement; без расширения — да.</summary>
+    /// <summary>Файл читается как текст (excerpt @ send, attach): расширение из manifest или plain-text; без расширения — да.</summary>
     public static bool IsTextFilePath(string path)
     {
         var ext = Path.GetExtension(path);
-        return ext.Length == 0
-            || SupportedExtensionSet.Contains(ext)
-            || PlainTextExtensionsWithoutGrammar.Contains(ext);
+        if (ext.Length == 0)
+            return true;
+
+        if (Current.PlainTextExtensions.Contains(ext))
+            return true;
+
+        return Current.ByExtension.TryGetValue(ext, out var lang) && lang.Attach;
     }
 
     /// <summary>Краткий текст для настроек: «C#, Markdown, XML/XAML, JSON, SQL, HTML, CSS, …».</summary>
@@ -137,4 +66,63 @@ public static class EditorLanguageSupport
             .ToList();
         return JsonSerializer.Serialize(list, JsonOptions);
     }
+
+    /// <summary>Monaco <c>languageId</c> для Forward host по пути файла (built-in + Monarch pack).</summary>
+    public static string GetMonacoLanguageId(string? filePath)
+    {
+        if (string.IsNullOrWhiteSpace(filePath))
+            return "plaintext";
+
+        var ext = Path.GetExtension(filePath);
+        return ext.Length != 0 && Current.ByExtension.TryGetValue(ext, out var lang)
+            ? lang.MonacoLanguageId
+            : "plaintext";
+    }
+
+    private static LanguageIndex BuildIndex()
+    {
+        var manifest = EditorLanguagesTomlLoader.LoadMergedManifest();
+        var byExtension = new Dictionary<string, LanguageDescriptor>(StringComparer.OrdinalIgnoreCase);
+        var supported = new List<(string Extension, string LanguageName)>();
+        var plainText = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+        foreach (var entry in manifest.Languages)
+        {
+            if (string.IsNullOrWhiteSpace(entry.Id))
+                continue;
+
+            var display = string.IsNullOrWhiteSpace(entry.Display) ? entry.Id : entry.Display;
+            var monaco = string.IsNullOrWhiteSpace(entry.Monaco) ? entry.Id : entry.Monaco;
+            foreach (var extension in entry.Extensions)
+            {
+                if (extension.Length == 0)
+                    continue;
+
+                var descriptor = new LanguageDescriptor(extension, display, monaco, entry.Attach);
+                byExtension[extension] = descriptor;
+                supported.Add((extension, display));
+            }
+        }
+
+        foreach (var entry in manifest.PlainText)
+        {
+            if (!entry.Attach)
+                continue;
+
+            foreach (var extension in entry.Extensions)
+            {
+                if (extension.Length == 0)
+                    continue;
+                plainText.Add(extension);
+            }
+        }
+
+        supported.Sort(static (a, b) => StringComparer.OrdinalIgnoreCase.Compare(a.Extension, b.Extension));
+        return new LanguageIndex(byExtension, supported, plainText);
+    }
+
+    private sealed record LanguageIndex(
+        IReadOnlyDictionary<string, LanguageDescriptor> ByExtension,
+        IReadOnlyList<(string Extension, string LanguageName)> Supported,
+        IReadOnlySet<string> PlainTextExtensions);
 }

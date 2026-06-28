@@ -1,0 +1,145 @@
+# CascadeIDE — манифест языков Forward-редактора (Monaco).
+# Аналог VS Code package.json → contributes.languages + grammars.
+#
+# Загрузка:
+#   1) Settings/editor-languages.toml рядом с exe (или встроенный ресурс)
+#   2) опционально %LocalAppData%\CascadeIDE\editor-languages.toml — merge/override по id
+#
+# Поля:
+#   id          — логический язык в IDE (MCP, UI)
+#   display     — человекочитаемое имя
+#   extensions  — суффиксы файлов (с точкой)
+#   monaco      — languageId в Monaco; если опущен — совпадает с id
+#   attach      — учитывать в IsTextFilePath / excerpt (default true)
+
+schema_version = 1
+
+# Текст без подсветки, но читаемый как текст (attach, excerpt)
+[[plain_text]]
+extensions = [".txt", ".log", ".jsx"]
+
+# --- built-in Monaco basic-languages + Monarch (toml) ---
+
+[[languages]]
+id = "csharp"
+display = "C#"
+extensions = [".cs", ".csx"]
+monaco = "csharp"
+
+[[languages]]
+id = "razor"
+display = "Razor"
+extensions = [".razor", ".cshtml"]
+monaco = "razor"
+
+[[languages]]
+id = "xml"
+display = "XML"
+extensions = [
+  ".xml",
+  ".axaml",
+  ".xaml",
+  ".csproj",
+  ".fsproj",
+  ".vbproj",
+  ".props",
+  ".targets",
+  ".config",
+]
+monaco = "xml"
+
+[[languages]]
+id = "json"
+display = "JSON"
+extensions = [".json"]
+
+[[languages]]
+id = "markdown"
+display = "Markdown"
+extensions = [".md", ".markdown"]
+
+[[languages]]
+id = "toml"
+display = "TOML"
+extensions = [".toml"]
+
+[[languages]]
+id = "yaml"
+display = "YAML"
+extensions = [".yaml", ".yml"]
+
+[[languages]]
+id = "html"
+display = "HTML"
+extensions = [".html", ".htm"]
+
+[[languages]]
+id = "css"
+display = "CSS"
+extensions = [".css"]
+
+[[languages]]
+id = "scss"
+display = "SCSS"
+extensions = [".scss"]
+
+[[languages]]
+id = "less"
+display = "Less"
+extensions = [".less"]
+
+[[languages]]
+id = "javascript"
+display = "JavaScript"
+extensions = [".js", ".mjs", ".cjs"]
+
+[[languages]]
+id = "typescript"
+display = "TypeScript"
+extensions = [".ts", ".mts", ".cts"]
+
+[[languages]]
+id = "typescriptreact"
+display = "TypeScript React"
+extensions = [".tsx"]
+monaco = "typescript"
+
+[[languages]]
+id = "powershell"
+display = "PowerShell"
+extensions = [".ps1", ".psm1", ".psd1"]
+
+[[languages]]
+id = "shell"
+display = "Bash"
+extensions = [".sh"]
+
+[[languages]]
+id = "bat"
+display = "Batch"
+extensions = [".bat"]
+
+[[languages]]
+id = "python"
+display = "Python"
+extensions = [".py"]
+
+[[languages]]
+id = "go"
+display = "Go"
+extensions = [".go"]
+
+[[languages]]
+id = "rust"
+display = "Rust"
+extensions = [".rs"]
+
+[[languages]]
+id = "sql"
+display = "SQL"
+extensions = [".sql"]
+
+[[languages]]
+id = "cake"
+display = "Cake"
+extensions = [".cake"]

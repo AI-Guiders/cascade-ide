@@ -1,0 +1,20 @@
+# CascadeIDE — образец overlay для editor-languages.toml
+#
+# Канонический шипнутый файл: Settings/editor-languages.toml
+# Пользовательский merge/override: %LocalAppData%\CascadeIDE\editor-languages.toml
+#
+# Пример добавления языка в overlay:
+#
+# [[languages]]
+# id = "dockerfile"
+# display = "Dockerfile"
+# extensions = [".dockerfile"]
+# monaco = "dockerfile"
+
+schema_version = 1
+
+[[languages]]
+id = "dockerfile"
+display = "Dockerfile"
+extensions = [".dockerfile"]
+monaco = "plaintext"
