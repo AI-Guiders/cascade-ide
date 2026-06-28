@@ -57,6 +57,26 @@ public static partial class IdeCommandRegistry
             "Вид",
             window: new MainWindowHotkeyVmBinding(MainWindowHotkeyVmBindingKind.ToggleCommandPalette));
 
+        AddPalette(
+            b,
+            "workspace_go_to_file",
+            IdeCommands.GoToFile,
+            "Перейти к файлу (Go to File)",
+            "Рабочая область",
+            access: CommandAccessibleFrom.AgentAndUI,
+            window: new MainWindowHotkeyVmBinding(MainWindowHotkeyVmBindingKind.OpenGoToFilePalette),
+            hotkeysTomlKey: "workspace_go_to_file");
+
+        AddPalette(
+            b,
+            "focus_solution_explorer_filter",
+            IdeCommands.FocusSolutionExplorerFilter,
+            "Поиск в обозревателе решения",
+            "Рабочая область",
+            access: CommandAccessibleFrom.UIOnly,
+            window: new MainWindowHotkeyVmBinding(MainWindowHotkeyVmBindingKind.FocusSolutionExplorerFilter),
+            hotkeysTomlKey: "focus_solution_explorer_filter");
+
         AddPalette(b, "show_environment_readiness_page", IdeCommands.ShowEnvironmentReadinessPage, "Готовность окружения (LSP, dotnet…)", "Вид");
         AddPalette(b, "show_hybrid_index_page", IdeCommands.ShowHybridIndexPage, "Hybrid Codebase Index (регион Mfd)", "Вид");
         AddPalette(b, "show_web_ai_portal_page", IdeCommands.ShowWebAiPortalPage, "Веб-портал AI (регион Mfd)", "Вид");

@@ -187,6 +187,54 @@ public sealed class MainWindowHotkeyServiceTests
         }
     }
 
+    [Fact]
+    public void TryHandleTunnelKeyDownForMainVm_CtrlP_OpensGoToFilePalette()
+    {
+        MainWindowHotkeyService.ReplaceMergedMapForTests(
+            new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+            {
+                ["workspace_go_to_file"] = "Ctrl+P"
+            });
+        try
+        {
+            var vm = new MainWindowViewModel();
+            Assert.False(vm.IsCommandPaletteOpen);
+
+            var e = new KeyEventArgs
+            {
+                RoutedEvent = InputElement.KeyDownEvent,
+                Key = Key.P,
+                KeyModifiers = KeyModifiers.Control,
+                PhysicalKey = PhysicalKey.P
+            };
+
+            Assert.True(MainWindowHotkeyService.TryHandleTunnelKeyDownForMainVm(e, vm));
+            Assert.True(e.Handled);
+            Assert.True(vm.IsCommandPaletteOpen);
+            Assert.Equal("f:", vm.CommandPaletteQuery);
+        }
+        finally
+        {
+            MainWindowHotkeyService.ReplaceMergedMapForTests(null);
+        }
+    }
+
+    [Fact]
+    public void TryExecuteEditorHostShortcut_WorkspaceGoToFile_OpensGoToFilePalette()
+    {
+        try
+        {
+            var vm = new MainWindowViewModel();
+            Assert.True(MainWindowHotkeyService.TryExecuteEditorHostShortcut("workspace_go_to_file", vm));
+            Assert.True(vm.IsCommandPaletteOpen);
+            Assert.Equal("f:", vm.CommandPaletteQuery);
+        }
+        finally
+        {
+            MainWindowHotkeyService.ReplaceMergedMapForTests(null);
+        }
+    }
+
     [AvaloniaFact]
     public void ApplyAll_AddsWindowKeyBinding_ForToggleCommandPalette()
     {

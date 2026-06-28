@@ -106,6 +106,8 @@ public static class MainWindowHotkeyService
             IdeCommandRegistry.MainWindowHotkeyVmBindingKind.DebugStepOver => (vm.DebugStepOverCommand, null),
             IdeCommandRegistry.MainWindowHotkeyVmBindingKind.DebugStepInto => (vm.DebugStepIntoCommand, null),
             IdeCommandRegistry.MainWindowHotkeyVmBindingKind.DebugStepOut => (vm.DebugStepOutCommand, null),
+            IdeCommandRegistry.MainWindowHotkeyVmBindingKind.OpenGoToFilePalette => (vm.OpenGoToFilePaletteCommand, null),
+            IdeCommandRegistry.MainWindowHotkeyVmBindingKind.FocusSolutionExplorerFilter => (vm.FocusSolutionExplorerFilterCommand, null),
             _ => throw new ArgumentOutOfRangeException(nameof(b)),
         };
 
@@ -140,6 +142,22 @@ public static class MainWindowHotkeyService
 
         LogTunnelEvent(windowName, e, vm, "window-entry");
         _ = TryHandleTunnelKeyDownForMainVm(e, vm);
+    }
+
+    /// <summary>
+    /// Выполняет tunnel-hotkey, пришедший из Monaco/WebView2 (Ctrl+P не доходит до Avalonia KeyDown).
+    /// </summary>
+    public static bool TryExecuteEditorHostShortcut(string tomlKey, MainWindowViewModel vm)
+    {
+        if (string.IsNullOrWhiteSpace(tomlKey))
+            return false;
+
+        if (!IdeCommandRegistry.WindowHotkeyByTomlKey.TryGetValue(tomlKey, out var entry)
+            || entry.WindowHotkey is not { } windowHotkey)
+            return false;
+
+        var fake = new KeyEventArgs { RoutedEvent = InputElement.KeyDownEvent, Key = Key.None };
+        return ExecuteWindowHotkeyBinding(fake, vm, tomlKey, windowHotkey);
     }
 
     /// <summary>
@@ -277,6 +295,20 @@ public static class MainWindowHotkeyService
             }
 
             vm.ToggleCommandPaletteCommand.Execute(null);
+            e.Handled = true;
+            LogTunnelEvent("HotkeyService", e, vm, $"matched-{tomlKey}");
+            return true;
+        }
+
+        if (tomlKey.Equals("workspace_go_to_file", StringComparison.OrdinalIgnoreCase))
+        {
+            if (!vm.OpenGoToFilePaletteCommand.CanExecute(null))
+            {
+                LogTunnelEvent("HotkeyService", e, vm, $"matched-{tomlKey}-cannot-execute");
+                return false;
+            }
+
+            vm.OpenGoToFilePaletteCommand.Execute(null);
             e.Handled = true;
             LogTunnelEvent("HotkeyService", e, vm, $"matched-{tomlKey}");
             return true;

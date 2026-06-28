@@ -38,6 +38,12 @@ public static partial class IdeCommands
     /// <summary>Открыть или закрыть палитру команд (как Ctrl+Q / пункт меню «Вид»). returns: text.</summary>
     public const string ToggleCommandPalette = "toggle_command_palette";
 
+    /// <summary>Go to File — палитра с префиксом <c>f:</c> (Ctrl+P). returns: text.</summary>
+    public const string GoToFile = "workspace_go_to_file";
+
+    /// <summary>Фокус в фильтр Solution Explorer на MFD (Ctrl+;). returns: text.</summary>
+    public const string FocusSolutionExplorerFilter = "focus_solution_explorer_filter";
+
     /// <summary>Показать Markdown preview как страницу во вторичном контуре/MFD. returns: text.</summary>
     public const string ShowMarkdownPreviewPage = "show_markdown_preview_page";
 

@@ -1,33 +1,26 @@
 using CascadeIDE.Contracts;
+using CascadeIDE.Features.Workspace.Application;
 
 namespace CascadeIDE.Features.Search.Application;
 
-/// <summary>Фильтрация файлов решения для префикса <c>f:</c>.</summary>
+/// <summary>Фильтрация файлов решения для префикса <c>f:</c> через <see cref="WorkspaceFileIndex"/>.</summary>
 [PresentationProjection("command palette goto file rows")]
 public static class CommandPaletteGoToFileNavRowsProjection
 {
     public static IEnumerable<CommandPaletteGoToNavRowPresentation> EnumerateFiltered(
-        IEnumerable<(string Title, string FullPath)> files,
+        WorkspaceFileIndex index,
         string filterTermTrimmedWhenNonEmptyOrEmptyMeansAll,
         string workspaceRoot,
         int maxFiles)
     {
-        IEnumerable<(string Title, string FullPath)> query = files;
-        if (!string.IsNullOrWhiteSpace(filterTermTrimmedWhenNonEmptyOrEmptyMeansAll))
+        var matches = index.Search(filterTermTrimmedWhenNonEmptyOrEmptyMeansAll, maxFiles);
+        foreach (var m in matches)
         {
-            var t = filterTermTrimmedWhenNonEmptyOrEmptyMeansAll.Trim();
-            query = files.Where(e =>
-                e.Title.Contains(t, StringComparison.OrdinalIgnoreCase)
-                || e.FullPath.Contains(t, StringComparison.OrdinalIgnoreCase));
-        }
-
-        foreach (var (title, path) in query.OrderBy(e => e.Title, StringComparer.OrdinalIgnoreCase).Take(maxFiles))
-        {
-            var rel = CommandPaletteGoToWorkspacePresentation.TryRelativePath(workspaceRoot, path);
+            var rel = CommandPaletteGoToWorkspacePresentation.TryRelativePath(workspaceRoot, m.FullPath);
             yield return new CommandPaletteGoToNavRowPresentation(
-                Title: title,
-                SubtitleCategory: rel ?? path,
-                FullPath: path,
+                Title: m.Title,
+                SubtitleCategory: rel ?? m.InsertPath,
+                FullPath: m.FullPath,
                 Line: 0,
                 Column: 1,
                 PrefixHint: "f:");

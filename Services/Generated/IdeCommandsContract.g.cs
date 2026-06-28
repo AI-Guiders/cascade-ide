@@ -82,6 +82,7 @@ internal static class IdeCommandsContractGenerated
         ["focus_checkpoint"] = IdeReturnKind.Text,
         ["focus_editor"] = IdeReturnKind.Text,
         ["focus_rollback"] = IdeReturnKind.Text,
+        ["focus_solution_explorer_filter"] = IdeReturnKind.Text,
         ["forge.artifact.goto"] = IdeReturnKind.Text,
         ["forge_lens.auth_status"] = IdeReturnKind.Text,
         ["forge_lens.connect"] = IdeReturnKind.Text,
@@ -241,6 +242,7 @@ internal static class IdeCommandsContractGenerated
         ["toggle_workspace_splitters_lock"] = IdeReturnKind.Text,
         ["upsert_agent_notes_section"] = IdeReturnKind.Text,
         ["upsert_knowledge_section"] = IdeReturnKind.Text,
+        ["workspace_go_to_file"] = IdeReturnKind.Text,
         ["write_agent_notes"] = IdeReturnKind.Text,
         ["write_knowledge_file"] = IdeReturnKind.Text,
     };

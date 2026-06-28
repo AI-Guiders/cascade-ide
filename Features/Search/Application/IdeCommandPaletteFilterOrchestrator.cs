@@ -3,6 +3,7 @@ using System.Collections.ObjectModel;
 using CascadeIDE.Contracts;
 using CascadeIDE.Features.Shell.Application;
 using CascadeIDE.Features.UiChrome;
+using CascadeIDE.Features.Workspace.Application;
 using CascadeIDE.Models;
 using CascadeIDE.Services;
 using CascadeIDE.ViewModels;
@@ -26,7 +27,9 @@ internal static class IdeCommandPaletteFilterOrchestrator
         Action<int> setSelectedIndex,
         Func<int> getSelectedIndex,
         Action refreshCommandPaletteSurfaceSnapshot,
-        Func<ICommandPaletteGoToSearchBackend> getWorkspaceGoToSearchBackend)
+        Func<ICommandPaletteGoToSearchBackend> getWorkspaceGoToSearchBackend,
+        WorkspaceFileIndex workspaceFileIndex,
+        Action invalidateWorkspaceFileIndex)
     {
         switch (CommandPaletteParsedQueryParser.Parse(getCommandPaletteQuery()))
         {
@@ -53,7 +56,9 @@ internal static class IdeCommandPaletteFilterOrchestrator
                     getSelectedIndex,
                     refreshCommandPaletteSurfaceSnapshot,
                     getCommandPaletteQuery,
-                    getWorkspaceGoToSearchBackend);
+                    getWorkspaceGoToSearchBackend,
+                    workspaceFileIndex,
+                    invalidateWorkspaceFileIndex);
                 break;
             case CommandPaletteParsedQuery.Catalog c:
                 goToHandle.Cancel();
@@ -182,7 +187,9 @@ internal static class IdeCommandPaletteFilterOrchestrator
         Func<int> getSelectedIndex,
         Action refreshCommandPaletteSurfaceSnapshot,
         Func<string> getCommandPaletteQuery,
-        Func<ICommandPaletteGoToSearchBackend> getWorkspaceGoToSearchBackend)
+        Func<ICommandPaletteGoToSearchBackend> getWorkspaceGoToSearchBackend,
+        WorkspaceFileIndex workspaceFileIndex,
+        Action invalidateWorkspaceFileIndex)
     {
         goToHandle.Cancel();
 
@@ -201,7 +208,8 @@ internal static class IdeCommandPaletteFilterOrchestrator
         switch (q.Prefix)
         {
             case 'f':
-                FillGoToFileEntries(q.Term, filteredEntries, workspaceSolutionPath, solutionRoots);
+                invalidateWorkspaceFileIndex();
+                FillGoToFileEntries(q.Term, filteredEntries, workspaceFileIndex, workspaceSolutionPath);
                 break;
             case 't':
             case 'm':
@@ -244,15 +252,14 @@ internal static class IdeCommandPaletteFilterOrchestrator
     private static void FillGoToFileEntries(
         string term,
         ObservableCollection<IdeCommandPaletteRowViewModel> filteredEntries,
-        string? workspaceSolutionPath,
-        ObservableCollection<SolutionItem> solutionRoots)
+        WorkspaceFileIndex workspaceFileIndex,
+        string? workspaceSolutionPath)
     {
         var workspaceRoot =
             CommandPaletteGoToWorkspacePresentation.TryResolveRoot(workspaceSolutionPath)
             ?? "";
-        var files = McpSolutionTree.CollectFileEntries(solutionRoots);
         foreach (var row in CommandPaletteGoToFileNavRowsProjection.EnumerateFiltered(
-                     files,
+                     workspaceFileIndex,
                      term,
                      workspaceRoot,
                      CommandPaletteGoToLimits.MaxFiles))

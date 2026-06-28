@@ -30,6 +30,7 @@ public static class SolutionLoadSessionApplyProjection
             normalizedSolutionPath,
             isDockedMfdSolutionExplorerTree);
 
+        SolutionTreeExpansionPolicy.ApplyDefaultExpansion([root]);
         host.ResetEditorSessionForNewSolution();
         workspace.SelectedSolutionItem = null;
         workspace.SolutionPath = plan.NormalizedSolutionPath;

@@ -4,8 +4,10 @@
              xmlns:feat="using:CascadeIDE.Features.Instrumentation"
              xmlns:models="using:CascadeIDE.Models"
              xmlns:views="using:CascadeIDE.Views"
+             x:Name="Root"
              x:Class="CascadeIDE.Views.SolutionExplorerView"
              Classes.power="{Binding UiModeFamily, Converter={StaticResource UiModeFamilyEq}, ConverterParameter=Power}"
+             Classes.compact="{Binding SolutionExplorerCompactTree}"
              x:DataType="vm:MainWindowViewModel">
     <UserControl.Resources>
         <views:SolutionItemIconConverter x:Key="SolutionItemIconConverter"/>
@@ -50,8 +52,17 @@
             <Setter Property="BorderThickness" Value="3,0,0,0"/>
         </Style>
         <Style Selector="UserControl.power Image.solutionExplorerTreeIcon">
-            <Setter Property="Width" Value="20"/>
-            <Setter Property="Height" Value="20"/>
+            <Setter Property="Width" Value="16"/>
+            <Setter Property="Height" Value="16"/>
+            <Setter Property="Opacity" Value="0.92"/>
+        </Style>
+        <Style Selector="UserControl.compact TreeView TreeViewItem">
+            <Setter Property="Padding" Value="2,2"/>
+            <Setter Property="MinHeight" Value="22"/>
+        </Style>
+        <Style Selector="UserControl.compact:not(.power) TreeView TreeViewItem">
+            <Setter Property="Padding" Value="2,2"/>
+            <Setter Property="MinHeight" Value="22"/>
         </Style>
     </UserControl.Styles>
     <Panel>
@@ -87,13 +98,34 @@
                               ItemsSource="{Binding LaunchProfileIds}"
                               SelectedItem="{Binding SelectedLaunchProfileId, Mode=TwoWay}"/>
                 </StackPanel>
+                <TextBox x:Name="SolutionFilterBox"
+                         Watermark="Поиск в дереве (Ctrl+;)"
+                         Text="{Binding SolutionExplorerFilterText, Mode=TwoWay}"
+                         FontSize="11"
+                         Margin="2,4,2,0"
+                         Padding="6,4"/>
             </StackPanel>
-            <TreeView Grid.Row="1"
-                      ItemsSource="{Binding Workspace.SolutionRoots}"
-                      SelectedItem="{Binding Workspace.SelectedSolutionItem}"
+            <TreeView x:Name="SolutionTree"
+                      Grid.Row="1"
+                      ItemsSource="{Binding SolutionExplorerDisplayRoots}"
+                      SelectedItem="{Binding SolutionExplorerSelectedItem, Mode=TwoWay}"
                       Margin="0,4,0,0">
                 <TreeView.ContextMenu>
                     <ContextMenu>
+                        <MenuItem Header="_Открыть"
+                                  Command="{Binding OpenSelectedSolutionItemCommand}"/>
+                        <MenuItem Header="Показать в проводнике"
+                                  Command="{Binding RevealSelectedSolutionItemInExplorerCommand}"/>
+                        <MenuItem Header="Копировать _путь"
+                                  Command="{Binding CopySelectedSolutionItemPathCommand}"/>
+                        <Separator/>
+                        <MenuItem Header="Следить за активным файлом"
+                                  ToggleType="CheckBox"
+                                  IsChecked="{Binding SolutionExplorerTrackActiveItem, Mode=TwoWay}"/>
+                        <MenuItem Header="_Компактное дерево"
+                                  ToggleType="CheckBox"
+                                  IsChecked="{Binding SolutionExplorerCompactTree, Mode=TwoWay}"/>
+                        <Separator/>
                         <MenuItem Header="Сделать стартовым для отладки (F5)"
                                   Command="{Binding SetStartupProjectFromSelectionCommand}"/>
                         <MenuItem Header="Сбросить стартовый проект"
@@ -102,18 +134,18 @@
                                   Command="{Binding ImportLaunchSettingsFromSelectionCommand}"/>
                     </ContextMenu>
                 </TreeView.ContextMenu>
-                <TreeView.Styles>
-                    <Style Selector="TreeViewItem">
-                        <Setter Property="IsExpanded" Value="True"/>
-                    </Style>
-                </TreeView.Styles>
                 <TreeView.ItemTemplate>
                     <TreeDataTemplate DataType="models:SolutionItem"
                                        ItemsSource="{Binding Children}">
                         <StackPanel Orientation="Horizontal" Spacing="6">
-                            <Image Classes="solutionExplorerTreeIcon"
-                                   Source="{Binding Converter={StaticResource SolutionItemIconConverter}}"
-                                   Width="16" Height="16" VerticalAlignment="Center"/>
+                            <Image Classes="solutionExplorerTreeIcon" Width="16" Height="16" VerticalAlignment="Center">
+                                <Image.Source>
+                                    <MultiBinding Converter="{StaticResource SolutionItemIconConverter}">
+                                        <Binding/>
+                                        <Binding Path="DataContext.UiModeFamily" ElementName="Root"/>
+                                    </MultiBinding>
+                                </Image.Source>
+                            </Image>
                             <TextBlock Text="{Binding Title}" VerticalAlignment="Center"/>
                         </StackPanel>
                     </TreeDataTemplate>

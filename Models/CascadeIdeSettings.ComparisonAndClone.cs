@@ -149,6 +149,12 @@ public sealed partial class CascadeIdeSettings
                 Mode = Workspace.Mode,
                 Culture = Workspace.Culture,
                 SplittersLocked = Workspace.SplittersLocked,
+                PrimaryWorkSurface = Workspace.PrimaryWorkSurface,
+                SolutionExplorer = new SolutionExplorerSettings
+                {
+                    TrackActiveItem = Workspace.SolutionExplorer.TrackActiveItem,
+                    CompactTree = Workspace.SolutionExplorer.CompactTree,
+                },
             },
             CodeNavigationMap = new CodeNavigationMapSettings
             {
@@ -494,7 +500,10 @@ public sealed partial class CascadeIdeSettings
             && a.ShowInstrumentation == b.ShowInstrumentation
             && a.Mode.Is(b.Mode)
             && a.Culture.Is(b.Culture)
-            && a.SplittersLocked == b.SplittersLocked;
+            && a.SplittersLocked == b.SplittersLocked
+            && a.PrimaryWorkSurface.Is(b.PrimaryWorkSurface)
+            && a.SolutionExplorer.TrackActiveItem == b.SolutionExplorer.TrackActiveItem
+            && a.SolutionExplorer.CompactTree == b.SolutionExplorer.CompactTree;
     }
 
     private static bool CodeNavigationMapEquals(CodeNavigationMapSettings? a, CodeNavigationMapSettings? b)

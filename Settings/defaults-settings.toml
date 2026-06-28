@@ -8,7 +8,7 @@
 # Расширенный пример: docs/samples/settings.toml
 
 [display.screens]
-topology = "(0.25P + 0.75F) (M)"
+topology = "(F) (M)"
 
 [display.screens.grammar]
 brackets = "()"
@@ -177,7 +177,7 @@ kb_base_overlay_path = ""
 kb_base_overlay_path_env = ""
 
 [workspace]
-pfd_expanded = true
+pfd_expanded = false
 show_terminal = true
 show_git = false
 show_instrumentation = true
@@ -187,6 +187,10 @@ culture = ""
 splitters_locked = false
 # editor | intercom
 primary_work_surface = "editor"
+
+[workspace.solution_explorer]
+track_active_item = true
+compact_tree = true
 
 [code_navigation_map]
 # list | graph | both

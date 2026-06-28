@@ -165,7 +165,9 @@ public partial class MainWindowViewModel
                 CommandPaletteGoToSearchBackendNormalizer.Parse(_settings.CommandPalette.GoToSearch.Backend),
                 _hybridIndex,
                 _settings.HybridIndex.ScopeMode,
-                _settings.HybridIndex.Enabled));
+                _settings.HybridIndex.Enabled),
+            _workspaceFileIndex,
+            InvalidateWorkspaceFileIndex);
 
     /// <summary>Обновить подписи доступности при смене UI-режима с открытой палитрой.</summary>
     private void RefreshCommandPaletteIfOpen()

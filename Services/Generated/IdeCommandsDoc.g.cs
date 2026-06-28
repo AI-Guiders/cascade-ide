@@ -82,6 +82,7 @@ internal static class IdeCommandsDoc
         ["focus_checkpoint"] = "Создать контрольную точку (Focus). returns: text.",
         ["focus_editor"] = "Передать фокус в редактор (чтобы клавиши/ввод шли в него). returns: text.",
         ["focus_rollback"] = "Откатить к последней контрольной точке (Focus). returns: text.",
+        ["focus_solution_explorer_filter"] = "Фокус в фильтр Solution Explorer на MFD (Ctrl+;). returns: text.",
         ["forge.artifact.goto"] = "Открыть forge artifact по bracket `[FRG:…]` (DOI forge.artifact.goto). args: bracket:string, base_url?:string, select_code?:boolean; returns: text; example: {\"bracket\":\"[FRG:issue:1]\",\"select_code\":true}.",
         ["forge_lens.auth_status"] = "Статус Forge Lens auth для host. args: base_url?:string; returns: text; example: {\"base_url\":\"http://127.0.0.1:8770\"}.",
         ["forge_lens.connect"] = "Device login к forge (браузер + approve, как Intercom OAuth). args: base_url?:string; returns: text; example: {\"base_url\":\"http://127.0.0.1:8770\"}.",
@@ -241,6 +242,7 @@ internal static class IdeCommandsDoc
         ["toggle_workspace_splitters_lock"] = "Сплиттеры рабочей области: переключить ON GND / IN AIR (мелодия tol, лампа TOL в task cockpit). returns: text.",
         ["upsert_agent_notes_section"] = "Вставить/обновить секцию заметок агента по section_id (маркерный блок). args: section_id:string, content:string; returns: text; example: {\"section_id\":\"active\",\"content\":\"ActiveProjectId: cascade-ide\"}.",
         ["upsert_knowledge_section"] = "Вставить/обновить секцию в knowledge-файле по section_id. args: file_path:string, section_id:string, content:string, knowledge_path?:string, knowledge_root_id?:string, save_revision?:boolean; returns: text; example: {\"file_path\":\"index.md\",\"section_id\":\"foo\",\"content\":\"body\"}.",
+        ["workspace_go_to_file"] = "Go to File — палитра с префиксом `f:` (Ctrl+P). returns: text.",
         ["write_agent_notes"] = "Записать заметки агента в каталог решения. args: content:string; returns: text; example: {\"content\":\"notes\"}.",
         ["write_knowledge_file"] = "Записать knowledge-файл (полная замена). Запись только в primary; read-only roots отклоняются. args: file_path:string, content:string, knowledge_path?:string, knowledge_root_id?:string, save_revision?:boolean; returns: text; example: {\"file_path\":\"META/x.md\",\"content\":\"# Hi\",\"save_revision\":true}.",
     };

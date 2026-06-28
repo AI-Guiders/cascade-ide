@@ -19,4 +19,7 @@ public sealed class WorkspaceSettings
 
     /// <summary>Лобовой якорь: <c>editor</c> | <c>intercom</c> (ADR 0120).</summary>
     public string PrimaryWorkSurface { get; set; } = PrimaryWorkSurfaceKindExtensions.EditorValue;
+
+    /// <summary>Обозреватель решения (ADR 0167).</summary>
+    public SolutionExplorerSettings SolutionExplorer { get; set; } = new();
 }

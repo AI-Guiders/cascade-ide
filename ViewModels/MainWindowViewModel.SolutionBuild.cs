@@ -133,6 +133,8 @@ public partial class MainWindowViewModel
 
     void SolutionLoadSessionApplyProjection.IHost.AfterSolutionApplied(MfdShellPage initialMfdPage)
     {
+        InvalidateWorkspaceFileIndex();
+        RefreshSolutionExplorerTreeFilter();
         RefreshStartupProjectAfterSolutionLoad();
         TryNavigateToMfdShellPage(initialMfdPage);
         ScheduleWorkspaceNavigationMapRefresh();

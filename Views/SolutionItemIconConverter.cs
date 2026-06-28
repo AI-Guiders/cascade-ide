@@ -1,54 +1,68 @@
 extern alias svgctrl;
 using System.Globalization;
 using Avalonia.Data.Converters;
+using CascadeIDE.Features.UiChrome;
+using CascadeIDE.Features.Workspace.Application;
 using CascadeIDE.Models;
 using SvgImage = svgctrl::Avalonia.Svg.SvgImage;
 using SvgSource = svgctrl::Avalonia.Svg.SvgSource;
 
 namespace CascadeIDE.Views;
 
-/// <summary>Преобразует SolutionItem в иконку для дерева решения. Загружает SVG из Assets/Icons: solution, project, folder, file, а также по расширению (cs, ts, json, md, ...). Иконки по расширениям можно взять из пакета file-icon-vectors (см. docs/ASSETS-ICONS.md).</summary>
-public sealed class SolutionItemIconConverter : IValueConverter
+/// <summary>Преобразует SolutionItem в иконку для дерева решения (ADR 0167 icon set).</summary>
+public sealed class SolutionItemIconConverter : IMultiValueConverter
 {
     private const string AvaresBase = "avares://CascadeIDE/Assets/Icons/";
-    private static readonly string[] NodeKeys = ["solution", "project", "folder", "file"];
     private static readonly Dictionary<string, SvgSource> Cache = new(StringComparer.OrdinalIgnoreCase);
     private static readonly object CacheLock = new();
 
-    private static SvgSource? LoadSvg(string iconKey)
+    private static SvgSource? LoadSvg(string assetName)
     {
-        // file_cs -> cs.svg, file_json -> json.svg; иначе solution/project/folder/file
-        var assetName = iconKey.StartsWith("file_", StringComparison.OrdinalIgnoreCase)
-            ? iconKey[5..]
-            : (NodeKeys.Contains(iconKey, StringComparer.OrdinalIgnoreCase) ? iconKey : "file");
-        var path = AvaresBase + assetName + ".svg";
-        SvgSource? source;
-        lock (CacheLock)
+        foreach (var candidate in FallbackAssetNames(assetName))
         {
-            if (Cache.TryGetValue(assetName, out var cached))
-                return cached;
-            source = SvgSource.Load(path, null);
-            if (source?.Picture is not null)
-                Cache[assetName] = source;
-        }
-        if (source is not null)
+            var path = AvaresBase + candidate + ".svg";
+            lock (CacheLock)
+            {
+                if (Cache.TryGetValue(candidate, out var cached))
+                    return cached;
+            }
+
+            var source = SvgSource.Load(path, null);
+            if (source?.Picture is null)
+                continue;
+
+            lock (CacheLock)
+                Cache[candidate] = source;
             return source;
-        if (assetName != "file")
-            return LoadSvg("file");
+        }
+
         return null;
     }
 
-    public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
+    private static IEnumerable<string> FallbackAssetNames(string assetName)
     {
-        var key = value is SolutionItem item ? item.IconKey : value?.ToString();
-        if (string.IsNullOrEmpty(key))
-            key = "file";
-        var source = LoadSvg(key);
-        if (source is null)
-            return null;
-        return new SvgImage { Source = source };
+        yield return assetName;
+        if (string.Equals(assetName, "file", StringComparison.OrdinalIgnoreCase))
+            yield return "cs";
     }
 
-    public object? ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture) =>
+    public object? Convert(IList<object?> values, Type targetType, object? parameter, CultureInfo culture)
+    {
+        var key = values.Count > 0 && values[0] is SolutionItem item
+            ? item.IconKey
+            : values.FirstOrDefault()?.ToString();
+        if (string.IsNullOrEmpty(key))
+            key = "file";
+
+        var powerMonochrome = values.Count > 1 && values[1] is UiModeFamily family
+            ? family.IsPowerFamily()
+            : false;
+
+        var assetName = SolutionExplorerIconKeys.ResolveAssetName(key, powerMonochrome);
+        var source = LoadSvg(assetName);
+        return source is null ? null : new SvgImage { Source = source };
+    }
+
+    public object? ConvertBack(IList<object?> values, Type targetType, object? parameter, CultureInfo culture) =>
         throw new NotImplementedException();
 }

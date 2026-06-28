@@ -34,6 +34,8 @@ public static partial class IdeCommandRegistry
         DebugStepOver,
         DebugStepInto,
         DebugStepOut,
+        OpenGoToFilePalette,
+        FocusSolutionExplorerFilter,
     }
 
     /// <summary>Привязка хоткея окна к команде VM (без строк жестов — они в TOML).</summary>
@@ -118,7 +120,10 @@ public static partial class IdeCommandRegistry
     private static ImmutableArray<string> BuildTunnelKeyPriorityOrder()
     {
         // Только палитра: остальные команды — через Command Melody (c:) или CascadeChord (корень из hotkeys.toml).
-        return ImmutableArray.Create("toggle_command_palette");
+        return ImmutableArray.Create(
+            "workspace_go_to_file",
+            "focus_solution_explorer_filter",
+            "toggle_command_palette");
     }
 
     private static Dictionary<string, IdeCommandRegistryEntry> BuildWindowHotkeyIndex()

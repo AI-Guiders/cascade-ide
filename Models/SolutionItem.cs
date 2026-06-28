@@ -1,16 +1,47 @@
 using System.Collections.ObjectModel;
+using System.ComponentModel;
+using System.Runtime.CompilerServices;
 
 namespace CascadeIDE.Models;
 
-public sealed class SolutionItem
+public sealed class SolutionItem : INotifyPropertyChanged
 {
+    private bool _isExpanded;
+    private bool _isVisible = true;
+
     public string Title { get; }
     public string? FullPath { get; }
     public bool IsFolder => Children.Count > 0 && FullPath is null;
     public ObservableCollection<SolutionItem> Children { get; } = [];
 
+    public bool IsExpanded
+    {
+        get => _isExpanded;
+        set
+        {
+            if (_isExpanded == value)
+                return;
+            _isExpanded = value;
+            OnPropertyChanged();
+        }
+    }
+
+    public bool IsVisible
+    {
+        get => _isVisible;
+        set
+        {
+            if (_isVisible == value)
+                return;
+            _isVisible = value;
+            OnPropertyChanged();
+        }
+    }
+
     /// <summary>Ключ иконки для UI: solution, project, folder, file, file_cs, file_json, file_md, file_xml, file_txt и т.д.</summary>
     public string IconKey => GetIconKey();
+
+    public event PropertyChangedEventHandler? PropertyChanged;
 
     private string GetIconKey()
     {
@@ -22,7 +53,11 @@ public sealed class SolutionItem
         if (p.EndsWith(".slnx", StringComparison.OrdinalIgnoreCase) || p.EndsWith(".sln", StringComparison.OrdinalIgnoreCase))
             return "solution";
         if (p.EndsWith(".csproj", StringComparison.OrdinalIgnoreCase))
-            return "project";
+            return "file_csproj";
+        if (p.EndsWith(".fsproj", StringComparison.OrdinalIgnoreCase))
+            return "file_fsproj";
+        if (p.EndsWith(".vbproj", StringComparison.OrdinalIgnoreCase))
+            return "file_vbproj";
         var ext = Path.GetExtension(FullPath);
         if (string.IsNullOrEmpty(ext) || ext.Length <= 1) return "file";
         return "file_" + ext[1..].ToLowerInvariant();
@@ -49,4 +84,7 @@ public sealed class SolutionItem
 
     public static SolutionItem CreateFolder(string title)
         => new(title, null);
+
+    private void OnPropertyChanged([CallerMemberName] string? name = null) =>
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
 }

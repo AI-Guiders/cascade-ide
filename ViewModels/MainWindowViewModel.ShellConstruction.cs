@@ -90,6 +90,7 @@ public partial class MainWindowViewModel
         _lastSavedSettings = (CascadeIdeSettings)_settings.Clone();
         _lastSavedAiKeys = (AiKeys)_aiKeys.Clone();
         _workspaceSplittersLocked = _settings.Workspace.SplittersLocked;
+        ApplySolutionExplorerSettingsFromModel(_settings.Workspace.SolutionExplorer);
 
         _hciIntegrationEnabled = _settings.HybridIndex.Enabled;
         _hciIndexDir = ShellSettingsPresentationProjection.NormalizeHybridIndexDir(_settings.HybridIndex.IndexDir);
@@ -246,14 +247,12 @@ public partial class MainWindowViewModel
             pg.Forward,
             pg.Mfd);
         _presentationParse = PresentationParser.Parse(_settings.GetEffectivePresentationLine(), grammar);
-        _presentationDedicatedMfdSecondScreen = _presentationParse.IsSuccess
-            && PresentationLayoutAnalyzer.IsDedicatedMfdSecondScreenPreset(_presentationParse.Screens);
-        _presentationTripleOneAnchorPerZone = _presentationParse.IsSuccess
-            && PresentationLayoutAnalyzer.IsTripleOneAnchorPerZonePreset(_presentationParse.Screens);
-        _presentationMfdHostTopology = _presentationDedicatedMfdSecondScreen || _presentationTripleOneAnchorPerZone;
-        _presentationPmForwardTwoScreen = _presentationParse.IsSuccess
-            && PresentationLayoutAnalyzer.IsPmPlusForwardTwoScreenPreset(_presentationParse.Screens);
-        _presentationPmHostTopology = _presentationPmForwardTwoScreen;
+        var topologyFlags = PresentationTopologyResolver.ResolveFlags(_presentationParse);
+        _presentationDedicatedMfdSecondScreen = topologyFlags.DedicatedMfdSecondScreen;
+        _presentationTripleOneAnchorPerZone = topologyFlags.TripleOneAnchorPerZone;
+        _presentationMfdHostTopology = topologyFlags.MfdHostTopology;
+        _presentationPmForwardTwoScreen = topologyFlags.PmForwardTwoScreen;
+        _presentationPmHostTopology = topologyFlags.PmHostTopology;
         _instrumentMountPolicyResolver = new SettingsBackedInstrumentMountPolicyResolver();
 
         SyncMfdShellPageForPrimaryWorkSurface();

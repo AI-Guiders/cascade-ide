@@ -5,9 +5,11 @@ using System.Text;
 using System.Text.Json;
 using System.Threading;
 using Avalonia.Threading;
+using CascadeIDE.Features.Editor.Application.Monaco;
 using CascadeIDE.Features.IdeMcp.Application;
 using CascadeIDE.Models;
 using CascadeIDE.Features.Workspace;
+using CascadeIDE.Features.Workspace.Application;
 using CascadeIDE.Features.Workspace.DataAcquisition;
 using CascadeIDE.ViewModels;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -407,6 +409,50 @@ public sealed partial class DocumentsWorkspaceViewModel : ObservableObject
         return saved;
     }
 
+    /// <summary>Roslyn refactorings: apply multi-file text changes from Monaco (move type, rename, extract interface).</summary>
+    public void ApplyRoslynWorkspaceChanges(IReadOnlyList<CideEditorDocumentTextChange> changes)
+    {
+        foreach (var change in changes)
+        {
+            if (!SolutionTreePath.TryGetFullPath(change.FilePath, out var normalized))
+                continue;
+
+            if (!string.IsNullOrWhiteSpace(change.PreviousFilePath)
+                && SolutionTreePath.TryGetFullPath(change.PreviousFilePath, out var oldPath)
+                && !string.Equals(oldPath, normalized, StringComparison.OrdinalIgnoreCase))
+            {
+                var renameDir = Path.GetDirectoryName(normalized);
+                if (renameDir is not null)
+                    Directory.CreateDirectory(renameDir);
+                if (File.Exists(oldPath))
+                    File.Move(oldPath, normalized, overwrite: true);
+            }
+
+            var dir = Path.GetDirectoryName(normalized);
+            if (dir is not null)
+                Directory.CreateDirectory(dir);
+
+            if (change.IsNewFile || !File.Exists(normalized))
+            {
+                WorkspaceDocumentFileIo.TryWriteText(normalized, change.Text, createIfMissing: true, out _);
+                if (FindOpenDocument(normalized) is null)
+                    OpenOrActivateDocument(normalized);
+            }
+
+            var doc = FindOpenDocument(normalized);
+            if (doc is not null)
+                ApplyEditorTextToDocument(doc, change.Text);
+            else
+                WorkspaceDocumentFileIo.TryWriteText(normalized, change.Text, createIfMissing: true, out _);
+
+            var open = doc ?? FindOpenDocument(normalized);
+            if (open is not null && IsActiveDocumentForHost(open))
+                _host.EditorText = change.Text;
+
+            _host.NotifyAgentEnvironmentDocumentWrite(normalized);
+        }
+    }
+
     private void ApplyEditorTextToDocument(OpenDocumentViewModel doc, string value)
     {
         var text = value ?? "";
@@ -586,7 +632,9 @@ public sealed partial class DocumentsWorkspaceViewModel : ObservableObject
         return root;
     }
 
-    private void SyncSelectedSolutionItemToCurrentFile()
+    public void SyncSelectedSolutionItemToCurrentFile() => SyncSelectedSolutionItemToCurrentFileCore();
+
+    private void SyncSelectedSolutionItemToCurrentFileCore()
     {
         var current = _host.CurrentFilePath;
         if (string.IsNullOrEmpty(current))
@@ -595,7 +643,11 @@ public sealed partial class DocumentsWorkspaceViewModel : ObservableObject
             return;
         var item = SolutionTreePath.FindItemByFullPath(_workspace.SolutionRoots, normalized);
         if (item is not null)
+        {
+            if (_host.SolutionExplorerTrackActiveItem)
+                SolutionTreeExpansionPolicy.TryExpandPathTo(_workspace.SolutionRoots, item);
             _workspace.SelectedSolutionItem = item;
+        }
     }
 
     private static string SafeReadFile(string path)
