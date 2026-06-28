@@ -73,4 +73,29 @@ public sealed class PresentationLayoutAnalyzerTests
         Assert.True(PresentationLayoutAnalyzer.TryGetMainWindowPresentationScreenIndex(r.Screens, out var idx));
         Assert.Equal(1, idx);
     }
+
+    [Fact]
+    public void IsForwardMfdTwoScreenPreset_WhenF_M_True()
+    {
+        var r = PresentationParser.Parse("(F) (M)", DefaultGrammar());
+        Assert.True(r.IsSuccess);
+        Assert.True(PresentationLayoutAnalyzer.IsForwardMfdTwoScreenPreset(r.Screens));
+        Assert.True(PresentationLayoutAnalyzer.ShouldMaximizeMainWindowAtStartup(r.Screens));
+        Assert.True(PresentationLayoutAnalyzer.TryGetMainWindowPresentationScreenIndex(r.Screens, out var mainIdx));
+        Assert.Equal(0, mainIdx);
+        Assert.True(PresentationLayoutAnalyzer.TryGetMfdHostPresentationScreenIndex(r.Screens, out var mfdIdx));
+        Assert.Equal(1, mfdIdx);
+    }
+
+    [Fact]
+    public void IsForwardMfdTwoScreenPreset_WhenM_F_Symmetric()
+    {
+        var r = PresentationParser.Parse("(M) (F)", DefaultGrammar());
+        Assert.True(r.IsSuccess);
+        Assert.True(PresentationLayoutAnalyzer.IsForwardMfdTwoScreenPreset(r.Screens));
+        Assert.True(PresentationLayoutAnalyzer.TryGetMainWindowPresentationScreenIndex(r.Screens, out var mainIdx));
+        Assert.Equal(1, mainIdx);
+        Assert.True(PresentationLayoutAnalyzer.TryGetMfdHostPresentationScreenIndex(r.Screens, out var mfdIdx));
+        Assert.Equal(0, mfdIdx);
+    }
 }

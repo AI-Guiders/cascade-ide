@@ -47,7 +47,23 @@ public static class PresentationLayoutAnalyzer
     public static bool ShouldMaximizeMainWindowAtStartup(IReadOnlyList<IReadOnlyList<PresentationAnchorSlot>> screens) =>
         IsPfdForwardCombinedOnFirstScreen(screens)
         || IsTripleOneAnchorPerZonePreset(screens)
-        || IsPmPlusForwardTwoScreenPreset(screens);
+        || IsPmPlusForwardTwoScreenPreset(screens)
+        || IsForwardMfdTwoScreenPreset(screens);
+
+    /// <summary>
+    /// Два дисплея: на одном — только Forward, на другом — только MFD.
+    /// Симметрично <c>(F)(M)</c> и <c>(M)(F)</c> (ADR 0017, operator 2-monitor default).
+    /// </summary>
+    public static bool IsForwardMfdTwoScreenPreset(IReadOnlyList<IReadOnlyList<PresentationAnchorSlot>> screens)
+    {
+        if (screens.Count != 2)
+            return false;
+
+        var a = screens[0];
+        var b = screens[1];
+        return IsForwardOnlyScreen(a) && IsSingleAnchor(b, PresentationAnchorKind.Mfd)
+            || IsSingleAnchor(a, PresentationAnchorKind.Mfd) && IsForwardOnlyScreen(b);
+    }
 
     /// <summary>
     /// Два дисплея: на одном — только Forward, на другом — только PFD+MFD (без лобового), с весами <c>xP+yM</c>.
@@ -73,22 +89,8 @@ public static class PresentationLayoutAnalyzer
         out int index)
     {
         index = -1;
-        if (IsPmPlusForwardTwoScreenPreset(screens))
-        {
-            if (IsForwardOnlyScreen(screens[0]))
-            {
-                index = 0;
-                return true;
-            }
-
-            if (IsForwardOnlyScreen(screens[1]))
-            {
-                index = 1;
-                return true;
-            }
-
-            return false;
-        }
+        if (TryGetForwardOnlyMainWindowScreenIndex(screens, out index))
+            return true;
 
         // (P)(F)(M) и перестановки: лобовое — экран с единственным F, не первый экран в строке (ADR 0017).
         return TryGetSingleAnchorScreenIndex(screens, PresentationAnchorKind.Forward, out index);
@@ -130,6 +132,52 @@ public static class PresentationLayoutAnalyzer
 
     private static bool IsForwardOnlyScreen(IReadOnlyList<PresentationAnchorSlot> screen) =>
         screen.Count == 1 && screen[0].Kind == PresentationAnchorKind.Forward;
+
+    private static bool TryGetForwardOnlyMainWindowScreenIndex(
+        IReadOnlyList<IReadOnlyList<PresentationAnchorSlot>> screens,
+        out int index)
+    {
+        index = -1;
+        if (IsPmPlusForwardTwoScreenPreset(screens) || IsForwardMfdTwoScreenPreset(screens))
+        {
+            if (IsForwardOnlyScreen(screens[0]))
+            {
+                index = 0;
+                return true;
+            }
+
+            if (IsForwardOnlyScreen(screens[1]))
+            {
+                index = 1;
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private static bool TryGetForwardMfdHostPresentationScreenIndex(
+        IReadOnlyList<IReadOnlyList<PresentationAnchorSlot>> screens,
+        out int index)
+    {
+        index = -1;
+        if (!IsForwardMfdTwoScreenPreset(screens))
+            return false;
+
+        if (IsSingleAnchor(screens[0], PresentationAnchorKind.Mfd))
+        {
+            index = 0;
+            return true;
+        }
+
+        if (IsSingleAnchor(screens[1], PresentationAnchorKind.Mfd))
+        {
+            index = 1;
+            return true;
+        }
+
+        return false;
+    }
 
     /// <summary>На экране есть и PFD, и MFD, и нет лобового (одна группа <c>xP+yM</c>).</summary>
     private static bool IsPmCombinedScreen(IReadOnlyList<PresentationAnchorSlot> screen) =>
@@ -180,6 +228,9 @@ public static class PresentationLayoutAnalyzer
             index = 1;
             return true;
         }
+
+        if (TryGetForwardMfdHostPresentationScreenIndex(screens, out index))
+            return true;
 
         if (TryGetSingleAnchorScreenIndex(screens, PresentationAnchorKind.Mfd, out index))
             return true;

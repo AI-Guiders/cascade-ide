@@ -81,4 +81,27 @@ public sealed class MainWindowShellSurfaceCompositorTests
         Assert.False(c.MfdColumnVisibleInMainGrid);
         Assert.Equal(0, c.MfdColumnPixelWidthInMainGrid);
     }
+
+    [Fact]
+    public void WhenForwardMfdTwoScreen_MainWindowIsForwardOnly_IntentDoesNotShowPOrMInMain()
+    {
+        var parse = PresentationParser.Parse("(F) (M)", DefaultGrammar());
+        Assert.True(parse.IsSuccess);
+
+        var c = MainWindowShellSurfaceCompositor.Compose(
+            new MainWindowShellSurfaceCompositionInput(
+                parse,
+                IntentSolutionExplorerVisible: true,
+                IntentChatPanelExpanded: true,
+                SuppressPfdColumnForPfdHostWindow: false,
+                SuppressMfdColumnForMfdHostWindow: true,
+                ExpandedMfdWidthPixels: 340,
+                CollapsedMfdWidthPixels: 8,
+                DisplaySettings: new DisplaySettings(),
+                SafetyLevel: AgentSafetyLevel.Confirm));
+
+        Assert.False(c.PfdSurfaceVisible);
+        Assert.False(c.MfdColumnVisibleInMainGrid);
+        Assert.Equal(0, c.MfdColumnPixelWidthInMainGrid);
+    }
 }

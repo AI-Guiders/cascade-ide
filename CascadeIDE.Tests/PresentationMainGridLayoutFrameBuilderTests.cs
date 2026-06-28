@@ -83,5 +83,23 @@ public sealed class PresentationMainGridLayoutFrameBuilderTests
         Assert.Equal(1.0 / 3.0, frame.NormalizedZoneWeights[2], 8);
         Assert.Equal(3, frame.ZoneBounds.Count);
     }
+
+    [Fact]
+    public void ForwardMfdTwoScreen_MainWindowOnF_UsesForwardOnlyColumns()
+    {
+        var parse = PresentationParser.Parse("(F) (M)", ShortGrammar);
+        Assert.True(parse.IsSuccess);
+
+        var frame = PresentationMainGridLayoutFrameBuilder.Build(
+            parse,
+            dedicatedMfdSecondScreen: false,
+            mfdColumnSuppressedForHost: true,
+            tripleOneAnchorPerZone: false,
+            suppressPfdColumnForPfdHostWindow: false,
+            mainWindowPresentationScreenIndex: 0);
+
+        Assert.Equal("0,4,*,4,0", frame.ColumnDefinitions);
+        Assert.Equal(1, frame.ContentZoneCount);
+    }
 }
 

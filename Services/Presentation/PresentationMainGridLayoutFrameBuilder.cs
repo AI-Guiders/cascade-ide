@@ -35,11 +35,8 @@ public static class PresentationMainGridLayoutFrameBuilder
         var clampedMain = Math.Clamp(mainWindowPresentationScreenIndex, 0, parse.Screens.Count - 1);
         var mainScreen = parse.Screens[clampedMain];
 
-        if (PresentationLayoutAnalyzer.IsPmPlusForwardTwoScreenPreset(parse.Screens)
-            && IsForwardOnlyMainScreen(mainScreen))
-        {
+        if (IsForwardOnlyMainScreen(mainScreen))
             return BuildForwardOnlyMainWindowFrame();
-        }
 
         if (mainScreen.Count is < 2 or > 3)
             return DefaultFrame(mainScreen.Count);
@@ -50,9 +47,17 @@ public static class PresentationMainGridLayoutFrameBuilder
         var hasExplicitWeights = HasExplicitWeights(mainScreen);
         if (!hasExplicitWeights)
         {
-            // Для пресетов без коэффициентов сохраняем исторический layout.
+            var unweightedColumns = DefaultColumnDefinitions;
+            if (mainScreen.Count == 2
+                && dedicatedMfdSecondScreen
+                && mfdColumnSuppressedForHost
+                && !ContainsAnchor(mainScreen, PresentationAnchorKind.Mfd))
+            {
+                unweightedColumns = "220,4,*,4,0";
+            }
+
             return new PresentationMainGridLayoutFrame(
-                DefaultColumnDefinitions,
+                unweightedColumns,
                 mainScreen.Count,
                 hasExplicitWeights,
                 normalized,
@@ -114,6 +119,17 @@ public static class PresentationMainGridLayoutFrameBuilder
         for (var i = 0; i < first.Count; i++)
         {
             if (first[i].Weight.HasValue)
+                return true;
+        }
+
+        return false;
+    }
+
+    private static bool ContainsAnchor(IReadOnlyList<PresentationAnchorSlot> screen, PresentationAnchorKind kind)
+    {
+        for (var i = 0; i < screen.Count; i++)
+        {
+            if (screen[i].Kind == kind)
                 return true;
         }
 
