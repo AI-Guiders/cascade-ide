@@ -51,7 +51,7 @@
 
 | ID | ADR |
 |----|-----|
-| 0039, 0053, 0151, 0062 | [workspace navigation](0039-workspace-navigation-affordances.md) · [control flow PFD](0053-semantic-map-control-flow-pfd.md) · [CF subgraph grain](0151-control-flow-subgraph-intent-vs-detailed-grain.md) · [GitMap](0062-git-submodules-semantic-map-subgraph.md) |
+| 0039, 0053, 0151, 0062, **0167**, **0168** | [workspace navigation](0039-workspace-navigation-affordances.md) · [control flow PFD](0053-semantic-map-control-flow-pfd.md) · [CF subgraph grain](0151-control-flow-subgraph-intent-vs-detailed-grain.md) · [GitMap](0062-git-submodules-semantic-map-subgraph.md) · [**Solution Explorer MLP**](0167-solution-explorer-ux-go-to-file-and-compact-tree.md) · [**2-screen layout**](0168-presentation-two-screen-pf-m-layout-policy.md) |
 | 0067, 0113–0115 | [graph-backed contract](0067-graph-backed-surfaces-contract.md) · [HCI orientation](0113-hci-semantic-map-orientation-layer.md) · [`relation_kind`](0114-graph-edge-relation-kind-taxonomy.md) · [CDS graph layer](0115-cds-graph-backed-shared-layer.md) |
 
 ### Превью и документация (Markdown)
@@ -248,6 +248,8 @@
 | [0164](0164-monaco-editor-presentation-projection-and-dock-chrome.md) | **Monaco presentation projection:** line-first CECB push, `MonacoEditorPresentationProjector`, `DecorationLayerManager`, version guard, dock chrome `*` | Accepted · Implemented |
 | [0165](0165-mcp-transport-stratification-stdio-http-and-host-matrix.md) | **MCP transport stratification:** Tier A/B/C (stdio vs HTTP-first), матрица хостов, фазы forge/notes/CIDE loopback; не переписывать тулы | Proposed |
 | [0166](0166-agent-centric-harness-model-comfort-and-pay-per-token-economics.md) | **Agent-centric harness:** «ничего о нас без нас», L0/colleague criterion, overlay vs Cursor, CIDE in-proc KB [0118], P0–P2 | Proposed |
+| [0167](0167-solution-explorer-ux-go-to-file-and-compact-tree.md) | **Solution Explorer MLP:** VS-grade mechanics, Go to File (Ctrl+P), icon set v2, `WorkspaceFileIndex`; дополняет [0039](0039-workspace-navigation-affordances.md) | Proposed |
+| [0168](0168-presentation-two-screen-pf-m-layout-policy.md) | **2-screen `(P+F)(M)`:** PFD collapsed by default; SE/map на MFD; Ctrl+P; narrow Forward chrome | Proposed |
 
 ## Сборка в один документ (HTML, TXT, PDF)
 

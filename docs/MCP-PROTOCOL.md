@@ -174,6 +174,7 @@
 | `close_correspondence_page` | Закрыть страницу Correspondence (CRS) — первая другая разрешённая страница Mfd. returns: text. |
 | `close_environment_readiness_page` | Перейти с страницы «готовность окружения» на первую другую разрешённую страницу вторичного контура. returns: text. |
 | `cycle_ui_mode` | Циклически переключить UI mode (hotkey). returns: text. |
+| `focus_solution_explorer_filter` | Фокус в фильтр Solution Explorer на MFD (Ctrl+;). returns: text. |
 | `set_mfd_shell_page` | Активная страница оболочки Mfd: имя значения MfdShellPage (Chat, Terminal, …). Якорь на экране — пресет (v1 — колонка зоны Mfd). args: page:string; returns: text; example: {"page":"Chat"}. |
 | `set_secondary_shell_page` | Устаревший идентификатор MCP-команды; поведение совпадает с `set_mfd_shell_page`. args: page:string; returns: text; example: {"page":"Chat"}. |
 | `show_correspondence_page` | Показать страницу Correspondence (CRS) во вторичном контуре (ADR 0156). Разворачивает регион Mfd при необходимости. returns: text. |
@@ -182,6 +183,7 @@
 | `show_markdown_preview_page` | Показать Markdown preview как страницу во вторичном контуре/MFD. returns: text. |
 | `show_web_ai_portal_page` | Показать страницу веб-портала (WebView + мост инструментов ADR 0108) во вторичном контуре/MFD. Разворачивает регион Mfd при необходимости. returns: text. |
 | `toggle_command_palette` | Открыть или закрыть палитру команд (как Ctrl+Q / пункт меню «Вид»). returns: text. |
+| `workspace_go_to_file` | Go to File — палитра с префиксом `f:` (Ctrl+P). returns: text. |
 
 ### Вид: тема
 
@@ -254,12 +256,12 @@
 | `debug_stop` | Завершить сессию отладки (dispose DAP). returns: text. |
 | `debug_variables` | Переменные кадра. args: frame_index?:integer; returns: text; example: {"frame_index":0}. |
 | `fetch_web_public_url` | Загрузить публичный HTTPS-документ по URL и вернуть тело как читаемый текст (HTML упрощается до текста, поле extraction в JSON). Запрос из машины оператора; только https; локальные/частные хосты блокируются базово (не полная SSRF-защита). args: url:string, max_chars?:integer; returns: json; example: {\"url\":\"https://learn.microsoft.com/en-us/dotnet/\"}. |
+| `forge.artifact.goto` | Открыть forge artifact по bracket `[FRG:…]` (DOI forge.artifact.goto). args: bracket:string, base_url?:string, select_code?:boolean; returns: text; example: {"bracket":"[FRG:issue:1]","select_code":true}. |
 | `forge_lens.auth_status` | Статус Forge Lens auth для host. args: base_url?:string; returns: text; example: {"base_url":"http://127.0.0.1:8770"}. |
 | `forge_lens.connect` | Device login к forge (браузер + approve, как Intercom OAuth). args: base_url?:string; returns: text; example: {"base_url":"http://127.0.0.1:8770"}. |
 | `forge_lens.create_issue` | Создать issue в Forge (write gate B). args: title:string, body?:string, repo?:string, base_url?:string, file_path?:string, line_start?:integer, line_end?:integer, member_key?:string; returns: text; example: {"title":"Zone leak","file_path":"src/Zones.cs","line_start":10}. |
 | `forge_lens.create_merge_request` | Создать merge request в Forge. args: title:string, source_branch:string, target_branch?:string, repo?:string, base_url?:string, file_path?:string, line_start?:integer, line_end?:integer; returns: text; example: {"title":"feat: zones","source_branch":"feat/zones"}. |
 | `forge_lens.disconnect` | Удалить сохранённый Bearer для forge host. args: base_url?:string; returns: text; example: {"base_url":"http://127.0.0.1:8770"}. |
-| `forge.artifact.goto` | Открыть forge artifact по bracket `[FRG:…]`. args: bracket:string, base_url?:string, select_code?:boolean; returns: text; example: {"bracket":"[FRG:issue:1]","select_code":true}. |
 | `get_colors_under_cursor` | Цвета под курсором (прямые и effective). returns: json. |
 | `get_control_appearance` | Снимок внешнего вида контрола (под курсором или по имени). args: name?:string; returns: json; example: {"name":"BuildButton"}. |
 | `get_debug_snapshot` | JSON: канонический снимок встроенной DAP-сессии (ADR 0002). returns: json. |
