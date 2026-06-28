@@ -38,6 +38,13 @@ public interface ICideEditorCapabilityHost
         IReadOnlyList<CideEditorCodeActionItem> actions,
         CancellationToken cancellationToken = default);
 
+    Task PushCapabilityWorkspaceEditResultAsync(
+        int requestId,
+        bool ok,
+        string? error,
+        IReadOnlyList<CideEditorDocumentTextChange> changes,
+        CancellationToken cancellationToken = default);
+
     Task PushCapabilityInlayHintsResultAsync(
         int requestId,
         IReadOnlyList<CideEditorInlayHint> hints,

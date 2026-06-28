@@ -16,6 +16,8 @@
     "references": "capability/references",
     "format": "capability/format",
     "codeAction": "capability/codeAction",
+    "codeActionApply": "capability/codeActionApply",
+    "rename": "capability/rename",
     "navigate": "capability/navigate",
     "inlayHints": "capability/inlayHints",
     "codeLens": "capability/codeLens",
@@ -28,6 +30,7 @@
     "referencesResult": "capability/referencesResult",
     "formatResult": "capability/formatResult",
     "codeActionResult": "capability/codeActionResult",
+    "workspaceEditResult": "capability/workspaceEditResult",
     "inlayHintsResult": "capability/inlayHintsResult",
     "codeLensResult": "capability/codeLensResult",
     "semanticTokensResult": "capability/semanticTokensResult"

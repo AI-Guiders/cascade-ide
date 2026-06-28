@@ -17,6 +17,7 @@ public partial class MonacoEditorHostControl : UserControl, ICideEditorCapabilit
 
     public event EventHandler? Ready;
     public event EventHandler<CideEditorInboundMessage>? Inbound;
+    public event EventHandler<string>? HostShortcutRequested;
 
     public bool IsReady => _ready;
 
@@ -48,7 +49,7 @@ public partial class MonacoEditorHostControl : UserControl, ICideEditorCapabilit
         if (_webView is null || _navigateRequested)
             return;
 
-        if (!MonacoEditorWebViewBootstrap.TryMapVirtualHost(_webView))
+        if (!MonacoEditorWebViewBootstrap.TryConfigure(_webView, OnEditorHostShortcutFromWebView))
         {
             System.Diagnostics.Debug.WriteLine("Monaco: virtual host mapping failed; falling back to file URI.");
             _webView.Navigate(MonacoEditorAssetLocator.GetFileIndexUri());
@@ -76,6 +77,14 @@ public partial class MonacoEditorHostControl : UserControl, ICideEditorCapabilit
         if (msg is null)
             return;
 
+        if (string.Equals(msg.Type, CideEditorBridgeTypes.HostShortcut, StringComparison.Ordinal)
+            && !string.IsNullOrWhiteSpace(msg.ShortcutId))
+        {
+            var shortcutId = msg.ShortcutId;
+            Dispatcher.UIThread.Post(() => HostShortcutRequested?.Invoke(this, shortcutId!));
+            return;
+        }
+
         if (string.Equals(msg.Type, CideEditorBridgeTypes.Ready, StringComparison.Ordinal))
         {
             if (!string.IsNullOrEmpty(msg.Error))
@@ -101,6 +110,9 @@ public partial class MonacoEditorHostControl : UserControl, ICideEditorCapabilit
         else
             Dispatcher.UIThread.Post(HandleInbound);
     }
+
+    private void OnEditorHostShortcutFromWebView(string tomlKey) =>
+        Dispatcher.UIThread.Post(() => HostShortcutRequested?.Invoke(this, tomlKey));
 
     public async Task PushSetModelAsync(string filePath, string text, CancellationToken cancellationToken = default)
     {
@@ -328,6 +340,20 @@ public partial class MonacoEditorHostControl : UserControl, ICideEditorCapabilit
             cancellationToken).ConfigureAwait(true);
     }
 
+    public async Task PushCapabilityWorkspaceEditResultAsync(
+        int requestId,
+        bool ok,
+        string? error,
+        IReadOnlyList<CideEditorDocumentTextChange> changes,
+        CancellationToken cancellationToken = default)
+    {
+        await EnsureReadyAsync(cancellationToken).ConfigureAwait(true);
+        await DispatchAsync(
+            CideEditorBusManifest.Capabilities.WorkspaceEditResult,
+            new CideEditorWorkspaceEditResultMessage(requestId, ok, error, changes),
+            cancellationToken).ConfigureAwait(true);
+    }
+
     public async Task PushCapabilityInlayHintsResultAsync(
         int requestId,
         IReadOnlyList<CideEditorInlayHint> hints,
@@ -441,7 +467,7 @@ public partial class MonacoEditorHostControl : UserControl, ICideEditorCapabilit
         EnsureWebView();
         if (_webView is not null && !_navigateRequested)
         {
-            if (MonacoEditorWebViewBootstrap.TryMapVirtualHost(_webView))
+            if (MonacoEditorWebViewBootstrap.TryConfigure(_webView, OnEditorHostShortcutFromWebView))
                 _webView.Navigate(MonacoEditorAssetLocator.GetIndexUri());
             else
                 _webView.Navigate(MonacoEditorAssetLocator.GetFileIndexUri());

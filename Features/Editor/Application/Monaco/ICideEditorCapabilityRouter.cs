@@ -35,4 +35,10 @@ public sealed class MonacoEditorCapabilityContext
     public Func<string, bool>? TryNavigateCodeLens { get; init; }
 
     public Func<CideEditorDefinitionLocation, Task>? NavigateToLocationAsync { get; init; }
+
+    public Func<string?>? GetSolutionPath { get; init; }
+
+    public Func<string?>? GetWorkspaceRoot { get; init; }
+
+    public Func<IReadOnlyList<CideEditorDocumentTextChange>, Task>? ApplyWorkspaceChangesAsync { get; init; }
 }

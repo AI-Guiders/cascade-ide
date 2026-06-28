@@ -154,6 +154,26 @@ public sealed class CSharpLanguageServiceCompletionTests
         Assert.Contains(items, i => i.DisplayText == "SByte");
     }
 
+    [Fact]
+    public void ScopeCompletion_includes_compiler_keywords_from_syntax_facts()
+    {
+        const string path = @"D:\Fake\Keywords.cs";
+        var src = """
+            class C
+            {
+                void M()
+                {
+                    rec
+                }
+            }
+            """;
+        var (line, column) = AfterMarker(src, "rec");
+        var svc = new CSharpLanguageService();
+        var items = svc.GetCompletionItems(path, src, line, column, TestContext.Current.CancellationToken);
+
+        Assert.Contains(items, i => i.DisplayText == "record" && i.Kind == CSharpLanguageService.CSharpCompletionKind.Keyword);
+    }
+
     private static (int Line, int Column) AfterMarker(string source, string marker)
     {
         var index = source.IndexOf(marker, StringComparison.Ordinal);

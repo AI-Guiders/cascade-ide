@@ -1,4 +1,6 @@
 using CascadeIDE.Services;
+using CascadeIDE.Services.Roslyn;
+using RoslynMcp.ServiceLayer;
 
 namespace CascadeIDE.Features.Editor.Application.Monaco;
 
@@ -61,6 +63,18 @@ public sealed class CideEditorCapabilityRouter : ICideEditorCapabilityRouter
             case CideEditorBusManifest.Capabilities.CodeAction:
                 if (message.Line is int al && message.Column is int ac)
                     await HandleCodeActionAsync(context, requestId, al, ac, cancellationToken).ConfigureAwait(true);
+                break;
+
+            case CideEditorBusManifest.Capabilities.CodeActionApply:
+                if (message.Line is int apl && message.Column is int apc && message.ActionIndex is int actionIndex)
+                    await HandleCodeActionApplyAsync(context, requestId, apl, apc, actionIndex, cancellationToken)
+                        .ConfigureAwait(true);
+                break;
+
+            case CideEditorBusManifest.Capabilities.Rename:
+                if (message.Line is int rnl && message.Column is int rnc && !string.IsNullOrWhiteSpace(message.NewName))
+                    await HandleRenameAsync(context, requestId, rnl, rnc, message.NewName!, cancellationToken)
+                        .ConfigureAwait(true);
                 break;
 
             case CideEditorBusManifest.Capabilities.InlayHints:
@@ -342,7 +356,7 @@ public sealed class CideEditorCapabilityRouter : ICideEditorCapabilityRouter
 
         var text = context.GetEditorText();
         var actions = await Task.Run(
-            () =>
+            async () =>
             {
                 var list = new List<CideEditorCodeActionItem>();
                 var organized = context.CSharpLanguage.OrganizeUsings(context.FilePath, text, cancellationToken);
@@ -363,10 +377,131 @@ public sealed class CideEditorCapabilityRouter : ICideEditorCapabilityRouter
                         formatted));
                 }
 
+                var solutionPath = ResolveRoslynWorkspacePath(context);
+                if (!string.IsNullOrWhiteSpace(solutionPath))
+                {
+                    var roslyn = await RoslynMcpEditorIntelligence.ListCodeActionsAsync(
+                        solutionPath,
+                        context.FilePath,
+                        text,
+                        line,
+                        column,
+                        cancellationToken).ConfigureAwait(false);
+                    if (string.IsNullOrWhiteSpace(roslyn.Error))
+                    {
+                        foreach (var item in roslyn.Actions)
+                        {
+                            list.Add(new CideEditorCodeActionItem(
+                                item.Title,
+                                item.Kind,
+                                Text: null,
+                                ActionIndex: item.Index));
+                        }
+                    }
+                }
+
                 return (IReadOnlyList<CideEditorCodeActionItem>)list;
             },
             cancellationToken).ConfigureAwait(true);
         await PushCodeActionsAsync(context.Host, requestId, actions, cancellationToken).ConfigureAwait(true);
+    }
+
+    private static async Task HandleCodeActionApplyAsync(
+        MonacoEditorCapabilityContext context,
+        int requestId,
+        int line,
+        int column,
+        int actionIndex,
+        CancellationToken cancellationToken)
+    {
+        if (!CideEditorLanguageIds.SupportsRoslynIntelligence(context.FilePath))
+        {
+            await PushWorkspaceEditAsync(context.Host, requestId, false, "unsupported_language", [], cancellationToken)
+                .ConfigureAwait(true);
+            return;
+        }
+
+        var solutionPath = ResolveRoslynWorkspacePath(context);
+        if (string.IsNullOrWhiteSpace(solutionPath))
+        {
+            await PushWorkspaceEditAsync(context.Host, requestId, false, "no_solution", [], cancellationToken)
+                .ConfigureAwait(true);
+            return;
+        }
+
+        var text = context.GetEditorText();
+        var result = await Task.Run(
+            () => RoslynMcpEditorIntelligence.ApplyCodeActionAsync(
+                solutionPath,
+                context.FilePath,
+                text,
+                line,
+                column,
+                actionIndex,
+                cancellationToken),
+            cancellationToken).ConfigureAwait(true);
+
+        await ApplyRoslynResultAsync(context, requestId, result, cancellationToken).ConfigureAwait(true);
+    }
+
+    private static async Task HandleRenameAsync(
+        MonacoEditorCapabilityContext context,
+        int requestId,
+        int line,
+        int column,
+        string newName,
+        CancellationToken cancellationToken)
+    {
+        if (!CideEditorLanguageIds.SupportsRoslynIntelligence(context.FilePath))
+        {
+            await PushWorkspaceEditAsync(context.Host, requestId, false, "unsupported_language", [], cancellationToken)
+                .ConfigureAwait(true);
+            return;
+        }
+
+        var solutionPath = ResolveRoslynWorkspacePath(context);
+        if (string.IsNullOrWhiteSpace(solutionPath))
+        {
+            await PushWorkspaceEditAsync(context.Host, requestId, false, "no_solution", [], cancellationToken)
+                .ConfigureAwait(true);
+            return;
+        }
+
+        var text = context.GetEditorText();
+        var result = await Task.Run(
+            () => RoslynMcpEditorIntelligence.RenameAsync(
+                solutionPath,
+                context.FilePath,
+                text,
+                line,
+                column,
+                newName,
+                cancellationToken),
+            cancellationToken).ConfigureAwait(true);
+
+        await ApplyRoslynResultAsync(context, requestId, result, cancellationToken).ConfigureAwait(true);
+    }
+
+    private static async Task ApplyRoslynResultAsync(
+        MonacoEditorCapabilityContext context,
+        int requestId,
+        RoslynEditorApplyResult result,
+        CancellationToken cancellationToken)
+    {
+        if (!string.IsNullOrWhiteSpace(result.Error))
+        {
+            await PushWorkspaceEditAsync(context.Host, requestId, false, result.Error, [], cancellationToken)
+                .ConfigureAwait(true);
+            return;
+        }
+
+        var mapped = result.Changes
+            .Select(c => new CideEditorDocumentTextChange(c.FilePath, c.Text, c.IsNewFile, c.PreviousFilePath))
+            .ToList();
+        if (context.ApplyWorkspaceChangesAsync is not null)
+            await context.ApplyWorkspaceChangesAsync(mapped).ConfigureAwait(true);
+
+        await PushWorkspaceEditAsync(context.Host, requestId, true, null, mapped, cancellationToken).ConfigureAwait(true);
     }
 
     private static async Task HandleInlayHintsAsync(
@@ -471,6 +606,15 @@ public sealed class CideEditorCapabilityRouter : ICideEditorCapabilityRouter
         CancellationToken cancellationToken) =>
         host.PushCapabilityCodeActionResultAsync(requestId, actions, cancellationToken);
 
+    private static Task PushWorkspaceEditAsync(
+        ICideEditorCapabilityHost host,
+        int requestId,
+        bool ok,
+        string? error,
+        IReadOnlyList<CideEditorDocumentTextChange> changes,
+        CancellationToken cancellationToken) =>
+        host.PushCapabilityWorkspaceEditResultAsync(requestId, ok, error, changes, cancellationToken);
+
     private static Task PushInlayHintsAsync(
         ICideEditorCapabilityHost host,
         int requestId,
@@ -513,4 +657,10 @@ public sealed class CideEditorCapabilityRouter : ICideEditorCapabilityRouter
         var offset = lineStart + columnOneBased - 1;
         return offset <= text.Length ? offset : text.Length;
     }
+
+    private static string? ResolveRoslynWorkspacePath(MonacoEditorCapabilityContext context) =>
+        RoslynEditorWorkspacePath.Resolve(
+            context.GetSolutionPath?.Invoke(),
+            context.FilePath,
+            context.GetWorkspaceRoot?.Invoke());
 }

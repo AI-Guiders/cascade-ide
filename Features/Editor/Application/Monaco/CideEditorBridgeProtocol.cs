@@ -1,5 +1,6 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using CascadeIDE.Services;
 
 namespace CascadeIDE.Features.Editor.Application.Monaco;
 
@@ -24,6 +25,9 @@ public static class CideEditorBridgeTypes
     public const string DidScroll = "editor/didScroll";
     public const string DidGutterClick = "editor/didGutterClick";
     public const string Ready = "editor/ready";
+
+    /// <summary>Editor → host: tunnel hotkey from WebView2 (Ctrl+P etc.).</summary>
+    public const string HostShortcut = "host/shortcut";
 
     public const string RequestCompletion = "editor/requestCompletion";
     public const string CompletionResult = "editor/completionResult";
@@ -121,7 +125,20 @@ public sealed record CideEditorFormatResultMessage(
 public sealed record CideEditorCodeActionItem(
     string Title,
     string Kind,
-    string? Text);
+    string? Text,
+    int? ActionIndex = null);
+
+public sealed record CideEditorDocumentTextChange(
+    string FilePath,
+    string Text,
+    bool IsNewFile = false,
+    string? PreviousFilePath = null);
+
+public sealed record CideEditorWorkspaceEditResultMessage(
+    int RequestId,
+    bool Ok,
+    string? Error,
+    IReadOnlyList<CideEditorDocumentTextChange> Changes);
 
 public sealed record CideEditorCodeActionResultMessage(
     int RequestId,
@@ -198,7 +215,12 @@ public sealed record CideEditorInboundMessage(
     [property: JsonPropertyName("topLine")] int? TopLine,
     [property: JsonPropertyName("lensId")] string? LensId,
     [property: JsonPropertyName("filePath")] string? FilePath,
-    [property: JsonPropertyName("error")] string? Error);
+    [property: JsonPropertyName("error")] string? Error,
+    [property: JsonPropertyName("actionIndex")] int? ActionIndex,
+    [property: JsonPropertyName("newName")] string? NewName,
+    [property: JsonPropertyName("endLine")] int? EndLine,
+    [property: JsonPropertyName("endColumn")] int? EndColumn,
+    [property: JsonPropertyName("id")] string? ShortcutId);
 
 public static class CideEditorBridgeJson
 {
@@ -234,8 +256,14 @@ public static class CideEditorBridgeJson
             string? lensId = root.TryGetProperty("lensId", out var lens) ? lens.GetString() : null;
             string? filePath = root.TryGetProperty("filePath", out var fp) ? fp.GetString() : null;
             string? error = root.TryGetProperty("error", out var err) ? err.GetString() : null;
+            int? actionIndex = TryInt(root, "actionIndex");
+            string? newName = root.TryGetProperty("newName", out var nn) ? nn.GetString() : null;
+            int? endLine = TryInt(root, "endLine");
+            int? endColumn = TryInt(root, "endColumn");
+            string? shortcutId = root.TryGetProperty("id", out var idEl) ? idEl.GetString() : null;
             return new CideEditorInboundMessage(
-                type, version, text, caret, selStart, selLen, requestId, line, column, topLine, lensId, filePath, error);
+                type, version, text, caret, selStart, selLen, requestId, line, column, topLine, lensId, filePath, error,
+                actionIndex, newName, endLine, endColumn, shortcutId);
         }
         catch
         {
@@ -249,33 +277,8 @@ public static class CideEditorBridgeJson
 
 public static class CideEditorLanguageIds
 {
-    public static string FromFilePath(string? filePath)
-    {
-        var ext = string.IsNullOrWhiteSpace(filePath)
-            ? ""
-            : Path.GetExtension(filePath).ToLowerInvariant();
-        return ext switch
-        {
-            ".cs" => "csharp",
-            ".csx" => "csharp",
-            ".json" => "json",
-            ".md" => "markdown",
-            ".toml" => "toml",
-            ".xml" => "xml",
-            ".axaml" => "xml",
-            ".html" => "html",
-            ".htm" => "html",
-            ".css" => "css",
-            ".js" => "javascript",
-            ".ts" => "typescript",
-            ".py" => "python",
-            ".yaml" or ".yml" => "yaml",
-            ".sql" => "sql",
-            ".sh" => "shell",
-            ".ps1" => "powershell",
-            _ => "plaintext",
-        };
-    }
+    public static string FromFilePath(string? filePath) =>
+        EditorLanguageSupport.GetMonacoLanguageId(filePath);
 
     public static bool SupportsRoslynIntelligence(string? filePath) =>
         string.Equals(Path.GetExtension(filePath), ".cs", StringComparison.OrdinalIgnoreCase)

@@ -26,7 +26,12 @@ public sealed class MonacoEditorSessionAndApplyEditsTests
             TopLine: null,
             LensId: null,
             FilePath: null,
-            Error: null));
+            Error: null,
+            ActionIndex: null,
+            NewName: null,
+            EndLine: null,
+            EndColumn: null,
+            ShortcutId: null));
 
         session.ReadSnapshot(out var version, out var text, out var caret, out var selStart, out var selLen);
         Assert.Equal(2, version);

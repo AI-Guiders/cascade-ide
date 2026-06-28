@@ -33,6 +33,8 @@ public sealed class CideEditorBusContractTests
         Assert.Equal(CideEditorBusManifest.Capabilities.References, caps.GetProperty("references").GetString());
         Assert.Equal(CideEditorBusManifest.Capabilities.Format, caps.GetProperty("format").GetString());
         Assert.Equal(CideEditorBusManifest.Capabilities.CodeAction, caps.GetProperty("codeAction").GetString());
+        Assert.Equal(CideEditorBusManifest.Capabilities.CodeActionApply, caps.GetProperty("codeActionApply").GetString());
+        Assert.Equal(CideEditorBusManifest.Capabilities.Rename, caps.GetProperty("rename").GetString());
         Assert.Equal(CideEditorBusManifest.Capabilities.Navigate, caps.GetProperty("navigate").GetString());
         Assert.Equal(CideEditorBusManifest.Capabilities.InlayHints, caps.GetProperty("inlayHints").GetString());
         Assert.Equal(CideEditorBusManifest.Capabilities.CodeLens, caps.GetProperty("codeLens").GetString());
@@ -45,6 +47,7 @@ public sealed class CideEditorBusContractTests
         Assert.Equal(CideEditorBusManifest.Capabilities.ReferencesResult, caps.GetProperty("referencesResult").GetString());
         Assert.Equal(CideEditorBusManifest.Capabilities.FormatResult, caps.GetProperty("formatResult").GetString());
         Assert.Equal(CideEditorBusManifest.Capabilities.CodeActionResult, caps.GetProperty("codeActionResult").GetString());
+        Assert.Equal(CideEditorBusManifest.Capabilities.WorkspaceEditResult, caps.GetProperty("workspaceEditResult").GetString());
         Assert.Equal(CideEditorBusManifest.Capabilities.InlayHintsResult, caps.GetProperty("inlayHintsResult").GetString());
         Assert.Equal(CideEditorBusManifest.Capabilities.CodeLensResult, caps.GetProperty("codeLensResult").GetString());
         Assert.Equal(CideEditorBusManifest.Capabilities.SemanticTokensResult, caps.GetProperty("semanticTokensResult").GetString());

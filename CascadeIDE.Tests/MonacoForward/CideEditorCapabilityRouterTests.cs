@@ -305,7 +305,7 @@ public sealed class CideEditorCapabilityRouterTests
         int? line = null,
         int? column = null,
         string? lensId = null) =>
-        new(type, null, null, null, null, null, requestId, line, column, null, lensId, null, null);
+        new(type, null, null, null, null, null, requestId, line, column, null, lensId, null, null, null, null, null, null, null);
 
     private static MonacoEditorCapabilityContext CreateContext(
         RecordingCapabilityHost host,
@@ -398,6 +398,14 @@ public sealed class CideEditorCapabilityRouterTests
             CodeActions.Add((requestId, actions));
             return Task.CompletedTask;
         }
+
+        public Task PushCapabilityWorkspaceEditResultAsync(
+            int requestId,
+            bool ok,
+            string? error,
+            IReadOnlyList<CideEditorDocumentTextChange> changes,
+            CancellationToken cancellationToken = default) =>
+            Task.CompletedTask;
 
         public Task PushCapabilityInlayHintsResultAsync(
             int requestId,

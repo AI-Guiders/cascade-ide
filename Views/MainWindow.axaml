@@ -169,8 +169,9 @@
             </MenuItem>
             <MenuItem Header="_Вид">
                 <MenuItem x:Name="MenuCommandPalette" Header="Палитра _команд" Command="{Binding ToggleCommandPaletteCommand}"/>
+                <MenuItem Header="Перейти к _файлу…" Command="{Binding OpenGoToFilePaletteCommand}"/>
                 <Separator/>
-                <MenuItem Header="Обозреватель _решения" ToggleType="CheckBox" IsChecked="{Binding IsPfdRegionExpanded, Mode=TwoWay}"/>
+                <MenuItem Header="Дерево _проекта (MFD)" Command="{Binding Shell.ShowSolutionExplorerPageCommand}"/>
                 <MenuItem Header="_Вывод сборки" ToggleType="CheckBox" IsChecked="{Binding IsBuildOutputVisible, Mode=TwoWay}"/>
                 <MenuItem Header="_Чат" ToggleType="CheckBox" IsChecked="{Binding IsMfdRegionExpanded, Mode=TwoWay}"/>
                 <MenuItem Header="_Терминал" ToggleType="CheckBox" IsChecked="{Binding IsTerminalVisible, Mode=TwoWay}"/>

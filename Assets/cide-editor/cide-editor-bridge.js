@@ -22,6 +22,8 @@
       references: 'capability/references',
       format: 'capability/format',
       codeAction: 'capability/codeAction',
+      codeActionApply: 'capability/codeActionApply',
+      rename: 'capability/rename',
       navigate: 'capability/navigate',
       inlayHints: 'capability/inlayHints',
       codeLens: 'capability/codeLens',
@@ -34,6 +36,7 @@
       referencesResult: 'capability/referencesResult',
       formatResult: 'capability/formatResult',
       codeActionResult: 'capability/codeActionResult',
+      workspaceEditResult: 'capability/workspaceEditResult',
       inlayHintsResult: 'capability/inlayHintsResult',
       codeLensResult: 'capability/codeLensResult',
       semanticTokensResult: 'capability/semanticTokensResult',
@@ -74,6 +77,22 @@
     console.log('host←', body);
   }
 
+  function installHostShortcutCapture() {
+    root.addEventListener(
+      'keydown',
+      (e) => {
+        if (!e.ctrlKey || e.altKey || e.metaKey || e.shiftKey) return;
+        if (e.key !== 'p' && e.key !== 'P') return;
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        postToHost({ type: 'host/shortcut', id: 'workspace_go_to_file' });
+      },
+      true,
+    );
+  }
+
+  installHostShortcutCapture();
+
   function offsetFromPosition(model, lineNumber, column) {
     return model.getOffsetAt({ lineNumber, column });
   }
@@ -103,6 +122,7 @@
   }
 
   const COMPLETION_HOST_TIMEOUT_MS = 2500;
+  const CODE_ACTION_HOST_TIMEOUT_MS = 30000;
   let activeCompletionRequestId = null;
 
   function cancelPendingCompletion() {
@@ -423,6 +443,10 @@
       return requestId;
     }
 
+    function nextCapabilityRequestId() {
+      return (Date.now() % 2000000000) + Math.floor(Math.random() * 1000);
+    }
+
     function mapCompletionKind(kind) {
       switch (kind) {
         case 'method':
@@ -576,34 +600,90 @@
     }));
 
     disposables.push(monaco.languages.registerCodeActionProvider('csharp', {
-      providedCodeActionKinds: ['source.organizeImports', 'source.formatDocument', 'quickfix'],
+      providedCodeActionKinds: [
+        'source.organizeImports',
+        'source.formatDocument',
+        'quickfix',
+        'refactor.extract.interface',
+        'refactor.move',
+        'refactor.rename',
+        'refactor.rewrite',
+      ],
       provideCodeActions: async (model, range) => {
         const requestId = requestCapability(BUS.capabilities.codeAction, range.getStartPosition());
         try {
           const payload = await waitForHostResponse(
             BUS.capabilities.codeActionResult,
             requestId,
-            5000);
-          const actions = (payload.actions || []).map((a) => ({
-            title: a.title,
-            kind: a.kind,
-            isPreferred: a.kind === 'source.organizeImports',
-            edit: {
-              edits: [{
-                resource: model.uri,
-                textEdit: {
-                  range: model.getFullModelRange(),
-                  text: a.text,
+            CODE_ACTION_HOST_TIMEOUT_MS);
+          const actions = (payload.actions || []).map((a) => {
+            if (a.actionIndex != null) {
+              const pos = range.getStartPosition();
+              return {
+                title: a.title,
+                kind: a.kind,
+                command: {
+                  id: 'cide.applyRoslynCodeAction',
+                  title: a.title,
+                  arguments: [a.actionIndex, pos.lineNumber, pos.column],
                 },
-              }],
-            },
-          }));
+              };
+            }
+            return {
+              title: a.title,
+              kind: a.kind,
+              isPreferred: a.kind === 'source.organizeImports',
+              edit: {
+                edits: [{
+                  resource: model.uri,
+                  textEdit: {
+                    range: model.getFullModelRange(),
+                    text: a.text,
+                  },
+                }],
+              },
+            };
+          });
           return { actions, dispose: () => {} };
         } catch {
           return { actions: [], dispose: () => {} };
         }
       },
     }));
+
+    disposables.push(monaco.languages.registerRenameProvider('csharp', {
+      provideRenameEdits: async (model, position, newName) => {
+        const requestId = nextCapabilityRequestId();
+        postToHost({
+          type: BUS.capabilities.rename,
+          requestId,
+          line: position.lineNumber,
+          column: position.column,
+          newName,
+        });
+        try {
+          const payload = await waitForHostResponse(
+            BUS.capabilities.workspaceEditResult,
+            requestId,
+            15000);
+          if (!payload.ok) return { edits: [] };
+          const currentPath = model.uri.path.replace(/^\//, '').replace(/\//g, '\\');
+          const hit = (payload.changes || []).find((c) =>
+            c.filePath && currentPath.toLowerCase().endsWith(String(c.filePath).replace(/\//g, '\\').toLowerCase()));
+          if (!hit) return { edits: [] };
+          return {
+            edits: [{
+              resource: model.uri,
+              textEdit: { range: model.getFullModelRange(), text: hit.text },
+            }],
+          };
+        } catch {
+          return { edits: [] };
+        }
+      },
+    }));
+
+    registerRoslynCodeActionCommand();
 
     disposables.push(monaco.languages.registerInlayHintsProvider('csharp', {
       provideInlayHints: async (model, range) => {
@@ -676,9 +756,56 @@
     }));
   }
 
+  function registerRoslynCodeActionCommand() {
+    disposables.push(monaco.editor.registerCommand('cide.applyRoslynCodeAction', async (_ctx, actionIndex, line, column) => {
+      const requestId = nextCapabilityRequestId();
+      postToHost({
+        type: BUS.capabilities.codeActionApply,
+        requestId,
+        actionIndex,
+        line,
+        column,
+      });
+      try {
+        const payload = await waitForHostResponse(
+          BUS.capabilities.workspaceEditResult,
+          requestId,
+          15000);
+        if (!payload.ok || !editor) return;
+        const model = editor.getModel();
+        if (!model) return;
+        const currentPath = model.uri.path.replace(/^\//, '').replace(/\//g, '\\');
+        const hit = (payload.changes || []).find((c) =>
+          c.filePath && currentPath.toLowerCase().endsWith(String(c.filePath).replace(/\//g, '\\').toLowerCase()));
+        if (!hit) return;
+        suppressChange = true;
+        try {
+          model.setValue(hit.text);
+        } finally {
+          suppressChange = false;
+        }
+        publishModelState('document');
+      } catch {
+        /* host may have applied via setModel */
+      }
+    }));
+  }
+
   function registerBundledMonarchGrammars() {
+    const amdRequire = typeof window !== 'undefined' ? window.require : undefined;
+    if (typeof window.cidePatchCsharpMonarch === 'function' && typeof amdRequire === 'function') {
+      window.cidePatchCsharpMonarch(monaco, amdRequire);
+    }
     if (typeof window.cideRegisterMonarchGrammars === 'function') {
       window.cideRegisterMonarchGrammars(monaco);
+    }
+  }
+
+  function refreshCsharpSyntaxHighlighting() {
+    registerBundledMonarchGrammars();
+    const model = editor && editor.getModel ? editor.getModel() : null;
+    if (model && model.getLanguageId && model.getLanguageId() === 'csharp') {
+      model.forceTokenization(model.getLineCount());
     }
   }
 
@@ -697,6 +824,7 @@
         case 'capability/referencesResult':
         case 'capability/formatResult':
         case 'capability/codeActionResult':
+        case 'capability/workspaceEditResult':
         case 'capability/inlayHintsResult':
         case 'capability/codeLensResult':
         case 'capability/semanticTokensResult':
@@ -715,6 +843,9 @@
             const current = model.getValue();
             if (current !== payload.text) {
               model.setValue(payload.text ?? '');
+            }
+            if (payload.languageId === 'csharp' || model.getLanguageId() === 'csharp') {
+              refreshCsharpSyntaxHighlighting();
             }
           } finally {
             suppressChange = false;
@@ -882,6 +1013,7 @@
       // CFG CodeLens ("1: var") overlaps content in WebView2 until view-zone layout is fixed (ADR 0163).
       codeLens: false,
       inlayHints: { enabled: 'on', padding: true },
+      lightbulb: { enabled: 'on' },
     });
 
     editor.onDidChangeModelContent(() => {
