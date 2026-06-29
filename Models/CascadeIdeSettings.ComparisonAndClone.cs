@@ -139,6 +139,23 @@ public sealed partial class CascadeIdeSettings
                         IdleUserThresholdMs = Agent.Environment.TimeAccounting.IdleUserThresholdMs,
                     },
                 },
+                Harness = new AgentHarnessSettings
+                {
+                    LoadHotContextOnSessionStart = Agent.Harness.LoadHotContextOnSessionStart,
+                    LoadHotContextOnTopicFork = Agent.Harness.LoadHotContextOnTopicFork,
+                    HotContextActiveScope = Agent.Harness.HotContextActiveScope,
+                    CheckpointEnabled = Agent.Harness.CheckpointEnabled,
+                    CheckpointThresholdUserTurns = Agent.Harness.CheckpointThresholdUserTurns,
+                    CheckpointRepeatEveryUserTurns = Agent.Harness.CheckpointRepeatEveryUserTurns,
+                    AutoVerifyAfterCsWrite = Agent.Harness.AutoVerifyAfterCsWrite,
+                    SuppressAcpIdeStdioInject = Agent.Harness.SuppressAcpIdeStdioInject,
+                    CheckpointOnContextPressure = Agent.Harness.CheckpointOnContextPressure,
+                    ContextPressureThreadMessageThreshold = Agent.Harness.ContextPressureThreadMessageThreshold,
+                    ContextPressureRepeatEveryMessages = Agent.Harness.ContextPressureRepeatEveryMessages,
+                    InjectHarnessTelemetryInContext = Agent.Harness.InjectHarnessTelemetryInContext,
+                    InjectTopicForkBrief = Agent.Harness.InjectTopicForkBrief,
+                    TopicForkBriefTemplate = Agent.Harness.TopicForkBriefTemplate,
+                },
             },
             Workspace = new WorkspaceSettings
             {
@@ -453,7 +470,28 @@ public sealed partial class CascadeIdeSettings
             && ea.TimeAccounting.ShowInChat == eb.TimeAccounting.ShowInChat
             && ea.TimeAccounting.PfdInstrumentEnabled == eb.TimeAccounting.PfdInstrumentEnabled
             && ea.TimeAccounting.ShowTaskProgressInChat == eb.TimeAccounting.ShowTaskProgressInChat
-            && ea.TimeAccounting.IdleUserThresholdMs == eb.TimeAccounting.IdleUserThresholdMs;
+            && ea.TimeAccounting.IdleUserThresholdMs == eb.TimeAccounting.IdleUserThresholdMs
+            && HarnessEquals(a.Harness, b.Harness);
+    }
+
+    private static bool HarnessEquals(AgentHarnessSettings? a, AgentHarnessSettings? b)
+    {
+        if (a is null || b is null)
+            return a == b;
+        return a.LoadHotContextOnSessionStart == b.LoadHotContextOnSessionStart
+            && a.LoadHotContextOnTopicFork == b.LoadHotContextOnTopicFork
+            && a.HotContextActiveScope == b.HotContextActiveScope
+            && a.CheckpointEnabled == b.CheckpointEnabled
+            && a.CheckpointThresholdUserTurns == b.CheckpointThresholdUserTurns
+            && a.CheckpointRepeatEveryUserTurns == b.CheckpointRepeatEveryUserTurns
+            && a.AutoVerifyAfterCsWrite == b.AutoVerifyAfterCsWrite
+            && a.SuppressAcpIdeStdioInject == b.SuppressAcpIdeStdioInject
+            && a.CheckpointOnContextPressure == b.CheckpointOnContextPressure
+            && a.ContextPressureThreadMessageThreshold == b.ContextPressureThreadMessageThreshold
+            && a.ContextPressureRepeatEveryMessages == b.ContextPressureRepeatEveryMessages
+            && a.InjectHarnessTelemetryInContext == b.InjectHarnessTelemetryInContext
+            && a.InjectTopicForkBrief == b.InjectTopicForkBrief
+            && a.TopicForkBriefTemplate == b.TopicForkBriefTemplate;
     }
 
     private static bool HybridIndexEquals(HybridIndexSettings? a, HybridIndexSettings? b)

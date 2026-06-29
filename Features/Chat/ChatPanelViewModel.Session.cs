@@ -36,6 +36,7 @@ public partial class ChatPanelViewModel
             _sessionStore.SetWorkspaceRoot(string.IsNullOrWhiteSpace(workspaceRoot) ? null : workspaceRoot);
             _sessionId = await _sessionStore.ResolveOrCreateCurrentSessionIdAsync(ct).ConfigureAwait(false);
             await _sessionStore.BindCurrentSessionAsync(_sessionId, ct).ConfigureAwait(false);
+            Harness.BindSession(_sessionId);
 
             var events = await _sessionStore.ReadEventsAsync(_sessionId, ct).ConfigureAwait(false);
             rebuildExplicitRelatesFromEvents(events);
@@ -94,6 +95,7 @@ public partial class ChatPanelViewModel
             }).ConfigureAwait(false);
 
             _ = StartIntercomTransportAsync(ct);
+            await Harness.OnSessionInitializedAsync(ct).ConfigureAwait(false);
         }
         catch (Exception ex)
         {

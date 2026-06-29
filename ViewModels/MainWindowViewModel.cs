@@ -376,12 +376,33 @@ public partial class MainWindowViewModel : ViewModelBase, IAutonomousAgentSessio
 
     private string? BuildChatMinimizedContextBlockCore()
     {
-        if (!UseMinimizedContext)
-            return null;
-        if (string.IsNullOrEmpty(CurrentFilePath) || string.IsNullOrEmpty(EditorText))
-            return null;
-        var minimized = _contextMinimizer.Minimize(CurrentFilePath, EditorText, CancellationToken.None);
-        return string.IsNullOrWhiteSpace(minimized) ? null : minimized;
+        string? block = null;
+        if (UseMinimizedContext
+            && !string.IsNullOrEmpty(CurrentFilePath)
+            && !string.IsNullOrEmpty(EditorText))
+        {
+            var minimized = _contextMinimizer.Minimize(CurrentFilePath, EditorText, CancellationToken.None);
+            if (!string.IsNullOrWhiteSpace(minimized))
+                block = minimized;
+        }
+
+        var hot = ChatPanel.Harness.HotContextBlock;
+        var telemetry = ChatPanel.Harness.BuildTelemetryContextBlock(
+            ChatPanel.Harness.GetTelemetry(),
+            _agentEnvironment.EpochTracker.IsUiStale);
+
+        string? prefix = null;
+        if (!string.IsNullOrWhiteSpace(hot))
+            prefix = hot;
+        if (!string.IsNullOrWhiteSpace(telemetry))
+            prefix = string.IsNullOrWhiteSpace(prefix) ? telemetry : prefix + "\n\n---\n\n" + telemetry;
+
+        if (string.IsNullOrWhiteSpace(prefix))
+            return block;
+
+        return string.IsNullOrWhiteSpace(block)
+            ? prefix
+            : prefix + "\n\n---\n\n" + block;
     }
 
     /// <summary>MCP / палитра / MAF — единая поверхность команд IDE (Wave 2 Big Bang).</summary>

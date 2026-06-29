@@ -586,6 +586,14 @@ public partial class ChatPanelViewModel : ViewModelBase
         var minimized = _getChatMinimizedContextBlock?.Invoke();
         minimized = string.IsNullOrWhiteSpace(minimized) ? null : minimized.Trim();
 
+        var pendingHarness = Harness.TryConsumePendingAgentContext();
+        if (!string.IsNullOrWhiteSpace(pendingHarness))
+        {
+            minimized = string.IsNullOrWhiteSpace(minimized)
+                ? pendingHarness.Trim()
+                : pendingHarness.Trim() + "\n\n---\n\n" + minimized;
+        }
+
         var projectRules = CascadeIdeMafProjectAgentRules.TryLoadMerged(_getWorkspaceRoot());
 
         ChatMessageViewModel? assistantMsg = null;

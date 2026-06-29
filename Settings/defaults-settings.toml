@@ -168,6 +168,22 @@ show_task_progress_in_chat = true
 # 0 = idle_user выкл
 idle_user_threshold_ms = 0
 
+[agent.harness]
+load_hot_context_on_session_start = true
+load_hot_context_on_topic_fork = true
+checkpoint_enabled = true
+checkpoint_threshold_user_turns = 40
+checkpoint_repeat_every_user_turns = 40
+auto_verify_after_cs_write = true
+# interim 0082: MAF/cloud = in-proc; suppress second CascadeIDE for Cursor ACP
+suppress_acp_ide_stdio_inject = true
+checkpoint_on_context_pressure = true
+context_pressure_thread_message_threshold = 60
+context_pressure_repeat_every_messages = 30
+inject_harness_telemetry_in_context = true
+inject_topic_fork_brief = true
+# topic_fork_brief_template = ""
+
 [agent_notes]
 # Пусто = встроенный agent-notes; иначе путь относительно %LocalAppData%\CascadeIDE\
 config_path = ""

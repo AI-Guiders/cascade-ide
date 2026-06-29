@@ -98,6 +98,7 @@ public partial class MainWindowViewModel
     {
         _agentEnvironment.EpochTracker.NotifyWrite(filePath);
         RefreshAgentVerifyEpochEditorDim(filePath);
+        MaybeScheduleAutoVerifyAfterCsWrite(filePath);
     }
 
     private void OnAgentVerifyEpochStaleUi()

@@ -57,7 +57,27 @@ internal sealed partial class MainWindowIdeMcpHost
     public Task<string> IdeAgentStatusAsync(CancellationToken cancellationToken = default)
     {
         _ = cancellationToken;
-        return Task.FromResult(JsonSerializer.Serialize(_host.AgentEnvironment.GetStatus()));
+        var aee = _host.AgentEnvironment.GetStatus();
+        var epoch = _host.AgentEnvironment.EpochTracker;
+        var harness = _host.ChatPanel.Harness.GetTelemetry();
+        return Task.FromResult(System.Text.Json.JsonSerializer.Serialize(new
+        {
+            active = aee.IsActive,
+            run_id = aee.RunId,
+            verify_snapshot_id = aee.VerifySnapshotId,
+            policy = aee.Policy,
+            sandbox_profile = aee.SandboxProfile,
+            sandbox_run_directory = aee.SandboxRunDirectory,
+            execution_channel = aee.ExecutionChannel,
+            writes_invalidated_verify_epoch = aee.WritesInvalidatedVerifyEpoch || epoch.WritesInvalidatedVerifyEpoch,
+            verify_epoch_ui_stale = epoch.IsUiStale,
+            solution_path = aee.SolutionPath,
+            harness_session_user_turn_count = harness.SessionUserTurnCount,
+            harness_checkpoint_due = harness.CheckpointDue,
+            harness_next_checkpoint_at_turn = harness.NextCheckpointAtTurn,
+            harness_hot_context_loaded = harness.HotContextLoaded,
+            harness_hot_context_scope = harness.HotContextScope,
+        }));
     }
 
     public Task<string> IdeAgentLastAsync(CancellationToken cancellationToken = default)

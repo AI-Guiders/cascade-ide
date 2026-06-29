@@ -4,4 +4,6 @@ namespace CascadeIDE.Models;
 public sealed class AgentSettings
 {
     public AgentEnvironmentSettings Environment { get; set; } = new();
+
+    public AgentHarnessSettings Harness { get; set; } = new();
 }

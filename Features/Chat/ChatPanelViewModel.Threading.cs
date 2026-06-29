@@ -89,6 +89,8 @@ public partial class ChatPanelViewModel
         _topicPickerPresentation = TopicPickerPresentation.None;
         IsChatOverviewMode = false;
         RefreshChatSurfaceSnapshot();
+        _ = Harness.OnTopicForkedAsync();
+        UiScheduler.Default.Post(ApplyTopicForkBriefToComposer);
         return TopicCreateResult.Ok($"Создана тема: {trimmed}");
     }
 

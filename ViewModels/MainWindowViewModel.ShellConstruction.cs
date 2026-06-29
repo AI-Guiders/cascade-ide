@@ -143,7 +143,7 @@ public partial class MainWindowViewModel
             GetWorkspacePath,
             () => CursorAcpAgentPath,
             () => Services.McpExternalServersJsonResolver.ResolveEffectiveJson(_settings),
-            () => AcpAutoInjectIdeMcp,
+            () => ResolveAcpAutoInjectIdeMcp(),
             () => string.IsNullOrWhiteSpace(CursorAcpModelId) ? null : CursorAcpModelId.Trim(),
             id => CursorAcpModelId = id ?? "",
             appendAcpTerminal: text => UiScheduler.Default.Post(() => TerminalPanel.AppendOutput(text)),
