@@ -77,6 +77,12 @@ public partial class ChatPanelViewModel
                 ChatLoadingStatusText = "";
         });
 
+    private async Task tryHandleIntercomSlashLineAsync_showSlashRunningAsync(string slashPath)
+    {
+        await UiScheduler.Default.InvokeAsync(() =>
+            ClarificationStatusText = $"Выполняю {slashPath}…").ConfigureAwait(false);
+    }
+
     private async Task<bool> tryHandleIntercomSlashLineAsync(string rawInput)
     {
         if (!ChatSlashCommandParser.IsSlashLine(rawInput))
@@ -101,6 +107,9 @@ public partial class ChatPanelViewModel
             ? slashDescriptor.MessageAudience
             : IntercomMessageAudience.Channel;
 
+        if (slashResolved && slashDescriptor.ExecutionKind == ChatSlashCommandExecutionKind.LocalAgent)
+            await tryHandleIntercomSlashLineAsync_showSlashRunningAsync(slashPath).ConfigureAwait(false);
+
         var slash = await _slashCommandRunner.TryRunAsync(rawInput).ConfigureAwait(false);
         await UiScheduler.Default.InvokeAsync(() =>
         {
@@ -114,6 +123,7 @@ public partial class ChatPanelViewModel
             var payload = ChatHistoryPayloadMapping.ToMessagePayload(cmdMsg);
             _ = PersistEventAsync(ChatHistoryEventKind.MessageAdded, payload);
             _ = PersistEventAsync(ChatHistoryEventKind.MessageCompleted, payload);
+            ClarificationStatusText = slash.Success ? "" : (slash.DetailText ?? "");
             RefreshChatSurfaceSnapshot();
         });
         return true;
@@ -142,6 +152,7 @@ public partial class ChatPanelViewModel
             _ = TryAutoConnectIntercomTransportAsync();
             RefreshChatSurfaceSnapshot();
             _ = PersistSessionSolutionPathIfChangedAsync(CancellationToken.None);
+            _ = OnHarnessAfterUserMessageCommittedAsync();
             if (startProviderLoading)
             {
                 IsChatLoading = true;

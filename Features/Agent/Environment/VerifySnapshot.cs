@@ -40,8 +40,8 @@ public static class VerifySnapshot
         return hash;
     }
 
-    private static IEnumerable<string> CollectGitParts(IGitCommandRunner git, string workspaceRoot) =>
-        Task.Run(() => CollectGitPartsCore(git, workspaceRoot)).GetAwaiter().GetResult();
+    private static List<string> CollectGitParts(IGitCommandRunner git, string workspaceRoot) =>
+        CollectGitPartsCore(git, workspaceRoot);
 
     private static List<string> CollectGitPartsCore(IGitCommandRunner git, string workspaceRoot)
     {

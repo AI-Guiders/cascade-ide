@@ -196,20 +196,18 @@ public sealed class ChatSlashCommandRunner
                     "Agent Execution Environment недоступен.");
             }
 
-            if (!ChatSlashAgentActions.TryExecute(
-                    descriptor.SlashPath,
-                    argsTail,
-                    _agentEnvironment,
-                    _getSolutionPathForAgent,
-                    out var agent))
-            {
-                return new ChatSlashCommandRunResult(
-                    true,
-                    false,
-                    displayPath,
-                    argsTail,
-                    "Действие agent недоступно.");
-            }
+            var agent = await Task.Run(
+                () =>
+                {
+                    ChatSlashAgentActions.TryExecute(
+                        descriptor.SlashPath,
+                        argsTail,
+                        _agentEnvironment,
+                        _getSolutionPathForAgent,
+                        out var result);
+                    return result;
+                },
+                cancellationToken).ConfigureAwait(false);
 
             return new ChatSlashCommandRunResult(
                 true,
