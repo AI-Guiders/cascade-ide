@@ -1,0 +1,38 @@
+# Overlay: политика harness «CASA / Neumann T1» (interim, до UI preset).
+# Merge в %LocalAppData%\CascadeIDE\settings.toml (или Setup-CideHarness.ps1 -Apply).
+# In-proc: agent-notes, hybrid-index, debug, AEE — НЕ дублировать в external MCP.
+# См. ADR 0166 §1.6, §5.1.
+#
+# НЕ задаёт ai.mode — operator: local | mcp_only | cloud | acp.
+# Cloud.ru FM отдельно: harness-cloud-fm.overlay.toml
+
+[mcp]
+acp_auto_inject_ide_mcp = true
+# Путь к optional JSON (roslyn-mcp, python-mcp) — см. harness-external-mcp.optional.json
+external_servers_json_path = "harness-external-mcp.json"
+
+[agent_notes]
+# Тот же TOML, что --config в Cursor agent-notes-mcp (замени путь):
+config_path = "D:/agent-notes-mcp/agent-notes-mcp.toml"
+
+[hybrid_index]
+enabled = true
+auto_reindex_on_solution_open = true
+
+[agent.environment]
+default_verify_policy = "standard"
+shell_escape_tier = "deny"
+
+[agent.harness]
+load_hot_context_on_session_start = true
+load_hot_context_on_topic_fork = true
+checkpoint_enabled = true
+checkpoint_threshold_user_turns = 40
+checkpoint_repeat_every_user_turns = 40
+auto_verify_after_cs_write = true
+suppress_acp_ide_stdio_inject = true
+checkpoint_on_context_pressure = true
+context_pressure_thread_message_threshold = 60
+context_pressure_repeat_every_messages = 30
+inject_harness_telemetry_in_context = true
+inject_topic_fork_brief = true

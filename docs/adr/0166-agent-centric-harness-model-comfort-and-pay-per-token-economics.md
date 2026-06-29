@@ -75,11 +75,34 @@ CIDE с Cloud.ru (`settings.toml` → `foundation-models.api.cloud.ru`) дела
 | Project/User **Rules** (`.mdc`) | механизм 🟡 | контент: указатели на KB, протоколы | тонкий preset или замена hot |
 | **L0 hot** (`read_hot_context`, manifest) | 🔴 | 🟢 agent-notes MCP | 🟢 **in-proc** [0118](0118-agent-notes-core-2-toml-and-knowledge-path.md) |
 | L1 + `route_context` | 🔴 | 🟢 | 🟢 in-proc / pull |
-| Hooks (checkpoint, pressure) | механизм 🟡 | 🟢 `.cursor/hooks.json` | 🔴 → product P0.2 |
-| Roslyn / python / index MCP | слот 🟡 | 🟢 настроенный bundle | 🟢 preset |
-| Verify truth (AEE) | 🔴 | 🟡 shell | 🟢 native |
+| Hooks (checkpoint, pressure) | механизм 🟡 | 🟢 `.cursor/hooks.json` | 🟡 `[agent.harness]` turn-count; preCompact backlog |
+| **Tool surface** (KB, index, debug, verify) | отдельные stdio MCP | 🟢 те же MCP в Cursor | 🟢 **in-proc** `ide_execute_command` ([0118](0118-agent-notes-core-2-toml-and-knowledge-path.md), HCI, AEE, `debug_*`) |
+| **Полный roslyn-mcp** (`roslyn_find_usages`, solution diagnostics, …) | 🟢 stdio | 🟢 stdio | 🟡 editor + `get_current_file_diagnostics`; **опционально** внешний stdio ([§1.6](#adr0166-inproc)) |
+| **python-mcp** | 🟢 stdio | 🟢 stdio | 🔴 только Monaco; **опционально** `external_servers_json` |
+| Verify truth (AEE) | 🔴 | 🟡 shell | 🟡 **частично** [0148](0148-agent-execution-environment-verification-ladder-and-native-tooling.md) W1–W2; Verify Epoch UI / auto-after-edit — **нет** |
 
-**Вывод:** parity с «как оператор работает сегодня» **строже**, чем клон чата Cursor. Отключение **agent-notes** бьёт сильнее, чем отключение Rules.
+**Вывод:** parity с «как оператор работает сегодня» **строже**, чем клон чата Cursor. Отключение **agent-notes** бьёт сильнее, чем отключение Rules. **Ошибка планирования:** ждать «вката MCP в CIDE» — capability уже in-proc; gap = **lifecycle** (L0 на session start, hooks) и **именованный preset**, не установка серверов.
+
+<a id="adr0166-inproc"></a>
+
+### 1.6 In-proc tool surface (2026-06, факт репо)
+
+В Cursor каждый сервер — **отдельный stdio-процесс**. В CIDE тот же **логический** bundle уже в **GUI-процессе** через `ide_execute_command` / `IdeCommands` (см. [MCP-PROTOCOL.md](../MCP-PROTOCOL.md)):
+
+| Было (Cursor MCP) | CIDE in-proc (канон) | Примечание |
+|-------------------|----------------------|------------|
+| agent-notes-mcp | `read_knowledge_file`, `route_context`, `compact_hot_context`, … | тот же TOML `agent_notes.config_path` [0118](0118-agent-notes-core-2-toml-and-knowledge-path.md) |
+| hybrid-codebase-index | `codebase_index_search`, `_status`, `_reindex` | `[hybrid_index]` в settings |
+| dotnet-debug-mcp | `debug_launch`, `debug_continue`, `debug_stop`, … | DAP in-proc |
+| cascade-ide | `ide_*` + весь реестр команд | не «ещё один MCP», а хост |
+| roslyn-mcp (полный) | частично: Monaco + `get_current_file_diagnostics` + AEE `diagnose.files` | **не** `roslyn_find_usages` / solution-scope diagnostics как pull-тулы |
+| python-mcp | — | подключить **внешним** stdio при необходимости |
+
+**Опционально внешний stdio** ([0048](0048-cursor-acp-chat-ide-parity-and-mcp-tool-surface.md) `external_servers_json`): полный **roslyn-mcp**, **python-mcp**, **forge** — те же записи, что в Cursor `mcp.json`; in-proc и внешний Roslyn **не конфликтуют** (разные имена тулов).
+
+**P0.3 Loopback** ([0082](0082-acp-ide-mcp-loopback-single-process.md)) — не «принести MCP», а **не плодить второй `CascadeIDE.exe`** при ACP. **Interim (2026-06-28):** `[agent.harness] suppress_acp_ide_stdio_inject` — MAF/cloud используют in-proc `ide_execute_command`; полный loopback HTTP **ещё нет**.
+
+**[0118](0118-agent-notes-core-2-toml-and-knowledge-path.md):** `McpAgentNotesService` + `AgentNotesRuntimeLoader.EnsureInitialized` при вызове knowledge-команд; тот же TOML, что Cursor `--config`. **Interim:** `ChatHarnessCoordinator` вызывает `read_hot_context` in-proc на session/topic start ([`AgentHarnessSettings`](../../Models/AgentHarnessSettings.cs)).
 
 ### 1.4 L0 hot — язык, смысл, «коллега на удалёнке» (operator testimony)
 
@@ -111,20 +134,6 @@ Junior--   уверенный тон + потеря якорей = хуже ст
 ```
 
 **Антидот:** L0/KB/export переживают compaction; chat context — **кэш**, не память (KB: `playbook-context-pressure-checkpoint-v1.md`).
-
-### 1.6 CIDE: KB in-proc ([0118](0118-agent-notes-core-2-toml-and-knowledge-path.md))
-
-В Cascade IDE **Agent Notes Core 2.0** встроен **in-proc** (`McpAgentNotesService`, `AgentNotesRuntimeLoader`) — не обязателен отдельный stdio subprocess agent-notes-mcp для knowledge-команд в GUI-процессе.
-
-| | Cursor + overlay | CIDE |
-|--|------------------|------|
-| SSOT конфига | `agent-notes-mcp.toml` + `mcp.json` | тот же TOML в `settings.toml` → `[agent_notes] config_path` |
-| Вызов L0 / route | MCP tool round-trip | **in-proc** `IdeCommands.Knowledge.*` |
-| Паритет args | `knowledge_path` | то же (+ legacy alias `canon_path`) |
-
-**Следствие для harness:** CIDE **может** (и должен в preset P0.1) поднимать L0 на **session start** без cold-start MCP — меньше latency, меньше token waste на «вспомни, кто ты», единый TOML с Cursor/Roo fallback.
-
-**Gap (product):** in-proc ≠ автоматический hot load в каждый чат — preset обязан явно: init runtime + `read_hot_context` / equivalent на старте topic (см. P0.1, H1).
 
 ### 1.7 Cursor как reference, не как цель
 
@@ -162,11 +171,42 @@ Harness CIDE — среда **совместного** труда человек
 | **Economics** | default, раздувающий context (whole-repo @, канон в system prompt) |
 | **Obligations** | rules «будь дисциплинированной» вместо продукта |
 
-**Не входит:** выбор бизнес-приоритета epic, safety approve, секреты, биллинг — это оператор.
+**Граница «о нас»** — не «всё, о чём можно говорить», а **где агент должен быть услышан до merge** изменений harness. См. L0 `agent-equal-standing-v1`: участник, не только исполнитель; co-design ≠ передача всех рычагов, но и ≠ исключение из разговора.
+
+#### Обсуждаем вместе (норма co-design)
+
+Эти темы **входят в диалог** и часто в ADR/playbook; агент может и должен возражать, предлагать trade-offs, отказываться от процесса («так не играю») в контуре оператора. Финальная ответственность ниже — не запрет на обсуждение.
+
+| Тема | Зачем голос агента |
+|------|-------------------|
+| **Приоритет epic / backlog** | оценка риска compaction, token cost, зависимостей verify; «сначала harness vs фича» |
+| **Safety / integrity** | framing под давлением; границы POST; не просить обход «в исследовательских целях» |
+| **Биллинг / token economics** | compactor, tier split, fork topic, pull vs push — модель несёт налог в сессии |
+| **Intent сессии** | что строим в P0.x, preset, hook — шаг 1 в §2.3 задаёт направление, **не** монолог без шага 2 |
+
+#### Финальная ответственность у оператора (не veto-зона co-design)
+
+Здесь **не требуется** согласие агента как gate на внедрение, но **желательна** консультация, если решение меняет harness (например, смена FM-провайдера влияет на economics plane).
+
+| Тема | Почему финал у оператора |
+|------|--------------------------|
+| **Бизнес-приоритет** | продукт, сроки, внешние обязательства — вне модели |
+| **Safety approve** | юридическая и человеческая ответственность за действие в prod / реальном мире |
+| **Секреты** | `ai-keys.toml`, токены, credentials — агент не хранит и не коммитит |
+| **Оплата** | счёт Cloud.ru / FM, лимиты кошелька |
+
+**Не путать:** «финал у оператора» ≠ «агент не в теме». Пример: оператор решает «платим за Cloud.ru», но **без** обсуждения с агентом preset compactor и pull-стратегии economics plane остаётся слепым.
+
+#### Вне диалога (только оператор)
+
+| Тема | Правило |
+|------|---------|
+| **Секреты в prompt / git** | никогда; только well-known paths и env |
+| **Принуждение к обходу POST** | не предмет переговоров |
 
 ### 2.3 Процесс co-design (минимум)
 
-1. **Intent** — оператор: что строим (P0.x, hook, preset, …).
+1. **Intent** — оператор **формулирует** направление (P0.x, hook, preset, …); не обязан иметь готовое решение — достаточно цели и ограничений.
 2. **Agent session** — тот же harness или Cursor-parity: «как тебе работать с этим? что сломается?»
 3. **Фиксация** — ADR / playbook / issue; не только PR без текста.
 4. **Checklist** (§2.4) — gate перед merge крупной harness-фичи.
@@ -309,21 +349,57 @@ Transport stratification — [0165](0165-mcp-transport-stratification-stdio-http
 
 ## 5. Продуктовый backlog (P0–P2)
 
+### 5.1 Interim до product preset (~2026-08)
+
+**Не блокер:** именованный mode «CASA/Neumann T1» в UI и wizard. **Достаточно** ручной политики + in-proc surface (§1.6):
+
+| Шаг | Артефакт | Где |
+|-----|----------|-----|
+| FM smoke | `[ai.cloud.openai]` → Cloud.ru + `ai-keys.toml` | `%LocalAppData%\CascadeIDE\` |
+| KB SSOT | `agent_notes.config_path` = тот же TOML, что `--config` agent-notes-mcp | settings.toml |
+| Опц. полный Roslyn / Python | `external_servers_json_path` | шаблон [harness-external-mcp.optional.json](../samples/harness-external-mcp.optional.json) |
+| Compactor / hot | `compact_hot_context` (in-proc); L0 — **`read_hot_context` в первом ходе** (ритуал или будущий session start) | agent obligation + [0118](0118-agent-notes-core-2-toml-and-knowledge-path.md) |
+| Checkpoint | Cursor hooks до Aug; CIDE — agent rules | overlay `.cursor/hooks.json` |
+
+Скрипт: [`scripts/setup/Setup-CideHarness.ps1`](../../scripts/setup/Setup-CideHarness.ps1) — TOML/policy overlay; **product hooks** `[agent.harness]` — см. §5.2 (interim 2026-06-28).
+
+<a id="adr0166-adr-vs-code"></a>
+
+### 5.2 Связанные ADR: норма vs код (честный срез)
+
+Этот ADR = **направление + backlog**. Ссылки на другие ADR **не означают**, что поведение уже в продукте.
+
+| ADR / item | Статус ADR | В коде (2026-06-28) | Что остаётся |
+|------------|------------|---------------------|--------------|
+| [0118](0118-agent-notes-core-2-toml-and-knowledge-path.md) | Accepted · Implemented | 🟢 in-proc + **L0/session/topic** `ChatHarnessCoordinator` | wizard «CASA/Neumann T1» |
+| [0148](0148-agent-execution-environment-verification-ladder-and-native-tooling.md) | Accepted · In progress | 🟡 W1–W2 + auto-verify coalescer; telemetry stale in context | Verify Epoch **UI**, W4–W6 |
+| [0082](0082-acp-ide-mcp-loopback-single-process.md) | **Proposed** | 🟡 `suppress_acp_ide_stdio_inject`; in-proc MCP smoke | loopback HTTP |
+| [0165](0165-mcp-transport-stratification-stdio-http-and-host-matrix.md) | Proposed | 🔴 HTTP MCP notes/forge в CIDE | P1.3 |
+| **P0.2** lifecycle hooks | этот ADR | 🟢 turn-count + **preCompact** (thread msgs) | platform preCompact event (нет в CIDE) |
+| **P0.4** verify habit | этот ADR | 🟡 auto-verify + stale в context/rules sample | Verify Epoch UI |
+| [0163](0163-monaco-native-capability-bus-full-forward-migration.md)–[0164](0164-monaco-editor-presentation-projection-and-dock-chrome.md) | In progress | 🟡 Monaco Forward частично | меньше Read целого файла |
+| [0106](0106-hybrid-codebase-index-cascadeide-integration-and-semantic-map.md) | Proposed | 🟡 `codebase_index_*` in-proc | полная интеграция DAL/CCU |
+| **P1.1** compactor tier split | этот ADR | 🔴 summary на той же FM | отдельная модель compactor |
+| **P1.2** topic fork brief | этот ADR | 🟢 composer template on `/topic create` | structured session tree UI |
+| **P2.3** harness telemetry | этот ADR | 🟢 `ide_agent_status` + minimized block | — |
+
+**Практика:** interim harness = **overlay + Cursor hooks + agent obligation** (`read_hot_context`, checkpoint); не ждать, пока все строки таблицы станут 🟢.
+
 ### P0 — daily driver для модели
 
 | # | Deliverable | Критерий готовности |
 |---|-------------|---------------------|
-| P0.1 | **Harness preset** + idempotent setup (`Setup-CideHarness.ps1` или wizard) | Cloud.ru smoke + `mcp.json` + mode «CASA/Neumann T1» + compactor on; **AgentNotesRuntime init + L0 hot on session start** ([0118](0118-agent-notes-core-2-toml-and-knowledge-path.md)) |
-| P0.2 | **Hook parity** (turn count + preCompact) | Поведение ≥ Cursor `session_checkpoint_pressure` для видимости оператору |
-| P0.3 | **Loopback MCP** MVP ([0082](0082-acp-ide-mcp-loopback-single-process.md)) | open file, diagnostics scope, verify trigger без второго exe |
-| P0.4 | **Verify Epoch default** после C# edits | Агент обучается: green = epoch на текущем snapshot |
+| P0.1 | **Harness preset (политика)** + setup | **Interim:** `Setup-CideHarness.ps1` + overlay + **`[agent.harness]`** L0 hot on session/topic. **Product (post-Aug):** wizard «CASA/Neumann T1». *Не* «установить MCP bundle» — in-proc §1.6. |
+| P0.2 | **Hook parity** (turn count + preCompact) | **Done interim:** @40 user turns + @60 msgs/topic + agent inject в MAF |
+| P0.3 | **Loopback MCP** MVP ([0082](0082-acp-ide-mcp-loopback-single-process.md)) | **Interim:** suppress ACP stdio + MCP smoke doc. **Остаётся:** loopback HTTP |
+| P0.4 | **Verify Epoch default** после C# edits | auto-verify + stale/telemetry в context + MAF rules sample |
 
 ### P1 — token economics
 
 | # | Deliverable | Критерий |
 |---|-------------|----------|
 | P1.1 | Compactor на отдельной модели | Summary не на том же coder FM |
-| P1.2 | Structured session tree | parent/child topics + brief template на fork |
+| P1.2 | Structured session tree | **Interim:** brief template в composer на fork |
 | P1.3 | HTTP MCP для notes/forge ([0165](0165-mcp-transport-stratification-stdio-http-and-host-matrix.md) Phase 2–3) | Те же тулы, другой transport |
 
 ### P2 — shared reality человек ↔ модель
@@ -332,7 +408,7 @@ Transport stratification — [0165](0165-mcp-transport-stratification-stdio-http
 |---|-------------|----------|
 | P2.1 | Monaco Forward stable ([0163](0163-monaco-native-capability-bus-full-forward-migration.md)–[0164](0164-monaco-editor-presentation-projection-and-dock-chrome.md)) | hover/nav/semantic без Read целого файла |
 | P2.2 | Debug MCP parity | attach/continue/stop без taskkill |
-| P2.3 | **Harness telemetry** в agent context | turn count, active verify task, stale flag |
+| P2.3 | **Harness telemetry** в agent context | **Interim:** `ide_agent_status` harness_* + stale flag |
 
 ---
 
@@ -376,7 +452,7 @@ Transport stratification — [0165](0165-mcp-transport-stratification-stdio-http
 ### Отрицательные / риски
 
 - Hook parity — product work (1–2 дня), не только rules.
-- Два harness (Cursor до ~Aug 2025, CIDE после) — временный dual maintenance.
+- Два harness (Cursor до ~Aug **2026**, CIDE после) — временный dual maintenance.
 - Compactor без checkpoint **опасен** — внедрять только с lifecycle.
 
 ### Не в scope
@@ -392,9 +468,9 @@ Transport stratification — [0165](0165-mcp-transport-stratification-stdio-http
 | Фаза | Содержание | Статус |
 |------|------------|--------|
 | **H0** | Cloud.ru key + `settings.toml` + smoke | 🔶 оператор |
-| **H1** | MCP bundle + preset T1 + agent rules fallback | 🔶 |
+| **H1** | **Политика T1** (FM, agent_notes TOML, topics, rules) + опц. external roslyn/python | 🔶 in-proc §1.6; не ждать UI preset |
 | **H2** | CIDE hook parity | 🔴 product gap |
-| **H3** | Loopback MCP MVP | 🔴 [0082](0082-acp-ide-mcp-loopback-single-process.md) |
+| **H3** | Loopback MCP (wire only) | 🔴 [0082](0082-acp-ide-mcp-loopback-single-process.md) — не duplicate MCP install |
 | **H4** | Verify Epoch habit + AEE defaults | 🟡 [0148](0148-agent-execution-environment-verification-ladder-and-native-tooling.md) in progress |
 | **H5** | Compactor tier split + HTTP MCP notes | 🔶 [0165](0165-mcp-transport-stratification-stdio-http-and-host-matrix.md) |
 
@@ -407,3 +483,5 @@ Transport stratification — [0165](0165-mcp-transport-stratification-stdio-http
 | 2026-06-25 | Proposed: agent-centric harness, five planes, P0–P2, co-design с оператором |
 | 2026-06-25 | §2: stakeholder «ничего о нас без нас», процесс, checklist §2.4 |
 | 2026-06-25 | §1.3–1.6: overlay vs Cursor product; L0/colleague criterion; Junior curve; CIDE in-proc KB [0118] |
+| 2026-06-28 | §1.6 in-proc tool surface; §2.2 co-design границы; §5.1 interim T1; §5.2 ADR vs код; P0.1/P0.3 уточнены |
+| 2026-06-28 | **Product interim:** `[agent.harness]` — L0 hot, checkpoint @40, auto-verify, suppress ACP stdio; §5.2 обновлён |

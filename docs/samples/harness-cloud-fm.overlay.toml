@@ -1,0 +1,12 @@
+# Опционально: Cloud.ru FM (отдельно от harness policy).
+# Merge поверх harness-neumann-t1 или вручную в settings.toml + ai-keys.toml (ADR 0028).
+
+[ai]
+mode = "cloud"
+
+[ai.cloud]
+active_provider = "openai"
+
+[ai.cloud.openai]
+base_url = "https://foundation-models.api.cloud.ru/v1"
+model = "Qwen/Qwen3-Coder-Next"

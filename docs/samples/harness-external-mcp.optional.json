@@ -1,0 +1,14 @@
+[
+  {
+    "name": "roslyn",
+    "command": "D:\\Experiments\\PersonalCursorFolder\\Financial\\software\\open\\roslyn-mcp\\bin\\Debug\\net10.0\\RoslynMcp.exe",
+    "arguments": [],
+    "enabled": true
+  },
+  {
+    "name": "python",
+    "command": "D:\\Experiments\\PersonalCursorFolder\\Financial\\software\\open\\python-mcp\\bin\\Debug\\net10.0\\PythonMcp.exe",
+    "arguments": [],
+    "enabled": true
+  }
+]
