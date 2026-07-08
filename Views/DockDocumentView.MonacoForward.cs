@@ -38,6 +38,8 @@ public partial class DockDocumentView
         _monacoHost.Inbound += OnMonacoInbound;
         _monacoHost.HostShortcutRequested -= OnMonacoHostShortcutRequested;
         _monacoHost.HostShortcutRequested += OnMonacoHostShortcutRequested;
+        _monacoHost.HostAttachDragCompleted -= OnMonacoHostAttachDragCompleted;
+        _monacoHost.HostAttachDragCompleted += OnMonacoHostAttachDragCompleted;
 
         _editorSurface = new MonacoWebViewSurfaceAdapter(_monacoHost.Session, _docVm.Doc.FilePath);
         _documentHudLayer.ConfigureDiagnostics(p => _vm!.WorkspaceDiagnostics.GetStripsForFile(p));
@@ -142,6 +144,7 @@ public partial class DockDocumentView
             _monacoHost.Ready -= OnMonacoHostReady;
             _monacoHost.Inbound -= OnMonacoInbound;
             _monacoHost.HostShortcutRequested -= OnMonacoHostShortcutRequested;
+            _monacoHost.HostAttachDragCompleted -= OnMonacoHostAttachDragCompleted;
         }
 
         if (_vm?.WorkspaceDiagnostics is not null && _monacoDiagHandler is not null)
@@ -192,6 +195,14 @@ public partial class DockDocumentView
             return;
 
         MainWindowHotkeyService.TryExecuteEditorHostShortcut(tomlKey, _vm);
+    }
+
+    private void OnMonacoHostAttachDragCompleted(object? sender, HostAttachDragCompleteEventArgs e)
+    {
+        if (_vm is null)
+            return;
+
+        _ = _vm.TryCompleteIntercomAttachDragAtScreen(e.ScreenX, e.ScreenY, e.Kind);
     }
 
     private void OnMonacoInbound(object? sender, CideEditorInboundMessage msg)

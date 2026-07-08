@@ -98,6 +98,56 @@ public static class IntercomAttachmentResolveAtSend
         return finalize(anchor, workspaceRoot, solutionPath, null, false, false, out anchor, out error);
     }
 
+    /// <summary>ADR 0128 affordance: Roslyn/LSP diagnostic @ caret → text-range chip.</summary>
+    public static bool TryResolveDiagnosticAtCaret(
+        in EditorSnapshot editor,
+        IReadOnlyList<EditorDiagnosticStrip> strips,
+        string? workspaceRoot,
+        string? solutionPath,
+        out AttachmentAnchor anchor,
+        out string error)
+    {
+        anchor = new AttachmentAnchor();
+        error = "";
+
+        if (string.IsNullOrWhiteSpace(editor.CurrentFilePath))
+        {
+            error = "Нет активного файла в редакторе.";
+            return false;
+        }
+
+        var text = editor.EditorText ?? "";
+        var caret = editor.CaretOffset ?? editor.SelectionStart ?? 0;
+        caret = Math.Clamp(caret, 0, text.Length);
+        var (line1, col1) = WorkspaceNavigationMapOrchestrator.ComputeLineColumn(text, caret);
+        var hit = WorkspaceDiagnosticsCoordinator.HitTestForToolTip(strips, caret, line1, col1, text);
+        if (hit is null)
+        {
+            error = "Под кареткой нет диагностики — поставь курсор на squiggle или выбери строку в Problems.";
+            return false;
+        }
+
+        var lineEnd = hit.Length > 0
+            ? WorkspaceNavigationMapOrchestrator.ComputeLineColumn(
+                text,
+                Math.Clamp(hit.Start + hit.Length - 1, 0, Math.Max(0, text.Length - 1))).line
+            : hit.Line1;
+
+        var rel = AttachmentAnchorPaths.ToWorkspaceRelative(editor.CurrentFilePath, workspaceRoot)
+            ?? editor.CurrentFilePath;
+        var fileName = Path.GetFileName(rel);
+        anchor = new AttachmentAnchor
+        {
+            AttachmentShape = "text-range",
+            File = rel.Replace('\\', '/'),
+            LineStart = hit.Line1,
+            LineEnd = lineEnd,
+            DisplayLabel = $"{fileName}:{hit.Line1} {hit.Id}",
+        };
+
+        return finalize(anchor, workspaceRoot, solutionPath, null, false, false, out anchor, out error);
+    }
+
     public static bool TryResolveFile(
         string pathArg,
         int? lineStart,

@@ -49,6 +49,9 @@
 - Примеры: `[M:Run]` · `[Foo.cs M:Bar]` · `[M:Run S:for:1]` · `[F:src/X.cs; M:Y; L:10-20]`
 - Autocomplete: набери `[` — подсказки по осям; Tab/Enter — вставить; Esc — закрыть.
 - `/intercom attach selection` · `/intercom attach scope` · `/intercom attach file <path> [start] [end]`
+- Хоткеи: **Ctrl+Shift+U** — selection · **Ctrl+Shift+Alt+U** — scope · **Ctrl+Shift+D** — диагностика @ caret
+- **Alt+drag** выделения из редактора → отпустить над composer (chip)
+- **Drag** строки из Problems → composer; ПКМ — «Прикрепить к Intercom»
 - Маркеры `⟦a:…⟧` в черновике — chip; клик в ленте → reveal в редакторе.
 
 ## Локальный intercom-service и team transport (ADR 0147)

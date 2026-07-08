@@ -26,19 +26,28 @@ public sealed record ProblemListItem(
 public sealed partial class ProblemsPanelViewModel : ObservableObject
 {
     private readonly Action<ProblemListItem> _navigate;
+    private readonly Action<ProblemListItem>? _attachToIntercom;
 
     public ObservableCollection<ProblemListItem> Items { get; } = new();
 
     public IRelayCommand<ProblemListItem?> NavigateCommand { get; }
 
-    public ProblemsPanelViewModel(Action<ProblemListItem> navigate)
+    public IRelayCommand<ProblemListItem?> AttachToIntercomCommand { get; }
+
+    public ProblemsPanelViewModel(Action<ProblemListItem> navigate, Action<ProblemListItem>? attachToIntercom = null)
     {
         _navigate = navigate;
+        _attachToIntercom = attachToIntercom;
         NavigateCommand = new RelayCommand<ProblemListItem?>(item =>
         {
             if (item is not null)
                 _navigate(item);
         });
+        AttachToIntercomCommand = new RelayCommand<ProblemListItem?>(item =>
+        {
+            if (item is not null)
+                _attachToIntercom?.Invoke(item);
+        }, item => item is not null && _attachToIntercom is not null);
     }
 
     internal void ReplaceItems(IReadOnlyList<ProblemListItem> rows)

@@ -7,6 +7,9 @@ public static partial class IdeCommandRegistry
 {
     private static void RegisterChatPalette(ImmutableArray<IdeCommandRegistryEntry>.Builder b)
     {
+        AddPalette(b, "intercom_attach_selection", IdeCommands.IntercomAttachSelection, "Intercom: прикрепить выделение", "Intercom");
+        AddPalette(b, "intercom_attach_scope", IdeCommands.IntercomAttachScope, "Intercom: прикрепить scope @ caret", "Intercom");
+        AddPalette(b, "intercom_attach_diagnostic", IdeCommands.IntercomAttachDiagnostic, "Intercom: прикрепить диагностику @ caret", "Intercom");
         AddPalette(b, "chat_select_prev_message", IdeCommands.ChatSelectPrevMessage, "Чат: выбрать предыдущее сообщение", "Чат");
         AddPalette(b, "chat_select_next_message", IdeCommands.ChatSelectNextMessage, "Чат: выбрать следующее сообщение", "Чат");
         AddPalette(b, "chat_select_prev_thread", IdeCommands.ChatSelectPrevThread, "Чат: выбрать предыдущую тему", "Чат");

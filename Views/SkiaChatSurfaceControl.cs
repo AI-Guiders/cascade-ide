@@ -275,6 +275,7 @@ public partial class SkiaChatSurfaceControl : Control
         AddHandler(PointerWheelChangedEvent, OnPointerWheelChanged, RoutingStrategies.Bubble);
         AddHandler(KeyDownEvent, OnKeyDown, RoutingStrategies.Bubble);
         InitializeIntercomComposer();
+        InitializeIntercomAttachDrop();
     }
 
     protected override void OnAttachedToVisualTree(VisualTreeAttachmentEventArgs e)

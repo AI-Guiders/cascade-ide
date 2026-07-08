@@ -189,10 +189,11 @@ public partial class MainWindowViewModel
         InstrumentationPanel.PropertyChanged += OnInstrumentationPanelPropertyChanged;
         HypothesesPanel = new HypothesesPanelViewModel(GetWorkspacePath);
 
-        ProblemsPanel = new ProblemsPanelViewModel(NavigateToProblemFromList);
+        ProblemsPanel = new ProblemsPanelViewModel(NavigateToProblemFromList, AttachSelectedProblemToIntercom);
         _workspaceDiagnostics = new Services.WorkspaceDiagnosticsCoordinator(_csharpLanguageService, ProblemsPanel);
         _workspaceDiagnostics.Attach(this);
         _workspaceDiagnostics.DiagnosticsChanged += OnWorkspaceDiagnosticsChangedForHud;
+        WireIntercomAttachAffordances();
         MarkdownPreviewTool = new MarkdownPreviewToolViewModel();
         MarkdownPreviewTool.AttachToEditor(this);
         StartMagicLinkListener();

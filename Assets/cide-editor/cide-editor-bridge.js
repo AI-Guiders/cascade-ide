@@ -81,6 +81,12 @@
     root.addEventListener(
       'keydown',
       (e) => {
+        if (e.ctrlKey && e.shiftKey && !e.altKey && !e.metaKey && (e.key === 'u' || e.key === 'U')) {
+          e.preventDefault();
+          e.stopImmediatePropagation();
+          postToHost({ type: 'host/shortcut', id: 'intercom_attach_selection' });
+          return;
+        }
         if (!e.ctrlKey || e.altKey || e.metaKey || e.shiftKey) return;
         if (e.key !== 'p' && e.key !== 'P') return;
         e.preventDefault();
@@ -91,7 +97,37 @@
     );
   }
 
+  let attachDragActive = false;
+
+  function installAttachDragToIntercom() {
+    root.addEventListener(
+      'mousedown',
+      (e) => {
+        if (!editor || !e.altKey || e.button !== 0) return;
+        const sel = editor.getSelection();
+        if (!sel || sel.isEmpty()) return;
+        attachDragActive = true;
+      },
+      true,
+    );
+    root.addEventListener(
+      'mouseup',
+      (e) => {
+        if (!attachDragActive) return;
+        attachDragActive = false;
+        postToHost({
+          type: 'host/attach-drag-complete',
+          kind: 'selection',
+          screenX: e.screenX,
+          screenY: e.screenY,
+        });
+      },
+      true,
+    );
+  }
+
   installHostShortcutCapture();
+  installAttachDragToIntercom();
 
   function offsetFromPosition(model, lineNumber, column) {
     return model.getOffsetAt({ lineNumber, column });

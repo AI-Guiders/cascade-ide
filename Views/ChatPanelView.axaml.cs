@@ -7,6 +7,7 @@ using Avalonia.Layout;
 using Avalonia.Media;
 using Avalonia.Interactivity;
 using Avalonia.Threading;
+using Avalonia.VisualTree;
 using CascadeIDE.Features.Chat;
 using CascadeIDE.Models;
 using CascadeIDE.Views.Chat;
@@ -178,6 +179,15 @@ public partial class ChatPanelView : UserControl
 
         surface.TopicRenameRequested += (_, e) =>
             _ = HandleTopicRenameRequestAsync(surface, e);
+
+        surface.IntercomAttachDropped += (_, e) =>
+        {
+            if (DataContext is not ChatPanelViewModel vm)
+                return;
+
+            vm.ClarificationStatusText = vm.ApplyAttachDropPayload(e.Payload);
+            surface.Focus();
+        };
 
         surface.ComposerKeyDown += (_, e) =>
         {
@@ -379,5 +389,21 @@ public partial class ChatPanelView : UserControl
         };
         menu.Items.Add(item);
         menu.Open(surface);
+    }
+
+    internal bool TryHitComposerAt(Point windowLocalPoint)
+    {
+        if (TopLevel.GetTopLevel(this) is not Visual window)
+            return false;
+
+        var chatPt = this.TranslatePoint(windowLocalPoint, window);
+        if (chatPt is null)
+            return false;
+
+        var surfacePt = IntercomSkiaSurface.TranslatePoint(chatPt.Value, this);
+        if (surfacePt is null)
+            return false;
+
+        return IntercomSkiaSurface.TryHitComposerBounds((float)surfacePt.Value.X, (float)surfacePt.Value.Y);
     }
 }

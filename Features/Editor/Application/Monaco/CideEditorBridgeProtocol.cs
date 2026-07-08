@@ -29,6 +29,9 @@ public static class CideEditorBridgeTypes
     /// <summary>Editor → host: tunnel hotkey from WebView2 (Ctrl+P etc.).</summary>
     public const string HostShortcut = "host/shortcut";
 
+    /// <summary>Alt+drag selection released — drop target hit-test on host (Intercom composer).</summary>
+    public const string HostAttachDragComplete = "host/attach-drag-complete";
+
     public const string RequestCompletion = "editor/requestCompletion";
     public const string CompletionResult = "editor/completionResult";
     public const string RequestHover = "editor/requestHover";

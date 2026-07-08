@@ -10,3 +10,8 @@ focus_solution_explorer_filter = "Ctrl+Oem1"
 
 # ADR 0060: корень аккорда (вторая клавиша — без Ctrl/Alt), затем тот же хвост мелодии, что после c:
 cascade_chord = "Ctrl+K"
+
+# Intercom attach affordances (ADR 0128 H0/H0b)
+intercom_attach_selection = "Ctrl+Shift+U"
+intercom_attach_scope = "Ctrl+Shift+Alt+U"
+intercom_attach_diagnostic = "Ctrl+Shift+D"

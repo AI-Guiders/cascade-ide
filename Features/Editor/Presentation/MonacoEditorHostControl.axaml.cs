@@ -2,6 +2,7 @@ using System.Text.Json;
 using Avalonia.Controls;
 using Avalonia.Threading;
 using CascadeIDE.Features.Editor.Application.Monaco;
+using CascadeIDE.Services.Intercom;
 
 namespace CascadeIDE.Features.Editor.Presentation;
 
@@ -18,6 +19,8 @@ public partial class MonacoEditorHostControl : UserControl, ICideEditorCapabilit
     public event EventHandler? Ready;
     public event EventHandler<CideEditorInboundMessage>? Inbound;
     public event EventHandler<string>? HostShortcutRequested;
+
+    public event EventHandler<HostAttachDragCompleteEventArgs>? HostAttachDragCompleted;
 
     public bool IsReady => _ready;
 
@@ -73,6 +76,9 @@ public partial class MonacoEditorHostControl : UserControl, ICideEditorCapabilit
 
     private void OnWebMessageReceived(object? sender, WebMessageReceivedEventArgs e)
     {
+        if (TryHandleHostAttachDragComplete(e.Body))
+            return;
+
         var msg = CideEditorBridgeJson.TryParseInbound(e.Body);
         if (msg is null)
             return;
@@ -506,4 +512,45 @@ public partial class MonacoEditorHostControl : UserControl, ICideEditorCapabilit
                      + "));";
         await _webView.InvokeScript(script).ConfigureAwait(true);
     }
+
+    private bool TryHandleHostAttachDragComplete(string? body)
+    {
+        if (string.IsNullOrWhiteSpace(body))
+            return false;
+
+        try
+        {
+            using var doc = JsonDocument.Parse(body);
+            var root = doc.RootElement;
+            if (!root.TryGetProperty("type", out var typeEl)
+                || !string.Equals(typeEl.GetString(), CideEditorBridgeTypes.HostAttachDragComplete, StringComparison.Ordinal))
+            {
+                return false;
+            }
+
+            var kind = root.TryGetProperty("kind", out var kindEl) && kindEl.ValueKind == JsonValueKind.String
+                ? kindEl.GetString()
+                : IntercomAttachDragFormats.KindSelection;
+            var screenX = root.TryGetProperty("screenX", out var xEl) && xEl.TryGetDouble(out var x) ? x : 0;
+            var screenY = root.TryGetProperty("screenY", out var yEl) && yEl.TryGetDouble(out var y) ? y : 0;
+            Dispatcher.UIThread.Post(() =>
+                HostAttachDragCompleted?.Invoke(
+                    this,
+                    new HostAttachDragCompleteEventArgs(kind ?? IntercomAttachDragFormats.KindSelection, screenX, screenY)));
+            return true;
+        }
+        catch
+        {
+            return false;
+        }
+    }
+}
+
+public sealed class HostAttachDragCompleteEventArgs(string kind, double screenX, double screenY) : EventArgs
+{
+    public string Kind { get; } = kind;
+
+    public double ScreenX { get; } = screenX;
+
+    public double ScreenY { get; } = screenY;
 }

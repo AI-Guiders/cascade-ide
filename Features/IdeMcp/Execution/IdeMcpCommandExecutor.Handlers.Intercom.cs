@@ -29,6 +29,15 @@ internal sealed partial class IdeMcpCommandExecutor
                 solutionPath));
         });
 
+        add(Services.IdeCommands.IntercomAttachSelection, async (_, _) =>
+            await Task.FromResult(_vm.ChatPanel.AttachSelectionToComposer()).ConfigureAwait(false));
+
+        add(Services.IdeCommands.IntercomAttachScope, async (_, _) =>
+            await Task.FromResult(_vm.ChatPanel.AttachScopeToComposer()).ConfigureAwait(false));
+
+        add(Services.IdeCommands.IntercomAttachDiagnostic, async (_, _) =>
+            await Task.FromResult(_vm.ChatPanel.AttachDiagnosticAtCaretToComposer()).ConfigureAwait(false));
+
         add(Services.IdeCommands.EditorSelectCode, ExecuteEditorCodeRefNavigation(select: true));
         add(Services.IdeCommands.EditorRevealCode, ExecuteEditorCodeRefNavigation(select: false));
 

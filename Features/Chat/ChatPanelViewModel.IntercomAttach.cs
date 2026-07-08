@@ -5,12 +5,16 @@ using CascadeIDE.Features.Workspace.Application;
 using CascadeIDE.Models.Intercom;
 using CascadeIDE.Services;
 using CascadeIDE.Services.Intercom;
+using CascadeIDE.ViewModels;
 using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace CascadeIDE.Features.Chat;
 
 public partial class ChatPanelViewModel
 {
+    private Func<IReadOnlyList<EditorDiagnosticStrip>>? _getDiagnosticStripsForCurrentFile;
+    private Action? _focusIntercomComposer;
+
     private readonly Dictionary<string, AttachmentAnchor> _pendingAttachDrafts = new(StringComparer.OrdinalIgnoreCase);
 
     [ObservableProperty]
@@ -22,6 +26,120 @@ public partial class ChatPanelViewModel
     public static bool IsComposerAttachSlash(string? slashPath) =>
         !string.IsNullOrWhiteSpace(slashPath)
         && slashPath.StartsWith("/attach", StringComparison.OrdinalIgnoreCase);
+
+    public void SetDiagnosticStripsAccessor(Func<IReadOnlyList<EditorDiagnosticStrip>>? getStripsForCurrentFile) =>
+        _getDiagnosticStripsForCurrentFile = getStripsForCurrentFile;
+
+    public void SetFocusIntercomComposerAction(Action? focusComposer) =>
+        _focusIntercomComposer = focusComposer;
+
+    public string AttachSelectionToComposer() =>
+        runAttachAffordance(ChatSlashIntercomHandlers.Ids.AttachSelection);
+
+    public string AttachScopeToComposer() =>
+        runAttachAffordance(ChatSlashIntercomHandlers.Ids.AttachScope);
+
+    public string AttachDiagnosticAtCaretToComposer()
+    {
+        var editor = BuildAttachEditorSnapshot();
+        var workspace = ResolveAttachWorkspaceRoot();
+        var solution = ResolveAttachSolutionPath();
+        var strips = _getDiagnosticStripsForCurrentFile?.Invoke() ?? Array.Empty<EditorDiagnosticStrip>();
+        if (!IntercomAttachmentResolveAtSend.TryResolveDiagnosticAtCaret(
+                editor,
+                strips,
+                workspace,
+                solution,
+                out var draft,
+                out var error))
+        {
+            return error;
+        }
+
+        return completeAttachAffordance(draft);
+    }
+
+    public string AttachProblemToComposer(ProblemListItem problem)
+    {
+        if (problem is null)
+            return "Нет выбранной диагностики.";
+
+        var workspace = ResolveAttachWorkspaceRoot();
+        var solution = ResolveAttachSolutionPath();
+        if (!IntercomAttachmentResolveAtSend.TryResolveFile(
+                problem.FilePath,
+                problem.Line,
+                problem.Line,
+                workspace,
+                solution,
+                out var draft,
+                out var error))
+        {
+            return error;
+        }
+
+        draft = draft with
+        {
+            DisplayLabel = $"{problem.FileName}:{problem.Line} {problem.Id}",
+        };
+        return completeAttachAffordance(draft);
+    }
+
+    public string AttachDragKindToComposer(string kind) => kind switch
+    {
+        IntercomAttachDragFormats.KindSelection => AttachSelectionToComposer(),
+        IntercomAttachDragFormats.KindScope => AttachScopeToComposer(),
+        _ => $"Неизвестный attach: {kind}",
+    };
+
+    public string ApplyAttachDropPayload(string payload)
+    {
+        if (payload.StartsWith(IntercomAttachDragFormats.TextPrefix, StringComparison.Ordinal))
+            payload = payload[IntercomAttachDragFormats.TextPrefix.Length..];
+
+        if (payload.StartsWith('{'))
+        {
+            try
+            {
+                using var doc = JsonDocument.Parse(payload);
+                var root = doc.RootElement;
+                var kind = root.TryGetProperty("kind", out var kindEl) && kindEl.ValueKind == JsonValueKind.String
+                    ? kindEl.GetString()
+                    : null;
+                if (string.Equals(kind, IntercomAttachDragFormats.KindProblem, StringComparison.OrdinalIgnoreCase)
+                    && root.TryGetProperty("filePath", out var pathEl)
+                    && pathEl.ValueKind == JsonValueKind.String
+                    && root.TryGetProperty("line", out var lineEl)
+                    && lineEl.TryGetInt32(out var line))
+                {
+                    var id = root.TryGetProperty("id", out var idEl) && idEl.ValueKind == JsonValueKind.String
+                        ? idEl.GetString() ?? ""
+                        : "";
+                    var severity = root.TryGetProperty("severity", out var sevEl) && sevEl.ValueKind == JsonValueKind.String
+                        ? sevEl.GetString() ?? "error"
+                        : "error";
+                    var msg = root.TryGetProperty("message", out var msgEl) && msgEl.ValueKind == JsonValueKind.String
+                        ? msgEl.GetString() ?? ""
+                        : "";
+                    return AttachProblemToComposer(new ProblemListItem(
+                        pathEl.GetString()!,
+                        line,
+                        1,
+                        severity,
+                        id,
+                        msg));
+                }
+
+                return AttachDragKindToComposer(kind ?? "");
+            }
+            catch
+            {
+                return AttachDragKindToComposer(payload);
+            }
+        }
+
+        return AttachDragKindToComposer(payload);
+    }
 
     public ChatSlashIntercomResult TryExecuteAttachSlash(string handlerId, string? argsTail)
     {
@@ -50,6 +168,31 @@ public partial class ChatPanelViewModel
         }
 
         return insertPendingAttach(draft);
+    }
+
+    private string runAttachAffordance(string handlerId)
+    {
+        var result = TryExecuteAttachSlash(handlerId, null);
+        if (!result.Success)
+            return result.Message;
+
+        return completeAttachAffordanceMessage(result.Message);
+    }
+
+    private string completeAttachAffordance(AttachmentAnchor draft)
+    {
+        var result = insertPendingAttach(draft);
+        return result.Success
+            ? completeAttachAffordanceMessage(result.Message)
+            : result.Message;
+    }
+
+    private string completeAttachAffordanceMessage(string? detail)
+    {
+        _focusIntercomComposer?.Invoke();
+        if (!string.IsNullOrWhiteSpace(detail))
+            ClarificationStatusText = detail;
+        return detail ?? "OK";
     }
 
     private ChatSlashIntercomResult insertPendingAttach(AttachmentAnchor draft)

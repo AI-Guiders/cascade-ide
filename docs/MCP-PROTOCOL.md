@@ -303,6 +303,9 @@
 | `editor.reveal_code` | Reveal в редакторе по bracket-ссылке (ADR 0131). args: code_ref:string, active_file?:string, duration_ms?:integer; returns: text; example: {"code_ref":"[M:Run]","active_file":"src/Foo.cs","duration_ms":4000}. |
 | `editor.select_code` | Select в редакторе по bracket-ссылке (ADR 0131). args: code_ref:string, active_file?:string, duration_ms?:integer; returns: text; example: {"code_ref":"[M:Run]","active_file":"src/Foo.cs"}. |
 | `intercom.agent_provision` | Provision agent account. args: display_name:string; returns: text; example: {"display_name":"Nova"}. |
+| `intercom.attach_diagnostic` | Прикрепить диагностику @ caret к черновику. returns: text. |
+| `intercom.attach_scope` | Прикрепить syntax scope @ caret к черновику (ADR 0128 H0b). returns: text. |
+| `intercom.attach_selection` | Прикрепить выделение редактора к черновику Intercom (ADR 0128 H0). returns: text. |
 | `intercom.connect_team` | OAuth Connect к team Intercom service (ADR 0144). returns: text. |
 | `intercom.disconnect_team` | Disconnect team transport и очистка JWT. returns: text. |
 | `intercom.message_relate` | Явная связь диапазона gutter-сообщений с кодом (ADR 0137). args: start_ordinal:integer, end_ordinal?:integer, use_selection?:boolean, code_ref?:string, anchor_json?:object, file?:string, line_start?:integer, line_end?:integer; returns: json; example: {"start_ordinal":3,"end_ordinal":5,"use_selection":true}. |

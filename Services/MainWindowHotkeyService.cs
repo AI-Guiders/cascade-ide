@@ -152,12 +152,25 @@ public static class MainWindowHotkeyService
         if (string.IsNullOrWhiteSpace(tomlKey))
             return false;
 
-        if (!IdeCommandRegistry.WindowHotkeyByTomlKey.TryGetValue(tomlKey, out var entry)
-            || entry.WindowHotkey is not { } windowHotkey)
-            return false;
+        if (IdeCommandRegistry.WindowHotkeyByTomlKey.TryGetValue(tomlKey, out var windowEntry)
+            && windowEntry.WindowHotkey is { } windowHotkey)
+        {
+            var fake = new KeyEventArgs { RoutedEvent = InputElement.KeyDownEvent, Key = Key.None };
+            return ExecuteWindowHotkeyBinding(fake, vm, tomlKey, windowHotkey);
+        }
 
-        var fake = new KeyEventArgs { RoutedEvent = InputElement.KeyDownEvent, Key = Key.None };
-        return ExecuteWindowHotkeyBinding(fake, vm, tomlKey, windowHotkey);
+        foreach (var entry in IdeCommandRegistry.AllEntries)
+        {
+            if (!string.Equals(entry.EffectiveHotkeysTomlKey, tomlKey, StringComparison.OrdinalIgnoreCase))
+                continue;
+            if (string.IsNullOrWhiteSpace(entry.CommandId))
+                return false;
+
+            ExecuteRegistryCommandAsync(vm, entry.CommandId, IdeCommandRegistry.ParseArgs(entry.ArgsJson));
+            return true;
+        }
+
+        return false;
     }
 
     /// <summary>

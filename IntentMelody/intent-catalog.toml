@@ -172,6 +172,11 @@ arg_tail = "required"
 
 # attach_selection — прикрепить выделение в редакторе (ADR 0128)
 [[command]]
+command_id = "intercom.attach_selection"
+melody_slug = "ias"
+melody_shape = "simple"
+melody_palette_usage_hint = "c:ias — прикрепить выделение в Intercom composer"
+melody_palette_usage_category = "Intercom -> Attach"
 
 [[command.slash]]
 path = "/intercom attach selection"
@@ -186,6 +191,11 @@ arg_tail = "none"
 
 # attach_scope — syntax scope @ caret (ADR 0128 H0b)
 [[command]]
+command_id = "intercom.attach_scope"
+melody_slug = "isc"
+melody_shape = "simple"
+melody_palette_usage_hint = "c:isc — прикрепить syntax scope @ caret"
+melody_palette_usage_category = "Intercom -> Attach"
 
 [[command.slash]]
 path = "/intercom attach scope"
