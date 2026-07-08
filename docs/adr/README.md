@@ -28,7 +28,7 @@
 | ID | ADR |
 |----|-----|
 | 0010, 0028–0029 | [UI modes](0010-ui-modes-toml-configuration.md) · [settings.toml](0028-user-settings-toml-localappdata-and-secrets.md) · [TOML-first UI](0029-configuration-toml-canonical-ui-facade.md) |
-| 0030, 0040, 0050–0051, 0083, 0086, 0149, 0151 | [команды/хоткеи](0030-command-ids-hotkeys-and-ui-registry-layers.md) · [LSP presets](0040-lsp-launch-line-settings-toml-presets-and-environment.md) · [`*_env`](0149-settings-toml-pointwise-environment-bindings.md) · [CF subgraph grain](0151-control-flow-subgraph-intent-vs-detailed-grain.md) · [инструменты в TOML](0050-declarative-instrument-zone-placement-toml.md) · [intent routing](0051-intent-based-attention-routing-toml.md) · [`[ai]`](0083-ai-mode-and-nested-settings-toml.md) · [тема UI](0086-ui-theme-toml-canonical-json-mcp-wire.md) |
+| 0030, 0040, 0050–0051, 0083, 0086, 0149, 0151, **0169** | [команды/хоткеи](0030-command-ids-hotkeys-and-ui-registry-layers.md) · [LSP presets](0040-lsp-launch-line-settings-toml-presets-and-environment.md) · [`*_env`](0149-settings-toml-pointwise-environment-bindings.md) · [CF subgraph grain](0151-control-flow-subgraph-intent-vs-detailed-grain.md) · [инструменты в TOML](0050-declarative-instrument-zone-placement-toml.md) · [intent routing](0051-intent-based-attention-routing-toml.md) · [`[ai]`](0083-ai-mode-and-nested-settings-toml.md) · [тема UI](0086-ui-theme-toml-canonical-json-mcp-wire.md) · [**keymap packs**](0169-keymap-contributions-and-pluggable-input-schemes.md) |
 
 ### Кокпит, CDS и вычислительный контур
 
@@ -250,6 +250,8 @@
 | [0166](0166-agent-centric-harness-model-comfort-and-pay-per-token-economics.md) | **Agent-centric harness:** «ничего о нас без нас», L0/colleague criterion, overlay vs Cursor, CIDE in-proc KB [0118], P0–P2 | Proposed |
 | [0167](0167-solution-explorer-ux-go-to-file-and-compact-tree.md) | **Solution Explorer MLP:** VS-grade mechanics, Go to File (Ctrl+P), icon set v2, `WorkspaceFileIndex`; дополняет [0039](0039-workspace-navigation-affordances.md) | Proposed |
 | [0168](0168-presentation-two-screen-pf-m-layout-policy.md) | **2-screen `(P+F)(M)`:** PFD collapsed by default; SE/map на MFD; Ctrl+P; narrow Forward chrome | Proposed |
+| [0169](0169-keymap-contributions-and-pluggable-input-schemes.md) | **Keymap contributions:** плагинные схемы ввода (flat / VS-style chord tree / CascadeChord); `command_id` + `when`; packs P0–P3 | Proposed |
+| [0170](0170-intercom-feed-readability-mlp.md) | **Intercom feed readability MLP:** comfortable default, 14pt prose, метка «Локально», отступы ленты | Proposed · In progress |
 
 ## Сборка в один документ (HTML, TXT, PDF)
 
