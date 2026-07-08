@@ -187,13 +187,5 @@ internal sealed class SkiaChatSlashCommandEntity(
             SKFontStyle.Bold);
         using var metaPaint = new SKPaint { IsAntialias = true, Color = context.Theme.Role };
         context.Canvas.DrawText(_slashPath, column.Left, baselineY, SKTextAlign.Left, metaFont, metaPaint);
-
-        if (!_isLocalSelfOnly)
-            return;
-
-        const string badge = "только ты";
-        using var badgeFont = SkiaChatFeedFontResolver.CreateFont(_layout.ProseFamily, _layout.SlashBadgeFontSize);
-        using var badgePaint = new SKPaint { IsAntialias = true, Color = context.Theme.MutedContent };
-        context.Canvas.DrawText(badge, column.Right - 2f, baselineY - 1f, SKTextAlign.Right, badgeFont, badgePaint);
     }
 }

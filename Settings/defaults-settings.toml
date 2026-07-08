@@ -279,9 +279,9 @@ kroki = true
 kroki_url = "https://kroki.io"
 
 [fonts.intercom]
-prose_pt = 13
-prose_pt_forward = 12
-composer_pt = 15
+prose_pt = 14
+prose_pt_forward = 14
+composer_pt = 16
 command_line_pt = 15
 chrome_title_pt = 14
 chrome_subtitle_pt = 11
@@ -321,7 +321,7 @@ show_conditions = true
 
 [intercom]
 # comfortable | compact
-feed_metrics = "compact"
+feed_metrics = "comfortable"
 # left | right | highlight_only
 tci_validation_icon = "right"
 

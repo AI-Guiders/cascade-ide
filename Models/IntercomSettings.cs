@@ -7,7 +7,7 @@ public sealed class IntercomSettings
     /// Плотность ленты и composer: <c>comfortable</c> (prose_pt, MFD-отступы) или <c>compact</c> (prose_pt_forward + SkiaChatDensity).
     /// TOML: <c>[intercom] feed_metrics</c>.
     /// </summary>
-    public string FeedMetrics { get; set; } = IntercomFeedMetricsModes.Compact;
+    public string FeedMetrics { get; set; } = IntercomFeedMetricsModes.Comfortable;
 
     /// <summary>
     /// Глиф валидации slash в CCL/composer: <c>left</c>, <c>right</c> (по умолчанию), <c>highlight_only</c>.

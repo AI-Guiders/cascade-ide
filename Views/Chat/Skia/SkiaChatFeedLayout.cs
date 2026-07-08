@@ -31,15 +31,15 @@ internal readonly struct SkiaChatFeedLayout
 
     private float Scale { get; }
 
-    public float RoleRailWidth => (ForwardHost ? 48f : 56f) * Scale;
-    public float RoleLabelInset => 4f;
-    public float TextInset => 6f;
-    public float BodyTopPad => 6f;
-    public float SegmentGap => 4f;
-    public float RowEdgePad => 2f;
+    public float RoleRailWidth => (ForwardHost ? 52f : 68f) * Scale;
+    public float RoleLabelInset => 6f;
+    public float TextInset => 8f;
+    public float BodyTopPad => ForwardHost ? 6f : 8f;
+    public float SegmentGap => ForwardHost ? 4f : 6f;
+    public float RowEdgePad => 3f;
 
     public float ProseFontSize { get; }
-    public float ProseLineHeight => (ForwardHost ? 14f : 15f) * Scale;
+    public float ProseLineHeight => (ForwardHost ? 15f : 18f) * Scale;
     public float ProseMeasureWidthTrim => TextInset * 2f;
     public float AttachChipFontSize => 11f * Scale;
 
@@ -51,13 +51,13 @@ internal readonly struct SkiaChatFeedLayout
         + SkiaSlashCommandStatusIconRenderer.IconMargin
         + SlashAccentGap;
 
-    public float SlashMetaFontSize => (ForwardHost ? 10f : 10.5f) * Scale;
+    public float SlashMetaFontSize => (ForwardHost ? 10.5f : 11.5f) * Scale;
     public float SlashArgsFontSize => ProseFontSize;
-    public float SlashMetaLineHeight => (ForwardHost ? 14f : 16f) * Scale;
-    public float SlashArgsLineHeight => (ForwardHost ? 13f : 14f) * Scale;
-    public float SlashBadgeFontSize => 9f * Scale;
+    public float SlashMetaLineHeight => (ForwardHost ? 15f : 17f) * Scale;
+    public float SlashArgsLineHeight => (ForwardHost ? 14f : 16f) * Scale;
+    public float SlashBadgeFontSize => 10.5f * Scale;
 
-    public float RoleLabelFontSize => (ForwardHost ? 9f : 9.5f) * Scale;
+    public float RoleLabelFontSize => (ForwardHost ? 10f : 11f) * Scale;
     public float GutterOrdinalFontSize => 10f * Scale;
 
     private SkiaChatFeedLayout(bool forwardHost, IntercomFontsSettings fonts)

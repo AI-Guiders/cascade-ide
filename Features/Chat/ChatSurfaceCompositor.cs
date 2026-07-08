@@ -370,7 +370,7 @@ public sealed class ChatSurfaceLayoutStage : IChatSurfaceLayoutStage
         if (!string.IsNullOrWhiteSpace(message.SlashCommandPath))
         {
             return message.Audience == IntercomMessageAudience.SelfOnly
-                ? "Система"
+                ? "Локально"
                 : "Команда";
         }
 
@@ -386,7 +386,7 @@ public sealed class ChatSurfaceLayoutStage : IChatSurfaceLayoutStage
             "thinking" => "Размышление",
             "tool" => "Инструмент",
             "slash_command" => message.Audience == IntercomMessageAudience.SelfOnly
-                ? "Система"
+                ? "Локально"
                 : "Команда",
             _ => message.Role
         };

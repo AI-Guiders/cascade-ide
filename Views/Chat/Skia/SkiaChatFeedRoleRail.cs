@@ -38,7 +38,7 @@ internal static class SkiaChatFeedRoleRail
         using var paint = new SKPaint
         {
             IsAntialias = true,
-            Color = theme.Role.WithAlpha(210),
+            Color = theme.Role.WithAlpha(235),
         };
         var baseline = layout.RoleLabelBaselineY(top);
         var text = TruncateToWidth(roleLabel, font, layout.RoleLabelMaxWidth);

@@ -205,8 +205,8 @@ internal static class ChatSurfaceEntityFactory
                                             or ChatMessageVisualRole.Assistant
                                             or ChatMessageVisualRole.Thinking;
                     var gapAfter = suppressTitle
-                        ? forwardHost ? 2f : 3f
-                        : forwardHost ? 5f : 8f;
+                        ? forwardHost ? 3f : 5f
+                        : forwardHost ? 6f : 14f;
                     entities.Add(MessageEntity(
                         entry,
                         forwardHost,

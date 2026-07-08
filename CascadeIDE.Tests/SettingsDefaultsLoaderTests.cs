@@ -14,7 +14,7 @@ public sealed class SettingsDefaultsLoaderTests
         Assert.Contains("prose_pt = 13", text, StringComparison.Ordinal);
         Assert.Contains("prose_pt_forward = 12", text, StringComparison.Ordinal);
         Assert.Contains("[intercom]", text, StringComparison.Ordinal);
-        Assert.Contains("feed_metrics = \"compact\"", text, StringComparison.Ordinal);
+        Assert.Contains("feed_metrics = \"comfortable\"", text, StringComparison.Ordinal);
     }
 
     [Fact]
