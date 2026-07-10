@@ -35,7 +35,7 @@
 | ID | ADR |
 |----|-----|
 | 0021 | [**PFD/MFD — модель внимания**](0021-pfd-mfd-cockpit-attention-model.md) |
-| 0036, 0046–0047, 0066 | [канал→CDS→surface](0036-cds-channel-compositor-surface-pipeline.md) · [layout authority](0046-presentation-layout-authority-and-cockpit-invariants.md) · [instrument descriptor](0047-cockpit-instrument-descriptor-and-slot-composition.md) · [cockpit vs presentation](0066-cockpit-ui-vs-ide-presentation-layer.md) |
+| 0036, 0046–0047, 0066, **0171** | [канал→CDS→surface](0036-cds-channel-compositor-surface-pipeline.md) · [layout authority](0046-presentation-layout-authority-and-cockpit-invariants.md) · [instrument descriptor](0047-cockpit-instrument-descriptor-and-slot-composition.md) · [cockpit vs presentation](0066-cockpit-ui-vs-ide-presentation-layer.md) · [**compact vs cockpit**](0171-presentation-tiers-compact-vs-cockpit.md) |
 | 0063–0065, 0068, 0097 | [instrument deck](0063-instrument-deck-named-composition-one-anchor.md) · [примитивы deck](0064-deck-primitives-visual-language-render-layer-and-palette.md) · [таксономия](0065-instrument-categories-domain-taxonomy.md) · [payload vs projection](0068-deck-row-payload-and-presentation-projection.md) · [**CCU**](0097-cockpit-compute-units-transport-to-channel-dto.md) |
 | 0094, 0099 | [ingestion bus](0094-ingestion-bus-afdx-analogy-and-threading-channels.md) · [IDE DataBus](0099-ide-databus-typed-events-and-projections.md) |
 
@@ -51,7 +51,7 @@
 
 | ID | ADR |
 |----|-----|
-| 0039, 0053, 0151, 0062, **0167**, **0168** | [workspace navigation](0039-workspace-navigation-affordances.md) · [control flow PFD](0053-semantic-map-control-flow-pfd.md) · [CF subgraph grain](0151-control-flow-subgraph-intent-vs-detailed-grain.md) · [GitMap](0062-git-submodules-semantic-map-subgraph.md) · [**Solution Explorer MLP**](0167-solution-explorer-ux-go-to-file-and-compact-tree.md) · [**2-screen layout**](0168-presentation-two-screen-pf-m-layout-policy.md) |
+| 0039, 0053, 0151, 0062, **0167**, **0168**, **0171** | [workspace navigation](0039-workspace-navigation-affordances.md) · [control flow PFD](0053-semantic-map-control-flow-pfd.md) · [CF subgraph grain](0151-control-flow-subgraph-intent-vs-detailed-grain.md) · [GitMap](0062-git-submodules-semantic-map-subgraph.md) · [**Solution Explorer MLP**](0167-solution-explorer-ux-go-to-file-and-compact-tree.md) · [**2-screen layout**](0168-presentation-two-screen-pf-m-layout-policy.md) · [**presentation tiers**](0171-presentation-tiers-compact-vs-cockpit.md) |
 | 0067, 0113–0115 | [graph-backed contract](0067-graph-backed-surfaces-contract.md) · [HCI orientation](0113-hci-semantic-map-orientation-layer.md) · [`relation_kind`](0114-graph-edge-relation-kind-taxonomy.md) · [CDS graph layer](0115-cds-graph-backed-shared-layer.md) |
 
 ### Превью и документация (Markdown)
@@ -252,6 +252,7 @@
 | [0168](0168-presentation-two-screen-pf-m-layout-policy.md) | **2-screen `(P+F)(M)`:** PFD collapsed by default; SE/map на MFD; Ctrl+P; narrow Forward chrome | Proposed |
 | [0169](0169-keymap-contributions-and-pluggable-input-schemes.md) | **Keymap contributions:** плагинные схемы ввода (flat / VS-style chord tree / CascadeChord); `command_id` + `when`; packs P0–P3 | Proposed |
 | [0170](0170-intercom-feed-readability-mlp.md) | **Intercom feed readability MLP:** comfortable default, 14pt prose, метка «Локально», отступы ленты | Proposed · In progress |
+| [0171](0171-presentation-tiers-compact-vs-cockpit.md) | **Presentation tiers:** Compact (standard IDE) vs Cockpit (3 mon / UltraWide); не впихивать P/F/M на 1–2 экрана | Accepted · Implemented |
 
 ## Сборка в один документ (HTML, TXT, PDF)
 

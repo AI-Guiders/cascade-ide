@@ -5,8 +5,14 @@
 # Env: <field>_env (ADR 0149): executable_env = "PATH" или имя переменной с путём/URL.
 
 # Строка топологии и грамматика якорей (ADR 0017 § display.screens).
+# Tier compact/cockpit — ADR 0171: на 1–2 мониторах обычно compact; cockpit — 3 mon / ultrawide.
 [display.screens]
-topology = "(0.25P + 0.75F) (M)"
+topology = "(F)"
+
+[display.presentation]
+tier = "auto"
+compact_intercom_placement = "side"
+compact_auxiliary_panel_width_px = 380
 
 [display.screens.grammar]
 brackets = "()"
@@ -21,10 +27,10 @@ maximize_hosts_on_dedicated_screens = true
 prefer_repo_instruments = false
 
 [display.pfd]
-open_on_startup = true
+open_on_startup = false
 
 [display.mfd]
-open_on_startup = true
+open_on_startup = false
 
 [display.skia]
 zone_geometry_overlay = false

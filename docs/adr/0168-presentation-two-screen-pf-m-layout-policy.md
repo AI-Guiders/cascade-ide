@@ -27,6 +27,7 @@
 | [0046](0046-presentation-layout-authority-and-cockpit-invariants.md) | `CockpitPresentationLayoutPolicy` |
 | [0163](0163-monaco-native-capability-bus-full-forward-migration.md)–[0164](0164-monaco-editor-presentation-projection-and-dock-chrome.md) | Monaco chrome, dock |
 | [0167](0167-solution-explorer-ux-go-to-file-and-compact-tree.md) | SE MLP, Ctrl+P |
+| [0171](0171-presentation-tiers-compact-vs-cockpit.md) | **Compact vs Cockpit** — на 1–2 mon default = compact, не обязательный P+F split |
 
 ### Вне ADR
 
