@@ -32,6 +32,9 @@ public partial class MainWindowViewModel
     /// </summary>
     private void EnsureMfdShellSurfaceForLayout()
     {
+        if (!IsCockpitPresentationTier)
+            return;
+
         if (PresentationRequestsMfdHostWindow)
             RequestToggleMfdHostWindow?.Invoke();
     }

@@ -28,5 +28,6 @@ public static class MainWindowHostSurfaceProjection
             expandedMfdWidthPixels,
             collapsedMfdWidthPixels,
             host.DisplaySettings,
-            host.SafetyLevel);
+            host.SafetyLevel,
+            host.EffectivePresentationTier);
 }

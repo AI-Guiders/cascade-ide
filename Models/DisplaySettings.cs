@@ -26,4 +26,7 @@ public sealed class DisplaySettings
 
     /// <summary>Топология пресета по экранам (ADR 0017). TOML: <c>[display.screens]</c>.</summary>
     public DisplayScreensSettings Screens { get; set; } = new();
+
+    /// <summary>Compact vs cockpit tier (ADR 0171). TOML: <c>[display.presentation]</c>.</summary>
+    public DisplayPresentationSettings Presentation { get; set; } = new();
 }

@@ -8,7 +8,16 @@
 # Расширенный пример: docs/samples/settings.toml
 
 [display.screens]
-topology = "(F) (M)"
+topology = "(F)"
+
+[display.presentation]
+tier = "auto"
+cockpit_min_total_width_px = 4800
+cockpit_min_anchor_width_px = 1280
+compact_intercom_placement = "side"
+compact_auxiliary_panel_width_px = 380
+ultrawide_cockpit_enabled = true
+tier_first_run_completed = false
 
 [display.screens.grammar]
 brackets = "()"
@@ -23,10 +32,10 @@ maximize_hosts_on_dedicated_screens = true
 prefer_repo_instruments = false
 
 [display.pfd]
-open_on_startup = true
+open_on_startup = false
 
 [display.mfd]
-open_on_startup = true
+open_on_startup = false
 
 [display.skia]
 zone_geometry_overlay = false

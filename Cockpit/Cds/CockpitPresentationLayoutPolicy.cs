@@ -1,3 +1,4 @@
+using CascadeIDE.Models;
 using CascadeIDE.Services.Presentation;
 
 namespace CascadeIDE.Cockpit.Cds;
@@ -12,21 +13,39 @@ public static class CockpitPresentationLayoutPolicy
     /// Для <c>(xP+yM)(F)</c> якоря P/M на экране сплита — в main не требуются (ADR 0017).
     /// </summary>
     public static bool RequiresPfdRegionInMainWindow(PresentationParseResult parse) =>
-        MainWindowPresentationScreenContains(parse, PresentationAnchorKind.Pfd);
+        RequiresPfdRegionInMainWindow(parse, PresentationTierKind.Cockpit);
+
+    public static bool RequiresPfdRegionInMainWindow(PresentationParseResult parse, PresentationTierKind tier)
+    {
+        if (tier == PresentationTierKind.Compact)
+            return false;
+
+        return MainWindowPresentationScreenContains(parse, PresentationAnchorKind.Pfd);
+    }
 
     /// <summary>См. <see cref="RequiresPfdRegionInMainWindow"/> — для MFD в главном окне.</summary>
     public static bool RequiresMfdRegionInMainWindow(PresentationParseResult parse) =>
-        MainWindowPresentationScreenContains(parse, PresentationAnchorKind.Mfd);
+        RequiresMfdRegionInMainWindow(parse, PresentationTierKind.Cockpit);
 
-    /// <summary>На экране главного окна в строке <c>presentation</c> есть якорь Forward (симметрия и будущие проверки).</summary>
-    public static bool RequiresForwardOnFirstScreen(PresentationParseResult parse) =>
-        MainWindowPresentationScreenContains(parse, PresentationAnchorKind.Forward);
+    public static bool RequiresMfdRegionInMainWindow(PresentationParseResult parse, PresentationTierKind tier)
+    {
+        if (tier == PresentationTierKind.Compact)
+            return false;
+
+        return MainWindowPresentationScreenContains(parse, PresentationAnchorKind.Mfd);
+    }
 
     public static bool CoercePfdRegionExpanded(PresentationParseResult parse, bool desired) =>
-        RequiresPfdRegionInMainWindow(parse) ? true : desired;
+        CoercePfdRegionExpanded(parse, PresentationTierKind.Cockpit, desired);
+
+    public static bool CoercePfdRegionExpanded(PresentationParseResult parse, PresentationTierKind tier, bool desired) =>
+        RequiresPfdRegionInMainWindow(parse, tier) ? true : desired;
 
     public static bool CoerceMfdRegionExpanded(PresentationParseResult parse, bool desired) =>
-        RequiresMfdRegionInMainWindow(parse) ? true : desired;
+        CoerceMfdRegionExpanded(parse, PresentationTierKind.Cockpit, desired);
+
+    public static bool CoerceMfdRegionExpanded(PresentationParseResult parse, PresentationTierKind tier, bool desired) =>
+        RequiresMfdRegionInMainWindow(parse, tier) ? true : desired;
 
     /// <summary>Флаги «якорь присутствует в строке <c>presentation</c>» для сериализации в <see cref="CockpitSurfaceZones"/>.</summary>
     public static CockpitPresentationLayoutInvariants InvariantsFromPresentation(PresentationParseResult parse) =>

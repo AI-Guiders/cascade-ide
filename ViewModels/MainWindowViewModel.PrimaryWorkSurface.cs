@@ -20,7 +20,7 @@ public partial class MainWindowViewModel
             OnPropertyChanged();
             OnPropertyChanged(nameof(IsForwardEditorHostVisible));
             OnPropertyChanged(nameof(IsForwardIntercomHostVisible));
-            ChatPanel.IsForwardIntercomLayout = value == PrimaryWorkSurfaceKind.Intercom;
+            ChatPanel.IsForwardIntercomLayout = value == PrimaryWorkSurfaceKind.Intercom && IsCockpitPresentationTier;
             CockpitCommandLineOverlay?.NotifyShellPresentationChanged();
             SyncMfdShellPageForPrimaryWorkSurface();
             try
@@ -63,9 +63,11 @@ public partial class MainWindowViewModel
         IdeMcp.FocusEditor();
     }
 
-    public bool IsForwardEditorHostVisible => PrimaryWorkSurface == PrimaryWorkSurfaceKind.Editor;
+    public bool IsForwardEditorHostVisible =>
+        IsCompactPresentationTier || PrimaryWorkSurface == PrimaryWorkSurfaceKind.Editor;
 
-    public bool IsForwardIntercomHostVisible => PrimaryWorkSurface == PrimaryWorkSurfaceKind.Intercom;
+    public bool IsForwardIntercomHostVisible =>
+        IsCockpitPresentationTier && PrimaryWorkSurface == PrimaryWorkSurfaceKind.Intercom;
 
     [RelayCommand]
     private void TogglePrimaryWorkSurface() =>

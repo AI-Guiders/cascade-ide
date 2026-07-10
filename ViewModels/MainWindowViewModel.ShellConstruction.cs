@@ -257,7 +257,8 @@ public partial class MainWindowViewModel
         _instrumentMountPolicyResolver = new SettingsBackedInstrumentMountPolicyResolver();
 
         SyncMfdShellPageForPrimaryWorkSurface();
-        ChatPanel.IsForwardIntercomLayout = PrimaryWorkSurface == PrimaryWorkSurfaceKind.Intercom;
+        InitializePresentationTier();
+        ChatPanel.IsForwardIntercomLayout = PrimaryWorkSurface == PrimaryWorkSurfaceKind.Intercom && IsCockpitPresentationTier;
         NotifyDockedInstrumentSlotBindings();
         EnsureAgentEnvironmentWiring();
     }

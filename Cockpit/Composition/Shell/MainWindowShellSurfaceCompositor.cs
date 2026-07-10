@@ -13,21 +13,51 @@ public static class MainWindowShellSurfaceCompositor
 {
     public static MainWindowShellSurfaceComposition Compose(in MainWindowShellSurfaceCompositionInput input)
     {
-        // Видимость слотов PFD/MFD в main: если в presentation задан хотя бы один экран, колонки показываем
-        // только когда соответствующий якорь на лобовом экране (при (xP+yM)(F) P/M на другом TopLevel).
-        // Пустая строка topology (0 экранов при успешном разборе) — прежнее поведение: колонки от intent, без гейта.
+        if (input.EffectivePresentationTier == PresentationTierKind.Compact)
+            return ComposeCompact(input);
+
+        return ComposeCockpit(input);
+    }
+
+    private static MainWindowShellSurfaceComposition ComposeCompact(in MainWindowShellSurfaceCompositionInput input)
+    {
+        var placement = input.DisplaySettings.Presentation.CompactIntercomPlacement?.Trim() ?? "side";
+        var sidePanel = !string.Equals(placement, "bottom", StringComparison.OrdinalIgnoreCase);
+        var auxExpanded = input.IntentChatPanelExpanded;
+        var auxVisible = sidePanel
+            && auxExpanded
+            && !input.SuppressMfdColumnForMfdHostWindow;
+
+        var width = auxVisible
+            ? Math.Max(
+                input.CollapsedMfdWidthPixels,
+                input.DisplaySettings.Presentation.CompactAuxiliaryPanelWidthPx)
+            : 0;
+
+        return new MainWindowShellSurfaceComposition(
+            PfdSurfaceVisible: false,
+            MfdSurfaceExpanded: auxExpanded,
+            MfdColumnVisibleInMainGrid: auxVisible,
+            MfdColumnPixelWidthInMainGrid: width);
+    }
+
+    private static MainWindowShellSurfaceComposition ComposeCockpit(in MainWindowShellSurfaceCompositionInput input)
+    {
+        var tier = input.EffectivePresentationTier;
         var presentationSpecifiesScreens = input.PresentationParse.IsSuccess && input.PresentationParse.Screens.Count > 0;
         var pfdRequiredOnMain = !presentationSpecifiesScreens
-            || CockpitPresentationLayoutPolicy.RequiresPfdRegionInMainWindow(input.PresentationParse);
+            || CockpitPresentationLayoutPolicy.RequiresPfdRegionInMainWindow(input.PresentationParse, tier);
         var pfdCoerced = CockpitPresentationLayoutPolicy.CoercePfdRegionExpanded(
             input.PresentationParse,
+            tier,
             input.IntentSolutionExplorerVisible);
         var pfdVisible = pfdRequiredOnMain && pfdCoerced && !input.SuppressPfdColumnForPfdHostWindow;
 
         var mfdRequiredOnMain = !presentationSpecifiesScreens
-            || CockpitPresentationLayoutPolicy.RequiresMfdRegionInMainWindow(input.PresentationParse);
+            || CockpitPresentationLayoutPolicy.RequiresMfdRegionInMainWindow(input.PresentationParse, tier);
         var mfdExpanded = CockpitPresentationLayoutPolicy.CoerceMfdRegionExpanded(
             input.PresentationParse,
+            tier,
             input.IntentChatPanelExpanded);
 
         var mfdColumnInMain = mfdRequiredOnMain && !input.SuppressMfdColumnForMfdHostWindow && mfdExpanded;
@@ -54,7 +84,8 @@ public readonly record struct MainWindowShellSurfaceCompositionInput(
     int ExpandedMfdWidthPixels,
     int CollapsedMfdWidthPixels,
     DisplaySettings DisplaySettings,
-    string SafetyLevel);
+    string SafetyLevel,
+    PresentationTierKind EffectivePresentationTier = PresentationTierKind.Cockpit);
 
 /// <summary>Результат: что отдать слою поверхности (привязки VM / code-behind) для колонок PFD/MFD.</summary>
 public readonly record struct MainWindowShellSurfaceComposition(

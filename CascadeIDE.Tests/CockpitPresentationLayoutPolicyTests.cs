@@ -1,4 +1,5 @@
 using CascadeIDE.Cockpit.Cds;
+using CascadeIDE.Models;
 using CascadeIDE.Services.Presentation;
 using Xunit;
 
@@ -59,6 +60,14 @@ public sealed class CockpitPresentationLayoutPolicyTests
     {
         var r = PresentationParser.Parse("(P+F) (M)", DefaultGrammar());
         Assert.False(CockpitPresentationLayoutPolicy.CoerceMfdRegionExpanded(r, false));
+    }
+
+    [Fact]
+    public void RequiresPfdInMain_compact_tier_always_false()
+    {
+        var r = PresentationParser.Parse("(P+F) (M)", DefaultGrammar());
+        Assert.False(CockpitPresentationLayoutPolicy.RequiresPfdRegionInMainWindow(r, PresentationTierKind.Compact));
+        Assert.False(CockpitPresentationLayoutPolicy.RequiresMfdRegionInMainWindow(r, PresentationTierKind.Compact));
     }
 
     [Fact]

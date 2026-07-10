@@ -21,6 +21,7 @@ public sealed class MainWindowHostSurfaceProjectionTests
         public required bool IsMfdHostWindowShellOpen { get; init; }
         public required DisplaySettings DisplaySettings { get; init; }
         public required string SafetyLevel { get; init; }
+        public PresentationTierKind EffectivePresentationTier { get; init; } = PresentationTierKind.Cockpit;
     }
 
     [Fact]
@@ -51,5 +52,6 @@ public sealed class MainWindowHostSurfaceProjectionTests
         Assert.Equal(8, input.CollapsedMfdWidthPixels);
         Assert.Same(display, input.DisplaySettings);
         Assert.Equal(AgentSafetyLevel.Observe, input.SafetyLevel);
+        Assert.Equal(PresentationTierKind.Cockpit, input.EffectivePresentationTier);
     }
 }

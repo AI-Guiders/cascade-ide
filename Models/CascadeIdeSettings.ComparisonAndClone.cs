@@ -334,6 +334,16 @@ public sealed partial class CascadeIdeSettings
                         Mfd = Display.Screens.Grammar.Mfd,
                     },
                 },
+                Presentation = new DisplayPresentationSettings
+                {
+                    Tier = Display.Presentation.Tier,
+                    CockpitMinTotalWidthPx = Display.Presentation.CockpitMinTotalWidthPx,
+                    CockpitMinAnchorWidthPx = Display.Presentation.CockpitMinAnchorWidthPx,
+                    CompactIntercomPlacement = Display.Presentation.CompactIntercomPlacement,
+                    UltrawideCockpitEnabled = Display.Presentation.UltrawideCockpitEnabled,
+                    TierFirstRunCompleted = Display.Presentation.TierFirstRunCompleted,
+                    CompactAuxiliaryPanelWidthPx = Display.Presentation.CompactAuxiliaryPanelWidthPx,
+                },
             },
             Editor = new EditorSettings
             {
@@ -664,7 +674,22 @@ public sealed partial class CascadeIdeSettings
             && a.Mount.RequireScores == b.Mount.RequireScores
             && InstrumentMountPolicyRulesEqual(a.Mount.Rules, b.Mount.Rules)
             && StringDictionaryEqualOrdinalIgnoreCase(a.Instruments, b.Instruments)
-            && DisplayScreensEquals(a.Screens, b.Screens);
+            && DisplayScreensEquals(a.Screens, b.Screens)
+            && DisplayPresentationEquals(a.Presentation, b.Presentation);
+    }
+
+    private static bool DisplayPresentationEquals(DisplayPresentationSettings? a, DisplayPresentationSettings? b)
+    {
+        if (a is null || b is null)
+            return a == b;
+
+        return a.Tier.Is(b.Tier)
+            && a.CockpitMinTotalWidthPx == b.CockpitMinTotalWidthPx
+            && a.CockpitMinAnchorWidthPx == b.CockpitMinAnchorWidthPx
+            && a.CompactIntercomPlacement.Is(b.CompactIntercomPlacement)
+            && a.UltrawideCockpitEnabled == b.UltrawideCockpitEnabled
+            && a.TierFirstRunCompleted == b.TierFirstRunCompleted
+            && a.CompactAuxiliaryPanelWidthPx == b.CompactAuxiliaryPanelWidthPx;
     }
 
     private static bool DisplayScreensEquals(DisplayScreensSettings? a, DisplayScreensSettings? b)

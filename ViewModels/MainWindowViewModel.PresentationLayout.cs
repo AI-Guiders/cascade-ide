@@ -1,4 +1,5 @@
 using CascadeIDE.Cockpit.Cds;
+using CascadeIDE.Features.UiChrome;
 using CascadeIDE.Services.Presentation;
 
 namespace CascadeIDE.ViewModels;
@@ -19,14 +20,37 @@ public partial class MainWindowViewModel
     public string MainGridColumnDefinitions => MainGridLayoutFrame.ColumnDefinitions;
 
     /// <summary>Кадр геометрии P/F/M для строки <c>MainGrid</c> (v1: колонка, число зон, нормализованные доли).</summary>
-    public PresentationMainGridLayoutFrame MainGridLayoutFrame =>
-        PresentationMainGridLayoutFrameBuilder.Build(
-            _presentationParse,
-            _presentationDedicatedMfdSecondScreen,
-            _suppressMfdColumnForMfdHostWindow,
-            _presentationTripleOneAnchorPerZone,
-            _suppressPfdColumnForPfdHostWindow,
-            PresentationLayoutAnalyzer.GetMainWindowPresentationScreenIndexOrDefault(_presentationParse));
+    public PresentationMainGridLayoutFrame MainGridLayoutFrame
+    {
+        get
+        {
+            if (IsCompactPresentationTier)
+            {
+                return PresentationCompactMainGridLayoutBuilder.Build(
+                    IsMfdRegionExpanded,
+                    _suppressMfdColumnForMfdHostWindow,
+                    _settings.Display.Presentation.CompactAuxiliaryPanelWidthPx,
+                    UiWorkspaceLayoutRuntimeMetrics.MfdRegionCollapsedWidthPixels);
+            }
+
+            if (UsesUltrawideCockpitLayout)
+            {
+                return PresentationUltrawideCockpitLayoutBuilder.Build(
+                    _presentationMonitorSnapshot.PrimaryWorkingAreaWidthPx,
+                    _settings.Display.Presentation.CockpitMinAnchorWidthPx,
+                    _suppressPfdColumnForPfdHostWindow,
+                    _suppressMfdColumnForMfdHostWindow);
+            }
+
+            return PresentationMainGridLayoutFrameBuilder.Build(
+                _presentationParse,
+                _presentationDedicatedMfdSecondScreen,
+                _suppressMfdColumnForMfdHostWindow,
+                _presentationTripleOneAnchorPerZone,
+                _suppressPfdColumnForPfdHostWindow,
+                PresentationLayoutAnalyzer.GetMainWindowPresentationScreenIndexOrDefault(_presentationParse));
+        }
+    }
 
     /// <summary>
     /// Пресет требует развернуть главное окно на весь экран при старте — см.
@@ -97,10 +121,12 @@ public partial class MainWindowViewModel
             : null;
 
     /// <summary>Открывать окно-хост Mfd при старте (если есть ≥2 мониторов и пресет подходит).</summary>
-    public bool OpenMfdHostWindowOnStartup => _settings.OpenMfdHostWindowOnStartup;
+    public bool OpenMfdHostWindowOnStartup =>
+        IsCockpitPresentationTier && _settings.OpenMfdHostWindowOnStartup;
 
     /// <summary>Открывать окно-хост Pfd при старте (если мониторов достаточно и пресет тройной).</summary>
-    public bool OpenPfdHostWindowOnStartup => _settings.OpenPfdHostWindowOnStartup;
+    public bool OpenPfdHostWindowOnStartup =>
+        IsCockpitPresentationTier && _settings.OpenPfdHostWindowOnStartup;
 
     /// <summary>Окна <c>PfdHostWindow</c>/<c>MfdHostWindow</c> на своём дисплее — максимизировать (иначе размер по рабочей области).</summary>
     public bool MaximizePresentationHostWindowsOnDedicatedScreens =>

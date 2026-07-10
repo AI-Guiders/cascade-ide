@@ -22,4 +22,7 @@ public interface IMainWindowHostSurfaceInput
     DisplaySettings DisplaySettings { get; }
 
     string SafetyLevel { get; }
+
+    /// <summary>Effective tier after auto-resolve (ADR 0171).</summary>
+    PresentationTierKind EffectivePresentationTier { get; }
 }
