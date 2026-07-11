@@ -35,7 +35,7 @@
 | ID | ADR |
 |----|-----|
 | 0021 | [**PFD/MFD — модель внимания**](0021-pfd-mfd-cockpit-attention-model.md) |
-| 0036, 0046–0047, 0066, **0171** | [канал→CDS→surface](0036-cds-channel-compositor-surface-pipeline.md) · [layout authority](0046-presentation-layout-authority-and-cockpit-invariants.md) · [instrument descriptor](0047-cockpit-instrument-descriptor-and-slot-composition.md) · [cockpit vs presentation](0066-cockpit-ui-vs-ide-presentation-layer.md) · [**compact vs cockpit**](0171-presentation-tiers-compact-vs-cockpit.md) |
+| 0036, 0046–0047, 0066, **0171**, **0172** | [канал→CDS→surface](0036-cds-channel-compositor-surface-pipeline.md) · [layout authority](0046-presentation-layout-authority-and-cockpit-invariants.md) · [instrument descriptor](0047-cockpit-instrument-descriptor-and-slot-composition.md) · [cockpit vs presentation](0066-cockpit-ui-vs-ide-presentation-layer.md) · [**compact vs cockpit**](0171-presentation-tiers-compact-vs-cockpit.md) · [**conversation habitat**](0172-conversation-first-habitat.md) |
 | 0063–0065, 0068, 0097 | [instrument deck](0063-instrument-deck-named-composition-one-anchor.md) · [примитивы deck](0064-deck-primitives-visual-language-render-layer-and-palette.md) · [таксономия](0065-instrument-categories-domain-taxonomy.md) · [payload vs projection](0068-deck-row-payload-and-presentation-projection.md) · [**CCU**](0097-cockpit-compute-units-transport-to-channel-dto.md) |
 | 0094, 0099 | [ingestion bus](0094-ingestion-bus-afdx-analogy-and-threading-channels.md) · [IDE DataBus](0099-ide-databus-typed-events-and-projections.md) |
 
@@ -253,6 +253,7 @@
 | [0169](0169-keymap-contributions-and-pluggable-input-schemes.md) | **Keymap contributions:** плагинные схемы ввода (flat / VS-style chord tree / CascadeChord); `command_id` + `when`; packs P0–P3 | Proposed |
 | [0170](0170-intercom-feed-readability-mlp.md) | **Intercom feed readability MLP:** comfortable default, 14pt prose, метка «Локально», отступы ленты | Proposed · In progress |
 | [0171](0171-presentation-tiers-compact-vs-cockpit.md) | **Presentation tiers:** Compact (standard IDE) vs Cockpit (3 mon / UltraWide); не впихивать P/F/M на 1–2 экрана | Accepted · Implemented |
+| [0172](0172-conversation-first-habitat.md) | **Session graph habitat:** Intercom = рабочая память сессии; worklines + tree/timeline; moat = нелинейность; concept ladder + API boundary | Proposed |
 
 ## Сборка в один документ (HTML, TXT, PDF)
 
