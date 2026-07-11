@@ -22,16 +22,35 @@ public sealed class MainWindowStranglerOrchestratorTests
     [Fact]
     public void SolutionLoadUiApply_terminal_when_tree_not_in_mfd_slot()
     {
-        var plan = SolutionLoadUiApplyProjection.Create(@"C:\a\s.sln", @"C:\a\s.sln", isDockedMfdSolutionExplorerTree: false);
+        var plan = SolutionLoadUiApplyProjection.Create(
+            @"C:\a\s.sln",
+            @"C:\a\s.sln",
+            isDockedMfdSolutionExplorerTree: false,
+            PresentationTierKind.Cockpit);
         Assert.Equal(MfdShellPage.Terminal, plan.InitialMfdPage);
     }
 
     [Fact]
     public void SolutionLoadUiApply_explorer_when_tree_in_mfd_slot()
     {
-        var plan = SolutionLoadUiApplyProjection.Create(@"C:\a\s.sln", null, isDockedMfdSolutionExplorerTree: true);
+        var plan = SolutionLoadUiApplyProjection.Create(
+            @"C:\a\s.sln",
+            null,
+            isDockedMfdSolutionExplorerTree: true,
+            PresentationTierKind.Cockpit);
         Assert.Equal(MfdShellPage.SolutionExplorer, plan.InitialMfdPage);
         Assert.Equal(@"C:\a\s.sln", plan.NormalizedSolutionPath);
+    }
+
+    [Fact]
+    public void SolutionLoadUiApply_compact_keeps_chat_even_when_tree_in_mfd_slot()
+    {
+        var plan = SolutionLoadUiApplyProjection.Create(
+            @"C:\a\s.sln",
+            @"C:\a\s.sln",
+            isDockedMfdSolutionExplorerTree: true,
+            PresentationTierKind.Compact);
+        Assert.Equal(MfdShellPage.Chat, plan.InitialMfdPage);
     }
 
     [Fact]

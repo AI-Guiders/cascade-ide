@@ -9,8 +9,24 @@ public static class SolutionLoadUiApplyProjection
 {
     public sealed record Plan(string NormalizedSolutionPath, MfdShellPage InitialMfdPage);
 
-    public static Plan Create(string originalPath, string? normalizedSolutionPath, bool isDockedMfdSolutionExplorerTree) =>
+    public static Plan Create(
+        string originalPath,
+        string? normalizedSolutionPath,
+        bool isDockedMfdSolutionExplorerTree,
+        PresentationTierKind presentationTier) =>
         new(
             normalizedSolutionPath ?? originalPath,
-            isDockedMfdSolutionExplorerTree ? MfdShellPage.SolutionExplorer : MfdShellPage.Terminal);
+            ResolveInitialMfdPage(isDockedMfdSolutionExplorerTree, presentationTier));
+
+    private static MfdShellPage ResolveInitialMfdPage(
+        bool isDockedMfdSolutionExplorerTree,
+        PresentationTierKind presentationTier)
+    {
+        if (presentationTier == PresentationTierKind.Compact)
+            return MfdShellPage.Chat;
+
+        return isDockedMfdSolutionExplorerTree
+            ? MfdShellPage.SolutionExplorer
+            : MfdShellPage.Terminal;
+    }
 }

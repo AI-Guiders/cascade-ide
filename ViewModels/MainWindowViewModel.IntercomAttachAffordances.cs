@@ -9,6 +9,7 @@ using CascadeIDE.Views;
 
 namespace CascadeIDE.ViewModels;
 
+/// <summary>Intercom attach affordances: selection hotkey, drag-to-composer (ADR 0128).</summary>
 public partial class MainWindowViewModel
 {
     internal void WireIntercomAttachAffordances()

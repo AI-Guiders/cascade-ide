@@ -20,6 +20,7 @@ public sealed class SolutionLoadSessionApplyProjectionTests
             @"C:\repo\App.sln",
             @"C:\repo\App.sln",
             isDockedMfdSolutionExplorerTree: false,
+            PresentationTierKind.Cockpit,
             host);
 
         Assert.Equal(@"C:\repo\App.sln", workspace.SolutionPath);
@@ -43,9 +44,29 @@ public sealed class SolutionLoadSessionApplyProjectionTests
             @"C:\repo\App.sln",
             @"C:\repo\App.sln",
             isDockedMfdSolutionExplorerTree: true,
+            PresentationTierKind.Cockpit,
             host);
 
         Assert.Equal(MfdShellPage.SolutionExplorer, host.InitialPage);
+    }
+
+    [Fact]
+    public void ApplySuccessfulLoad_compact_keeps_chat_page()
+    {
+        var workspace = new SolutionWorkspaceViewModel();
+        var root = SolutionItem.CreateSolution("App", @"C:\repo\App.sln");
+        var host = new RecordingHost();
+
+        SolutionLoadSessionApplyProjection.ApplySuccessfulLoad(
+            workspace,
+            root,
+            @"C:\repo\App.sln",
+            @"C:\repo\App.sln",
+            isDockedMfdSolutionExplorerTree: true,
+            PresentationTierKind.Compact,
+            host);
+
+        Assert.Equal(MfdShellPage.Chat, host.InitialPage);
     }
 
     private sealed class RecordingHost : SolutionLoadSessionApplyProjection.IHost

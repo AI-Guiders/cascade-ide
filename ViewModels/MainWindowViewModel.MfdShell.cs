@@ -54,7 +54,9 @@ public partial class MainWindowViewModel
         MfdShellPageAllowanceProjection.IsAllowed(page, MfdShellAllowanceSnapshot);
 
     private MfdShellPage GetFirstAllowedMfdShellPage() =>
-        MfdShellPageAllowanceProjection.FirstAllowedOrChat(MfdShellAllowanceSnapshot);
+        IsCompactPresentationTier && IsMfdShellPageAllowed(MfdShellPage.Chat)
+            ? MfdShellPage.Chat
+            : MfdShellPageAllowanceProjection.FirstAllowedOrChat(MfdShellAllowanceSnapshot);
 
     private void CoerceMfdShellPageToAllowed()
     {

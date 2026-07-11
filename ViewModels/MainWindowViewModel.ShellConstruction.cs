@@ -73,6 +73,12 @@ public partial class MainWindowViewModel
         _deepSeekApiKey = _aiKeys.DeepSeekApiKey ?? "";
         InitializeAgentUiDefaults();
         RegisterAgentFeedHandlers();
+        InitializeWorkspaceNavigationMap();
+        NavigationMap.CodeNavigationMapPresentation =
+            CodeNavigationMapPresentationKind.Normalize(_settings.CodeNavigationMap.View);
+        NavigationMap.CodeNavigationMapLevel = CodeNavigationMapLevelKind.Normalize(_settings.CodeNavigationMap.Depth);
+        NavigationMap.CodeNavigationMapControlFlowMainAxis =
+            CodeNavigationMapControlFlowMainAxisKind.Normalize(_settings.CodeNavigationMap.ControlFlowMainAxis);
         ApplyUiModeLayout(Shell.UiMode, persist: false);
         if (UiModeFamily.IsPowerFamily())
             UiScheduler.Default.Post(RefreshWorkspaceSnapshotCore, DispatcherPriority.Background);
@@ -80,12 +86,6 @@ public partial class MainWindowViewModel
         Documents.InitializeDock();
 
         InitializeEditorNavigation();
-        InitializeWorkspaceNavigationMap();
-        NavigationMap.CodeNavigationMapPresentation =
-            CodeNavigationMapPresentationKind.Normalize(_settings.CodeNavigationMap.View);
-        NavigationMap.CodeNavigationMapLevel = CodeNavigationMapLevelKind.Normalize(_settings.CodeNavigationMap.Depth);
-        NavigationMap.CodeNavigationMapControlFlowMainAxis =
-            CodeNavigationMapControlFlowMainAxisKind.Normalize(_settings.CodeNavigationMap.ControlFlowMainAxis);
 
         _lastSavedSettings = (CascadeIdeSettings)_settings.Clone();
         _lastSavedAiKeys = (AiKeys)_aiKeys.Clone();

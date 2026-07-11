@@ -5,6 +5,7 @@ using CascadeIDE.Features.Agent.Harness;
 
 namespace CascadeIDE.ViewModels;
 
+/// <summary>Agent harness: auto-verify coalescing after .cs writes (ADR 0166 interim).</summary>
 public partial class MainWindowViewModel
 {
     private AgentVerifyCoalescer? _autoVerifyCoalescer;

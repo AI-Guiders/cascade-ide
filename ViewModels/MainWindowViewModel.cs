@@ -350,6 +350,19 @@ public partial class MainWindowViewModel : ViewModelBase, IAutonomousAgentSessio
         _ = RestartCSharpLanguageServerAsync();
         _ = RestartMarkdownLanguageServerAsync();
         HypothesesPanel.LoadFromWorkspace();
+        RestoreCompactAuxiliaryPanelAfterSolutionScopeChange(value);
+    }
+
+    private void RestoreCompactAuxiliaryPanelAfterSolutionScopeChange(string? solutionPath)
+    {
+        if (!IsCompactPresentationTier || string.IsNullOrWhiteSpace(solutionPath))
+            return;
+
+        ApplyPfdRegionExpanded(false);
+        if (!IsMfdRegionExpanded)
+            ApplyMfdRegionExpanded(true);
+
+        TryNavigateToMfdShellPage(MfdShellPage.Chat);
     }
 
     private (string WorkspaceRoot, string? SolutionPath) ResolveHybridIndexScope(string workspaceRoot, string? solutionPath) =>

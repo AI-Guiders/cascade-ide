@@ -23,12 +23,14 @@ public static class SolutionLoadSessionApplyProjection
         string originalPath,
         string? normalizedSolutionPath,
         bool isDockedMfdSolutionExplorerTree,
+        PresentationTierKind presentationTier,
         IHost host)
     {
         var plan = SolutionLoadUiApplyProjection.Create(
             originalPath,
             normalizedSolutionPath,
-            isDockedMfdSolutionExplorerTree);
+            isDockedMfdSolutionExplorerTree,
+            presentationTier);
 
         SolutionTreeExpansionPolicy.ApplyDefaultExpansion([root]);
         host.ResetEditorSessionForNewSolution();

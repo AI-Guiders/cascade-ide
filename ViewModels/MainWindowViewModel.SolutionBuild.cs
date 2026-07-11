@@ -43,6 +43,7 @@ public partial class MainWindowViewModel
                     path,
                     normalizedSolutionPath,
                     IsDockedMfdSolutionExplorerTree,
+                    EffectivePresentationTier,
                     this);
             });
         }
