@@ -2,7 +2,7 @@
 
 **Статус:** Proposed (концепт / north-star)  
 **Дата:** 2026-07-10  
-**Обновлено:** 2026-07-11 — design thesis (comprehension-first); concept vs implementation ladder; API boundary (stateless FM)
+**Обновлено:** 2026-07-11 — worklines, spin-off, agent materialization; design thesis; API boundary (stateless FM)
 
 ## Резюме
 
@@ -227,6 +227,71 @@ Session graph — **клиентская** модель. Cloud.ru Foundation Mod
 **Fork / continue from:** меняется head и `parent_id` нового сообщения; следующий request несёт **другой путь** — без переписывания истории на стороне API (её там нет). Pay-per-token: нелинейность — **экономия**, не overhead.
 
 Конфиг провайдера (пример): `[ai.cloud.openai]` `base_url = https://foundation-models.api.cloud.ru`; harness [0166](0166-agent-centric-harness-model-comfort-and-pay-per-token-economics.md) не меняется от habitat.
+
+### 9. Worklines — ретро-проекция, не форум
+
+Оператор **не обязан** создавать тему до разговора. Один composer, один поток реплик — как в обычном чате. **Workline** — имя и граница **уже идущей** линии работы, которую система и агент выводят из event log (и при необходимости уточняют одной фразой).
+
+| Принцип | Смысл |
+|---------|--------|
+| Разговор первичен | Структура следует за диалогом, не наоборот |
+| Индекс сбоку | Параллельные линии видны без скролла всей сессии |
+| Большинство реплик | Остаются в **активной** workline без split |
+| Инициатор split | Оператор, агент или checkpoint — **предложение**, не модалка «создай топик» |
+
+**Anti-pattern:** обязательный title/summary или New-Chat-подобный вход перед первым сообщением.
+
+### 10. Переключение worklines и доделывание хвостов
+
+Переключение строки в **worklines index** — смена **фокуса**, не новая сессия. У каждой workline свой **head** в session tree; при возврате head сохранён.
+
+```text
+Оператор кликает workline B
+  → timeline = flat feed ветки B до head_B
+  → tree/scope = проекция workline B
+  → composer пишет в B (новые события — потомки head_B)
+  → orchestrator: messages[] только путь active workline
+```
+
+**Доделать в старой линии:** зайти в workline → закрыть open item (коммит, smoke, ADR) → при желании отметить в meta «closed» → вернуться в предыдущую workline (parked, head не сдвинулся). Scope strip показывает несколько open worklines без слияния их в один prompt.
+
+Статусы в индексе (продуктовые, не обязательный протокол): **active** · **parked** · open count на строке.
+
+### 11. Spin-off — вынесение диапазона сообщений
+
+Когда линия внутри workline или целый смысловой блок вырос в отдельную работу, стороны договариваются **в чате**, система фиксирует **событие** (канон [0045](0045-agent-chat-persistence-event-log-and-projections.md)):
+
+```text
+1. Предложение (user или agent): «вынести msg A…B в workline X?»
+2. Согласие или отказ одной короткой репликой
+3. Событие spin_off (имя в log уточняется при реализации):
+     source_workline, target_workline, msg_range, agreed
+4. Проекция: сообщения rehome в target; в source — collapsed marker
+```
+
+**UI в timeline (активная ветка source):** system card / спойлер, свёрнут по умолчанию:
+
+```text
+┌─ Вынесено в «VDS» (msg 840–1020) ─── [перейти] [развернуть] ─┐
+└───────────────────────────────────────────────────────────────┘
+```
+
+Сообщения **не удаляются** из log; меняется **принадлежность workline** и материализация prompt. Отказ на шаге 2 — no-op, лента без изменений.
+
+**Отличие от fork branch:** fork — ветвление **внутри** workline (tree); spin-off — перенос **диапазона** в другую workline (или новую).
+
+### 12. Materialization для агента (двухслойный роутинг)
+
+Ограниченный контекст FM и дефицит внимания оператора — **одна экономика**. Агент не «живёт во всём графе»; habitat задаёт, **что попадает в ход**.
+
+| Слой | Что решает | Аналог |
+|------|------------|--------|
+| **Структурный** | Какая workline активна; путь `root → head` в дереве | Активная ветка в `messages[]` |
+| **Семантический** | Какие знания и тулы подтянуть | KB: status → playbook → pull; `route_context` [0166](0166-agent-centric-harness-model-comfort-and-pay-per-token-economics.md) |
+
+Соседние ветки и worklines **не** входят в `messages[]`, пока не станут активными. Scope strip и one-liner в system — сжатая карта («2 open worklines»), не полный dump. Решения и checkpoint — KB / export, chat context — кэш.
+
+Workline может нести **intent tag** (например `cascade-ide/habitat`) → bias для `route_context` и MCP pull без чтения всей сессии.
 
 ---
 
