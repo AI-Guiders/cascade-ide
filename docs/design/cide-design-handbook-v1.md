@@ -408,6 +408,8 @@ Intercom — **не один экран**, а **несколько домено�
 
 ### 8.1 Визуальный язык (две системы — не смешивать)
 
+**VDS (visual DoD):** [cide-vds-v1.md](cide-vds-v1.md) — проекция ADR на проверку глазами (quiet normal, surface-first); не заменяет ADR.
+
 | Система | Для чего | С чего начать |
 |---------|----------|----------------|
 | **IDE chrome** | Меню, MFD-страницы, оболочка, Intercom AXAML-рамка | [ide-chrome-tokens-v1.md](ide-chrome-tokens-v1.md), `CascadeTheme.*`, [Views/UiKit/](../../Views/UiKit/) |

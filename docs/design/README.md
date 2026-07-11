@@ -5,6 +5,7 @@
 | Документ | Для кого | Статус |
 |----------|----------|--------|
 | [cide-design-handbook-v1.md](cide-design-handbook-v1.md) | **Старт здесь** — §1.1 два порога входа, принципы (§2), зоны (§3), фокус дизайнера (§8) | v1 hub |
+| [**cide-vds-v1.md**](cide-vds-v1.md) | **VDS:** визуальная проекция ADR (I1–I5, DoD, слои Surface/Chrome/Instrument) | v1 |
 | [cascadeide-philosophy-v1.md](cascadeide-philosophy-v1.md) | Зачем продукт, метафоры, AI; два порога — см. [IOP-манифест](../iop-manifest-v1.md) | справочник |
 | [ide-chrome-tokens-v1.md](ide-chrome-tokens-v1.md) | Семантические токены IDE chrome (`CascadeTheme.*`) | v1 |
 | [intercom-design-hub-v1.md](intercom-design-hub-v1.md) | **Intercom для дизайнера:** домены D1–D9, иерархия доков, чеклист PNG | v1 hub |
