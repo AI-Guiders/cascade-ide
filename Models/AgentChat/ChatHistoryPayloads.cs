@@ -42,3 +42,83 @@ public sealed record ChatHistoryMessageRangeRelatedPayload(
     [property: JsonPropertyName("code_ref")] AttachmentAnchor CodeRef,
     [property: JsonPropertyName("source")] string Source,
     [property: JsonPropertyName("ordinal_segments")] IReadOnlyList<ChatHistoryMessageOrdinalSegment>? OrdinalSegments = null);
+
+/// <summary>Якорь T2 context card (ADR 0174 §3.1).</summary>
+public sealed record SedmContextCardAnchorPayload(
+    [property: JsonPropertyName("path")] string Path,
+    [property: JsonPropertyName("symbol")] string? Symbol = null);
+
+/// <summary>Workline ref в SEDM payload (MLP: thread_id как workline).</summary>
+public sealed record SedmWorklineRefPayload(
+    [property: JsonPropertyName("id")] string Id,
+    [property: JsonPropertyName("label")] string? Label = null,
+    [property: JsonPropertyName("intent_tag")] string? IntentTag = null);
+
+/// <summary>Applies one-liner (0061 / ADR map).</summary>
+public sealed record SedmAppliesEntryPayload(
+    [property: JsonPropertyName("kind")] string Kind,
+    [property: JsonPropertyName("ref")] string Ref,
+    [property: JsonPropertyName("one_liner")] string OneLiner,
+    [property: JsonPropertyName("provenance")] string? Provenance = null);
+
+/// <summary><see cref="ChatHistoryEventKind.ContextCardMaterialized"/> payload v1.</summary>
+public sealed record SedmContextCardMaterializedPayload(
+    [property: JsonPropertyName("schema_version")] int SchemaVersion,
+    [property: JsonPropertyName("workline_id")] string WorklineId,
+    [property: JsonPropertyName("anchor")] SedmContextCardAnchorPayload Anchor,
+    [property: JsonPropertyName("workline")] SedmWorklineRefPayload? Workline = null,
+    [property: JsonPropertyName("applies")] IReadOnlyList<SedmAppliesEntryPayload>? Applies = null,
+    [property: JsonPropertyName("path_hint")] string? PathHint = null,
+    [property: JsonPropertyName("risk_advisory")] string? RiskAdvisory = null,
+    [property: JsonPropertyName("drill_down")] IReadOnlyList<string>? DrillDown = null,
+    [property: JsonPropertyName("trigger_reason")] string? TriggerReason = null);
+
+/// <summary>Тело intent / decision card (ADR 0173 tier A).</summary>
+public sealed record SedmIntentCardBodyPayload(
+    [property: JsonPropertyName("outcome")] string Outcome,
+    [property: JsonPropertyName("trigger")] string? Trigger = null,
+    [property: JsonPropertyName("chosen_approach")] string? ChosenApproach = null,
+    [property: JsonPropertyName("selection_rationale")] string? SelectionRationale = null,
+    [property: JsonPropertyName("constraints")] string? Constraints = null,
+    [property: JsonPropertyName("validation_plan")] string? ValidationPlan = null);
+
+public sealed record SedmIntentConsideredOptionPayload(
+    [property: JsonPropertyName("approach")] string Approach,
+    [property: JsonPropertyName("rejected_because")] string? RejectedBecause = null);
+
+/// <summary><see cref="ChatHistoryEventKind.IntentCardRecorded"/> payload v1.</summary>
+public sealed record SedmIntentCardRecordedPayload(
+    [property: JsonPropertyName("schema_version")] int SchemaVersion,
+    [property: JsonPropertyName("author")] string Author,
+    [property: JsonPropertyName("workline_id")] string WorklineId,
+    [property: JsonPropertyName("card")] SedmIntentCardBodyPayload Card,
+    [property: JsonPropertyName("message_id")] string? MessageId = null,
+    [property: JsonPropertyName("considered")] IReadOnlyList<SedmIntentConsideredOptionPayload>? Considered = null);
+
+public sealed record SedmDecisionFindingPayload(
+    [property: JsonPropertyName("kind")] string Kind,
+    [property: JsonPropertyName("ref")] string Ref,
+    [property: JsonPropertyName("summary")] string Summary);
+
+public sealed record SedmDecisionBasisPayload(
+    [property: JsonPropertyName("revision")] string? Revision = null,
+    [property: JsonPropertyName("touched_paths")] IReadOnlyList<string>? TouchedPaths = null);
+
+/// <summary><see cref="ChatHistoryEventKind.DecisionRecorded"/> payload v1.</summary>
+public sealed record SedmDecisionRecordedPayload(
+    [property: JsonPropertyName("schema_version")] int SchemaVersion,
+    [property: JsonPropertyName("author")] string Author,
+    [property: JsonPropertyName("workline_id")] string WorklineId,
+    [property: JsonPropertyName("card")] SedmIntentCardBodyPayload Card,
+    [property: JsonPropertyName("message_id")] string? MessageId = null,
+    [property: JsonPropertyName("considered")] IReadOnlyList<SedmIntentConsideredOptionPayload>? Considered = null,
+    [property: JsonPropertyName("findings")] IReadOnlyList<SedmDecisionFindingPayload>? Findings = null,
+    [property: JsonPropertyName("basis")] SedmDecisionBasisPayload? Basis = null,
+    [property: JsonPropertyName("status")] string Status = "active");
+
+/// <summary>Lifecycle events for decisions (stale / superseded).</summary>
+public sealed record SedmDecisionLifecyclePayload(
+    [property: JsonPropertyName("schema_version")] int SchemaVersion,
+    [property: JsonPropertyName("workline_id")] string WorklineId,
+    [property: JsonPropertyName("decision_event_id")] string DecisionEventId,
+    [property: JsonPropertyName("reason")] string? Reason = null);

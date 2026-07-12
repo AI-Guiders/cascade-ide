@@ -13,6 +13,7 @@ public sealed record ChatSurfaceIntent(
     Guid ActiveThreadId,
     string? ThreadBranchHint,
     ChatProductSpine? ProductSpine = null,
+    IReadOnlyList<ChatSedmTimelineEntry>? SedmTimelineEntries = null,
     IReadOnlyDictionary<Guid, string>? ThreadDisplayTitles = null,
     IReadOnlyList<ChatThreadForkRecord>? ThreadForks = null,
     TopicPickerPresentation TopicPicker = TopicPickerPresentation.None,
@@ -77,7 +78,8 @@ public sealed record ChatDecisionEdge(
 public enum ChatSurfaceEntryKind
 {
     Message = 0,
-    Confirmation = 1
+    Confirmation = 1,
+    SedmCard = 2,
 }
 
 public sealed record ChatSurfaceEntry(
@@ -126,11 +128,13 @@ public sealed record ChatSurfaceSnapshot(
     ChatSurfaceState State,
     ChatSurfaceLayout Layout,
     ChatProductSpine ProductSpine,
+    ChatSedmScopeStrip SedmScopeStrip = default,
     TopicPickerPresentation TopicPicker = TopicPickerPresentation.None,
     IReadOnlySet<int>? HighlightedMessageIndices = null)
 {
     public static ChatSurfaceSnapshot Empty { get; } = new(
         new ChatSurfaceState([], [], [], [], Guid.Empty, "Chat"),
         new ChatSurfaceLayout([], []),
-        ChatProductSpine.Empty);
+        ChatProductSpine.Empty,
+        ChatSedmScopeStrip.Empty);
 }

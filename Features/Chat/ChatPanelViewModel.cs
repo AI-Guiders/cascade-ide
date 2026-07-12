@@ -1087,6 +1087,9 @@ public partial class ChatPanelViewModel : ViewModelBase
     public string ExportReadableMarkdown(bool writeFile, string? fileName)
     {
         var md = ChatReadableExporter.BuildMarkdown(_sessionId, [.. ChatMessages]);
+        var decisions = ChatSedmReadableExport.BuildDecisionsSection(_sessionEventsCache);
+        if (!string.IsNullOrWhiteSpace(decisions))
+            md = md.TrimEnd() + Environment.NewLine + Environment.NewLine + decisions + Environment.NewLine;
         if (!writeFile)
             return JsonSerializer.Serialize(new { ok = true, markdown = md, relative_path = (string?)null }, ChatPanelJson);
 

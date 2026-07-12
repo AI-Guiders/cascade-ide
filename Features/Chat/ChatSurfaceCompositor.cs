@@ -16,7 +16,7 @@ public interface IChatSurfaceDeclutterStage
 
 public interface IChatSurfaceLayoutStage
 {
-    ChatSurfaceLayout Layout(in ChatSurfaceState state);
+    ChatSurfaceLayout Layout(in ChatSurfaceState state, IReadOnlyList<ChatSedmTimelineEntry>? sedmTimelineEntries = null);
 }
 
 /// <summary>Intent stage: строит first-class thread/message/confirmation graph из канонического chat intent.</summary>
@@ -253,8 +253,11 @@ public sealed class ChatSurfaceDeclutterStage : IChatSurfaceDeclutterStage
 /// <summary>Layout stage: строит overview тредов и ленты карточек по каждой линии работы.</summary>
 public sealed class ChatSurfaceLayoutStage : IChatSurfaceLayoutStage
 {
-    public ChatSurfaceLayout Layout(in ChatSurfaceState state)
+    public ChatSurfaceLayout Layout(in ChatSurfaceState state, IReadOnlyList<ChatSedmTimelineEntry>? sedmTimelineEntries = null)
     {
+        var sedmByThread = (sedmTimelineEntries ?? [])
+            .GroupBy(entry => entry.WorklineId)
+            .ToDictionary(group => group.Key, group => group.OrderBy(e => e.Sequence).ToList());
         var confirmationsByThread = state.Confirmations
             .GroupBy(confirmation => confirmation.ThreadId)
             .ToDictionary(group => group.Key, group => group.OrderBy(confirmation => confirmation.Title, StringComparer.Ordinal).ToList());
@@ -291,6 +294,22 @@ public sealed class ChatSurfaceLayoutStage : IChatSurfaceLayoutStage
                         SlashCommandStatus: message.SlashCommandStatus,
                         Attachments: message.Attachments,
                         Audience: message.Audience));
+                }
+            }
+
+            if (sedmByThread.TryGetValue(thread.ThreadId, out var sedmEntries))
+            {
+                var orderBase = entries.Count == 0 ? thread.Order : entries.Max(entry => entry.Order) + 1;
+                foreach (var sedm in sedmEntries)
+                {
+                    entries.Add(new ChatSurfaceEntry(
+                        ChatSurfaceEntryKind.SedmCard,
+                        $"sedm:{sedm.EventId:N}",
+                        sedm.Title,
+                        sedm.Body,
+                        sedm.VisualRole,
+                        orderBase++,
+                        IsPending: false));
                 }
             }
 
@@ -406,8 +425,14 @@ public sealed class ChatSurfaceCompositor(
     {
         var resolved = _intentStage.Resolve(intent);
         var decluttered = _declutterStage.Apply(resolved);
-        var layout = _layoutStage.Layout(decluttered);
+        var layout = _layoutStage.Layout(decluttered, intent.SedmTimelineEntries);
         var spine = intent.ProductSpine ?? ChatProductSpine.Empty;
-        return new ChatSurfaceSnapshot(decluttered, layout, spine, intent.TopicPicker, intent.HighlightedMessageIndices);
+        return new ChatSurfaceSnapshot(
+            decluttered,
+            layout,
+            spine,
+            ChatSedmScopeStrip.Empty,
+            intent.TopicPicker,
+            intent.HighlightedMessageIndices);
     }
 }

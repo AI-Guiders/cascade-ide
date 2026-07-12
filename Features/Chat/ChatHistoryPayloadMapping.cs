@@ -46,4 +46,64 @@ internal static class ChatHistoryPayloadMapping
         ClarificationResponse response,
         IReadOnlyDictionary<string, string> answers) =>
         new(response.BatchId.ToString("N"), answers);
+
+    public static SedmContextCardMaterializedPayload ToContextCardMaterializedPayload(
+        Guid worklineId,
+        string anchorPath,
+        string? anchorSymbol,
+        string? worklineLabel,
+        string? pathHint,
+        string? triggerReason,
+        IReadOnlyList<SedmAppliesEntryPayload>? applies = null) =>
+        new(
+            SchemaVersion: 1,
+            WorklineId: worklineId.ToString("N"),
+            Anchor: new SedmContextCardAnchorPayload(anchorPath, anchorSymbol),
+            Workline: new SedmWorklineRefPayload(worklineId.ToString("N"), worklineLabel),
+            Applies: applies,
+            PathHint: pathHint,
+            TriggerReason: triggerReason);
+
+    public static SedmIntentCardRecordedPayload ToIntentCardRecordedPayload(
+        Guid worklineId,
+        SedmIntentCardBodyPayload card,
+        IReadOnlyList<SedmIntentConsideredOptionPayload>? considered,
+        string author = "operator",
+        Guid? messageId = null) =>
+        new(
+            SchemaVersion: 1,
+            Author: author,
+            WorklineId: worklineId.ToString("N"),
+            Card: card,
+            MessageId: messageId?.ToString("N"),
+            Considered: considered);
+
+    public static SedmDecisionRecordedPayload ToDecisionRecordedPayload(
+        Guid worklineId,
+        SedmIntentCardBodyPayload card,
+        IReadOnlyList<SedmIntentConsideredOptionPayload>? considered,
+        IReadOnlyList<SedmDecisionFindingPayload>? findings,
+        SedmDecisionBasisPayload? basis,
+        string author = "agent",
+        Guid? messageId = null) =>
+        new(
+            SchemaVersion: 1,
+            Author: author,
+            WorklineId: worklineId.ToString("N"),
+            Card: card,
+            MessageId: messageId?.ToString("N"),
+            Considered: considered,
+            Findings: findings,
+            Basis: basis,
+            Status: "active");
+
+    public static SedmDecisionLifecyclePayload ToDecisionLifecyclePayload(
+        Guid worklineId,
+        Guid decisionEventId,
+        string? reason) =>
+        new(
+            SchemaVersion: 1,
+            WorklineId: worklineId.ToString("N"),
+            DecisionEventId: decisionEventId.ToString("N"),
+            Reason: reason);
 }

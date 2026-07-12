@@ -40,6 +40,7 @@ public partial class ChatPanelViewModel
 
             var events = await _sessionStore.ReadEventsAsync(_sessionId, ct).ConfigureAwait(false);
             rebuildExplicitRelatesFromEvents(events);
+            ReplaceSessionEventsCache(events);
 
             var meta = await _sessionStore.LoadOrCreateMetadataAsync(_sessionId, ct).ConfigureAwait(false);
             var inferredMain = ChatHistoryMessageProjector.InferMainThreadId(events);
@@ -126,6 +127,7 @@ public partial class ChatPanelViewModel
                 ChatHistoryJson.Serialize(payload),
                 ThreadId: tid == Guid.Empty ? null : tid.ToString("N"));
             await _sessionStore.AppendEventAsync(ev, CancellationToken.None).ConfigureAwait(false);
+            AppendSessionEventCache(ev);
             NotifyIntercomTransportAfterPersist(ev);
             await _sessionStore.BindCurrentSessionAsync(_sessionId, CancellationToken.None).ConfigureAwait(false);
             var meta = await _sessionStore.LoadOrCreateMetadataAsync(_sessionId, CancellationToken.None).ConfigureAwait(false);

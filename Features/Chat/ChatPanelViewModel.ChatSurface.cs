@@ -9,6 +9,8 @@ public partial class ChatPanelViewModel
     private void RefreshChatSurfaceSnapshot()
     {
         NormalizeOrphanMessageThreadIds();
+        RebuildSedmScopeStrip();
+        var sedmTimeline = BuildSedmTimelineEntries();
         ChatSurfaceSnapshot = _chatSurfaceCompositor.Compose(new ChatSurfaceIntent(
             BuildConversationMessages(),
             _activeClarificationBatch,
@@ -17,10 +19,12 @@ public partial class ChatPanelViewModel
             _activeThreadId,
             ThreadBranchHint,
             BuildProductSpine(),
+            sedmTimeline,
             BuildThreadDisplayTitles(),
             _threadForks,
             _topicPickerPresentation,
-            HighlightedMessageIndices.Count > 0 ? HighlightedMessageIndices : null));
+            HighlightedMessageIndices.Count > 0 ? HighlightedMessageIndices : null))
+        with { SedmScopeStrip = _sedmScopeStrip };
 
         var overview = ChatSurfaceSnapshot.Layout.Overview;
         if (overview.Count == 0)

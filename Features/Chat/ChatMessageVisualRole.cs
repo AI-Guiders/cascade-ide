@@ -10,4 +10,8 @@ public enum ChatMessageVisualRole
     ClarificationPending = 4,
     ClarificationResolved = 5,
     SlashCommand = 6,
+    SedmContext = 7,
+    SedmIntent = 8,
+    SedmDecision = 9,
+    SedmLifecycle = 10,
 }

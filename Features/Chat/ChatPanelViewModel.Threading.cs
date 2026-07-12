@@ -163,6 +163,7 @@ public partial class ChatPanelViewModel
         if (_topicPickerPresentation != TopicPickerPresentation.None)
             _topicPickerPresentation = TopicPickerPresentation.None;
 
+        _ = MaybeMaterializeContextCardOnWorklineSwitchAsync();
         RefreshChatSurfaceSnapshot();
     }
 }

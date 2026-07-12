@@ -22,7 +22,7 @@ public partial class ChatPanelViewModel
             TryBuildOutboundAsync = buildOutboundOnBackgroundAsync,
             BeginPrepareOutboundAsync = beginPrepareOutboundAsync,
             EndPrepareOutboundAsync = endPrepareOutboundAsync,
-            ApplyProductSpine = ApplyProductSpineToOutboundMessage,
+            ApplyProductSpine = ApplyAgentContextPrefixes,
             FormatAgentInput = (display, outbound) => IntercomAttachmentPromptFormatter.AppendToUserMessage(
                 display,
                 outbound.Attachments,
@@ -149,6 +149,7 @@ public partial class ChatPanelViewModel
             ChatMessages.Add(userMsg);
             SelectedChatThreadId = _activeThreadId;
             _ = PersistEventAsync(ChatHistoryEventKind.MessageAdded, ChatHistoryPayloadMapping.ToMessagePayload(userMsg));
+            _ = MaybeMaterializeContextCardAsync(outbound.Attachments, "attach");
             _ = TryAutoConnectIntercomTransportAsync();
             RefreshChatSurfaceSnapshot();
             _ = PersistSessionSolutionPathIfChangedAsync(CancellationToken.None);

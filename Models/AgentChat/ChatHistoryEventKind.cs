@@ -16,4 +16,19 @@ public static class ChatHistoryEventKind
 
     /// <summary>Явная связь диапазона gutter-сообщений с кодом (ADR 0137): payload — <see cref="ChatHistoryMessageRangeRelatedPayload"/>.</summary>
     public const string MessageRangeRelated = "message_range_related";
+
+    /// <summary>T2 context card materialized (ADR 0174 §3.1, unified model §10).</summary>
+    public const string ContextCardMaterialized = "context_card_materialized";
+
+    /// <summary>T1 intent card recorded by operator (ADR 0173).</summary>
+    public const string IntentCardRecorded = "intent_card_recorded";
+
+    /// <summary>Agent decision trail after investigation (ADR 0173 §8, unified model §12).</summary>
+    public const string DecisionRecorded = "decision_recorded";
+
+    /// <summary>Decision no longer trustworthy — code drift (ADR 0173 §8).</summary>
+    public const string DecisionMarkedStale = "decision_marked_stale";
+
+    /// <summary>Decision replaced by a newer record (ADR 0173 §8).</summary>
+    public const string DecisionSuperseded = "decision_superseded";
 }
