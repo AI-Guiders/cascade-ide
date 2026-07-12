@@ -28,13 +28,15 @@ internal static class SkiaChatChromeRenderer
         bool showOverviewCatalog,
         bool showStatusSubtitle,
         bool overviewMode,
-        int topicCount) =>
+        int topicCount,
+        bool hasScopeStrip = false) =>
         SkiaIntercomNavigationChrome.ResolveTopChromeHeight(
             forwardHost,
             showOverviewCatalog,
             showStatusSubtitle,
             overviewMode,
-            topicCount);
+            topicCount,
+            hasScopeStrip);
 
     public static void Draw(
         SKCanvas canvas,

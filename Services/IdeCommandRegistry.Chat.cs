@@ -19,6 +19,9 @@ public static partial class IdeCommandRegistry
         AddPalette(b, "chat_toggle_product_spine_in_agent_context", IdeCommands.ChatToggleProductSpineInAgentContext, "Чат: spine в контекст агента (вкл/выкл)", "Чат");
         AddPalette(b, "chat_get_product_spine", IdeCommands.ChatGetProductSpine, "Чат: прочитать product spine", "Чат");
         AddPalette(b, "chat_set_product_spine", IdeCommands.ChatSetProductSpine, "Чат: обновить product spine", "Чат");
+        AddPalette(b, "chat_get_sedm_scope", IdeCommands.ChatGetSedmScope, "Чат: SEDM scope strip (JSON)", "Чат");
+        AddPalette(b, "chat_record_sedm_intent", IdeCommands.ChatRecordSedmIntent, "Чат: записать intent card", "Чат");
+        AddPalette(b, "chat_record_sedm_decision", IdeCommands.ChatRecordSedmDecision, "Чат: записать decision record", "Чат");
         AddPalette(b, "chat_toggle_selected_thinking", IdeCommands.ChatToggleSelectedThinking, "Чат: свернуть/развернуть selected thinking", "Чат");
         AddPalette(
             b,

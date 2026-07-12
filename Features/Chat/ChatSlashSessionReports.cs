@@ -88,4 +88,42 @@ public static class ChatSlashSessionReports
         sb.Append("   (" + ctx + ")");
         return sb.ToString().TrimEnd();
     }
+
+    public static string FormatSedmScope(ChatSedmScopeStrip strip)
+    {
+        var text = strip.FormatStripText();
+        return string.IsNullOrWhiteSpace(text)
+            ? "SEDM scope strip пуст. Прикрепи файл или зафиксируй intent/decision."
+            : "SEDM scope · " + text;
+    }
+
+    public static string FormatSedmScopeDetail(ChatSurfaceSnapshot snapshot)
+    {
+        var strip = snapshot.SedmScopeStrip;
+        var lines = new List<string> { "SEDM · активная workline" };
+        if (strip.OpenWorklineCount > 1)
+            lines.Add($"Open worklines: {strip.OpenWorklineCount}");
+        if (!string.IsNullOrWhiteSpace(strip.ContextOneLiner))
+            lines.Add("Context: " + strip.ContextOneLiner);
+        if (!string.IsNullOrWhiteSpace(strip.IntentOneLiner))
+            lines.Add("Intent: " + strip.IntentOneLiner + (strip.IntentIncomplete ? " (incomplete)" : ""));
+        if (!string.IsNullOrWhiteSpace(strip.DecisionOneLiner))
+            lines.Add("Decision: " + strip.DecisionOneLiner + (string.IsNullOrWhiteSpace(strip.DecisionStatus) ? "" : $" [{strip.DecisionStatus}]"));
+
+        var timeline = snapshot.Layout.Lanes
+            .SelectMany(l => l.Entries)
+            .Where(e => e.Kind == ChatSurfaceEntryKind.SedmCard)
+            .ToList();
+        if (timeline.Count > 0)
+        {
+            lines.Add($"Timeline cards: {timeline.Count}");
+            foreach (var card in timeline.Take(6))
+                lines.Add($"  · {card.Title}: {Truncate(card.Body, 72)}");
+        }
+
+        return string.Join(Environment.NewLine, lines);
+    }
+
+    private static string Truncate(string text, int max) =>
+        text.Length <= max ? text : text[..max] + "…";
 }

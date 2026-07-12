@@ -529,6 +529,7 @@ internal static class SkiaChatBubbleRenderer
             SkiaBubbleFillRole.ThreadHeaderActive => SkiaKitColor.Blend(theme.Surface, theme.HoverBorder, 0.28f),
             SkiaBubbleFillRole.ClarificationPending => SkiaKitColor.Blend(theme.BubbleAssistant, theme.HoverBorder, 0.32f),
             SkiaBubbleFillRole.ClarificationResolved => SkiaKitColor.Blend(theme.BubbleAssistant, theme.HoverBorder, 0.18f),
+            SkiaBubbleFillRole.SedmCard => SkiaKitColor.Blend(theme.Surface, theme.HoverBorder, 0.14f),
             SkiaBubbleFillRole.MessageThinking => SkiaKitColor.Blend(theme.BubbleAssistant, theme.HoverBorder, 0.26f),
             SkiaBubbleFillRole.MessageTool => SkiaKitColor.Blend(theme.BubbleAssistant, theme.Border, 0.35f),
             SkiaBubbleFillRole.MessageUser => theme.BubbleUser,

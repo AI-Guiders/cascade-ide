@@ -14,6 +14,10 @@ internal static class SkiaBubbleFillRoleMapping
             ChatMessageVisualRole.ClarificationPending => SkiaBubbleFillRole.ClarificationPending,
             ChatMessageVisualRole.ClarificationResolved => SkiaBubbleFillRole.ClarificationResolved,
             ChatMessageVisualRole.SlashCommand => SkiaBubbleFillRole.MessageTool,
+            ChatMessageVisualRole.SedmContext => SkiaBubbleFillRole.SedmCard,
+            ChatMessageVisualRole.SedmIntent => SkiaBubbleFillRole.SedmCard,
+            ChatMessageVisualRole.SedmDecision => SkiaBubbleFillRole.SedmCard,
+            ChatMessageVisualRole.SedmLifecycle => SkiaBubbleFillRole.SedmCard,
             _ => SkiaBubbleFillRole.MessageAssistant
         };
 }

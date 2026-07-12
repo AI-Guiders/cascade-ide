@@ -49,6 +49,12 @@ public static partial class IdeCommands
     public const string ChatEditMessage = "chat_edit_message";
     /// <summary>Экспорт текущего чата в читаемый Markdown (роли, индексы, message_id). Поддерживаемый сценарий — явно подвести итоги длинной сессии: экспорт, затем краткое смысловое резюме и согласование с пользователем (см. MCP-PROTOCOL.md, раздел «Подведение итогов сессии чата»). args: write_file?:boolean, file_name?:string; returns: json; example: {"write_file":true}.</summary>
     public const string ChatExportReadable = "chat_export_readable";
+    /// <summary>SEDM scope strip one-liner активной workline (T2+T1). returns: json; example: {}.</summary>
+    public const string ChatGetSedmScope = "chat_get_sedm_scope";
+    /// <summary>Записать intent card (T1) в event log. args: outcome:string, trigger?:string, chosen_approach?:string, selection_rationale?:string, considered?:object[]; returns: text; example: {"outcome":"scope strip shows open worklines","chosen_approach":"meta projection","considered":[{"approach":"New Chat","rejected_because":"flat chat"}]}.</summary>
+    public const string ChatRecordSedmIntent = "chat_record_sedm_intent";
+    /// <summary>Записать decision_recorded (агент). args: outcome:string, chosen_approach?:string, selection_rationale?:string, considered?:object[], findings?:object[], touched_paths?:string[], revision?:string; returns: text; example: {"outcome":"S1 events in log","chosen_approach":"append-only","touched_paths":["Features/Chat/Foo.cs"]}.</summary>
+    public const string ChatRecordSedmDecision = "chat_record_sedm_decision";
     /// <summary>Переключить <c>primary_work_surface</c> intercom ↔ editor (ADR 0120). returns: text.</summary>
     public const string TogglePrimaryWorkSurface = "toggle_primary_work_surface";
     /// <summary>Установить якорь Forward: <c>intercom</c> | <c>editor</c>. args: surface:string; returns: text; example: {"surface":"intercom"}.</summary>

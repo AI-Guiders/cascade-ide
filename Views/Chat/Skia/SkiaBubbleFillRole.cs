@@ -15,5 +15,6 @@ internal enum SkiaBubbleFillRole
     ThreadHeader = 9,
     ThreadHeaderActive = 10,
     SpineCard = 11,
-    SpineStrip = 12
+    SpineStrip = 12,
+    SedmCard = 13,
 }

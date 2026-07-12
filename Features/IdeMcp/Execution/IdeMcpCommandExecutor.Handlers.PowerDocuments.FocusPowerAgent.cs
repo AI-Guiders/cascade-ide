@@ -238,6 +238,18 @@ internal sealed partial class IdeMcpCommandExecutor
         {
             return _vm.ChatPanel.SetProductSpineFromMcp(args);
         });
+        add(Services.IdeCommands.ChatGetSedmScope, async (_, _) =>
+        {
+            return _vm.ChatPanel.GetSedmScopeJson();
+        });
+        add(Services.IdeCommands.ChatRecordSedmIntent, async (args, ct) =>
+        {
+            return await _vm.ChatPanel.RecordIntentCardFromMcpArgsAsync(args, ct).ConfigureAwait(false);
+        });
+        add(Services.IdeCommands.ChatRecordSedmDecision, async (args, ct) =>
+        {
+            return await _vm.ChatPanel.RecordDecisionFromMcpArgsAsync(args, ct).ConfigureAwait(false);
+        });
 
         add(Services.IdeCommands.InstallOllamaModel, async (args, _) =>
         {

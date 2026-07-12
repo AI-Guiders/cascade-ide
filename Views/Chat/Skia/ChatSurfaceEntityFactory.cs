@@ -218,8 +218,12 @@ internal static class ChatSurfaceEntityFactory
                     continue;
                 }
 
-                entities.Add(ConfirmationEntity(entry, forwardHost));
-                previousMessageRole = null;
+                if (entry.Kind is ChatSurfaceEntryKind.Confirmation or ChatSurfaceEntryKind.SedmCard)
+                {
+                    entities.Add(ConfirmationEntity(entry, forwardHost));
+                    previousMessageRole = null;
+                    continue;
+                }
             }
         }
     }

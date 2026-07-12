@@ -1411,6 +1411,48 @@ report_handler = "spine_tree"
 
 [[command]]
 [[command.slash]]
+path = "/intercom sedm scope"
+domain = "intercom"
+object = "sedm"
+intent = "scope"
+help = "SEDM scope strip: context + intent + decision one-liner."
+group = "Intercom"
+kind = "report"
+report_handler = "sedm_scope_text"
+
+[[command]]
+[[command.slash]]
+path = "/intercom sedm detail"
+domain = "intercom"
+object = "sedm"
+intent = "detail"
+help = "SEDM: scope strip + timeline cards активной workline."
+group = "Intercom"
+kind = "report"
+report_handler = "sedm_scope_detail"
+
+# chat_get_sedm_scope — JSON scope strip (MCP)
+[[command]]
+command_id = "chat_get_sedm_scope"
+
+[[command.slash]]
+path = "/intercom sedm show"
+domain = "intercom"
+object = "sedm"
+intent = "show"
+help = "SEDM scope strip (JSON)."
+group = "Intercom"
+
+# chat_record_sedm_intent — Intent card T1 (MCP)
+[[command]]
+command_id = "chat_record_sedm_intent"
+
+# chat_record_sedm_decision — Decision record (MCP)
+[[command]]
+command_id = "chat_record_sedm_decision"
+
+[[command]]
+[[command.slash]]
 path = "/intercom topic cards"
 domain = "intercom"
 object = "topic"

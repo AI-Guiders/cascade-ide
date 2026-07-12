@@ -381,8 +381,11 @@
 | `chat_edit_message` | Заменить текст ответа ассистента по стабильному message_id; в лог пишется message_edited. args: message_id:string, new_content:string, reason?:string; returns: json; example: {"message_id":"a1b2c3d4e5f6789012345678901234ab","new_content":"fixed text"}. |
 | `chat_export_readable` | Экспорт текущего чата в читаемый Markdown (роли, индексы, message_id). Поддерживаемый сценарий — явно подвести итоги длинной сессии: экспорт, затем краткое смысловое резюме и согласование с пользователем (см. MCP-PROTOCOL.md, раздел «Подведение итогов сессии чата»). args: write_file?:boolean, file_name?:string; returns: json; example: {"write_file":true}. |
 | `chat_get_product_spine` | Прочитать сквозную линию продукта (spine) сессии. returns: json. |
+| `chat_get_sedm_scope` | SEDM scope strip one-liner активной workline (T2+T1). returns: json; example: {}. |
 | `chat_get_selected_message` | Получить выбранное сообщение чата в JSON. returns: json. Поля: selected_index, feed_ordinal, branch_message_count, message_id, role, content. |
 | `chat_open_selected_thread` | Открыть detail выбранной темы. returns: text. |
+| `chat_record_sedm_decision` | Записать decision_recorded (агент). args: outcome:string, chosen_approach?:string, selection_rationale?:string, considered?:object[], findings?:object[], touched_paths?:string[], revision?:string; returns: text; example: {"outcome":"S1 events in log","chosen_approach":"append-only","touched_paths":["Features/Chat/Foo.cs"]}. |
+| `chat_record_sedm_intent` | Записать intent card (T1) в event log. args: outcome:string, trigger?:string, chosen_approach?:string, selection_rationale?:string, considered?:object[]; returns: text; example: {"outcome":"scope strip shows open worklines","chosen_approach":"meta projection","considered":[{"approach":"New Chat","rejected_because":"flat chat"}]}. |
 | `chat_select_message` | Выбрать сообщение в чате. args: ordinal?:integer, end_ordinal?:integer, index?:integer; returns: text; example: {"ordinal":3}. ordinal/end_ordinal — 1-based gutter активной detail-ветки; index — 0-based глобальный ChatMessages. |
 | `chat_select_next_message` | Сместить выбор на следующее сообщение чата (keyboard-first). returns: text. |
 | `chat_select_next_thread` | Выбрать следующую тему в overview (циклически). returns: text. |

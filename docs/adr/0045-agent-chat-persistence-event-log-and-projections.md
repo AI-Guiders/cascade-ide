@@ -52,6 +52,10 @@
 - `clarification_answer_submitted`
 - `message_edited` — компенсирующее событие: новый текст для существующего `message_id` в payload (`message_added` / `message_completed` не переписываются).
 - `message_range_related` — явная связь contiguous gutter ordinals с `AttachmentAnchor` ([0137](0137-intercom-message-code-correspondence.md)); не top-level «только строки».
+- `context_card_materialized` — T2 context card (SEDM Perceive, [0174](0174-sedm-software-engineering-decision-making-ux-spine.md)).
+- `intent_card_recorded` — T1 intent card ([0173](0173-intercom-intent-card-session-decision-capture.md)).
+- `decision_recorded` — agent decision trail ([0173](0173-intercom-intent-card-session-decision-capture.md) §8).
+- `decision_marked_stale` / `decision_superseded` — lifecycle decision records.
 
 Полезная нагрузка `message_added` и `message_completed` v1 включает стабильный `message_id` (строка без дефисов), `role`, `content`.
 

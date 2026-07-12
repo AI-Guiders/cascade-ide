@@ -11,6 +11,8 @@ public static class ChatSlashReportHandlers
         public const string TopicTreeText = "topic_tree_text";
         public const string SpineList = "spine_list";
         public const string SpineTree = "spine_tree";
+        public const string SedmScopeText = "sedm_scope_text";
+        public const string SedmScopeDetail = "sedm_scope_detail";
     }
 
     private static readonly IReadOnlyDictionary<string, Func<ChatSurfaceSnapshot, string>> Formatters =
@@ -20,6 +22,8 @@ public static class ChatSlashReportHandlers
             [Ids.TopicTreeText] = ChatThreadPresentation.FormatTopicTree,
             [Ids.SpineList] = static s => ChatSlashSessionReports.FormatSpineList(s.ProductSpine),
             [Ids.SpineTree] = static s => ChatSlashSessionReports.FormatSpineTree(s.ProductSpine),
+            [Ids.SedmScopeText] = static s => ChatSlashSessionReports.FormatSedmScope(s.SedmScopeStrip),
+            [Ids.SedmScopeDetail] = static s => ChatSlashSessionReports.FormatSedmScopeDetail(s),
         };
 
     public static bool IsKnown(string handlerId) => Formatters.ContainsKey(handlerId);

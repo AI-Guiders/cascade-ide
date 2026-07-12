@@ -9,6 +9,7 @@ namespace CascadeIDE.Views.Chat.Skia;
 internal static class SkiaIntercomNavigationChrome
 {
     public const float SpineRowHeight = 26f;
+    public const float ScopeStripRowHeight = 22f;
     public const float TabBarHeight = 30f;
     public const int DefaultMaxVisibleTabs = 7;
     public const float HorizontalPad = 12f;
@@ -23,11 +24,13 @@ internal static class SkiaIntercomNavigationChrome
         SKRect? OverflowBounds,
         int OverflowHiddenCount);
 
-    public static float ResolveNavigationHeight(bool forwardHost, bool overviewMode, int topicCount)
+    public static float ResolveNavigationHeight(bool forwardHost, bool overviewMode, int topicCount, bool hasScopeStrip = false)
     {
         if (!forwardHost || topicCount <= 0)
             return 0f;
         var height = SpineRowHeight;
+        if (hasScopeStrip)
+            height += ScopeStripRowHeight;
         if (!overviewMode)
             height += TabBarHeight;
         return height;
@@ -38,9 +41,10 @@ internal static class SkiaIntercomNavigationChrome
         bool showOverviewCatalog,
         bool showStatusSubtitle,
         bool overviewMode,
-        int topicCount) =>
+        int topicCount,
+        bool hasScopeStrip = false) =>
         SkiaChatChromeRenderer.ResolveToolbarHeight(forwardHost, showStatusSubtitle)
-        + ResolveNavigationHeight(forwardHost, overviewMode, topicCount)
+        + ResolveNavigationHeight(forwardHost, overviewMode, topicCount, hasScopeStrip)
         + (showOverviewCatalog ? SkiaChatChromeRenderer.OverviewCatalogBandHeight : 0f);
 
     public static float DrawSpineRow(
@@ -74,6 +78,36 @@ internal static class SkiaIntercomNavigationChrome
         using var font = new SKFont(SKTypeface.FromFamilyName(fonts.ResolveProseFamily()), pt);
         using var paint = new SKPaint { IsAntialias = true, Color = theme.MutedContent };
         canvas.DrawText(spineText, HorizontalPad, top + pt * 0.9f + 4f, SKTextAlign.Left, font, paint);
+        return bottom;
+    }
+
+    public static float DrawScopeStripRow(
+        SKCanvas canvas,
+        float width,
+        float top,
+        SkiaChatTheme theme,
+        ChatSedmScopeStrip scopeStrip,
+        IntercomFontsSettings fonts)
+    {
+        var bottom = top + ScopeStripRowHeight;
+        using (var fill = new SKPaint
+        {
+            Color = SkiaKit.SkiaKitColor.Blend(theme.Surface, theme.BubbleAssistant, 0.08f),
+            IsAntialias = true,
+        })
+            canvas.DrawRect(new SKRect(0, top, width, bottom), fill);
+
+        using (var line = new SKPaint { Color = theme.Border, StrokeWidth = 1, IsAntialias = true })
+            canvas.DrawLine(0, bottom - 0.5f, width, bottom - 0.5f, line);
+
+        var text = scopeStrip.FormatStripText();
+        if (string.IsNullOrWhiteSpace(text))
+            text = "—";
+
+        var pt = Math.Max(9f, fonts.ResolveChromeSubtitlePt() - 1f);
+        using var font = new SKFont(SKTypeface.FromFamilyName(fonts.ResolveProseFamily()), pt);
+        using var paint = new SKPaint { IsAntialias = true, Color = theme.Content };
+        canvas.DrawText("Scope: " + Truncate(text, 96), HorizontalPad, top + pt * 0.9f + 3f, SKTextAlign.Left, font, paint);
         return bottom;
     }
 
