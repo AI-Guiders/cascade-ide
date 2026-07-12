@@ -5,6 +5,7 @@
 | Документ | Для кого | Статус |
 |----------|----------|--------|
 | [cide-design-handbook-v1.md](cide-design-handbook-v1.md) | **Старт здесь** — §2.0 design thesis, §1.1 два порога входа, принципы (§2), зоны (§3), фокус дизайнера (§8) | v1 hub |
+| [cide-glossary-v1.md](cide-glossary-v1.md) | **Глоссарий** — steer, SEDM, workline, intent/context card, cockpit | v1 |
 | [**cide-vds-v1.md**](cide-vds-v1.md) | **VDS:** design thesis + визуальная проекция ADR (принципы, DoD, слои Surface/Chrome/Instrument) | v1 |
 | [cascadeide-philosophy-v1.md](cascadeide-philosophy-v1.md) | Зачем продукт, метафоры, AI; два порога — см. [IOP-манифест](../iop-manifest-v1.md) | справочник |
 | [ide-chrome-tokens-v1.md](ide-chrome-tokens-v1.md) | Семантические токены IDE chrome (`CascadeTheme.*`) | v1 |

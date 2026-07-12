@@ -393,10 +393,20 @@ Intercom — **не один экран**, а **несколько домено�
 
 ## 7. Глоссарий (для общего языка с командой)
 
+**Полный словарь:** [cide-glossary-v1.md](cide-glossary-v1.md) — Intercom, SEDM, steer/follow-up, intent/context card, workline, cockpit.
+
+Краткая выжимка (legacy); новые термины — только в полном глоссарии:
+
 | Термин | Кратко |
 |--------|--------|
 | **PFD / Forward / MFD** | Три зоны внимания главного окна ([0021](../adr/0021-pfd-mfd-cockpit-attention-model.md)) |
 | **Intercom** | Канал диалога и команд в сессии, не generic chat |
+| **Habitat** | Session graph canvas в Forward — рабочая память сессии ([0172](../adr/0172-conversation-first-habitat.md)) |
+| **Workline** | Параллельная линия работы в сессии; не New Chat |
+| **Steer** | Перехват intent агента mid-run; **не** передача контроля ([0116](../adr/0116-intercom-session-tree-and-agent-message-steering.md)) |
+| **SEDM** | Цикл Perceive→Process→Perform→Evaluate; UX spine ([0174](../adr/0174-sedm-software-engineering-decision-making-ux-spine.md)) |
+| **Intent card / Context card** | T1 решение в workline / T2 Perceive для файла ([0173](../adr/0173-intercom-intent-card-session-decision-capture.md), 0174) |
+| **IOP** | Intent-Oriented Programming — дисциплина намерения и верификации |
 | **Topic / topic card** | Тема работы в сессии; карточка с summary |
 | **Spine** | Продуктовая линия «над чем работаем в целом» ([0096](../adr/0096-intercom-topic-card-summary-and-product-spine.md), [0127](../adr/0127-intercom-spine-and-topic-tabs-chrome-navigation.md)) |
 | **Forward (primary work surface)** | Редактор или Intercom на всю центральную колонку |
@@ -404,7 +414,6 @@ Intercom — **не один экран**, а **несколько домено�
 | **IDS** | IDE Display System — overlay поверх workspace (палитра, модалки) ([0079](../adr/0079-ide-display-system-ids-overlay-pipeline.md)) |
 | **CDS** | Pipeline «канал → compositor → surface» для приборов кабины ([0036](../adr/0036-cds-channel-compositor-surface-pipeline.md)) |
 | **MCP** | Протокол инструментов агента внутри IDE |
-| **IOP** | Intent-Oriented Programming — дисциплина намерения и верификации |
 | **Melody / Chord** | Клавиатурная «мелодия» команд после Ctrl+K ([0060](../adr/0060-keyboard-chord-stack-fms-tactical-strategic.md)) |
 | **Slash / unified command line** | `/…` в composer Intercom → тот же `command_id`, что палитра/MCP ([0119](../adr/0119-chat-slash-commands-intercom-surface.md)) |
 

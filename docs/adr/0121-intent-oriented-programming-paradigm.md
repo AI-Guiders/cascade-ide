@@ -15,6 +15,7 @@
 | [0109](0109-declarative-parametric-melody-catalog-toml-and-code-binders.md) | Каталог Intent Melody (декларативный слой интентов) |
 | [0119](0119-chat-slash-commands-intercom-surface.md) | Слэш в Intercom → тот же `command_id`, что палитра/MCP |
 | [0120](0120-primary-work-surface-intercom-or-editor.md) | Якорь Forward: Intercom или редактор — где живёт IOP-цикл |
+| [0174](0174-sedm-software-engineering-decision-making-ux-spine.md) | SEDM — операционная модель под IOP; фазы → UX |
 | [0122](0122-collaborative-iop-environment-and-shared-situational-display.md) | Среда: N станций `(P)(F)(M)` + общий ситуационный экран комнаты |
 | [0019](0019-shared-git-core-ide-and-git-mcp.md) | Паритет git: человек и агент в одном контуре |
 | [0084](0084-agent-edits-editor-source-of-truth-presence-channel.md) | Редактор — source of truth текста; чат — intent/status |
@@ -97,6 +98,8 @@ Cascade IDE — **открытая рабочая реализация** пре�
 <a id="adr0121-p4"></a>
 
 ### 4. Терминология (глоссарий v0)
+
+Полный словарь продукта: [cide-glossary-v1.md](../design/cide-glossary-v1.md).
 
 | Термин | Значение в IOP/CIDE |
 |--------|---------------------|
