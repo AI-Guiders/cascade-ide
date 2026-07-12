@@ -254,6 +254,8 @@
 | [0170](0170-intercom-feed-readability-mlp.md) | **Intercom feed readability MLP:** comfortable default, 14pt prose, метка «Локально», отступы ленты | Proposed · In progress |
 | [0171](0171-presentation-tiers-compact-vs-cockpit.md) | **Presentation tiers:** Compact (standard IDE) vs Cockpit (3 mon / UltraWide); не впихивать P/F/M на 1–2 экрана | Accepted · Implemented |
 | [0172](0172-conversation-first-habitat.md) | **Session graph habitat:** Intercom = рабочая память сессии; worklines + tree/timeline; moat = нелинейность; concept ladder + API boundary | Proposed |
+| [0173](0173-intercom-intent-card-session-decision-capture.md) | **Intent card:** структурированная фиксация решений в workline (outcome/trigger/considered/chosen); event log [0045]; сборка ADR; IOP + SDM | Proposed |
+| [0174](0174-sedm-software-engineering-decision-making-ux-spine.md) | **SEDM:** Perceive/Process/Perform/Evaluate; context card + scope strip; SM/CRS как Process engines; UX spine под IOP | Proposed |
 
 ## Сборка в один документ (HTML, TXT, PDF)
 

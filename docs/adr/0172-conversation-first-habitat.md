@@ -42,6 +42,8 @@ Session graph habitat — ответ на эту ось: Intercom — не «е�
 | [0166](0166-agent-centric-harness-model-comfort-and-pay-per-token-economics.md) | Harness ≠ habitat |
 | [0170](0170-intercom-feed-readability-mlp.md) | Comfortable flat feed внутри ветки |
 | [0171](0171-presentation-tiers-compact-vs-cockpit.md) | Compact ≠ session-graph default |
+| [0173](0173-intercom-intent-card-session-decision-capture.md) | Intent card: фиксация решений в workline; event log; эскалация в ADR |
+| [0174](0174-sedm-software-engineering-decision-making-ux-spine.md) | SEDM: операционная модель; context card; UX spine; SM/CRS перепривязка |
 
 ---
 
@@ -292,6 +294,8 @@ Session graph — **клиентская** модель. Cloud.ru Foundation Mod
 Соседние ветки и worklines **не** входят в `messages[]`, пока не станут активными. Scope strip и one-liner в system — сжатая карта («2 open worklines»), не полный dump. Решения и checkpoint — KB / export, chat context — кэш.
 
 Workline может нести **intent tag** (например `cascade-ide/habitat`) → bias для `route_context` и MCP pull без чтения всей сессии.
+
+**Intent card** [0173](0173-intercom-intent-card-session-decision-capture.md) — типизированная фиксация решения **внутри** workline (`outcome`, `trigger`, `considered[]`, `chosen_approach` + `selection_rationale`); не заменяет intent tag и не равна ADR. В лестнице **SEDM** [0174](0174-sedm-software-engineering-decision-making-ux-spine.md) — артефакт **T1**; **context card** (T2) — Perceive для файла в scope strip.
 
 ---
 
