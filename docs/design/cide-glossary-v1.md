@@ -54,6 +54,9 @@
 | **Applies** | **Применимо** (one-liner) | Какие ADR/KB относятся к файлу |
 | **Blast radius** | **Радиус поражения** / blast radius | Tao I-9, Q-blast |
 | **Checkpoint** | **Чекпоинт** | Export, handoff, KB |
+| **Decision record** | **Запись решения** (агент) | `decision_recorded`; findings + card |
+| **Stale decision** | **Устаревшее решение** | Код ушёл вперёд; re-verify, не trust |
+| **Superseded** | **Заменено** | Как в ADR; новое событие вместо старого |
 
 ---
 

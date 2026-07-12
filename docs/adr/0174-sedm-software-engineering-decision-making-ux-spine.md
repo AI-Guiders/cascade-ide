@@ -257,10 +257,10 @@ Query-first (до массового Read): `codebase_index_search`, `get_code_n
 
 ## Открытые вопросы
 
-- Публичное имя SEDM в brand/manifest или только internal (v1: **internal**).
-- Context card: только projection из существующих источников или отдельное событие в [0045](0045-agent-chat-persistence-event-log-and-projections.md) (рекомендация v1: **projection**, не event).
-- Кто выставляет `sedm_phase` — оператор, агент, или эвристика по последнему действию.
 - Связь с EICAS/Health: advisory только в Evaluate/Perform, не в Perceive prose [0021](0021-pfd-mfd-cockpit-attention-model.md).
+- Debounce `context_card_materialized` и политика auto-stale decisions — при реализации S1/S2.
+
+**Закрыто (unified model v1.1+, 2026-07-12):** SEDM internal; T2 = **событие** в [0045](0045-agent-chat-persistence-event-log-and-projections.md); `sedm_phase` → протокол маркеров [WORK/HUMAN]-style (KB §11); SM off by default для operator.
 
 ---
 

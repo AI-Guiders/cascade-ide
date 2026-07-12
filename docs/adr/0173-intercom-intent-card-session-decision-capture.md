@@ -188,6 +188,19 @@ N intent cards в workline / по intent tag
 
 Intent cards остаются в session export как **provenance**; ADR не дублирует их дословно.
 
+### 8. Decision history (агент) — addendum v1.1
+
+См. unified model §12 (KB `kb-cide-sedm-unified-model-v1`): после исследования агент пишет **`decision_recorded`** — те же поля `card` + `considered[]`, плюс **`findings[]`** (сжатые находки) и **`basis`** (`revision`, `touched_paths`).
+
+| Событие | Кто | Зачем |
+|---------|-----|--------|
+| `intent_card_recorded` | оператор | намерение / выбор пути |
+| `decision_recorded` | агент | след «находки → решение»; не grep снова при возврате |
+| `decision_marked_stale` | система / оператор | код ушёл (другая workline, commit) |
+| `decision_superseded` | любой | замена записи (аналог Superseded в ADR) |
+
+**Cross-workline:** workline A parked, B меняет `touched_paths` из basis A → decisions A → **stale**; при activate A — re-verify, не слепой trust. Materialization: только **active** + one-liner по **stale**.
+
 ---
 
 ## Отклонённые альтернативы
@@ -216,7 +229,7 @@ Intent cards остаются в session export как **provenance**; ADR не 
 | Фаза | Содержание |
 |------|------------|
 | **P0** | ADR + схема payload v1 (этот документ) |
-| **P1** | `intent_card_recorded` в log + system card в timeline (read-only projection) |
+| **P1** | `intent_card_recorded` + `decision_recorded` в log + system card в timeline |
 | **P2** | Агент propose + operator approve; scope strip one-liner |
 | **P3** | → KB, draft ADR template, incomplete marker |
 
