@@ -14,10 +14,11 @@ internal static class ChatSurfaceEntityFactory
         bool overviewMode,
         Guid detailThreadId,
         bool forwardHost = false,
-        IntercomFontsSettings? intercomFonts = null)
+        IntercomFontsSettings? intercomFonts = null,
+        bool compactSideHost = false)
     {
         var entities = new List<ISkiaChatEntity>();
-        var hideNavChromeInFeed = forwardHost;
+        var hideNavChromeInFeed = forwardHost || compactSideHost;
 
         if (!hideNavChromeInFeed)
             AppendSpine(entities, snapshot.ProductSpine, overviewMode, forwardHost, intercomFonts);
@@ -205,8 +206,8 @@ internal static class ChatSurfaceEntityFactory
                                             or ChatMessageVisualRole.Assistant
                                             or ChatMessageVisualRole.Thinking;
                     var gapAfter = suppressTitle
-                        ? forwardHost ? 3f : 5f
-                        : forwardHost ? 6f : 14f;
+                        ? forwardHost ? 3f : 6f
+                        : forwardHost ? 6f : 16f;
                     entities.Add(MessageEntity(
                         entry,
                         forwardHost,

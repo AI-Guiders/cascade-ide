@@ -12,6 +12,7 @@ internal static class SkiaChatSceneBuilder
         bool overviewMode,
         Guid detailThreadId,
         bool forwardHost = false,
-        IntercomFontsSettings? intercomFonts = null) =>
-        ChatSurfaceEntityFactory.Build(snapshot, overviewMode, detailThreadId, forwardHost, intercomFonts);
+        IntercomFontsSettings? intercomFonts = null,
+        bool compactSideHost = false) =>
+        ChatSurfaceEntityFactory.Build(snapshot, overviewMode, detailThreadId, forwardHost, intercomFonts, compactSideHost);
 }

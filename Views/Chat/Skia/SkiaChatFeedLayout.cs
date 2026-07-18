@@ -34,8 +34,8 @@ internal readonly struct SkiaChatFeedLayout
     public float RoleRailWidth => (ForwardHost ? 52f : 68f) * Scale;
     public float RoleLabelInset => 6f;
     public float TextInset => 8f;
-    public float BodyTopPad => ForwardHost ? 6f : 8f;
-    public float SegmentGap => ForwardHost ? 4f : 6f;
+    public float BodyTopPad => ForwardHost ? 6f : 10f;
+    public float SegmentGap => ForwardHost ? 4f : 8f;
     public float RowEdgePad => 3f;
 
     public float ProseFontSize { get; }

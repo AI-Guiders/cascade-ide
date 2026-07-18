@@ -1,6 +1,6 @@
 # ADR 0170: Intercom feed readability MLP — типографика, роли, flat feed
 
-**Статус:** Proposed · In progress (P0 defaults + метки)  
+**Статус:** Accepted · Implemented (P0 defaults + метки)  
 **Дата:** 2026-06-28
 
 ## Резюме

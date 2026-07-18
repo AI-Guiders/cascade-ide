@@ -1,4 +1,5 @@
 #nullable enable
+using CascadeIDE.Features.Chat;
 using CascadeIDE.Models;
 using CascadeIDE.Models.Intercom;
 using CascadeIDE.Views.SkiaKit;
@@ -72,6 +73,32 @@ internal static class SkiaChatBubbleRenderer
 
         var bodyColor = ResolveBodyColor(spec.BodyTone);
         var codeColor = new SKColor(180, 190, 210);
+        if (ChatMessageBodyPresentation.ShouldUseDocumentLayout(body))
+        {
+            var document = SkiaRichTextKitMarkdown.TryMeasureDocument(
+                body,
+                bodyWidth,
+                baseFontSize: ProseFontSize(spec, feed),
+                bodyColor,
+                codeColor,
+                maxBodyLines,
+                spec.LineHeight,
+                forwardHost: spec.ForwardFeedMetrics,
+                fontFamily: feed.ProseFamily,
+                monoFamily: feed.MonoFamily);
+            if (document is not null)
+            {
+                var placeholder = new SkiaMarkdownLine([new SkiaMarkdownRun("", SkiaMarkdownStyle.Plain)]);
+                return new SkiaChatBubbleMetrics(
+                    [placeholder],
+                    spec.Footer,
+                    titleHeight,
+                    footerHeight,
+                    spec.LineHeight,
+                    document);
+            }
+        }
+
         var rich = SkiaRichTextKitMarkdown.TryMeasure(
             body,
             bodyWidth,
