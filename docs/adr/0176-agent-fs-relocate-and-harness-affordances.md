@@ -1,7 +1,8 @@
 # ADR 0176: Agent FS relocate и harness affordances (дешёвый правильный edit path)
 
 **Статус:** Proposed  
-**Дата:** 2026-07-18
+**Дата:** 2026-07-18  
+**Tags:** #fs-relocate #agent-affordances #living #adr
 
 ## Резюме
 
@@ -31,6 +32,7 @@
 | Документ | Роль |
 |----------|------|
 | KB `work/projects/.../cascade-ide/note-cognitive-se-environments-historiography-v0.md` | Триггер: перенос domains→work через Write+Delete |
+| KB `work/projects/.../cascade-ide/note-canon-map-dynamic-inventory-v0.md` | Почему cite проигрывает: нет динамической карты канона (HCI-like) |
 | KB `META/kb-taxonomy-v1.md` | Правило placement; tool должен *дешевить* соблюдение |
 | ADR IPSE lesson (historiography note) | Framework tax vs thin tool — здесь thin tool *снимает* обход |
 

@@ -1,7 +1,8 @@
 # ADR 0175: ADCM Partition — continuity pair (TopicDecisions + Handover ops) + message anchors
 
 **Статус:** Proposed (наметки / направление)  
-**Дата:** 2026-07-18
+**Дата:** 2026-07-18  
+**Tags:** #adcm #harness #living #adr
 
 ## Резюме
 
