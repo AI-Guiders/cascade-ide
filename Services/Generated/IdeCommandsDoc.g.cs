@@ -69,6 +69,7 @@ internal static class IdeCommandsDoc
         ["debug_step_out"] = "Шаг с выходом (DAP stepOut). returns: text.",
         ["debug_step_over"] = "Шаг через строку (DAP next). returns: text.",
         ["debug_stop"] = "Завершить сессию отладки (dispose DAP). returns: text.",
+        ["debug_stop_context"] = "Один снимок после stopped: meta + stack + variables (Core DapStopContext). args: frame_index?:integer, fast?:boolean, max_depth?:integer, max_children_per_node?:integer, time_budget_ms?:integer, format?:string, json_indented?:boolean; returns: text; example: {\"frame_index\":0,\"fast\":true}.",
         ["debug_variables"] = "Переменные кадра. args: frame_index?:integer; returns: text; example: {\"frame_index\":0}.",
         ["delete_knowledge_file"] = "Удалить knowledge-файл. args: file_path:string, knowledge_path?:string, knowledge_root_id?:string; returns: text; example: {\"file_path\":\"tmp.md\"}.",
         ["delete_knowledge_section"] = "Удалить секцию из knowledge-файла. args: file_path:string, section_id:string, knowledge_path?:string, knowledge_root_id?:string; returns: text; example: {\"file_path\":\"index.md\",\"section_id\":\"foo\"}.",

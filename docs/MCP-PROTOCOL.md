@@ -254,6 +254,7 @@
 | `debug_step_out` | Шаг с выходом (DAP stepOut). returns: text. |
 | `debug_step_over` | Шаг через строку (DAP next). returns: text. |
 | `debug_stop` | Завершить сессию отладки (dispose DAP). returns: text. |
+| `debug_stop_context` | Один снимок после stopped: meta + stack + variables (Core DapStopContext). args: frame_index?:integer, fast?:boolean, max_depth?:integer, max_children_per_node?:integer, time_budget_ms?:integer, format?:string, json_indented?:boolean; returns: text; example: {"frame_index":0,"fast":true}. |
 | `debug_variables` | Переменные кадра. args: frame_index?:integer; returns: text; example: {"frame_index":0}. |
 | `fetch_web_public_url` | Загрузить публичный HTTPS-документ по URL и вернуть тело как читаемый текст (HTML упрощается до текста, поле extraction в JSON). Запрос из машины оператора; только https; локальные/частные хосты блокируются базово (не полная SSRF-защита). args: url:string, max_chars?:integer; returns: json; example: {\"url\":\"https://learn.microsoft.com/en-us/dotnet/\"}. |
 | `forge.artifact.goto` | Открыть forge artifact по bracket `[FRG:…]` (DOI forge.artifact.goto). args: bracket:string, base_url?:string, select_code?:boolean; returns: text; example: {"bracket":"[FRG:issue:1]","select_code":true}. |

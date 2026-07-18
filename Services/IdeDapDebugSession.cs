@@ -695,6 +695,26 @@ public sealed class IdeDapDebugSession
         return "# Debug session stopped.";
     }
 
+    /// <summary>Один снимок stop-context через Core <see cref="DapStopContext"/> (паритет MCP).</summary>
+    public async Task<string> StopContextAsync(
+        DapFrameInspectionOptions? options = null,
+        CancellationToken cancellationToken = default)
+    {
+        _ = cancellationToken;
+        if (_client is null)
+            return "# No active debug session.";
+        try { await WaitForStoppedAsync(TimeSpan.FromSeconds(5)).ConfigureAwait(false); }
+        catch (TimeoutException) { return "# Timeout (5s) waiting for execution to stop."; }
+
+        var (client, _) = GetSessionAndThreadId();
+        var meta = new DapStopContextMeta(
+            _lastStoppedThreadId,
+            _sessionWorkspacePath,
+            _sessionTargetPath,
+            _lastExceptionText);
+        return await DapStopContext.FormatMarkdownAsync(client, meta, options ?? new DapFrameInspectionOptions()).ConfigureAwait(false);
+    }
+
     private async Task StopInternalAsync()
     {
         var client = _client;

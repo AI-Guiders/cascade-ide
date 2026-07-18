@@ -112,7 +112,8 @@
     <PackageReference Include="AIGuiders.DotNetBuildTestParsers" Version="0.1.1" />
     <ProjectReference Include="..\dotnet-build-test-core\DotNetBuildTest.Core.csproj" Condition="Exists('..\dotnet-build-test-core\DotNetBuildTest.Core.csproj')" />
     <PackageReference Include="AIGuiders.DotNetBuildTest.Core" Version="0.1.0" Condition="!Exists('..\dotnet-build-test-core\DotNetBuildTest.Core.csproj')" />
-    <PackageReference Include="AIGuiders.DotnetDebugMCP.Core" Version="0.1.0" />
+    <ProjectReference Include="..\dotnet-debug-core\DotnetDebug.Core.csproj" Condition="Exists('..\dotnet-debug-core\DotnetDebug.Core.csproj')" />
+    <PackageReference Include="AIGuiders.DotnetDebugMCP.Core" Version="0.2.0" Condition="!Exists('..\dotnet-debug-core\DotnetDebug.Core.csproj')" />
     <!-- Локальный Core в open/; иначе NuGet AIGuiders.HybridCodebaseIndex.Core (как agent-notes-core) -->
     <ProjectReference Include="..\hybrid-codebase-index-core\HybridCodebaseIndex.Core.csproj" Condition="Exists('..\hybrid-codebase-index-core\HybridCodebaseIndex.Core.csproj')" />
     <ProjectReference Include="wire\intercom-wire-core\IntercomWire.Core.csproj" Condition="Exists('wire\intercom-wire-core\IntercomWire.Core.csproj')" />

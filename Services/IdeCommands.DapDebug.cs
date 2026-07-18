@@ -20,6 +20,8 @@ public static partial class IdeCommands
     public const string DebugStepOut = "debug_step_out";
     /// <summary>Завершить сессию отладки (dispose DAP). returns: text.</summary>
     public const string DebugStop = "debug_stop";
+    /// <summary>Один снимок после stopped: meta + stack + variables (Core DapStopContext). args: frame_index?:integer, fast?:boolean, max_depth?:integer, max_children_per_node?:integer, time_budget_ms?:integer, format?:string, json_indented?:boolean; returns: text; example: {"frame_index":0,"fast":true}.</summary>
+    public const string DebugStopContext = "debug_stop_context";
     /// <summary>Стек вызовов (DAP stackTrace). returns: text.</summary>
     public const string DebugStackTrace = "debug_stack_trace";
     /// <summary>Переменные кадра. args: frame_index?:integer; returns: text; example: {"frame_index":0}.</summary>

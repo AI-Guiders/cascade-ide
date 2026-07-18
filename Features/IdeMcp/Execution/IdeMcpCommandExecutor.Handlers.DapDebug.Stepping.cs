@@ -1,3 +1,7 @@
+using System.Text.Json;
+using CascadeIDE.Services;
+using DotnetDebug.Core;
+
 namespace CascadeIDE.Features.IdeMcp.Execution;
 
 /// <summary>MCP DAP: шагание, стоп, стек, снимок, переменные кадра.</summary>
@@ -35,6 +39,16 @@ internal sealed partial class IdeMcpCommandExecutor
             catch (Exception ex) { return "# " + ex.Message; }
         });
 
+        add(Services.IdeCommands.DebugStopContext, async (args, ct) =>
+        {
+            try
+            {
+                var opts = ParseDapFrameInspectionOptions(args);
+                return await _vm.DapDebug.StopContextAsync(opts, ct).ConfigureAwait(false);
+            }
+            catch (Exception ex) { return "# " + ex.Message; }
+        });
+
         add(Services.IdeCommands.DebugStackTrace, async (_, ct) =>
         {
             try { return await _vm.DapDebug.StackTraceFromSnapshotAsync(ct).ConfigureAwait(false); }
@@ -53,5 +67,22 @@ internal sealed partial class IdeMcpCommandExecutor
             try { return await _vm.DapDebug.VariablesAsync(frameIndex, ct).ConfigureAwait(false); }
             catch (Exception ex) { return "# " + ex.Message; }
         });
+    }
+
+    private static DapFrameInspectionOptions ParseDapFrameInspectionOptions(IReadOnlyDictionary<string, JsonElement>? args)
+    {
+        var fast = McpCommandJsonArgs.Bool(args, "fast");
+        var format = McpCommandJsonArgs.String(args, "format");
+        var formatJson = string.Equals(format, "json", StringComparison.OrdinalIgnoreCase);
+        return new DapFrameInspectionOptions
+        {
+            FrameIndex = McpCommandJsonArgs.Int(args, "frame_index", 0),
+            Fast = fast,
+            MaxDepth = McpCommandJsonArgs.OptionalInt32(args, "max_depth"),
+            MaxChildrenPerNode = McpCommandJsonArgs.OptionalInt32(args, "max_children_per_node"),
+            TimeBudgetMs = McpCommandJsonArgs.OptionalInt32(args, "time_budget_ms"),
+            FormatJson = formatJson,
+            JsonIndented = McpCommandJsonArgs.OptionalBool(args, "json_indented") ?? true,
+        };
     }
 }
