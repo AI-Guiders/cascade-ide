@@ -70,7 +70,33 @@ public sealed class ChatHarnessCoordinatorTests
 
         var fifth = coord.OnThreadMessageCommitted(5);
         Assert.True(fifth.InjectPreCompact);
-        Assert.Contains("preCompact", fifth.PreCompactUserMessage, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("ADCM", fifth.PreCompactUserMessage, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public void OnContextUsagePct_EmitsAtWarnThreshold()
+    {
+        var settings = new CascadeIdeSettings
+        {
+            Agent = new AgentSettings
+            {
+                Harness = new AgentHarnessSettings
+                {
+                    CheckpointOnContextPressure = true,
+                    ContextWarnPct = 75,
+                },
+            },
+        };
+
+        var coord = new ChatHarnessCoordinator(() => settings, executeIdeCommand: null);
+        coord.BindSession(Guid.NewGuid());
+
+        Assert.False(coord.OnContextUsagePct(7000, 10000).InjectPreCompact);
+        var atWarn = coord.OnContextUsagePct(7500, 10000);
+        Assert.True(atWarn.InjectPreCompact);
+        Assert.Contains("ADCM", atWarn.PreCompactUserMessage, StringComparison.OrdinalIgnoreCase);
+        Assert.False(coord.OnContextUsagePct(8000, 10000).InjectPreCompact);
+        Assert.True(coord.OnContextUsagePct(8500, 10000).InjectPreCompact);
     }
 
     [Fact]

@@ -25,16 +25,19 @@ public sealed class AgentHarnessSettings
     /// <summary>До loopback MCP (0082): не поднимать второй CascadeIDE для Cursor ACP — MAF/cloud используют in-proc.</summary>
     public bool SuppressAcpIdeStdioInject { get; set; } = true;
 
-    /// <summary>Длинная ветка темы — видимое preCompact-сообщение (P0.2 parity).</summary>
+    /// <summary>Длинная ветка темы — видимый ADCM pressure inject (P0.2).</summary>
     public bool CheckpointOnContextPressure { get; set; } = true;
 
-    /// <summary>Сообщений в активной теме до preCompact-предупреждения.</summary>
+    /// <summary>Сообщений в активной теме до ADCM context-pressure предупреждения.</summary>
     public int ContextPressureThreadMessageThreshold { get; set; } = 60;
 
     public int ContextPressureRepeatEveryMessages { get; set; } = 30;
 
     /// <summary>Блок harness telemetry в minimized/MAF context (P2.3).</summary>
     public bool InjectHarnessTelemetryInContext { get; set; } = true;
+
+    /// <summary>Порог предупреждения: prompt tokens хода ≥ N% <c>max_model_len</c> (FM catalog).</summary>
+    public int ContextWarnPct { get; set; } = 75;
 
     /// <summary>После <c>/topic create</c> — шаблон brief в поле ввода (P1.2).</summary>
     public bool InjectTopicForkBrief { get; set; } = true;

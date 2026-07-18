@@ -20,6 +20,7 @@ public sealed class ChatHarnessCoordinator
     private int _userTurnCount;
     private int _lastCheckpointTurn;
     private int _lastContextPressureAtCount;
+    private int _lastUsagePressureAtPct;
     private string? _hotContextBlock;
     private bool _hotContextLoaded;
     private string? _hotContextScope;
@@ -53,6 +54,7 @@ public sealed class ChatHarnessCoordinator
             _userTurnCount = 0;
             _lastCheckpointTurn = 0;
             _lastContextPressureAtCount = 0;
+            _lastUsagePressureAtPct = 0;
             _hotContextBlock = null;
             _hotContextLoaded = false;
             _hotContextScope = null;
@@ -131,6 +133,44 @@ public sealed class ChatHarnessCoordinator
         }
 
         return HarnessContextPressureResult.None;
+    }
+
+    /// <summary>
+    /// FM prompt tokens vs model max — usage-based pressure (Cursor Context Usage parity).
+    /// Fires at <see cref="AgentHarnessSettings.ContextWarnPct"/> and every +10pp thereafter.
+    /// </summary>
+    public HarnessContextPressureResult OnContextUsagePct(int promptTokens, int maxModelLen)
+    {
+        var h = _getSettings().Agent.Harness;
+        if (!h.CheckpointOnContextPressure || maxModelLen <= 0 || promptTokens <= 0)
+            return HarnessContextPressureResult.None;
+
+        var pct = (int)Math.Round(100.0 * promptTokens / maxModelLen);
+        var warnPct = Math.Clamp(h.ContextWarnPct, 1, 100);
+        if (pct < warnPct)
+            return HarnessContextPressureResult.None;
+
+        lock (_gate)
+        {
+            // First fire at warnPct; then every +10 percentage points of context fill.
+            if (_lastUsagePressureAtPct == 0)
+            {
+                if (pct < warnPct)
+                    return HarnessContextPressureResult.None;
+                _lastUsagePressureAtPct = warnPct;
+            }
+            else if (pct < _lastUsagePressureAtPct + 10)
+            {
+                return HarnessContextPressureResult.None;
+            }
+            else
+            {
+                _lastUsagePressureAtPct = pct;
+            }
+
+            QueueAgentContextReminder(pct, "context_usage_pct");
+            return HarnessContextPressureResult.PreCompactPrompt(BuildUsagePressureUserMessage(pct, promptTokens, maxModelLen));
+        }
     }
 
     public string? TryConsumePendingAgentContext()
@@ -268,17 +308,24 @@ public sealed class ChatHarnessCoordinator
     private void QueueAgentContextReminder(int count, string reason)
     {
         _pendingAgentContext =
-            "Session checkpoint (L1 harness · agent-memory §9): длинная сессия или context pressure. " +
+            "Session checkpoint (L1 harness · ADCM · agent-memory §9): длинная сессия или context pressure. " +
             "Предложи явно: (1) chat_export_readable, (2) краткое резюме решений/open items, " +
-            "(3) согласование с пользователем. Не silent summary. " +
-            $"Playbook: knowledge/worlds/agent-orchestration/playbook-session-summary-and-chat-export-v1.md " +
-            $"(harness: {reason}, thread_messages≈{count})";
+            "(3) согласование с пользователем. Не silent summary. Тактики: Prevent/Partition/Persist/Prune — " +
+            $"playbook-agent-driven-context-management-v1.md " +
+            $"(harness: {reason}, approx={count})";
     }
 
     private static string BuildPreCompactUserMessage(int threadMessages) =>
-        $"[harness preCompact · ~{threadMessages} messages in topic] " +
-        "Длинная ветка — скоро упрётся в лимит контекста. " +
-        "По канону: export → резюме → согласование. Скажи «подведи итоги с экспортом», если важно сохранить нить.";
+        $"[harness ADCM · context pressure · ~{threadMessages} messages in topic] " +
+        "Длинная ветка — бюджет контекста. " +
+        "Выбери тактику ADCM: Prevent/Partition/Persist/Prune (не silent rewrite чата). " +
+        "По канону часто: export → резюме → согласование. Скажи «подведи итоги с экспортом», если важно сохранить нить.";
+
+    private static string BuildUsagePressureUserMessage(int pct, int promptTokens, int maxModelLen) =>
+        $"[harness ADCM · context usage · ~{pct}% prompt {promptTokens}/{maxModelLen}] " +
+        "Контекст по токенам заполнен сильно. " +
+        "Выбери тактику ADCM (часто Persist/export или Partition/fork). " +
+        "Скажи «подведи итоги с экспортом», если важно сохранить нить.";
 
     private static string BuildCheckpointUserMessage(int turn) =>
         $"[harness checkpoint · ~{turn} user turns] Длинная сессия — прошу подвести итоги: " +
