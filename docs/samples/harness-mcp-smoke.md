@@ -35,7 +35,7 @@
 | Поведение | Где видно |
 |-----------|-----------|
 | Checkpoint @40 user turns | сообщение `[harness checkpoint · …]` в Intercom |
-| preCompact @60 msgs/topic | `[harness preCompact · …]` |
+| ADCM pressure @60 msgs/topic | `[harness ADCM · context pressure · …]` |
 | `/topic create` brief | шаблон в поле ввода |
 | Auto-verify после `.cs` | AEE панель / `ide_agent_status.active` |
 

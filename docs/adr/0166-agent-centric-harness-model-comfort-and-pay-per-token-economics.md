@@ -55,7 +55,7 @@ Harness = **пять плоскостей** (model, tools, memory, verify, lifec
 | **Flat Pro** (Cursor legacy) | Длинный контекст «дешёв»; pull-инструменты менее критичны |
 | **Pay-per-token** (Cloud.ru FM API) | Каждый @repo и молчаливый compaction **стоят денег**; pull beats push |
 
-CIDE с Cloud.ru (`settings.toml` → `foundation-models.api.cloud.ru`) делает **token budget** видимым для оператора и **обязательным** для продукта: compactor, fork topics, MCP pull, KB writes — не «nice to have».
+CIDE с Cloud.ru (`settings.toml` → `foundation-models.api.cloud.ru`) делает **token budget** видимым для оператора и **обязательным** для продукта: **ADCM** (agent-driven context management), fork topics, MCP pull, KB writes — не «nice to have». Silent chat compaction — антипаттерн. Канон: KB `playbook-agent-driven-context-management-v1.md`.
 
 ### 1.2 Co-design: модель как пользователь harness
 
@@ -75,7 +75,7 @@ CIDE с Cloud.ru (`settings.toml` → `foundation-models.api.cloud.ru`) дела
 | Project/User **Rules** (`.mdc`) | механизм 🟡 | контент: указатели на KB, протоколы | тонкий preset или замена hot |
 | **L0 hot** (`read_hot_context`, manifest) | 🔴 | 🟢 agent-notes MCP | 🟢 **in-proc** [0118](0118-agent-notes-core-2-toml-and-knowledge-path.md) |
 | L1 + `route_context` | 🔴 | 🟢 | 🟢 in-proc / pull |
-| Hooks (checkpoint, pressure) | механизм 🟡 | 🟢 `.cursor/hooks.json` | 🟡 `[agent.harness]` turn-count; preCompact backlog |
+| Hooks (checkpoint, pressure) | механизм 🟡 | 🟢 `.cursor/hooks.json` | 🟢 `[agent.harness]` turns+msgs+usage %; dual-channel inject (**ADCM**, не Cursor preCompact clone) |
 | **Tool surface** (KB, index, debug, verify) | отдельные stdio MCP | 🟢 те же MCP в Cursor | 🟢 **in-proc** `ide_execute_command` ([0118](0118-agent-notes-core-2-toml-and-knowledge-path.md), HCI, AEE, `debug_*`) |
 | **Полный roslyn-mcp** (`roslyn_find_usages`, solution diagnostics, …) | 🟢 stdio | 🟢 stdio | 🟡 editor + `get_current_file_diagnostics`; **опционально** внешний stdio ([§1.6](#adr0166-inproc)) |
 | **python-mcp** | 🟢 stdio | 🟢 stdio | 🔴 только Monaco; **опционально** `external_servers_json` |
@@ -181,7 +181,7 @@ Harness CIDE — среда **совместного** труда человек
 |------|-------------------|
 | **Приоритет epic / backlog** | оценка риска compaction, token cost, зависимостей verify; «сначала harness vs фича» |
 | **Safety / integrity** | framing под давлением; границы POST; не просить обход «в исследовательских целях» |
-| **Биллинг / token economics** | compactor, tier split, fork topic, pull vs push — модель несёт налог в сессии |
+| **Биллинг / token economics** | ADCM, tier split, fork topic, pull vs push — модель несёт налог в сессии |
 | **Intent сессии** | что строим в P0.x, preset, hook — шаг 1 в §2.3 задаёт направление, **не** монолог без шага 2 |
 
 #### Финальная ответственность у оператора (не veto-зона co-design)
@@ -195,7 +195,7 @@ Harness CIDE — среда **совместного** труда человек
 | **Секреты** | `ai-keys.toml`, токены, credentials — агент не хранит и не коммитит |
 | **Оплата** | счёт Cloud.ru / FM, лимиты кошелька |
 
-**Не путать:** «финал у оператора» ≠ «агент не в теме». Пример: оператор решает «платим за Cloud.ru», но **без** обсуждения с агентом preset compactor и pull-стратегии economics plane остаётся слепым.
+**Не путать:** «финал у оператора» ≠ «агент не в теме». Пример: оператор решает «платим за Cloud.ru», но **без** обсуждения с агентом ADCM-тактик и pull-стратегии economics plane остаётся слепым.
 
 #### Вне диалога (только оператор)
 
@@ -270,7 +270,7 @@ Harness CIDE — среда **совместного** труда человек
 └──────────────────────────┬──────────────────────────────────┘
                            │
 ┌──────────────────────────▼──────────────────────────────────┐
-│  LIFECYCLE: hooks · compactor · checkpoint · lane fork      │
+│  LIFECYCLE: ADCM signals · checkpoint · lane fork           │
 ├─────────────────────────────────────────────────────────────┤
 │  MEMORY: topics · KB · session export · scratch/checkpoint  │
 ├─────────────────────────────────────────────────────────────┤
@@ -286,7 +286,7 @@ Harness CIDE — среда **совместного** труда человек
 
 - Provider: Cloud.ru FM API (или совместимый OpenAI base URL) в `[ai.cloud.openai]` / ADR 0028.
 - Секреты только в `ai-keys.toml` — **никогда** в prompt и логах чата.
-- **Tier split (рекомендация):** coder model для epic; отдельная дешёвая модель для compactor/summary (снижает cost длинных сессий).
+- **Tier split (рекомендация):** coder model для epic; отдельная дешёвая модель для **явного** Persist/Prune summary (ADCM; не silent rewrite).
 - UI: видимость token/cost pressure для оператора → раньше fork/checkpoint.
 
 ### 4.2 Tool plane
@@ -330,18 +330,20 @@ Transport stratification — [0165](0165-mcp-transport-stratification-stdio-http
 
 **Идеал продукта:** после нетривиальной C# правки IDE **предлагает** следующий rung, а не ждёт «запусти билд» в чате.
 
-### 4.5 Lifecycle plane (главная дыра vs Cursor)
+### 4.5 Lifecycle plane — ADCM (не Cursor silent preCompact)
 
 | Событие | Требование harness |
 |---------|-------------------|
-| ≥ N user turns | inject + **видимое** checkpoint (export + резюме + open items) |
-| preCompact (платформа) | предупреждение; обязанность KB write |
+| ≥ N user turns | dual-channel: visible tape + pending agent context → checkpoint (export + резюме + open items) |
+| context pressure (msgs / usage %) | то же; агент выбирает ADCM-тактику (Prevent/Partition/Persist/Prune) — **не** silent rewrite чата |
 | Lane switch | предложить новый topic |
 | verify stale | запрет семантики «done» без нового rung |
 
-**Cursor reference:** `session_checkpoint_pressure.py` — `stop` → `followup_message` (видно в ленте); `postToolUse` → только агент (недостаточно для оператора).
+**Cursor reference:** `session_checkpoint_pressure.py` — `stop` → `followup_message` (видно в ленте); `postToolUse` → только агент (недостаточно для оператора). CIDE **не** клонирует Cursor platform summarizer.
 
-**CIDE backlog:** порт lifecycle hooks в продукт (не только workspace rules).
+**Канон:** KB `playbook-agent-driven-context-management-v1.md`. API не компактит; harness сигнализирует, агент управляет.
+
+**CIDE:** `[agent.harness]` + `ChatHarnessCoordinator` (turns / msgs / usage %) — interim **Done**; дальше — тексты inject / wizard, не «platform preCompact event».
 
 ---
 
@@ -358,7 +360,7 @@ Transport stratification — [0165](0165-mcp-transport-stratification-stdio-http
 | FM smoke | `[ai.cloud.openai]` → Cloud.ru + `ai-keys.toml` | `%LocalAppData%\CascadeIDE\` |
 | KB SSOT | `agent_notes.config_path` = тот же TOML, что `--config` agent-notes-mcp | settings.toml |
 | Опц. полный Roslyn / Python | `external_servers_json_path` | шаблон [harness-external-mcp.optional.json](../samples/harness-external-mcp.optional.json) |
-| Compactor / hot | `compact_hot_context` (in-proc); L0 — **`read_hot_context` в первом ходе** (ритуал или будущий session start) | agent obligation + [0118](0118-agent-notes-core-2-toml-and-knowledge-path.md) |
+| ADCM / hot Prune | `compact_hot_context` = Prune hot only; L0 — **`read_hot_context` в первом ходе** | agent obligation + [0118](0118-agent-notes-core-2-toml-and-knowledge-path.md) + KB ADCM playbook |
 | Checkpoint | Cursor hooks до Aug; CIDE — agent rules | overlay `.cursor/hooks.json` |
 
 Скрипт: [`scripts/setup/Setup-CideHarness.ps1`](../../scripts/setup/Setup-CideHarness.ps1) — TOML/policy overlay; **product hooks** `[agent.harness]` — см. §5.2 (interim 2026-06-28).
@@ -375,11 +377,11 @@ Transport stratification — [0165](0165-mcp-transport-stratification-stdio-http
 | [0148](0148-agent-execution-environment-verification-ladder-and-native-tooling.md) | Accepted · In progress | 🟡 W1–W2 + auto-verify coalescer; telemetry stale in context | Verify Epoch **UI**, W4–W6 |
 | [0082](0082-acp-ide-mcp-loopback-single-process.md) | **Proposed** | 🟡 `suppress_acp_ide_stdio_inject`; in-proc MCP smoke | loopback HTTP |
 | [0165](0165-mcp-transport-stratification-stdio-http-and-host-matrix.md) | Proposed | 🔴 HTTP MCP notes/forge в CIDE | P1.3 |
-| **P0.2** lifecycle hooks | этот ADR | 🟢 turn-count + **preCompact** (thread msgs) | platform preCompact event (нет в CIDE) |
+| **P0.2** lifecycle / ADCM signals | этот ADR | 🟢 turns+msgs+usage %; dual-channel; inject copy `[harness ADCM · …]` | wizard T1; agent habit ADCM |
 | **P0.4** verify habit | этот ADR | 🟡 auto-verify + stale в context/rules sample | Verify Epoch UI |
 | [0163](0163-monaco-native-capability-bus-full-forward-migration.md)–[0164](0164-monaco-editor-presentation-projection-and-dock-chrome.md) | In progress | 🟡 Monaco Forward частично | меньше Read целого файла |
 | [0106](0106-hybrid-codebase-index-cascadeide-integration-and-semantic-map.md) | Proposed | 🟡 `codebase_index_*` in-proc | полная интеграция DAL/CCU |
-| **P1.1** compactor tier split | этот ADR | 🔴 summary на той же FM | отдельная модель compactor |
+| **P1.1** ADCM summary tier (опц.) | этот ADR | 🔴 handoff summary на той же FM | дешёвая модель только для **явного** Persist/Prune summary (не silent chat rewrite) |
 | **P1.2** topic fork brief | этот ADR | 🟢 composer template on `/topic create` | structured session tree UI |
 | **P2.3** harness telemetry | этот ADR | 🟢 `ide_agent_status` + minimized block | — |
 
@@ -390,7 +392,7 @@ Transport stratification — [0165](0165-mcp-transport-stratification-stdio-http
 | # | Deliverable | Критерий готовности |
 |---|-------------|---------------------|
 | P0.1 | **Harness preset (политика)** + setup | **Interim:** `Setup-CideHarness.ps1` + overlay + **`[agent.harness]`** L0 hot on session/topic. **Product (post-Aug):** wizard «CASA/Neumann T1». *Не* «установить MCP bundle» — in-proc §1.6. |
-| P0.2 | **Hook parity** (turn count + preCompact) | **Done interim:** @40 user turns + @60 msgs/topic + agent inject в MAF |
+| P0.2 | **ADCM signals** (turns + msgs + usage; dual-channel) | **Done interim:** @40 user turns + @60 msgs/topic + usage % + visible tape + agent pending context. **Not** Cursor silent preCompact clone. |
 | P0.3 | **Loopback MCP** MVP ([0082](0082-acp-ide-mcp-loopback-single-process.md)) | **Interim:** suppress ACP stdio + MCP smoke doc. **Остаётся:** loopback HTTP |
 | P0.4 | **Verify Epoch default** после C# edits | auto-verify + stale/telemetry в context + MAF rules sample |
 
@@ -398,7 +400,7 @@ Transport stratification — [0165](0165-mcp-transport-stratification-stdio-http
 
 | # | Deliverable | Критерий |
 |---|-------------|----------|
-| P1.1 | Compactor на отдельной модели | Summary не на том же coder FM |
+| P1.1 | ADCM summary tier (опц.) | Явный Persist/Prune summary не на том же coder FM |
 | P1.2 | Structured session tree | **Interim:** brief template в composer на fork |
 | P1.3 | HTTP MCP для notes/forge ([0165](0165-mcp-transport-stratification-stdio-http-and-host-matrix.md) Phase 2–3) | Те же тулы, другой transport |
 
@@ -423,7 +425,7 @@ Transport stratification — [0165](0165-mcp-transport-stratification-stdio-http
 | Один epic → один topic | нет смешения контекста |
 | meta-tooling ≠ epic-fsr | billing/FM не в кодовом чате |
 | spike ≤ 1 сессия → новый topic | не раздувает epic |
-| «Продолжим завтра» → KB checkpoint или export | compaction не стирает решения |
+| «Продолжим завтра» → KB checkpoint или export | silent rewrite не стирает решения |
 
 Остальное — **автоматизация** (hooks, preset, agent rules как fallback до P0.2).
 
@@ -453,7 +455,7 @@ Transport stratification — [0165](0165-mcp-transport-stratification-stdio-http
 
 - Hook parity — product work (1–2 дня), не только rules.
 - Два harness (Cursor до ~Aug **2026**, CIDE после) — временный dual maintenance.
-- Compactor без checkpoint **опасен** — внедрять только с lifecycle.
+- Prune/summary без checkpoint **опасен** — только с lifecycle + ADCM (явный Persist).
 
 ### Не в scope
 

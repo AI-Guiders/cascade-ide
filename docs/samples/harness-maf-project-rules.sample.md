@@ -5,7 +5,7 @@ Or merge fragments from `docs/samples/harness-maf-project-rules.sample.md`.
 
 ## Checkpoint (automation-first)
 
-При **≥40 user turns**, **preCompact**, смене epic или конце блока работы — **без ожидания оператора**:
+При **≥40 user turns**, **ADCM context pressure**, смене epic или конце блока работы — **без ожидания оператора**:
 
 1. `chat_export_readable` (или export JSONL в Cursor)
 2. Краткое резюме решений и open items
