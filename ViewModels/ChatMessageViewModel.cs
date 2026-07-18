@@ -1,4 +1,5 @@
 using CascadeIDE.Features.Chat;
+using CascadeIDE.Models;
 using CascadeIDE.Models.Intercom;
 using CommunityToolkit.Mvvm.ComponentModel;
 
@@ -33,6 +34,9 @@ public sealed partial class ChatMessageViewModel : ObservableObject
 
     public IntercomMessageAudience Audience { get; private set; } = IntercomMessageAudience.Channel;
 
+    /// <summary>ADR 0116: normal | steer | follow_up.</summary>
+    public string? DeliveryMode { get; private set; }
+
     public bool IsLocalSelfOnly => Audience == IntercomMessageAudience.SelfOnly;
 
     public bool IsSlashCommand => SlashCommandStatus is not null;
@@ -48,7 +52,8 @@ public sealed partial class ChatMessageViewModel : ObservableObject
         ChatSlashCommandStatus? slashCommandStatus = null,
         IReadOnlyList<AttachmentAnchor>? attachments = null,
         SenderWorkspaceContext? senderWorkspaceContext = null,
-        IntercomMessageAudience audience = IntercomMessageAudience.Channel)
+        IntercomMessageAudience audience = IntercomMessageAudience.Channel,
+        string? deliveryMode = null)
     {
         MessageId = messageId ?? Guid.NewGuid();
         Role = role;
@@ -61,6 +66,9 @@ public sealed partial class ChatMessageViewModel : ObservableObject
         Attachments = attachments ?? [];
         SenderWorkspaceContext = senderWorkspaceContext;
         Audience = audience;
+        DeliveryMode = string.IsNullOrWhiteSpace(deliveryMode)
+            ? null
+            : IntercomComposerDeliveryModes.Normalize(deliveryMode);
     }
 
     public void SetAttachments(IReadOnlyList<AttachmentAnchor> attachments, SenderWorkspaceContext? senderWorkspaceContext)

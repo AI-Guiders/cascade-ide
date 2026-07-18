@@ -24,7 +24,17 @@ public sealed class IntercomOutboundSendHost
 
     public required Func<string, IntercomAttachmentMessageBuilder.Outbound, string> FormatAgentInput { get; init; }
 
-    public required Func<string, IntercomAttachmentMessageBuilder.Outbound, bool, Task> CommitUserMessageAsync { get; init; }
+    public required Func<string, IntercomAttachmentMessageBuilder.Outbound, bool, string, Task> CommitUserMessageAsync { get; init; }
+
+    public required Func<string> ConsumeDeliveryMode { get; init; }
+
+    public required Func<string, bool> ShouldDeferProviderDispatch { get; init; }
+
+    public required Action<string> CancelActiveTurnIfSteer { get; init; }
+
+    public required Func<string, Task> EnqueueFollowUpAgentInputAsync { get; init; }
+
+    public required Func<Task> ProcessFollowUpQueueAsync { get; init; }
 
     public required Func<bool> GetChatMcpOnly { get; init; }
 

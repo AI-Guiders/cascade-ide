@@ -101,6 +101,16 @@ public partial class ChatPanelView : UserControl
 
     private void OnChatPanelVmPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
+        if (e.PropertyName is nameof(ChatPanelViewModel.IntercomComposerPlaceholder)
+            or nameof(ChatPanelViewModel.IsChatLoading)
+            or nameof(ChatPanelViewModel.FollowUpQueueCount))
+            IntercomSkiaSurface.InvalidateVisual();
+
+        if (e.PropertyName is nameof(ChatPanelViewModel.ChatInput)
+            or nameof(ChatPanelViewModel.IsChatLoading)
+            or nameof(ChatPanelViewModel.FollowUpQueueCount))
+            _subscribedVm?.SendChatCommand.NotifyCanExecuteChanged();
+
         if (e.PropertyName is nameof(ChatPanelViewModel.ChatSlashPathPrefix)
             or nameof(ChatPanelViewModel.ChatSlashNextStepLabel)
             or nameof(ChatPanelViewModel.ChatSlashBreadcrumb))
@@ -388,6 +398,14 @@ public partial class ChatPanelView : UserControl
             surface.SelectedMessageIndex = vm.SelectedMessageIndex;
         };
         menu.Items.Add(item);
+
+        if (vm.TryGetMessageContent(messageIndex, out _))
+        {
+            var preview = new MenuItem { Header = "Открыть как Markdown" };
+            preview.Click += (_, _) => vm.OpenMessageMarkdownPreview(messageIndex);
+            menu.Items.Add(preview);
+        }
+
         menu.Open(surface);
     }
 

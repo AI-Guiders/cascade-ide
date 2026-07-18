@@ -15,7 +15,8 @@ public sealed record ChatHistoryMessagePayload(
     [property: JsonPropertyName("slash_command_status")] string? SlashCommandStatus = null,
     [property: JsonPropertyName("attachments")] IReadOnlyList<AttachmentAnchor>? Attachments = null,
     [property: JsonPropertyName("sender_workspace_context")] SenderWorkspaceContext? SenderWorkspaceContext = null,
-    [property: JsonPropertyName("audience")] IntercomMessageAudience? Audience = null);
+    [property: JsonPropertyName("audience")] IntercomMessageAudience? Audience = null,
+    [property: JsonPropertyName("delivery_mode")] string? DeliveryMode = null);
 
 /// <summary>Компенсирующее редактирование (<see cref="ChatHistoryEventKind.MessageEdited"/>).</summary>
 public sealed record ChatHistoryMessageEditedPayload(

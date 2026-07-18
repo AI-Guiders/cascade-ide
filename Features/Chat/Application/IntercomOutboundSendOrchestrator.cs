@@ -90,25 +90,37 @@ public static class IntercomOutboundSendOrchestrator
         var displayInput = prepared.Display;
         var agentInput = prepared.Agent!;
         var mcpOnly = host.GetChatMcpOnly();
-        var startProviderLoading = !mcpOnly;
+        var deliveryMode = host.ConsumeDeliveryMode();
+        host.CancelActiveTurnIfSteer(deliveryMode);
+        var deferProvider = host.ShouldDeferProviderDispatch(deliveryMode);
+        var startProviderLoading = !mcpOnly && !deferProvider;
+        var dispatchedProvider = false;
 
         try
         {
             await IntercomSendTrace.RunAsync(
                 workspaceRoot,
                 IntercomSendPhases.SendChat.CommitFeed,
-                _ => host.CommitUserMessageAsync(displayInput, build.Outbound, startProviderLoading)).ConfigureAwait(false);
+                _ => host.CommitUserMessageAsync(displayInput, build.Outbound, startProviderLoading, deliveryMode))
+                .ConfigureAwait(false);
 
             if (mcpOnly)
                 return;
 
+            if (deferProvider)
+            {
+                await host.EnqueueFollowUpAgentInputAsync(agentInput).ConfigureAwait(false);
+                return;
+            }
+
+            dispatchedProvider = true;
             await IntercomSendTrace.RunAsync(
                 workspaceRoot,
                 IntercomSendPhases.SendChat.DispatchProvider,
                 async dispatchPhase =>
                 {
                     var provider = host.GetActiveAiProvider();
-                    dispatchPhase.Detail($"provider={provider} agent_input_len={agentInput.Length}");
+                    dispatchPhase.Detail($"provider={provider} agent_input_len={agentInput.Length} delivery={deliveryMode}");
 
                     if (string.Equals(provider, "CursorACP", StringComparison.Ordinal))
                         await host.SendCursorAcpAsync(agentInput).ConfigureAwait(false);
@@ -123,7 +135,7 @@ public static class IntercomOutboundSendOrchestrator
         }
         finally
         {
-            if (startProviderLoading)
+            if (dispatchedProvider)
                 await host.EndProviderTurnAsync().ConfigureAwait(false);
         }
     }

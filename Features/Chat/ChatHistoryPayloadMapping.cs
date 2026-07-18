@@ -21,7 +21,8 @@ internal static class ChatHistoryPayloadMapping
             slashStatus,
             message.Attachments.Count > 0 ? message.Attachments : null,
             message.SenderWorkspaceContext,
-            message.Audience == IntercomMessageAudience.Channel ? null : message.Audience);
+            message.Audience == IntercomMessageAudience.Channel ? null : message.Audience,
+            message.DeliveryMode);
     }
 
     public static ChatHistoryMessageEditedPayload ToMessageEditedPayload(

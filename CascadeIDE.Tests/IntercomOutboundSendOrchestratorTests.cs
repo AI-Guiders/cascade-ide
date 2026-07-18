@@ -74,6 +74,23 @@ public sealed class IntercomOutboundSendOrchestratorTests
         Assert.Equal("hi|agent", host.LastAgentInput);
     }
 
+    [Fact]
+    public async Task RunAsync_follow_up_defers_provider_and_enqueues()
+    {
+        var host = new RecordingHost
+        {
+            TrimmedInput = "wait",
+            BuildResult = (true, new IntercomAttachmentMessageBuilder.Outbound("wait", [], null), ""),
+            DeferProvider = true,
+        };
+        await IntercomOutboundSendOrchestrator.RunAsync(host.ToHost());
+        Assert.Equal(1, host.CommitCount);
+        Assert.False(host.LastCommitStartProviderLoading);
+        Assert.Equal(0, host.ProviderDispatchCount);
+        Assert.Equal(1, host.EnqueueCount);
+        Assert.Equal("wait|agent", host.LastAgentInput);
+    }
+
     private sealed class RecordingHost
     {
         public string TrimmedInput { get; init; } = "";
@@ -84,7 +101,12 @@ public sealed class IntercomOutboundSendOrchestratorTests
         public bool McpOnly { get; init; }
         public string ActiveProvider { get; init; } = "CursorACP";
 
+        public string DeliveryMode { get; init; } = "normal";
+        public bool DeferProvider { get; init; }
+
         public bool BuildAttempted { get; private set; }
+        public int EnqueueCount { get; private set; }
+        public string? LastDeliveryMode { get; private set; }
         public string? LastClarification { get; private set; }
         public int CommitCount { get; private set; }
         public bool LastCommitStartProviderLoading { get; private set; }
@@ -109,12 +131,23 @@ public sealed class IntercomOutboundSendOrchestratorTests
                 EndPrepareOutboundAsync = () => Task.CompletedTask,
                 ApplyProductSpine = s => s,
                 FormatAgentInput = (display, _) => display + "|agent",
-                CommitUserMessageAsync = (_, _, startLoading) =>
+                CommitUserMessageAsync = (_, _, startLoading, deliveryMode) =>
                 {
                     CommitCount++;
                     LastCommitStartProviderLoading = startLoading;
+                    LastDeliveryMode = deliveryMode;
                     return Task.CompletedTask;
                 },
+                ConsumeDeliveryMode = () => DeliveryMode,
+                ShouldDeferProviderDispatch = _ => DeferProvider,
+                CancelActiveTurnIfSteer = _ => { },
+                EnqueueFollowUpAgentInputAsync = input =>
+                {
+                    EnqueueCount++;
+                    LastAgentInput = input;
+                    return Task.CompletedTask;
+                },
+                ProcessFollowUpQueueAsync = () => Task.CompletedTask,
                 GetChatMcpOnly = () => McpOnly,
                 GetActiveAiProvider = () => ActiveProvider,
                 SendCursorAcpAsync = input =>

@@ -28,6 +28,15 @@ public partial class ChatPanelViewModel
                 outbound.Attachments,
                 outbound.SenderWorkspaceContext),
             CommitUserMessageAsync = commitIntercomUserMessageAsync,
+            ConsumeDeliveryMode = ConsumePendingDeliveryMode,
+            ShouldDeferProviderDispatch = ShouldDeferProviderDispatch,
+            CancelActiveTurnIfSteer = CancelActiveAgentTurnIfSteer,
+            EnqueueFollowUpAgentInputAsync = text =>
+            {
+                EnqueueFollowUpAgentInput(text);
+                return Task.CompletedTask;
+            },
+            ProcessFollowUpQueueAsync = TryDispatchFollowUpQueueAsync,
             GetChatMcpOnly = _getChatMcpOnly,
             GetActiveAiProvider = _getActiveAiProvider,
             SendCursorAcpAsync = SendChatWithCursorAcpAsync,
@@ -132,7 +141,8 @@ public partial class ChatPanelViewModel
     private async Task commitIntercomUserMessageAsync(
         string displayInput,
         IntercomAttachmentMessageBuilder.Outbound outbound,
-        bool startProviderLoading)
+        bool startProviderLoading,
+        string deliveryMode)
     {
         await UiScheduler.Default.InvokeAsync(() =>
         {
@@ -145,7 +155,8 @@ public partial class ChatPanelViewModel
                 threadId: _activeThreadId,
                 parentMessageId: parent,
                 attachments: outbound.Attachments,
-                senderWorkspaceContext: outbound.SenderWorkspaceContext);
+                senderWorkspaceContext: outbound.SenderWorkspaceContext,
+                deliveryMode: deliveryMode);
             ChatMessages.Add(userMsg);
             SelectedChatThreadId = _activeThreadId;
             _ = PersistEventAsync(ChatHistoryEventKind.MessageAdded, ChatHistoryPayloadMapping.ToMessagePayload(userMsg));
@@ -163,10 +174,12 @@ public partial class ChatPanelViewModel
     }
 
     private Task endIntercomProviderTurnAsync() =>
-        UiScheduler.Default.InvokeAsync(() =>
+        UiScheduler.Default.InvokeAsync(async () =>
         {
             StopAcpWaitWatchdog();
             IsChatLoading = false;
             ChatLoadingStatusText = "";
+            OnPropertyChanged(nameof(IntercomComposerPlaceholder));
+            await TryDispatchFollowUpQueueAsync().ConfigureAwait(true);
         });
 }

@@ -32,6 +32,8 @@ public partial class ChatPanelViewModel
                 DismissChatBracketAutocomplete();
                 return new(true, false, false, false, false);
             case IntercomComposerKeyKind.Enter:
+                if (keyEvent is { } enterKey && IsChatLoading)
+                    PrepareDeliveryModeForComposerKey(kind, enterKey);
                 return handleEnter(keyEvent);
             case IntercomComposerKeyKind.CommitSlashSuggestion:
                 return handleTabCommitSuggestion();
