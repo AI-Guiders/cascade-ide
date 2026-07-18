@@ -336,6 +336,7 @@ Transport stratification — [0165](0165-mcp-transport-stratification-stdio-http
 |---------|-------------------|
 | ≥ N user turns | dual-channel: visible tape + pending agent context → checkpoint (export + резюме + open items) |
 | context pressure (msgs / usage %) | то же; агент выбирает ADCM-тактику (Prevent/Partition/Persist/Prune) — **не** silent rewrite чата |
+| Partition continuity | sibling topic + **TopicDecisions + Handover ops** (+ export/якоря) — [0175](0175-adcm-partition-continuity-pair-and-message-anchors.md) (Proposed) |
 | Lane switch | предложить новый topic |
 | verify stale | запрет семантики «done» без нового rung |
 
