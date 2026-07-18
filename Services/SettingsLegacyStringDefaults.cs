@@ -45,7 +45,7 @@ public static class SettingsLegacyStringDefaults
         if (string.IsNullOrWhiteSpace(w.Mode))
             w.Mode = "Flight";
         if (string.IsNullOrWhiteSpace(w.PrimaryWorkSurface))
-            w.PrimaryWorkSurface = PrimaryWorkSurfaceKindExtensions.EditorValue;
+            w.PrimaryWorkSurface = PrimaryWorkSurfaceKindExtensions.IntercomValue;
     }
 
     private static void ApplyLanguages(LanguagesSettings l)

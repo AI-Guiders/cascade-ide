@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using Avalonia.Controls;
+using CascadeIDE.Services;
 using CascadeIDE.Services.Presentation;
 
 namespace CascadeIDE.Views;
@@ -14,11 +15,35 @@ public partial class MainWindow
         try
         {
             MainGrid.ColumnDefinitions = ColumnDefinitions.Parse(vm.MainGridColumnDefinitions);
+            ApplyMainGridRowDefinitions(vm);
             LogMainGridGeometrySnapshot(vm);
         }
         catch
         {
             MainGrid.ColumnDefinitions = ColumnDefinitions.Parse(PresentationMainGridColumnDefinitions.Default);
+            MainGrid.RowDefinitions = RowDefinitions.Parse(PresentationCompactMainGridLayoutBuilder.CockpitRowDefinitions);
+        }
+    }
+
+    private void ApplyMainGridRowDefinitions(ViewModels.MainWindowViewModel vm)
+    {
+        try
+        {
+            MainGrid.RowDefinitions = RowDefinitions.Parse(vm.MainGridRowDefinitions);
+            if (vm.IsCompactIntercomBottomDockVisible)
+                UiWorkspaceLayout.ApplyBottomRowHeight(
+                    MainGrid,
+                    4,
+                    vm.CompactIntercomBottomDockHeightPixels);
+            if (vm.IsCompactMfdBottomDockVisible)
+                UiWorkspaceLayout.ApplyBottomRowHeight(
+                    MainGrid,
+                    vm.CompactMfdBottomDockGridRow,
+                    vm.CompactMfdBottomDockHeightPixels);
+        }
+        catch
+        {
+            MainGrid.RowDefinitions = RowDefinitions.Parse(PresentationCompactMainGridLayoutBuilder.CockpitRowDefinitions);
         }
     }
 

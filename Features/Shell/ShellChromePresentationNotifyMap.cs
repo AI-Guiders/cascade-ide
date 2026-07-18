@@ -23,6 +23,14 @@ internal static class ShellChromePresentationNotifyMap
                 nameof(MainWindowViewModel.MfdRegionPixelWidth),
                 nameof(MainWindowViewModel.IsMfdRegionVisible),
                 nameof(MainWindowViewModel.IsMfdColumnVisible),
+                nameof(MainWindowViewModel.IsCockpitMfdColumnVisible),
+                nameof(MainWindowViewModel.IsCompactRightChromeColumnVisible),
+                nameof(MainWindowViewModel.IsCompactIntercomAuxVisible),
+                nameof(MainWindowViewModel.IsCompactIntercomBottomDockVisible),
+                nameof(MainWindowViewModel.CompactRightChromeColumnPixelWidth),
+                nameof(MainWindowViewModel.CompactIntercomBottomDockHeightPixels),
+                nameof(MainWindowViewModel.CompactMfdBottomDockGridRow),
+                nameof(MainWindowViewModel.CompactMfdBottomDockSplitterGridRow),
                 nameof(MainWindowViewModel.IsSkiaZoneGeometryOverlayMfdVisible),
                 nameof(MainWindowViewModel.IsPfdIdeHealthMountVisible),
                 nameof(MainWindowViewModel.IsMfdIdeHealthMountVisible),
@@ -30,15 +38,22 @@ internal static class ShellChromePresentationNotifyMap
                 nameof(MainWindowViewModel.MfdIdeHealthMountContext),
                 nameof(MainWindowViewModel.IsMfdRegionCollapsed),
                 nameof(MainWindowViewModel.IsChatPanelHidden),
+                nameof(MainWindowViewModel.ChatPanelColumnPixelWidth),
+                nameof(MainWindowViewModel.IsChatPanelColumnVisible),
+                nameof(MainWindowViewModel.MainGridColumnDefinitions),
             ],
             [nameof(ShellChromeViewModel.IsPfdRegionExpanded)] =
             [
                 nameof(MainWindowViewModel.IsPfdColumnVisible),
+                nameof(MainWindowViewModel.IsCompactPfdRightVisible),
+                nameof(MainWindowViewModel.IsCompactRightChromeColumnVisible),
+                nameof(MainWindowViewModel.CompactRightChromeColumnPixelWidth),
                 nameof(MainWindowViewModel.IsSkiaZoneGeometryOverlayPfdVisible),
                 nameof(MainWindowViewModel.IsPfdIdeHealthMountVisible),
                 nameof(MainWindowViewModel.PfdIdeHealthMountContext),
                 nameof(MainWindowViewModel.IsPfdRegionCollapsed),
                 nameof(MainWindowViewModel.IsSolutionPanelHidden),
+                nameof(MainWindowViewModel.MainGridColumnDefinitions),
             ],
             [nameof(ShellChromeViewModel.IsTerminalVisible)] =
             [
@@ -47,17 +62,30 @@ internal static class ShellChromePresentationNotifyMap
                 nameof(MainWindowViewModel.IsMfdContourContentVisible),
                 nameof(MainWindowViewModel.ShowWorkspaceBottomChrome),
                 nameof(MainWindowViewModel.IsTerminalPanelHidden),
+                nameof(MainWindowViewModel.IsCompactMfdBottomDockVisible),
+                nameof(MainWindowViewModel.MainGridRowDefinitions),
+                nameof(MainWindowViewModel.CompactMfdBottomDockHeightPixels),
+                nameof(MainWindowViewModel.CompactMfdBottomDockGridRow),
+                nameof(MainWindowViewModel.CompactMfdBottomDockSplitterGridRow),
             ],
             [nameof(ShellChromeViewModel.IsGitPanelVisible)] =
             [
                 nameof(MainWindowViewModel.IsMfdContourContentVisible),
                 nameof(MainWindowViewModel.ShowWorkspaceBottomChrome),
+                nameof(MainWindowViewModel.IsCompactMfdBottomDockVisible),
+                nameof(MainWindowViewModel.MainGridRowDefinitions),
+                nameof(MainWindowViewModel.CompactMfdBottomDockGridRow),
+                nameof(MainWindowViewModel.CompactMfdBottomDockSplitterGridRow),
             ],
             [nameof(ShellChromeViewModel.IsBuildOutputVisible)] =
             [
                 nameof(MainWindowViewModel.IsMfdContourContentVisible),
                 nameof(MainWindowViewModel.ShowWorkspaceBottomChrome),
                 nameof(MainWindowViewModel.IsBuildPanelHidden),
+                nameof(MainWindowViewModel.IsCompactMfdBottomDockVisible),
+                nameof(MainWindowViewModel.MainGridRowDefinitions),
+                nameof(MainWindowViewModel.CompactMfdBottomDockGridRow),
+                nameof(MainWindowViewModel.CompactMfdBottomDockSplitterGridRow),
             ],
             [nameof(ShellChromeViewModel.IsInstrumentationDockVisible)] =
             [
@@ -65,6 +93,10 @@ internal static class ShellChromePresentationNotifyMap
                 nameof(MainWindowViewModel.HypothesesTab),
                 nameof(MainWindowViewModel.IsMfdContourContentVisible),
                 nameof(MainWindowViewModel.ShowWorkspaceBottomChrome),
+                nameof(MainWindowViewModel.IsCompactMfdBottomDockVisible),
+                nameof(MainWindowViewModel.MainGridRowDefinitions),
+                nameof(MainWindowViewModel.CompactMfdBottomDockGridRow),
+                nameof(MainWindowViewModel.CompactMfdBottomDockSplitterGridRow),
             ],
             [nameof(ShellChromeViewModel.CurrentMfdShellPage)] =
             [

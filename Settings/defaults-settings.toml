@@ -190,6 +190,7 @@ checkpoint_on_context_pressure = true
 context_pressure_thread_message_threshold = 60
 context_pressure_repeat_every_messages = 30
 inject_harness_telemetry_in_context = true
+context_warn_pct = 75
 inject_topic_fork_brief = true
 # topic_fork_brief_template = ""
 
@@ -211,7 +212,7 @@ mode = "Flight"
 culture = ""
 splitters_locked = false
 # editor | intercom
-primary_work_surface = "editor"
+primary_work_surface = "intercom"
 
 [workspace.solution_explorer]
 track_active_item = true

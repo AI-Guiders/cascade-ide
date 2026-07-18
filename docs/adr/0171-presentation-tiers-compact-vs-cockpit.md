@@ -61,7 +61,7 @@ CIDE проектировалась с **трёхмониторным cockpit** 
 ### 1.3 Что не меняется
 
 - Intercom wire, attachments, topics, slash, AEE, in-proc MCP.
-- `[workspace] primary_work_surface` — в **cockpit** чаще `intercom` в Forward; в **compact** Intercom — **панель** (side/bottom), редактор — центр.
+- `[workspace] primary_work_surface` — default **`intercom`** (conversation-first); **`editor`** в Forward — compact presentation с Intercom в side/bottom panel.
 - Авиация как **язык дисциплины** (не смешивать критичное с побочным) — не отменяется.
 
 ---
@@ -74,7 +74,7 @@ CIDE проектировалась с **трёхмониторным cockpit** 
 
 | Tier | Когда (default) | UX-обещание |
 |------|-----------------|-------------|
-| **`compact`** | 1–2 стандартных монитора; ноутбук; узкий 21:9 | **Обычная IDE**: редактор в центре, Explorer / Problems / Terminal в dock, **Intercom как панель** (как Copilot Chat / боковая панель). **Без** обязательных колонок PFD/MFD в main. |
+| **`compact`** | 1–2 стандартных монитора; ноутбук; узкий 21:9 | **IDE-scan, conversation-first**: Intercom в Forward по умолчанию; редактор — toggle; Explorer / Problems / Terminal в dock; при editor-forward — Intercom в side/bottom panel |
 | **`cockpit`** | 3 монитора `(P)(F)(M)`; или `cockpit_capable` UltraWide | Полный **P / F / M**, host windows, **пространственный scan**, semantic map / deck на своих якорях, dark cockpit для приборов. |
 
 ### 2.2 Выбор tier
@@ -105,12 +105,26 @@ cockpit_min_anchor_width_px = 1280
 
 | Элемент | Cockpit (было default mindset) | Compact |
 |---------|----------------------------------|---------|
-| Main `MainGrid` P/M колонки | 220 / 340 при якорях | **0** — нет «фиктивной кабины» |
-| PFD semantic map на боковой полосе | default на 3-screen | **нет**; map / SE — **MFD-страница** или палитра (Ctrl+P) [0167](0167-solution-explorer-ux-go-to-file-and-compact-tree.md) |
-| Intercom | Forward full-width | **Side panel** или bottom; comfortable feed [0170](0170-intercom-feed-readability-mlp.md) |
+| Main `MainGrid` P/M колонки | 220 / 340 при якорях | **0** слева; **IDE-scan** слоты ниже |
+| PFD semantic map / SE | default на 3-screen / слева | **Правая колонка** при `IsPfdRegionExpanded`; иначе палитра (Ctrl+P) |
+| Intercom | Forward full-width | **Правая панель** (`ChatPanelView` напрямую, без `MfdShellPage.Chat`) |
+| MFD (terminal, build, git) | правая колонка / host | **Нижний dock** при видимом contour content |
 | Scan checklist (acceptance) | обязателен для release cockpit | **не применяется** |
 | `CockpitPresentationLayoutPolicy` coercion P/M | инварианты якорей | **relaxed** / bypass для compact tier |
 | Host windows Pfd/Mfd | типично | опционально; не default при старте |
+
+**Compact IDE-scan (presentation slots, семантика зон сохраняется):**
+
+| Зона (команда) | Слот на 1 мониторе |
+|----------------|-------------------|
+| **Forward** | Центр — Intercom по умолчанию (`primary_work_surface = intercom`); редактор — toggle/reveal |
+| **PFD** | Правая колонка (Solution Explorer) при раскрытии |
+| **Intercom** | Forward (default) или правая/нижняя панель при `primary_work_surface = editor` |
+| **MFD** | Нижний dock — Terminal / Build / Git / Problems |
+
+`compact_intercom_placement`: `side` (default) — Intercom справа; `bottom` — Intercom снизу (над MFD при обоих видимых). **Chat focus:** `toggle_primary_work_surface` / `primary_work_surface = intercom` — Intercom на весь Forward (как Cursor maximize chat).
+
+Команды (`set_mfd_shell_page`, `focus_forward`, `/build`) по-прежнему адресуют **зону**, не пиксели; compositor tier `compact` выбирает слот из таблицы выше.
 
 **Инвариант compact:** пользователь узнаёт раскладку **VS Code / Rider / Cursor** — один главный canvas, панели по краям.
 

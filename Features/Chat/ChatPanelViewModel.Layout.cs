@@ -10,22 +10,35 @@ public partial class ChatPanelViewModel
     [ObservableProperty]
     private bool _isForwardIntercomLayout;
 
+    /// <summary>Compact side/bottom panel (ADR 0171): feed-first nav, navigator toggle not pinned.</summary>
+    [ObservableProperty]
+    private bool _isCompactPanelIntercomLayout;
+
+    /// <summary>Устаревшее имя: side panel only.</summary>
+    public bool IsCompactSideIntercomLayout
+    {
+        get => IsCompactPanelIntercomLayout;
+        set => IsCompactPanelIntercomLayout = value;
+    }
+
     /// <summary>Skia chrome: toolbar, spine, вкладки (лобовой Forward на весь экран).</summary>
     public bool IntercomForwardChrome => IsForwardIntercomLayout;
 
     /// <summary>Лента и composer: <c>comfortable</c> vs <c>compact</c> из <c>[intercom] feed_metrics</c>.</summary>
     [ObservableProperty]
-    private bool _intercomComfortableFeed;
+    private bool _intercomComfortableFeed = true;
 
     /// <summary>Устаревшее имя привязки: только chrome, не плотность ленты.</summary>
     public bool IntercomForwardHost => IntercomForwardChrome;
 
-    /// <summary>Topic Navigator: при comfortable — как на MFD; иначе toggle на Forward.</summary>
+    /// <summary>Topic Navigator: Forward toggle; MFD comfortable pinned; compact side — toggle only.</summary>
     [ObservableProperty]
     private bool _isTopicNavigatorVisible;
 
     public bool IntercomTopicNavigatorVisible =>
-        IsTopicNavigatorVisible || !IntercomForwardChrome;
+        IsCompactPanelIntercomLayout
+            ? IsTopicNavigatorVisible
+            : IsTopicNavigatorVisible || !IntercomForwardChrome;
 
     [ObservableProperty]
     private string _topicNavigatorSearchQuery = "";
@@ -43,6 +56,14 @@ public partial class ChatPanelViewModel
         OnPropertyChanged(nameof(IntercomTopicNavigatorVisible));
         if (value && IntercomComfortableFeed)
             IsTopicNavigatorVisible = true;
+    }
+
+    partial void OnIsCompactPanelIntercomLayoutChanged(bool value)
+    {
+        OnPropertyChanged(nameof(IsCompactSideIntercomLayout));
+        OnPropertyChanged(nameof(IntercomTopicNavigatorVisible));
+        if (value)
+            IsTopicNavigatorVisible = false;
     }
 
     public void SetIntercomFontsSettings(IntercomFontsSettings fonts) =>

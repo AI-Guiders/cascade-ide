@@ -11,8 +11,8 @@ public sealed class SettingsDefaultsLoaderTests
     {
         var text = SettingsDefaultsLoader.GetEmbeddedDefaultsToml();
         Assert.Contains("[fonts.intercom]", text, StringComparison.Ordinal);
-        Assert.Contains("prose_pt = 13", text, StringComparison.Ordinal);
-        Assert.Contains("prose_pt_forward = 12", text, StringComparison.Ordinal);
+        Assert.Contains("prose_pt = 14", text, StringComparison.Ordinal);
+        Assert.Contains("prose_pt_forward = 14", text, StringComparison.Ordinal);
         Assert.Contains("[intercom]", text, StringComparison.Ordinal);
         Assert.Contains("feed_metrics = \"comfortable\"", text, StringComparison.Ordinal);
     }
@@ -21,13 +21,13 @@ public sealed class SettingsDefaultsLoaderTests
     public void DeserializeEffective_WithoutUserToml_UsesEmbeddedProsePt()
     {
         var s = SettingsDefaultsLoader.CreateDefault();
-        Assert.Equal(13, s.Fonts.Intercom.ProsePt);
-        Assert.Equal(12, s.Fonts.Intercom.ProsePtForward);
-        Assert.Equal(15, s.Fonts.Intercom.ComposerPt);
+        Assert.Equal(14, s.Fonts.Intercom.ProsePt);
+        Assert.Equal(14, s.Fonts.Intercom.ProsePtForward);
+        Assert.Equal(16, s.Fonts.Intercom.ComposerPt);
         Assert.Equal(14, s.Fonts.Editor.SizePt);
-        Assert.Equal(13f, s.Fonts.Intercom.ResolveProsePt(forwardHost: false));
-        Assert.Equal(12f, s.Fonts.Intercom.ResolveProsePt(forwardHost: true));
-        Assert.Equal(15f, s.Fonts.Intercom.ResolveComposerPt(forwardHost: false));
+        Assert.Equal(14f, s.Fonts.Intercom.ResolveProsePt(forwardHost: false));
+        Assert.Equal(14f, s.Fonts.Intercom.ResolveProsePt(forwardHost: true));
+        Assert.Equal(16f, s.Fonts.Intercom.ResolveComposerPt(forwardHost: false));
     }
 
     [Fact]
@@ -36,11 +36,11 @@ public sealed class SettingsDefaultsLoaderTests
         var s = SettingsDefaultsLoader.CreateDefault();
         Assert.Equal("local", s.Ai.Mode);
         Assert.Equal("Flight", s.Workspace.Mode);
-        Assert.Equal("editor", s.Workspace.PrimaryWorkSurface);
+        Assert.Equal("intercom", s.Workspace.PrimaryWorkSurface);
         Assert.True(s.HybridIndex.Enabled);
         Assert.Equal("rg", s.CommandPalette.GoToSearch.Backend);
-        Assert.False(s.Intercom.UseComfortableFeedMetrics());
-        Assert.Equal(IntercomFeedMetricsModes.Compact, s.Intercom.FeedMetrics);
+        Assert.True(s.Intercom.UseComfortableFeedMetrics());
+        Assert.Equal(IntercomFeedMetricsModes.Comfortable, s.Intercom.FeedMetrics);
     }
 
     [Fact]
@@ -54,7 +54,7 @@ public sealed class SettingsDefaultsLoaderTests
 
         var s = SettingsDefaultsLoader.DeserializeEffective(user);
         Assert.Equal(18, s.Fonts.Intercom.ProsePt);
-        Assert.Equal(12, s.Fonts.Intercom.ProsePtForward);
+        Assert.Equal(14, s.Fonts.Intercom.ProsePtForward);
         Assert.Equal("Segoe UI", s.Fonts.Intercom.ProseFamily);
     }
 
@@ -69,6 +69,6 @@ public sealed class SettingsDefaultsLoaderTests
 
         var s = SettingsDefaultsLoader.DeserializeEffective(user);
         Assert.Equal("mcp_only", s.Ai.Mode);
-        Assert.Equal(13, s.Fonts.Intercom.ProsePt);
+        Assert.Equal(14, s.Fonts.Intercom.ProsePt);
     }
 }

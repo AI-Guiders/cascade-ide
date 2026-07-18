@@ -216,14 +216,18 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
+            <RowDefinition Height="0"/>
+            <RowDefinition Height="0"/>
+            <RowDefinition Height="0"/>
+            <RowDefinition Height="0"/>
         </Grid.RowDefinitions>
         <!-- Подсказка при работе как MCP-сервер -->
         <views:McpBannerView Grid.Row="0" Grid.ColumnSpan="5"/>
 
         <views:TaskCockpitView Grid.Row="1" Grid.ColumnSpan="5"/>
 
-        <!-- Якорь зоны PFD: контент по InstrumentPlacementRuntime + Display / workspace.toml (pfd_primary), без дубля с MfdShellView. -->
-        <chrome:AttentionZoneContainer Zone="Pfd" Grid.Row="2" Grid.Column="0">
+        <!-- Якорь зоны PFD (cockpit): левая колонка. Compact — дерево справа, см. CompactRightChromeHost. -->
+        <chrome:AttentionZoneContainer Zone="Pfd" Grid.Row="2" Grid.Column="0" IsVisible="{Binding IsCockpitPfdColumnVisible}">
             <Grid RowDefinitions="Auto,*">
                 <views:PfdBackgroundStatusBarView Grid.Row="0"
                                                   IsVisible="{Binding ShowWorkspaceBackgroundStatusOnPfd}"/>
@@ -245,7 +249,7 @@
                 </Grid>
             </Grid>
         </chrome:AttentionZoneContainer>
-        <GridSplitter Grid.Row="2" Grid.Column="1" Width="4" ResizeDirection="Columns" Background="{DynamicResource CascadeTheme.WorkspacePanelBorderBrush}" IsVisible="{Binding IsPfdColumnVisible}" IsEnabled="{Binding WorkspaceSplittersUnlocked}"/>
+        <GridSplitter Grid.Row="2" Grid.Column="1" Width="4" ResizeDirection="Columns" Background="{DynamicResource CascadeTheme.WorkspacePanelBorderBrush}" IsVisible="{Binding IsCockpitPfdColumnVisible}" IsEnabled="{Binding WorkspaceSplittersUnlocked}"/>
 
         <!-- Лобовое: редактор или Intercom (ADR 0120 primary_work_surface) -->
         <chrome:AttentionZoneContainer Zone="Forward" Grid.Row="2" Grid.Column="2">
@@ -267,9 +271,40 @@
                       IsVisible="{Binding IsMfdColumnVisible}"
                       IsEnabled="{Binding WorkspaceSplittersUnlocked}"/>
 
-        <!-- Якорь зоны MFD: вторичный контур оболочки (MfdShellView) — WORKSPACE / чат / терминал / сборка / …; состав страниц ≠ сама зона (ADR 0021). -->
+        <!-- Cockpit: MFD справа. Compact: Intercom/PFD справа + MFD снизу (ADR 0171 IDE-scan). -->
         <chrome:AttentionZoneContainer Zone="Mfd" Grid.Row="2" Grid.Column="4" Grid.RowSpan="{Binding ChatPanelMainGridRowSpan}"
-                                       IsVisible="{Binding IsMfdColumnVisible}">
+                                       IsVisible="{Binding IsCockpitMfdColumnVisible}">
+            <views:MfdShellView DataContext="{Binding DataContext, ElementName=RootWindow}" MinHeight="0"/>
+        </chrome:AttentionZoneContainer>
+
+        <Grid Grid.Row="2" Grid.Column="4" RowDefinitions="Auto,*" IsVisible="{Binding IsCompactRightChromeColumnVisible}">
+            <chrome:AttentionZoneContainer Zone="Pfd" Grid.Row="0" IsVisible="{Binding IsCompactPfdRightVisible}">
+                <views:SolutionExplorerView IsVisible="{Binding IsDockedPfdSolutionExplorerTree}"/>
+            </chrome:AttentionZoneContainer>
+            <Border Grid.Row="1" IsVisible="{Binding IsCompactIntercomAuxVisible}"
+                    Background="{DynamicResource CascadeTheme.ChatPanelBackground}">
+                <views:ChatPanelView DataContext="{Binding ChatPanel}"/>
+            </Border>
+        </Grid>
+
+        <GridSplitter Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="5" Height="4" ResizeDirection="Rows"
+                      Background="{DynamicResource CascadeTheme.WorkspacePanelBorderBrush}"
+                      IsVisible="{Binding IsCompactIntercomBottomDockVisible}"
+                      IsEnabled="{Binding WorkspaceSplittersUnlocked}"/>
+
+        <Border Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="5"
+                IsVisible="{Binding IsCompactIntercomBottomDockVisible}"
+                Background="{DynamicResource CascadeTheme.ChatPanelBackground}">
+            <views:ChatPanelView DataContext="{Binding ChatPanel}"/>
+        </Border>
+
+        <GridSplitter Grid.Row="{Binding CompactMfdBottomDockSplitterGridRow}" Grid.Column="0" Grid.ColumnSpan="5" Height="4" ResizeDirection="Rows"
+                      Background="{DynamicResource CascadeTheme.WorkspacePanelBorderBrush}"
+                      IsVisible="{Binding IsCompactMfdBottomDockVisible}"
+                      IsEnabled="{Binding WorkspaceSplittersUnlocked}"/>
+
+        <chrome:AttentionZoneContainer Zone="Mfd" Grid.Row="{Binding CompactMfdBottomDockGridRow}" Grid.Column="0" Grid.ColumnSpan="5"
+                                       IsVisible="{Binding IsCompactMfdBottomDockVisible}">
             <views:MfdShellView DataContext="{Binding DataContext, ElementName=RootWindow}" MinHeight="0"/>
         </chrome:AttentionZoneContainer>
 

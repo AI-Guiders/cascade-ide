@@ -50,14 +50,18 @@ public static class UiWorkspaceLayout
         return true;
     }
 
-    /// <summary>Строка 4 MainGrid — высота зоны над нижней панелью (терминал / сборка / …).</summary>
-    public static void ApplyBottomSplitterRowHeight(Grid mainGrid, double heightPixels)
+    /// <summary>Строка bottom dock в <c>MainGrid</c> (индекс строки).</summary>
+    public static void ApplyBottomRowHeight(Grid mainGrid, int rowIndex, double heightPixels)
     {
-        if (mainGrid.RowDefinitions.Count <= 4)
+        if (mainGrid.RowDefinitions.Count <= rowIndex)
             return;
         var h = Math.Max(UiWorkspaceLayoutRuntimeMetrics.BottomPanelMinRowPixels, heightPixels);
-        mainGrid.RowDefinitions[4].Height = new GridLength(h);
+        mainGrid.RowDefinitions[rowIndex].Height = new GridLength(h);
     }
+
+    /// <summary>Строка 4 MainGrid — высота зоны над нижней панелью (терминал / сборка / …).</summary>
+    public static void ApplyBottomSplitterRowHeight(Grid mainGrid, double heightPixels) =>
+        ApplyBottomRowHeight(mainGrid, 4, heightPixels);
 
     /// <summary>Строка вывода сборки в <c>EditorColumnGrid</c>.</summary>
     public static void ApplyBuildOutputRowHeight(Grid editorColumnGrid, double heightPixels)

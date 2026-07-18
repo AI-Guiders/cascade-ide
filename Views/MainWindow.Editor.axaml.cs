@@ -95,6 +95,8 @@ public partial class MainWindow
 
         if (e.PropertyName == nameof(ViewModels.MainWindowViewModel.MainGridColumnDefinitions) && sender is ViewModels.MainWindowViewModel gridVm)
             ApplyMainGridColumnDefinitions(gridVm);
+        if (e.PropertyName == nameof(ViewModels.MainWindowViewModel.MainGridRowDefinitions) && sender is ViewModels.MainWindowViewModel rowVm)
+            ApplyMainGridRowDefinitions(rowVm);
         if (IsSkiaHostRelatedProperty(e.PropertyName))
             InvalidateSkiaHosts();
     }

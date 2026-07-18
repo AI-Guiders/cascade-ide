@@ -23,4 +23,10 @@ public sealed class DisplayPresentationSettings
 
     /// <summary>Compact auxiliary panel width (px).</summary>
     public int CompactAuxiliaryPanelWidthPx { get; set; } = 380;
+
+    /// <summary>Compact IDE-scan: MFD bottom dock height when terminal/build/git visible (px).</summary>
+    public int CompactMfdBottomDockHeightPx { get; set; } = 220;
+
+    /// <summary>Compact <c>bottom</c> placement: Intercom bottom dock height when chat visible (px).</summary>
+    public int CompactIntercomBottomDockHeightPx { get; set; } = 280;
 }

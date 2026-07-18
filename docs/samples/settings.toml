@@ -13,6 +13,8 @@ topology = "(F)"
 tier = "auto"
 compact_intercom_placement = "side"
 compact_auxiliary_panel_width_px = 380
+compact_intercom_bottom_dock_height_px = 280
+compact_mfd_bottom_dock_height_px = 220
 
 [display.screens.grammar]
 brackets = "()"
@@ -132,7 +134,7 @@ mode = "Flight"
 culture = ""
 splitters_locked = false
 # ADR 0120: "editor" (дефолт) | "intercom" — Intercom в Forward, редактор на MFD
-primary_work_surface = "editor"
+primary_work_surface = "intercom"
 
 [code_navigation_map]
 view = "list"
@@ -207,9 +209,9 @@ kroki_url = "https://kroki.io"
 
 # Типографика (Skia Intercom, AvaloniaEdit). Заводские значения — Settings/defaults-settings.toml.
 [fonts.intercom]
-prose_pt = 13
+prose_pt = 14
 # Отдельный размер только для лобового Forward (intercom); MFD Chat — prose_pt. Не про ширину split-колонки.
-prose_pt_forward = 12
+prose_pt_forward = 14
 # Composer: ввод и placeholder внизу; 0 = ~prose×12/11
 # composer_pt = 15
 # chrome_title_pt = 14
@@ -247,7 +249,7 @@ show_conditions = true
 
 # Intercom: плотность ленты — comfortable | compact (см. также [fonts.intercom] prose_pt / prose_pt_forward)
 [intercom]
-feed_metrics = "compact"
+feed_metrics = "comfortable"
 
 # Intercom: code-attach (chip F:/M:/L:) — ADR 0130
 # navigate: reveal | select; reveal_load_solution: when_needed | never

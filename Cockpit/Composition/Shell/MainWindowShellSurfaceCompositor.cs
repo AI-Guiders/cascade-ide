@@ -21,24 +21,42 @@ public static class MainWindowShellSurfaceCompositor
 
     private static MainWindowShellSurfaceComposition ComposeCompact(in MainWindowShellSurfaceCompositionInput input)
     {
-        var placement = input.DisplaySettings.Presentation.CompactIntercomPlacement?.Trim() ?? "side";
-        var sidePanel = !string.Equals(placement, "bottom", StringComparison.OrdinalIgnoreCase);
-        var auxExpanded = input.IntentChatPanelExpanded;
-        var auxVisible = sidePanel
-            && auxExpanded
-            && !input.SuppressMfdColumnForMfdHostWindow;
+        var presentation = input.DisplaySettings.Presentation;
+        var placement = presentation.CompactIntercomPlacement?.Trim() ?? "side";
+        var sideIntercom = !string.Equals(placement, "bottom", StringComparison.OrdinalIgnoreCase);
+        var chatExpanded = input.IntentChatPanelExpanded && !input.SuppressMfdColumnForMfdHostWindow;
+        var intercomAuxVisible = sideIntercom && chatExpanded;
+        var intercomBottomVisible = !sideIntercom && chatExpanded;
 
-        var width = auxVisible
+        var intercomWidth = intercomAuxVisible
             ? Math.Max(
                 input.CollapsedMfdWidthPixels,
-                input.DisplaySettings.Presentation.CompactAuxiliaryPanelWidthPx)
+                presentation.CompactAuxiliaryPanelWidthPx)
             : 0;
+
+        var pfdRightVisible = input.IntentSolutionExplorerVisible
+            && !input.SuppressPfdColumnForPfdHostWindow;
+        var pfdRightWidth = pfdRightVisible
+            ? CompactIdeLayoutMetrics.PfdRightColumnWidthPixels
+            : 0;
+
+        var rightChromeWidth = Math.Max(intercomWidth, pfdRightWidth);
 
         return new MainWindowShellSurfaceComposition(
             PfdSurfaceVisible: false,
-            MfdSurfaceExpanded: auxExpanded,
-            MfdColumnVisibleInMainGrid: auxVisible,
-            MfdColumnPixelWidthInMainGrid: width);
+            MfdSurfaceExpanded: input.IntentChatPanelExpanded,
+            MfdColumnVisibleInMainGrid: false,
+            MfdColumnPixelWidthInMainGrid: 0,
+            CompactIdeLayout: true,
+            IntercomAuxColumnVisible: intercomAuxVisible,
+            IntercomAuxColumnPixelWidth: intercomWidth,
+            IntercomBottomDockVisible: intercomBottomVisible,
+            IntercomBottomDockHeightPx: presentation.CompactIntercomBottomDockHeightPx,
+            PfdRightColumnVisible: pfdRightVisible,
+            PfdRightColumnPixelWidth: pfdRightWidth,
+            CompactRightChromeColumnVisible: intercomAuxVisible || pfdRightVisible,
+            CompactRightChromeColumnPixelWidth: rightChromeWidth,
+            MfdBottomDockHeightPx: presentation.CompactMfdBottomDockHeightPx);
     }
 
     private static MainWindowShellSurfaceComposition ComposeCockpit(in MainWindowShellSurfaceCompositionInput input)
@@ -92,4 +110,14 @@ public readonly record struct MainWindowShellSurfaceComposition(
     bool PfdSurfaceVisible,
     bool MfdSurfaceExpanded,
     bool MfdColumnVisibleInMainGrid,
-    int MfdColumnPixelWidthInMainGrid);
+    int MfdColumnPixelWidthInMainGrid,
+    bool CompactIdeLayout = false,
+    bool IntercomAuxColumnVisible = false,
+    int IntercomAuxColumnPixelWidth = 0,
+    bool IntercomBottomDockVisible = false,
+    int IntercomBottomDockHeightPx = CompactIdeLayoutMetrics.IntercomBottomDockDefaultHeightPixels,
+    bool PfdRightColumnVisible = false,
+    int PfdRightColumnPixelWidth = 0,
+    bool CompactRightChromeColumnVisible = false,
+    int CompactRightChromeColumnPixelWidth = 0,
+    int MfdBottomDockHeightPx = 220);

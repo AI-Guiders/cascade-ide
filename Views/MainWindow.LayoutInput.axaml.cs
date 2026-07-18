@@ -18,7 +18,11 @@ public partial class MainWindow
         var inner = this.FindControl<Grid>("WorkspaceHealthColumnsGrid");
         // MainGrid: сплиттер и MFD — см. UiWorkspaceLayoutDimensions.MainWindowMainGridColumns (индексы 3 и 4). Пока зона скрыта (в т.ч. Mfd на отдельном TopLevel),
         // не оставляем ширину по «чату» — иначе серая полоса без контента при пресете «P+F на первом дисплее».
-        var w = vm.IsMfdColumnVisible ? vm.MfdRegionPixelWidth : 0;
+        var w = vm.IsCompactPresentationTier
+            ? vm.CompactRightChromeColumnPixelWidth
+            : vm.IsMfdColumnVisible
+                ? vm.MfdRegionPixelWidth
+                : 0;
         UiWorkspaceLayout.ApplyMfdRegionColumns(main, inner, w);
     }
 }

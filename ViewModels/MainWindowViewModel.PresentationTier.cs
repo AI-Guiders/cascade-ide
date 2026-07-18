@@ -44,6 +44,7 @@ public partial class MainWindowViewModel
             _presentationMonitorSnapshot);
 
         ApplyPresentationTierLayoutDefaults();
+        ApplyIntercomHostPresentation();
         OnPropertyChanged(nameof(EffectivePresentationTier));
         OnPropertyChanged(nameof(IsCompactPresentationTier));
         OnPropertyChanged(nameof(IsCockpitPresentationTier));
@@ -51,8 +52,7 @@ public partial class MainWindowViewModel
         OnPropertyChanged(nameof(OpenMfdHostWindowOnStartup));
         OnPropertyChanged(nameof(OpenPfdHostWindowOnStartup));
         OnPropertyChanged(nameof(MainGridColumnDefinitions));
-        OnPropertyChanged(nameof(IsPfdColumnVisible));
-        OnPropertyChanged(nameof(IsMfdColumnVisible));
+        NotifyCompactIdeLayoutChanged();
     }
 
     internal void ApplyPresentationTierLayoutDefaults()
@@ -64,16 +64,10 @@ public partial class MainWindowViewModel
         if (!IsMfdRegionExpanded)
             ApplyMfdRegionExpanded(true);
 
-        if (PrimaryWorkSurface == PrimaryWorkSurfaceKind.Intercom)
-        {
-            _settings.Workspace.PrimaryWorkSurface = PrimaryWorkSurfaceKind.Editor.ToTomlValue();
-            OnPropertyChanged(nameof(PrimaryWorkSurface));
-            OnPropertyChanged(nameof(IsForwardEditorHostVisible));
-            OnPropertyChanged(nameof(IsForwardIntercomHostVisible));
-        }
+        ChatPanel.IsTopicNavigatorVisible = false;
 
-        ChatPanel.IsForwardIntercomLayout = false;
-        TryNavigateToMfdShellPage(MfdShellPage.Chat);
+        if (IsMfdContourContentVisible)
+            CoerceMfdShellPageToAllowed();
     }
 
     public async Task TryCompletePresentationTierFirstRunAsync(Window? owner)

@@ -177,11 +177,13 @@ public partial class MainWindowViewModel
             getSolutionPathForAgent: () => Workspace.SolutionPath);
         ChatPanel.SetIntercomFontsSettings(_settings.Fonts.Intercom);
         ChatPanel.ApplyIntercomPresentationSettings(_settings.Intercom);
+        ChatPanel.ShowMarkdownPreview = (title, content) => RequestShowMarkdownPreviewWindow?.Invoke(title, content);
         CockpitCommandLineOverlay = new CockpitCommandLineOverlayViewModel(
             ChatPanel,
             () => PrimaryWorkSurface,
             () => CommandPaletteHost);
         ChatPanel.SetCascadeSettingsAccessor(() => _settings);
+        ChatPanel.SetFmOpenAiCredentialsAccessor(ResolveFmOpenAiCredentialsForCatalog);
         ChatPanel.SetIntercomTransportCoordinator(_intercomTransport);
         ChatPanel.SetIntercomAdminRunner((handlerId, argsTail, ct) =>
             RunIntercomAdminSlashAsync(handlerId, argsTail, ct));
@@ -258,7 +260,6 @@ public partial class MainWindowViewModel
 
         SyncMfdShellPageForPrimaryWorkSurface();
         InitializePresentationTier();
-        ChatPanel.IsForwardIntercomLayout = PrimaryWorkSurface == PrimaryWorkSurfaceKind.Intercom && IsCockpitPresentationTier;
         NotifyDockedInstrumentSlotBindings();
         EnsureAgentEnvironmentWiring();
     }

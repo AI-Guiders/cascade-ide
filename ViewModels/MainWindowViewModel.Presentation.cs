@@ -40,7 +40,10 @@ public partial class MainWindowViewModel
     public IReadOnlyList<CockpitInstrumentDescriptor> MainWindowHostSurfaceInstruments => HostSurfaceFrame.Instruments;
 
     /// <summary>Ширина региона MFD в main grid (пиксели); 0 если колонка не выделяется (хост MFD и т.п.).</summary>
-    public int ChatPanelColumnPixelWidth => ShellSurfaceComposition.MfdColumnPixelWidthInMainGrid;
+    public int ChatPanelColumnPixelWidth =>
+        IsCompactPresentationTier
+            ? CompactRightChromeColumnPixelWidth
+            : ShellSurfaceComposition.MfdColumnPixelWidthInMainGrid;
 
     /// <summary>Есть правая колонка MFD и сплиттер перед ней (ширина &gt; 0 в main).</summary>
     public bool IsChatPanelColumnVisible =>
@@ -62,13 +65,19 @@ public partial class MainWindowViewModel
     /// Не путать с картой «панель → зона»: <see cref="AttentionZonePanelRuntime"/>, <c>docs/design/attention-zone-panel-playbook-v1.md</c>.
     /// Ширина колонки совпадает с поверхностью PFD в main grid.
     /// </summary>
-    public bool IsPfdColumnVisible => ShellSurfaceComposition.PfdSurfaceVisible;
+    public bool IsPfdColumnVisible =>
+        IsCompactPresentationTier
+            ? false
+            : ShellSurfaceComposition.PfdSurfaceVisible;
 
     /// <summary>
     /// Видна ли колонка <c>MainGrid</c> под правый якорь при <see cref="ActiveAttentionLayoutSurface"/> (в этой разметке — зона MFD).
     /// Не путать с вкладками MFD или картой панелей — <see cref="AttentionZonePanelRuntime"/>; место в сетке совпадает с <see cref="IsChatPanelColumnVisible"/>.
     /// </summary>
-    public bool IsMfdColumnVisible => ShellSurfaceComposition.MfdColumnVisibleInMainGrid;
+    public bool IsMfdColumnVisible =>
+        IsCompactPresentationTier
+            ? IsCompactRightChromeColumnVisible
+            : ShellSurfaceComposition.MfdColumnVisibleInMainGrid;
 
     /// <summary>Включён debug-overlay контуров зон (ручная валидация геометрии W2).</summary>
     public bool ShowSkiaZoneGeometryOverlay => _settings.Display.Skia.ZoneGeometryOverlay;

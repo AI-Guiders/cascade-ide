@@ -18,9 +18,7 @@ public partial class MainWindowViewModel
                 return;
             _settings.Workspace.PrimaryWorkSurface = normalized;
             OnPropertyChanged();
-            OnPropertyChanged(nameof(IsForwardEditorHostVisible));
-            OnPropertyChanged(nameof(IsForwardIntercomHostVisible));
-            ChatPanel.IsForwardIntercomLayout = value == PrimaryWorkSurfaceKind.Intercom && IsCockpitPresentationTier;
+            ApplyIntercomHostPresentation();
             CockpitCommandLineOverlay?.NotifyShellPresentationChanged();
             SyncMfdShellPageForPrimaryWorkSurface();
             try
@@ -32,6 +30,17 @@ public partial class MainWindowViewModel
                 // ignore persistence errors during toggle
             }
         }
+    }
+
+    /// <summary>Синхронизирует ChatPanel chrome и compact слоты с <see cref="PrimaryWorkSurface"/> и tier.</summary>
+    internal void ApplyIntercomHostPresentation()
+    {
+        ChatPanel.IsForwardIntercomLayout = PrimaryWorkSurface == PrimaryWorkSurfaceKind.Intercom;
+        ChatPanel.IsCompactPanelIntercomLayout =
+            IsCompactPresentationTier && PrimaryWorkSurface == PrimaryWorkSurfaceKind.Editor;
+        OnPropertyChanged(nameof(IsForwardEditorHostVisible));
+        OnPropertyChanged(nameof(IsForwardIntercomHostVisible));
+        NotifyCompactIdeLayoutChanged();
     }
 
     private void SyncMfdShellPageForPrimaryWorkSurface()
@@ -64,10 +73,10 @@ public partial class MainWindowViewModel
     }
 
     public bool IsForwardEditorHostVisible =>
-        IsCompactPresentationTier || PrimaryWorkSurface == PrimaryWorkSurfaceKind.Editor;
+        PrimaryWorkSurface == PrimaryWorkSurfaceKind.Editor;
 
     public bool IsForwardIntercomHostVisible =>
-        IsCockpitPresentationTier && PrimaryWorkSurface == PrimaryWorkSurfaceKind.Intercom;
+        PrimaryWorkSurface == PrimaryWorkSurfaceKind.Intercom;
 
     [RelayCommand]
     private void TogglePrimaryWorkSurface() =>

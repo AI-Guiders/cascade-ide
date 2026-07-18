@@ -26,10 +26,8 @@ public partial class MainWindowViewModel
         {
             if (IsCompactPresentationTier)
             {
-                return PresentationCompactMainGridLayoutBuilder.Build(
-                    IsMfdRegionExpanded,
-                    _suppressMfdColumnForMfdHostWindow,
-                    _settings.Display.Presentation.CompactAuxiliaryPanelWidthPx,
+                return PresentationCompactMainGridLayoutBuilder.BuildWithRightChromeWidth(
+                    CompactRightChromeColumnPixelWidth,
                     UiWorkspaceLayoutRuntimeMetrics.MfdRegionCollapsedWidthPixels);
             }
 

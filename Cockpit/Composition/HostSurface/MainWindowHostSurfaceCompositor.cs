@@ -40,6 +40,12 @@ public static class MainWindowHostSurfaceCompositor
             list.Add(new CockpitInstrumentDescriptor(pfdInstrumentId, CockpitSlotIds.Pfd));
         }
 
+        if (shell.PfdRightColumnVisible
+            && InstrumentPlacementRuntime.TryResolveInstrument(surfaceId, CockpitSlotIds.Pfd, input.DisplaySettings, out var pfdRightInstrumentId))
+        {
+            list.Add(new CockpitInstrumentDescriptor(pfdRightInstrumentId, CockpitSlotIds.Pfd));
+        }
+
         if (shell.MfdColumnVisibleInMainGrid
             && InstrumentPlacementRuntime.TryResolveInstrument(surfaceId, CockpitSlotIds.Mfd, input.DisplaySettings, out var mfdInstrumentId))
         {
