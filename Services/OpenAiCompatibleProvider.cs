@@ -1,10 +1,11 @@
 using System.Net.Http.Json;
-using System.Text.Json;
 using System.Runtime.CompilerServices;
+using System.Text.Json;
+using CascadeIDE.Services.Fm;
 
 namespace CascadeIDE.Services;
 
-/// <summary>Провайдер чата через OpenAI-совместимый API (OpenAI, DeepSeek и др.).</summary>
+/// <summary>Провайдер чата через OpenAI-совместимый API (OpenAI, DeepSeek, Cloud.ru FM и др.).</summary>
 public sealed class OpenAiCompatibleProvider : IAiChatProvider
 {
     private readonly HttpClient _httpClient;
@@ -13,14 +14,18 @@ public sealed class OpenAiCompatibleProvider : IAiChatProvider
 
     public OpenAiCompatibleProvider(string baseUrl, string apiKey, string modelId)
     {
-        var baseUri = new Uri(baseUrl?.TrimEnd('/') ?? "https://api.openai.com");
+        var baseUri = new Uri(NormalizeBaseUrl(baseUrl));
         _httpClient = new HttpClient { BaseAddress = baseUri };
         _apiKey = apiKey ?? "";
         _modelId = modelId ?? "gpt-4o";
         _httpClient.DefaultRequestHeaders.Add("Authorization", "Bearer " + _apiKey);
     }
 
-    public async IAsyncEnumerable<string> StreamChatAsync(string model, IReadOnlyList<ChatMessage> messages, [EnumeratorCancellation] CancellationToken cancellationToken = default)
+    public async IAsyncEnumerable<string> StreamChatAsync(
+        string model,
+        IReadOnlyList<ChatMessage> messages,
+        [EnumeratorCancellation] CancellationToken cancellationToken = default,
+        ChatTurnUsageCollector? usageCollector = null)
     {
         var modelId = string.IsNullOrEmpty(model) ? _modelId : model;
         if (string.IsNullOrEmpty(_apiKey))
@@ -33,7 +38,8 @@ public sealed class OpenAiCompatibleProvider : IAiChatProvider
         {
             model = modelId,
             stream = true,
-            messages = messages.Select(m => new { role = m.Role, content = m.Content }).ToArray()
+            stream_options = new { include_usage = true },
+            messages = messages.Select(m => new { role = m.Role, content = m.Content }).ToArray(),
         };
 
         using var request = new HttpRequestMessage(HttpMethod.Post, "v1/chat/completions");
@@ -47,6 +53,7 @@ public sealed class OpenAiCompatibleProvider : IAiChatProvider
             yield break;
         }
 
+        FmTurnUsage? usage = null;
         await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
         using var reader = new StreamReader(stream);
         while (await reader.ReadLineAsync(cancellationToken) is { } line)
@@ -54,6 +61,11 @@ public sealed class OpenAiCompatibleProvider : IAiChatProvider
             if (!line.StartsWith("data:", StringComparison.Ordinal)) continue;
             var json = line.Length > 5 ? line[5..].Trim() : "";
             if (json == "[DONE]" || string.IsNullOrEmpty(json)) continue;
+
+            var parsedUsage = FmOpenAiUsageParser.TryParseFromCompletionChunk(json);
+            if (parsedUsage is not null)
+                usage = parsedUsage;
+
             string? text = null;
             try
             {
@@ -68,8 +80,22 @@ public sealed class OpenAiCompatibleProvider : IAiChatProvider
             {
                 // skip invalid line
             }
+
             if (!string.IsNullOrEmpty(text))
                 yield return text;
         }
+
+        if (usage is not null)
+            usageCollector?.Report(usage);
+    }
+
+    private static string NormalizeBaseUrl(string? baseUrl)
+    {
+        var t = (baseUrl ?? "").Trim().TrimEnd('/');
+        if (t.Length == 0)
+            return "https://api.openai.com/v1/";
+        if (!t.EndsWith("/v1", StringComparison.OrdinalIgnoreCase))
+            t += "/v1";
+        return t + "/";
     }
 }

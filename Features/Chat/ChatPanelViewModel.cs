@@ -471,7 +471,7 @@ public partial class ChatPanelViewModel : ViewModelBase
                     MarkAcpActivity();
                 }),
                 onSessionModels: state => UiScheduler.Default.Post(() => ApplyCursorAcpSessionModels(state)),
-                CancellationToken.None).ConfigureAwait(false);
+                BeginAgentTurnCancellation()).ConfigureAwait(false);
             await UiScheduler.Default.InvokeAsync(() =>
             {
                 FinalizeThinkingMessage(thoughtMsg);
@@ -516,17 +516,21 @@ public partial class ChatPanelViewModel : ViewModelBase
         var assistantMsg = new ChatMessageViewModel("assistant", "", threadId: _activeThreadId);
         ChatMessages.Add(assistantMsg);
 
+        var usageCollector = new ChatTurnUsageCollector();
         await foreach (var token in _aiProviderManager.StreamChatAsync(
             _getActiveAiProvider(),
             messages,
             _getCurrentFilePath(),
             _getEditorText(),
             _getUseMinimizedContext(),
-            CancellationToken.None))
+            BeginAgentTurnCancellation(),
+            usageCollector))
         {
             var t = token;
             UiScheduler.Default.Post(() => assistantMsg.Content += t);
         }
+
+        await RecordFmTurnUsageAsync(usageCollector.LastTurn).ConfigureAwait(false);
         _ = PersistEventAsync(ChatHistoryEventKind.MessageCompleted, ChatHistoryPayloadMapping.ToMessagePayload(assistantMsg));
     }
 
@@ -600,13 +604,15 @@ public partial class ChatPanelViewModel : ViewModelBase
 
         try
         {
-            var (text, toolUiBubbles) = await CascadeIdeMafIdeAgentChat.RunAsync(
+            var (text, toolUiBubbles, fmUsage) = await CascadeIdeMafIdeAgentChat.RunAsync(
                 chatClient,
                 dialogMessages,
                 minimized,
                 projectRules,
                 executeIdeCommandAsync,
-                CancellationToken.None).ConfigureAwait(false);
+                BeginAgentTurnCancellation()).ConfigureAwait(false);
+
+            await RecordFmTurnUsageAsync(fmUsage).ConfigureAwait(false);
 
             await UiScheduler.Default.InvokeAsync(() =>
             {
@@ -825,7 +831,7 @@ public partial class ChatPanelViewModel : ViewModelBase
 
     private bool CanSendChat()
     {
-        if (string.IsNullOrWhiteSpace(ChatInput) || IsChatLoading)
+        if (string.IsNullOrWhiteSpace(ChatInput))
             return false;
 
         if (_getChatMcpOnly())

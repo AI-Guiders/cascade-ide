@@ -22,7 +22,11 @@ public sealed class AnthropicProvider : IAiChatProvider
         _httpClient.DefaultRequestHeaders.Add("anthropic-version", "2023-06-01");
     }
 
-    public async IAsyncEnumerable<string> StreamChatAsync(string model, IReadOnlyList<ChatMessage> messages, [EnumeratorCancellation] CancellationToken cancellationToken = default)
+    public async IAsyncEnumerable<string> StreamChatAsync(
+        string model,
+        IReadOnlyList<ChatMessage> messages,
+        [EnumeratorCancellation] CancellationToken cancellationToken = default,
+        ChatTurnUsageCollector? usageCollector = null)
     {
         var modelId = string.IsNullOrEmpty(model) ? _modelId : model;
         if (string.IsNullOrEmpty(_apiKey))

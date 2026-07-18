@@ -26,7 +26,7 @@ internal static class CascadeIdeMafIdeAgentChat
     internal const int MafHistoryToolBubbleMaxChars = 960;
 
     /// <inheritdoc cref="RunAsync(IChatClient, IReadOnlyList{ChatMessage}, string?, string?, Func{string, IReadOnlyDictionary{string, JsonElement}?, CancellationToken, Task{string}}, CancellationToken)" />
-    internal static Task<(string AssistantText, IReadOnlyList<string> ToolUiBubbles)> RunAsync(
+    internal static Task<(string AssistantText, IReadOnlyList<string> ToolUiBubbles, Fm.FmTurnUsage? Usage)> RunAsync(
         Uri ollamaBaseUri,
         string modelId,
         IReadOnlyList<ChatMessage> cascadeConversation,
@@ -47,7 +47,7 @@ internal static class CascadeIdeMafIdeAgentChat
     /// Запуск агента MAF. <paramref name="ToolUiBubbles"/> — по одному элементу на шаг инструмента для панели чата
     /// (отдельные пузыри «Инструмент»); при совпадении числа с <see cref="FunctionCallContent"/> в ответе сверху добавляется блок параметров.
     /// </summary>
-    public static async Task<(string AssistantText, IReadOnlyList<string> ToolUiBubbles)> RunAsync(
+    public static async Task<(string AssistantText, IReadOnlyList<string> ToolUiBubbles, Fm.FmTurnUsage? Usage)> RunAsync(
         Microsoft.Extensions.AI.IChatClient chatClient,
         IReadOnlyList<ChatMessage> cascadeConversation,
         string? minimizedContextBlock,
@@ -76,7 +76,7 @@ internal static class CascadeIdeMafIdeAgentChat
 
         var messages = BuildMeAiMessages(cascadeConversation, minimizedContextBlock);
         if (messages.Count == 0)
-            return ("Нет сообщений для модели.", []);
+            return ("Нет сообщений для модели.", [], null);
 
         var response = await agent.RunAsync(messages, cancellationToken: cancellationToken).ConfigureAwait(false);
         var assistantText = ExtractAssistantText(response);
@@ -106,7 +106,8 @@ internal static class CascadeIdeMafIdeAgentChat
         }
 
         var uiBubbles = BuildToolUiBubbles(response, toolTraces);
-        return (assistantText, uiBubbles);
+        var usage = Fm.FmMeAiUsageExtractor.TryFromAgentResponse(response);
+        return (assistantText, uiBubbles, usage);
     }
 
     internal static string BuildInstructions(

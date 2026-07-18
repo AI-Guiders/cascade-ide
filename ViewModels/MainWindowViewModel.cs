@@ -254,6 +254,20 @@ public partial class MainWindowViewModel : ViewModelBase, IAutonomousAgentSessio
         };
     }
 
+    private Features.Chat.FmOpenAiCompatibleCredentials? ResolveFmOpenAiCredentialsForCatalog() =>
+        ActiveAiProvider switch
+        {
+            "OpenAI" when !string.IsNullOrWhiteSpace(OpenAiApiKey) => new(
+                _settings.Ai.Cloud.OpenAi.BaseUrl,
+                OpenAiApiKey.Trim(),
+                _settings.Ai.Cloud.OpenAi.Model),
+            "DeepSeek" when !string.IsNullOrWhiteSpace(DeepSeekApiKey) => new(
+                _settings.Ai.Cloud.DeepSeek.BaseUrl,
+                DeepSeekApiKey.Trim(),
+                _settings.Ai.Cloud.DeepSeek.Model),
+            _ => null,
+        };
+
     private readonly Services.AppDataService _appData = new();
     private readonly IGitCommandRunner _gitRunner = new GitCommandRunner();
     private readonly IDotnetCommandRunner _dotnetRunner = new DotnetCommandRunner();

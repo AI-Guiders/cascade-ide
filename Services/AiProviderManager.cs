@@ -24,7 +24,8 @@ public sealed class AiProviderManager
         string? currentFilePath,
         string? currentSourceText,
         bool useMinimizedContext,
-        [EnumeratorCancellation] CancellationToken cancellationToken = default)
+        [EnumeratorCancellation] CancellationToken cancellationToken = default,
+        ChatTurnUsageCollector? usageCollector = null)
     {
         var (provider, model) = _resolveProvider(providerKey ?? "Ollama");
         if (provider is null)
@@ -44,7 +45,7 @@ public sealed class AiProviderManager
             }
         }
 
-        await foreach (var token in provider.StreamChatAsync(model, list, cancellationToken))
+        await foreach (var token in provider.StreamChatAsync(model, list, cancellationToken, usageCollector))
             yield return token;
     }
 }

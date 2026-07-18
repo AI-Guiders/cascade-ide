@@ -56,9 +56,13 @@ public partial class SkiaChatSurfaceControl : Control
     public static readonly StyledProperty<bool> ForwardHostProperty =
         AvaloniaProperty.Register<SkiaChatSurfaceControl, bool>(nameof(ForwardHost), false);
 
+    /// <summary>Compact tier side panel (ADR 0171): feed-first, navigator toggle.</summary>
+    public static readonly StyledProperty<bool> CompactSideHostProperty =
+        AvaloniaProperty.Register<SkiaChatSurfaceControl, bool>(nameof(CompactSideHost), false);
+
     /// <summary>Comfortable feed/composer metrics; false — legacy compact Forward feed (prose_pt_forward + SkiaChatDensity).</summary>
     public static readonly StyledProperty<bool> ComfortableFeedProperty =
-        AvaloniaProperty.Register<SkiaChatSurfaceControl, bool>(nameof(ComfortableFeed), false);
+        AvaloniaProperty.Register<SkiaChatSurfaceControl, bool>(nameof(ComfortableFeed), true);
 
     /// <summary>Topic Navigator (ADR 0127-E): видимая боковая панель (MFD — pinned; Forward — toggle).</summary>
     public static readonly StyledProperty<bool> TopicNavigatorVisibleProperty =
@@ -78,6 +82,9 @@ public partial class SkiaChatSurfaceControl : Control
 
     public static readonly StyledProperty<string> LoadingStatusTextProperty =
         AvaloniaProperty.Register<SkiaChatSurfaceControl, string>(nameof(LoadingStatusText), "");
+
+    public static readonly StyledProperty<string> FmUsageSubtitleProperty =
+        AvaloniaProperty.Register<SkiaChatSurfaceControl, string>(nameof(FmUsageSubtitle), "");
 
     public static readonly StyledProperty<bool> IsChatLoadingProperty =
         AvaloniaProperty.Register<SkiaChatSurfaceControl, bool>(nameof(IsChatLoading), false);
@@ -110,6 +117,12 @@ public partial class SkiaChatSurfaceControl : Control
     {
         get => GetValue(ForwardHostProperty);
         set => SetValue(ForwardHostProperty, value);
+    }
+
+    public bool CompactSideHost
+    {
+        get => GetValue(CompactSideHostProperty);
+        set => SetValue(CompactSideHostProperty, value);
     }
 
     public bool ComfortableFeed
@@ -153,6 +166,12 @@ public partial class SkiaChatSurfaceControl : Control
         set => SetValue(LoadingStatusTextProperty, value);
     }
 
+    public string FmUsageSubtitle
+    {
+        get => GetValue(FmUsageSubtitleProperty);
+        set => SetValue(FmUsageSubtitleProperty, value);
+    }
+
     public bool IsChatLoading
     {
         get => GetValue(IsChatLoadingProperty);
@@ -168,12 +187,14 @@ public partial class SkiaChatSurfaceControl : Control
             DetailThreadIdProperty,
             OverviewModeProperty,
             ForwardHostProperty,
+            CompactSideHostProperty,
             ComfortableFeedProperty,
             TopicNavigatorVisibleProperty,
             TopicNavigatorSearchQueryProperty,
             IntercomFontsProperty,
             ChromeTitleProperty,
             LoadingStatusTextProperty,
+            FmUsageSubtitleProperty,
             IsChatLoadingProperty,
             ShowIntercomComposerProperty,
             ComposerTextProperty,
@@ -378,7 +399,8 @@ public partial class SkiaChatSurfaceControl : Control
                 OverviewMode,
                 DetailThreadId,
                 FeedUsesForwardMetrics,
-                IntercomFonts);
+                IntercomFonts,
+                CompactSideHost);
             placed = SkiaChatLayoutEngine.Layout(entities, measureContext);
             _feedLayoutCache = placed;
             _feedLayoutCacheKey = layoutCacheKey;
@@ -390,7 +412,9 @@ public partial class SkiaChatSurfaceControl : Control
         var showOverviewCatalog = OverviewMode && topicCount > 0;
         var showTopicTabBar = ForwardHost && !OverviewMode && topicCount > 0;
         var statusSubtitle = ForwardHost
-            ? ChatIntercomChromeStatusPresentation.FormatSubtitle(snapshot, OverviewMode, DetailThreadId, showTopicTabBar)
+            ? MergeStatusSubtitles(
+                ChatIntercomChromeStatusPresentation.FormatSubtitle(snapshot, OverviewMode, DetailThreadId, showTopicTabBar),
+                FmUsageSubtitle)
             : null;
         var bottomChrome = (float)ResolveBottomChromeHeight((float)Math.Max(160, Bounds.Width));
         ClampScrollToContent(showOverviewCatalog, statusSubtitle, bottomChrome);
@@ -675,7 +699,9 @@ public partial class SkiaChatSurfaceControl : Control
     private bool ShouldShowTopicNavigator(int topicCount) =>
         topicCount > 0
         && !OverviewMode
-        && (TopicNavigatorVisible || !ForwardHost);
+        && (CompactSideHost
+            ? TopicNavigatorVisible
+            : TopicNavigatorVisible || !ForwardHost);
 
     private void RefreshTheme()
     {
@@ -792,6 +818,17 @@ public partial class SkiaChatSurfaceControl : Control
             _scrollOffset = max;
         if (_scrollOffset < 0)
             _scrollOffset = 0;
+    }
+
+    private static string? MergeStatusSubtitles(string? primary, string? fmUsage)
+    {
+        var p = primary?.Trim();
+        var f = fmUsage?.Trim();
+        if (string.IsNullOrEmpty(p))
+            return string.IsNullOrEmpty(f) ? null : f;
+        if (string.IsNullOrEmpty(f))
+            return p;
+        return p + " · " + f;
     }
 
 }
