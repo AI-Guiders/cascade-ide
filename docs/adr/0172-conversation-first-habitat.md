@@ -2,7 +2,7 @@
 
 **Статус:** Proposed (концепт / north-star)  
 **Дата:** 2026-07-10  
-**Обновлено:** 2026-07-11 — worklines, spin-off, agent materialization; design thesis; API boundary (stateless FM)
+**Обновлено:** 2026-07-12 — habitat ≠ TOML axis; G1 = `primary_work_surface` default; session_graph prefs — future UI only
 
 ## Резюме
 
@@ -10,11 +10,11 @@
 
 **Моат CIDE — не «ещё один чат»**, а **нелинейная сессия**: темы, ветки, rewind, scope на экране [0031](0031-agent-chat-clarification-batches-and-threading.md), [0116](0116-intercom-session-tree-and-agent-message-steering.md). Линейная flat feed — **проекция одной ветки**, не единственная правда.
 
-[0171](0171-presentation-tiers-compact-vs-cockpit.md) задаёт tier (compact/cockpit). **0172** задаёт **habitat** для conversation-first: **Session graph canvas** в Forward, код on demand.
+[0171](0171-presentation-tiers-compact-vs-cockpit.md) задаёт tier (compact/cockpit). **0172** задаёт **habitat** (имя session-graph canvas в глоссарии) для conversation-first: **Session graph canvas** в Forward, код on demand. **Habitat — не ось `settings.toml`**; продукт conversation-first выражается через `primary_work_surface = intercom` [0120](0120-primary-work-surface-intercom-or-editor.md).
 
 **Принято направление (концепт):**
 
-1. **`habitat = session-graph`** (или `conversation`) — Forward = Intercom canvas (scope + worklines + tree/timeline).
+1. **Session graph habitat** — Forward = Intercom canvas (scope + worklines + tree/timeline); не отдельный переключатель `habitat = …` в TOML.
 2. **Topics = worklines index** — параллельные `ThreadNode` [0072](0072-chat-topic-cards-intent-melody-keyboard-contract.md); **не** аналог Cursor New Chat.
 3. **Detail default** — scope strip + **Tree | Timeline**; flat feed только для **выбранной ветки** [0170](0170-intercom-feed-readability-mlp.md).
 4. **Composer modes:** continue · **steer** · **follow-up** [0116](0116-intercom-session-tree-and-agent-message-steering.md).
@@ -67,10 +67,12 @@ Session graph habitat — ответ на эту ось: Intercom — не «е�
 ### Три оси (не смешивать)
 
 ```text
-Tier (пространство)   : compact | cockpit
-Forward [0120]        : intercom | editor
-Stance                : session-graph-first | code-first
+Tier (пространство)   : compact | cockpit          ← [display.presentation] tier
+Forward [0120]        : intercom | editor            ← [workspace] primary_work_surface
+Stance (продукт)      : session-graph-first          ← не TOML; Agent/Intent/Conversation-first
 ```
+
+**Не путать:** **Habitat** в глоссарии = имя canvas (scope + worklines + tree/timeline), не четвёртая ось настроек рядом с tier и `primary_work_surface`.
 
 ### Оператор session-graph-first
 
@@ -135,21 +137,24 @@ Forward ~90% = полный session canvas (index + scope + tree/timeline + comp
 
 ```toml
 [workspace]
-primary_work_surface = "intercom"
+primary_work_surface = "intercom"   # conversation-first default [0120]
 
 [display.presentation]
 tier = "compact"
-habitat = "session-graph"   # session-graph | code
+# compact_intercom_placement = "side" | "bottom"  — см. [0171](0171-presentation-tiers-compact-vs-cockpit.md)
 
-[display.presentation.session_graph]
-workline_rail_width_px = 200
-feed_max_measure_ch = 72
-detail_default_view = "tree"   # tree | timeline
-overview_style = "rows"
+# Будущие UI-префы session graph (не ось habitat):
+# [display.presentation.session_graph]
+# workline_rail_width_px = 200
+# feed_max_measure_ch = 72
+# detail_default_view = "tree"   # tree | timeline
+# overview_style = "rows"
 
 [intercom]
 feed_metrics = "comfortable"
 ```
+
+**Убрано из target settings:** `habitat = "session-graph"` — продукт уже conversation-first; отдельный runtime knob дублировал бы `primary_work_surface` и tier.
 
 ### 6. Anti-patterns
 
@@ -304,7 +309,7 @@ Workline может нести **intent tag** (например `cascade-ide/hab
 | Фаза | Содержание | Moat? |
 |------|------------|-------|
 | **G0** | ADR + wireframe v2 | Док |
-| **G1** | `habitat` + Intercom Forward | Habitat |
+| **G1** | `primary_work_surface = intercom` + Intercom Forward (без coercion tier→editor) | Habitat |
 | **G2** | Scope strip (minimal) | **Да** |
 | **G3** | Tree ↔ Timeline toggle; continue from | **Да** |
 | **G4** | Steer/follow-up в composer | **Да** |

@@ -67,7 +67,7 @@
 | **Intercom** | Канал сессии: диалог оператора и агента, команды, topic/worklines — **не** generic messenger | [0080](../adr/0080-intercom-naming-and-multi-party-channel-model.md) |
 | **Forward** | Центральная колонка главного окна; primary work surface = Intercom или редактор | [0021](../adr/0021-pfd-mfd-cockpit-attention-model.md), [0120](../adr/0120-primary-work-surface-intercom-or-editor.md) |
 | **Session graph** | Дерево событий/сообщений с `parent_id`, ветками, head — **физическая** модель сессии | [0116](../adr/0116-intercom-session-tree-and-agent-message-steering.md), [0045](../adr/0045-agent-chat-persistence-event-log-and-projections.md) |
-| **Habitat** | Режим Forward, где Intercom canvas (scope, worklines, tree/timeline) — рабочая память сессии, не «лента чата» | [0172](../adr/0172-conversation-first-habitat.md) |
+| **Habitat** | Session graph canvas в Forward (scope, worklines, tree/timeline) — рабочая память сессии, не «лента чата»; **имя в глоссарии**, не ось `settings.toml` (см. `primary_work_surface`) | [0172](../adr/0172-conversation-first-habitat.md) |
 | **Workline** | Параллельная линия работы в одной сессии (индекс тем); свой head в дереве; **не** аналог Cursor New Chat | [0172](../adr/0172-conversation-first-habitat.md), [0072](../adr/0072-chat-topic-cards-intent-melody-keyboard-contract.md) |
 | **Topic / topic card** | Продуктовая «нить» с заголовком и summary; может ссылаться на поддерево workline | [0096](../adr/0096-intercom-topic-card-summary-and-product-spine.md) |
 | **Spine** | Продуктовая линия «над чем работаем в целом» (chrome-навигация) | [0127](../adr/0127-intercom-spine-and-topic-tabs-chrome-navigation.md) |
@@ -200,7 +200,7 @@
 | Дата | Изменение |
 |------|-----------|
 | 2026-07-12 | v1: консолидация handbook §7, ADR 0121 §4, SEDM/habitat 0172–0174, steer 0116 |
-| 2026-07-12 | §0 русские алиасы для операторского языка |
+| 2026-07-12 | Habitat: glossary canvas name, не ось `settings.toml` |
 
 ---
 
