@@ -9,6 +9,7 @@
 | [0008](0008-mcp-contracts-and-testable-infrastructure.md) | контракты MCP |
 | [0016](0016-agent-client-protocol-external-agent.md) | ACP ортогонально MCP |
 | [0002](0002-debug-human-agent-parity.md) | Единый слой состояния отладки для человека и агента |
+| [0177](0177-harness-mcp-presence-signal.md) | Presence online/offline (дополнение к уровню C) |
 
 ### Вне ADR
 
@@ -52,6 +53,16 @@ MCP-серверы у хоста — это **процессы**: обмен п�
 <a id="adr0043-p3"></a>
 
 3. **ACP:** внешний агент по [0016](0016-agent-client-protocol-external-agent.md) остаётся **ортогонален** этому ADR; восстановление MCP-транспорта к IDE не смешивается с транспортом ACP, кроме общего требования **ясных ошибок** и наблюдаемости.
+
+<a id="adr0043-p4-presence"></a>
+
+4. **Harness presence (дополнение 2026-07-22):** уровень C недостаточен, если агент узнаёт о жизни канала **только** на следующем tool call (`Not connected` / ok). После deploy/KillRunning оператор включает MCP — **mid-turn push/online нет** (Cursor MCP gap). В CIDE это **базовый** сигнал substrate, не optional UX:
+
+   - push (или дешёвый poll) `harness.online` / `harness.offline` + reason (`killed`, `reload`, `crash`, `deploy`);
+   - mid-turn: resume-hook после reconnect **или** явный `await harness` — не «напиши готово»;
+   - ListTools/capabilities refresh как следствие online.
+
+   Деталь и контракт: [0177](0177-harness-mcp-presence-signal.md). Dogfood: kolb `kj-20260722-2158-harness-presence-signal`.
 
 ## Последствия
 

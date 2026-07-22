@@ -2,7 +2,7 @@
 
 **Статус:** Proposed (наметки / направление)  
 **Дата:** 2026-07-18  
-**Tags:** #adcm #harness #living #adr
+**Tags:** #adcm #harness #living #adr #cascade-ide
 
 ## Резюме
 

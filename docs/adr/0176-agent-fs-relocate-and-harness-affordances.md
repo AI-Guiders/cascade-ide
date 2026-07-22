@@ -2,7 +2,7 @@
 
 **Статус:** Proposed  
 **Дата:** 2026-07-18  
-**Tags:** #fs-relocate #agent-affordances #living #adr
+**Tags:** #fs-relocate #agent-affordances #ssot #living #adr #harness
 
 ## Резюме
 
