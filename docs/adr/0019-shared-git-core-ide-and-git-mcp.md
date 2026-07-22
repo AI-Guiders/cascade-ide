@@ -8,6 +8,7 @@
 |-----|------|
 | [0008](0008-mcp-contracts-and-testable-infrastructure.md) | Стабильные контракты MCP и тестируемая инфраструктура |
 | [0002](0002-debug-human-agent-parity.md) | Единый слой состояния отладки для человека и агента |
+| [0178](0178-agent-scm-scene-detect-map-act.md) | SCM scene для агента (`git_scene`) |
 
 ### Вне ADR
 

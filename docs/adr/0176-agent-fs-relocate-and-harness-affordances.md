@@ -99,7 +99,7 @@
 | **A3** | `kb_place_check` / write gate | domains vs work/projects | молчаливая запись не туда |
 | **A4** | MCP schema session cache | повторный `GetMcpTools`/`man` | schema tax |
 | **A5** | `mcp_package_deploy` (`.next`→live, stop/hold process) | hot-swap MCP | robocopy + `Stop-Process` + `$PID` traps |
-| **A6** | Native git always-on (усиление [0019](0019-shared-git-core-ide-and-git-mcp.md)) | status/diff/commit | Shell git «потому что ближе» |
+| **A6** | Native git always-on (усиление [0019](0019-shared-git-core-ide-and-git-mcp.md)); **A6+** SCM scene [0178](0178-agent-scm-scene-detect-map-act.md) (`git_scene`) | status/diff/commit + compact workspace map | Shell git «потому что ближе»; N× monorepo status dump |
 | **A7** | Research backpack: `prior_art_digest` / capped search | historiography | WebSearch flood |
 | **A8** | `route_context` defaults (`workspace_path` from host) | обязательные args | fail→retry |
 | **A9** | Shell known-gotchas inject (PS `$PID`, quoting) | escape hatch | повтор одних граблей |
