@@ -33,9 +33,10 @@ Dogfood: «закоммить и запушь везде» = N× shell status п
 
 ### Контракт MVP
 
-- Wire: `git_scene` (git-mcp) / `git_git_scene` (CDP).
+- Wire: `git_scene` (git-mcp) / `git_git_scene` (CDP) / CSX `Git.SceneAsync` (ScriptableIde).
 - Prefer `git_scene` перед полным `git_status` для ориентации.
 - Cap: `max_roots`, `max_submodules`.
+- Act thin: `Git.CommitAsync` / `Git.PushAsync` на фасаде — без ослабления «только по явному запросу».
 
 ### Где жить
 
