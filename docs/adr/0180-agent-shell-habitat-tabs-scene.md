@@ -60,13 +60,15 @@ Default cwd: tab cwd → `session.ProjectRoot` → `session.ScmRoot` → process
 ## Последствия
 
 - Equal standing: ↑ + multi-tab + long-run poll without terminals-folder scrape.
-- Backlog: ConPTY / persistent REPL session; WT profile discovery as Operator plug; CSX `ShellFacade`.
+- **Stopgap:** deploy/`KillRunning` from external terminal only (cannot kill own MCP tree).
+- Backlog: **extract terminal MCP** to sibling process (`kj-1358`) so habitat/background survives CDP redeploy; ConPTY / persistent REPL; WT profile as Operator plug; CSX `ShellFacade`.
 
 ## Отклонённые альтернативы
 
 - **Только учить агента Cursor Shell** — отклонено: continuity не в harness CDP.
 - **WT feature parity в MCP** — отклонено: wrong layer; shell first.
 - **Fake in-proc string runner as “shell”** — отклонено: not equal standing with real pwsh/cmd.
+- **«Deploy outside» as final architecture** — отклонено как конец пути: workaround; preferred = separate shell MCP process.
 
 ## Dogfood
 
