@@ -46,6 +46,7 @@ Default cwd: tab cwd → `session.ProjectRoot` → `session.ScmRoot` → process
 - Parallelism = several tabs / several tool calls in one turn.
 - Prefer `cdp_build`/`cdp_run`/`cdp_test` for session project lifecycle when they fit; shell for the rest of the world.
 - When CDP MCP is up, prefer `cdp_shell_*` over Cursor Shell tool.
+- **Deploy exception:** `publish-and-deploy.ps1` (KillRunning) must run from an **external** terminal — not `cdp_shell_*` (cannot kill own MCP process tree). Reload MCP after.
 
 ### Где жить
 
