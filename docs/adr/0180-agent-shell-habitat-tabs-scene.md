@@ -42,36 +42,35 @@ Default cwd: tab cwd → `session.ProjectRoot` → `session.ScmRoot` → process
 ### Execution model
 
 - **Foreground (default):** one-shot process; timeout; history append.
-- **Background (`background=true`):** return immediately with `pid`; tab stays `running`; poll `cdp_shell_scene` / `cdp_shell_last`; stop with `cdp_shell_kill`. Not ConPTY — still one process per command, but long-lived.
+- **Background (`background=true`):** return immediately with `pid`; tab stays `running`; poll scene/last; stop with kill. Not ConPTY — still one process per command, but long-lived.
 - Parallelism = several tabs / several tool calls in one turn.
 - Prefer `cdp_build`/`cdp_run`/`cdp_test` for session project lifecycle when they fit; shell for the rest of the world.
-- When CDP MCP is up, prefer `cdp_shell_*` over Cursor Shell tool.
-- **Deploy exception:** `publish-and-deploy.ps1` (KillRunning) must run from an **external** terminal — not `cdp_shell_*` (cannot kill own MCP process tree). Reload MCP after.
+- **IDE-first:** agent uses **`cdp_shell_*` as the normal IDE terminal** (like leather). Sibling **`terminal-mcp`** (`terminal_*`) is an **escape hatch** (CDP down/redeploy, or a job that must outlive CDP) — not the default long-run home.
 
 ### Где жить
 
 | Слой | Роль |
 |------|------|
 | `terminal-mcp-core` (`ShellHabitat`) | Shared habitat |
-| `terminal-mcp` (`terminal_*`) | Sibling host — durable / long-run |
-| `cdp-mcp` (`cdp_shell_*`) | In-proc — session cwd / short |
-| Cursor rule `cdp-shell-habitat.mdc` | Agent habit |
+| `cdp-mcp` (`cdp_shell_*`) | **Primary** — IDE terminal + session cwd |
+| `terminal-mcp` (`terminal_*`) | **Escape** — survives CDP kill/redeploy |
+| Cursor rule `cdp-shell-habitat.mdc` | Agent habit (IDE-first) |
 | CSX facade (later) | `Shell.*` twin |
 
 ## Последствия
 
-- Equal standing: ↑ + multi-tab + long-run poll without terminals-folder scrape.
-- **Dual host (kj-1358):** CDP shell stays; sibling **terminal-mcp** owns durable background.
-- **Stopgap still:** CDP deploy/`KillRunning` from external terminal (cannot kill own tree). terminal-mcp deploy is independent.
-- Backlog: ConPTY / persistent REPL; WT profile as Operator plug; CSX `ShellFacade`; optional session hint file for terminal-mcp cwd.
+- Equal standing: ↑ + multi-tab + scene — terminal *in* the agent-IDE.
+- Dual host: CDP shell stays primary; sibling terminal-mcp = escape (`kj-1358`). CDP redeploy survival is a side effect of the escape hatch, not the product pitch.
+- CDP deploy/`KillRunning` from external process (cannot kill own tree).
+- Backlog: ConPTY / persistent REPL; WT profile as Operator plug; CSX `ShellFacade`; optional session hint for escape host cwd.
 
 ## Отклонённые альтернативы
 
 - **Только учить агента Cursor Shell** — отклонено: continuity не в harness CDP.
 - **WT feature parity в MCP** — отклонено: wrong layer; shell first.
 - **Fake in-proc string runner as “shell”** — отклонено: not equal standing with real pwsh/cmd.
-- **«Deploy outside» as final architecture** — отклонено как конец пути: workaround; preferred = **sibling terminal-mcp** (+ CDP shell остаётся).
-- **Удалить `cdp_shell_*` из CDP** — отклонено: session cwd inject ценен; dual host, не replace.
+- **«Deploy outside» / «always use terminal-mcp for long-run» as primary UX** — отклонено: IDE-first `cdp_shell_*`; escape host is secondary.
+- **Удалить `cdp_shell_*` из CDP** — отклонено: session cwd + «терминал в IDE» — primary.
 
 ## Dogfood
 
