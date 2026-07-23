@@ -52,24 +52,27 @@ Default cwd: tab cwd → `session.ProjectRoot` → `session.ScmRoot` → process
 
 | Слой | Роль |
 |------|------|
-| `cdp-mcp/Shell/ShellHabitat.cs` | Habitat state + process spawn |
-| `cdp-mcp/Program.cs` | Meta tools + dispatch |
+| `terminal-mcp-core` (`ShellHabitat`) | Shared habitat |
+| `terminal-mcp` (`terminal_*`) | Sibling host — durable / long-run |
+| `cdp-mcp` (`cdp_shell_*`) | In-proc — session cwd / short |
 | Cursor rule `cdp-shell-habitat.mdc` | Agent habit |
 | CSX facade (later) | `Shell.*` twin |
 
 ## Последствия
 
 - Equal standing: ↑ + multi-tab + long-run poll without terminals-folder scrape.
-- **Stopgap:** deploy/`KillRunning` from external terminal only (cannot kill own MCP tree).
-- Backlog: **extract terminal MCP** to sibling process (`kj-1358`) so habitat/background survives CDP redeploy; ConPTY / persistent REPL; WT profile as Operator plug; CSX `ShellFacade`.
+- **Dual host (kj-1358):** CDP shell stays; sibling **terminal-mcp** owns durable background.
+- **Stopgap still:** CDP deploy/`KillRunning` from external terminal (cannot kill own tree). terminal-mcp deploy is independent.
+- Backlog: ConPTY / persistent REPL; WT profile as Operator plug; CSX `ShellFacade`; optional session hint file for terminal-mcp cwd.
 
 ## Отклонённые альтернативы
 
 - **Только учить агента Cursor Shell** — отклонено: continuity не в harness CDP.
 - **WT feature parity в MCP** — отклонено: wrong layer; shell first.
 - **Fake in-proc string runner as “shell”** — отклонено: not equal standing with real pwsh/cmd.
-- **«Deploy outside» as final architecture** — отклонено как конец пути: workaround; preferred = separate shell MCP process.
+- **«Deploy outside» as final architecture** — отклонено как конец пути: workaround; preferred = **sibling terminal-mcp** (+ CDP shell остаётся).
+- **Удалить `cdp_shell_*` из CDP** — отклонено: session cwd inject ценен; dual host, не replace.
 
 ## Dogfood
 
-Kolb: `kj-20260723-1312-cdp-agent-terminal-history`. Wire: cdp-mcp **0.5.77+**.
+Kolb: `kj-20260723-1312`, `kj-20260723-1358`. Wire: cdp-mcp **0.5.78+** + terminal-mcp **0.1.0+** (`D:\terminal-mcp\`).
