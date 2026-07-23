@@ -39,6 +39,7 @@ Dogfood: «закоммить и запушь везде» = N× shell status п
 - Cap: `max_roots`, `max_submodules`; diff: `max_files`, `max_hunks`, `max_hunk_lines`.
 - Act thin: `Git.CommitAsync` / `Git.PushAsync` на фасаде — без ослабления «только по явному запросу».
 - **Session default (comfort):** `cdp_open` sets `scm_root` (`git rev-parse --show-toplevel`). CDP `git_*` may omit `workspace_path` → inject `scm_root`. ListTools schema marks `workspace_path` optional. `git_scene` also matches object=`code` so retarget to `repo` is not required after open.
+- **Related multi-root:** `git_commit` / `git_push` accept `slices=[{root, paths, message?}]` / `[{root,...}]` — one call, per-root paths (refuses add -A in slice mode). Prefer over N× open→retarget→commit. `git_commit`/`git_push` also match object=`code` for shortlist after open.
 
 ### Где жить
 
