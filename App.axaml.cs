@@ -51,8 +51,9 @@ public partial class App : Application
     {
         try
         {
-            var options = Services.IdeMcpServer.BuildOptions(vm.IdeMcp);
-            await using var server = McpServer.Create(new StdioServerTransport("CascadeIDE"), options);
+            var runtime = Services.IdeMcpServer.Create(vm.IdeMcp);
+            await using var server = McpServer.Create(new StdioServerTransport("CascadeIDE"), runtime.Options);
+            runtime.AttachServer(server);
             await server.RunAsync();
         }
         catch (Exception ex)
