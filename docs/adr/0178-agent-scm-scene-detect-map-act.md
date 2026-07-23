@@ -38,6 +38,7 @@ Dogfood: «закоммить и запушь везде» = N× shell status п
 - Prefer `git_scene` перед полным `git_status` для ориентации.
 - Cap: `max_roots`, `max_submodules`; diff: `max_files`, `max_hunks`, `max_hunk_lines`.
 - Act thin: `Git.CommitAsync` / `Git.PushAsync` на фасаде — без ослабления «только по явному запросу».
+- **Session default (comfort):** `cdp_open` sets `scm_root` (`git rev-parse --show-toplevel`). CDP `git_*` may omit `workspace_path` → inject `scm_root`. ListTools schema marks `workspace_path` optional. `git_scene` also matches object=`code` so retarget to `repo` is not required after open.
 
 ### Где жить
 

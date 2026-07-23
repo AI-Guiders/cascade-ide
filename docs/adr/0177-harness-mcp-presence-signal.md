@@ -16,6 +16,7 @@
 | [0166](0166-agent-centric-harness-model-comfort-and-pay-per-token-economics.md) | Agent-centric harness; «ничего о нас без нас» |
 | [0082](0082-acp-ide-mcp-loopback-single-process.md) | Loopback MCP в GUI-процессе |
 | [0165](0165-mcp-transport-stratification-stdio-http-and-host-matrix.md) | Transport tiers |
+| [0179](0179-mcp-progress-mid-op-not-agent-unblock.md) | Sibling: progress ≠ unblock; host consumer gap |
 
 ## Контекст
 
@@ -32,6 +33,7 @@ Dogfood (Cursor + CDP deploy): после `KillRunning` / reload MCP опера�
 
 - Бэклог: IdeCommand/notification + ACP/session hook; telemetry «оператор сказал готово» → анти-паттерн.
 - Cursor hosts без push остаются probe-only — документировать честно.
+- См. также [0179](0179-mcp-progress-mid-op-not-agent-unblock.md): `notifications/progress` — UI/long-op, не снятие tool barrier.
 
 ## Отклонённые альтернативы
 
