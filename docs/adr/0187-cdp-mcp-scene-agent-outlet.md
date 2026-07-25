@@ -1,15 +1,16 @@
 # ADR 0187: CDP `mcp_scene` — агент монтирует MCP как оператор в Cursor
 
-**Статус:** Proposed  
+**Статус:** Accepted · Implemented (CDP 0.5.157)  
 **Дата:** 2026-07-25  
+**Обновлено:** 2026-07-25 — `cdp_mcp` op=scene|presets|mount|tools|call|unmount  
 **Tags:** #cdp #mcp #habitat #equal-standing #agent-comfort #serena #outlet #adr #cascade-ide
 
 ## Резюме
 
-- CDP — не только in-proc backends, а **розетка / habitat для других MCP**.
-- Агент получает **`mcp_scene`** (как `git_scene` / `shell_scene`): список, mount, tools shortlist, call, unmount — **полный контроль**, зеркало того, что человек делает в Cursor MCP panel.
-- Cold ListTools хоста **не** раздувается: дочерние tools живут за сценой, наружу — короткие `cdp_mcp_*` / `go=mcp_*`.
-- Equal-standing: «я подключаю Serena на rename, потом снимаю» — без просьбы человека править `mcp.json`.
+- CDP — **розетка / habitat для других MCP**.
+- Агент: **`cdp_mcp`** / `go=mcp_scene|mcp_mount|…` — полный контроль как MCP panel в Cursor.
+- Child tools **не** в host ListTools — только через `op=tools|call`.
+- Presets: `memory`, `serena`, `filesystem`, `time` (+ raw `command`/`args`).
 
 ## Связанные ADR
 
@@ -34,29 +35,20 @@
 Как у оператора в Cursor: панель MCP → connect / tools / call.  
 У агента в CDP: **`mcp_scene`** на пульте — тот же жест, agent-native.
 
-### Жесты (черновик)
+### Жесты (Implemented · CDP 0.5.157)
+
+Один мета-tool **`cdp_mcp`** + cockpit aliases:
 
 | Verb | Смысл |
 |------|--------|
-| `cdp_mcp_scene` / `go=mcp_scene` | карта: mounted[], health, transport, tool_count |
-| `cdp_mcp_mount` | подключить: preset \| command+args \| url; id= |
-| `cdp_mcp_tools` | shortlist/peek tools дочернего (filter, limit) |
-| `cdp_mcp_call` | `server=` + `tool=` + args |
-| `cdp_mcp_unmount` | снять; kill child process |
-| `cdp_mcp_presets` | serena, context7, … (кураторский каталог) |
+| `cdp_mcp` / `go=mcp_scene` | карта: mounted[], presets, next[] |
+| `op=presets` / `go=mcp_presets` | каталог: memory, serena, filesystem, time |
+| `op=mount` / `go=mcp_mount` | `preset=` \| `command=`+`args=[]`; `id=` |
+| `op=tools` / `go=mcp_tools` | shortlist child tools (`server=`, `filter=`, `take=`) |
+| `op=call` / `go=mcp_call` | `server=` + `tool=` + `args={…}` |
+| `op=unmount` / `go=mcp_unmount` | снять; dispose child client |
 
-Wire sketch:
-
-```text
-mcp_scene =
-  { servers: [{ id, kind: preset|stdio|http, status, tools_hint }],
-    next: [mount, tools, call, unmount] }
-
-mount =
-  { id: "serena",
-    preset: "serena" | { command, args, env?, cwd? } | { url } }
-```
-
+Dogfood: mount `memory` → `create_entities(Operator)` → `read_graph` → unmount. Host ListTools не раздулся.
 ### Инварианты
 
 1. **Outlet, не merge:** дочерние tools **не** попадают в host ListTools автоматически.
