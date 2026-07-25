@@ -60,20 +60,50 @@ SendToLifeThread(
 - Integrity / safety: life thread не обходит POST failed.
 - Wake может нести desk restore hint ([0182](0182-restore-previous-desk-dual-instance.md)) + continuity card ([0183](0183-cockpit-intercom-chat-continuity.md)).
 
+### Что получает модель на Self-Ignition
+
+Completions **всегда** с `messages[]`. Вопрос: откуда берётся «прошлый ход».
+
+| Случай | История ходов в API | Harness обязан |
+|--------|---------------------|----------------|
+| **Тёплый thread** (тот же Intercom/workline, история в host store) | Да (с учётом окна / compact) | Ignition-строка (`тра-та-та`) + **тонкий wake pulse** (см. ниже). Не дублировать всю историю вручную. |
+| **Холодный / новый process / после compact / Partition** | Нет или сильно урезана | Ignition + **обязательный continuity pack** — иначе модель проснётся амнезией |
+| **Desk умер** (MCP kill между ping и wake) | История чата ≠ desk | `cdp_restore` / hint «Call restore previous» + desk bookmark ([0182](0182-restore-previous-desk-dual-instance.md)) |
+
+**Автоматический wake pulse (рекомендуемый минимум от harness, не от «памяти модели»):**
+
+```text
+life_wake:
+  reason: timer|presence|scm|manual
+  scheduled_text: <payload агента>
+  last_closed_task: …    # если есть task plane
+  planned_next: …        # короткий хвост плана
+  desk: ok|needs_restore
+  continuity_card_ref: … # 0175 A/B, если cold
+```
+
+- Тёплый thread: pulse **короткий** (не замена history) — зачем разбудила + что с desk/MCP.
+- Холодный: pulse + continuity card / handoff; опционально auto-`restore` desk перед completion.
+- Не полагаться на «у модели в весах останется прошлый ход» — между ходами контекст только то, что harness кладёт в `messages`.
+
 ## Последствия
 
 - CIDE: scheduler service + IdeCommand/MCP verb; UI «life thread armed».
+- Wake path ветвится: warm vs cold (detect session store / compaction / MCP desk).
 - Cursor: ограниченно (чужой host); не обещать тот же API.
-- Telemetry: scheduled_wake vs human_ignition.
+- Telemetry: scheduled_wake vs human_ignition; cold_wake_without_card = anti-pattern.
 
 ## Отклонённые альтернативы
 
 - Вечные noop tool_calls чтобы «не уснуть» — костыль; отклонено как канон.
 - Пустой completion без messages — невозможно по API.
 - Только «напиши себе в чат глазами оператора» — ломает уход оператора на час.
+- «Модель сама вспомнит без messages» — нет; только то, что в API.
+- На каждом warm wake пихать полный transcript заново — token tax; history уже в thread store.
 
 ## Follow-up (после unpark CIDE)
 
 - [ ] `SendToLifeThread` / `go=life_ping` MVP + cancel.
 - [ ] Caps + operator pause.
+- [ ] Warm vs cold wake pack (pulse + optional auto desk restore).
 - [ ] Wire presence/scm events as sibling enqueues (не только self-delay).
