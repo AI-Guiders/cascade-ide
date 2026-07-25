@@ -2,7 +2,7 @@
 
 **Статус:** Proposed  
 **Дата:** 2026-07-25  
-**Обновлено:** 2026-07-25 — лексика `Muted` ≠ `Killed` / offline  
+**Обновлено:** 2026-07-25 — `Muted` ≠ `Killed`; слои ignition vs side-channel  
 **Tags:** #harness #mute #mcp #intercom #cockpit #attention #equal-standing #adr #cascade-ide
 
 ## Резюме
@@ -66,12 +66,26 @@ Dogfood (2026-07-25): беруши на harness; кокпит = ручки. Ут
 ### Политика
 
 - Unmute явный; integrity MCP — не mute без override/audit.
-- Mute единственного оператора в личке — запрет или soft+confirm.
+
+### Слои входа (mute ≠ выключить completion)
+
+По определению **чей-то** текст должен попасть в chat/completions, иначе ход не стартует. Обычно это оператор (или система / таймер / другой агент). Хост дергает API.
+
+| Слой | Mute «единственного оператора»? | Зачем |
+|------|----------------------------------|--------|
+| **Host chat → completions** (ignition хода) | **Нет** (не беруши). Отключить ≈ не звать модель / стоп IDE | Без входа turn не начинается |
+| **Intercom side-channel** (шум, peer, pulse) | **Да** — не кормить агенту Intercom-ingress; host user message всё равно может стартовать turn | Беруши на внимании, не на API |
+| **Steer / interrupt mid-turn** (хост прерывает агента) | Не агентский mute; власть хоста | Cursor stop и аналоги |
+
+`Mute ≠ Disconnect API.` Беруши — на **ingress внимания** (MCP, peer, Intercom). Primary steer (то, что зажигает completion) в единственной личке — **неприкосновенен**, иначе агент глушит единственный способ сказать «хватит» / «поправь».
+
+Mute единственного оператора **целиком** в 1:1: запрет, либо soft (только side-channel / delayed queue) + confirm — не глушить ignition.
 
 ## Последствия
 
 - Отдельные индикаторы **Muted** vs **Killed** в cockpit/health.
 - Telemetry: mute_duration ≠ crash/kill counts.
+- Policy engine различает ignition vs side-channel.
 
 ## Отклонённые альтернативы
 
@@ -79,10 +93,11 @@ Dogfood (2026-07-25): беруши на harness; кокпит = ручки. Ут
 - Kill = mute — нет: это `Killed`, не `Muted`.
 - Один значок на muted и offline — нет: путаница.
 - Mute только в UI человека — нет.
+- Mute primary steer / host completion ignition как «беруши» — нет: ломает определение хода.
 
 ## Follow-up (после unpark CIDE)
 
 - [ ] Channel registry + mute map.
 - [ ] Cockpit verbs + лейбл **Muted**.
 - [ ] Intercom filter + notice.
-- [ ] Policy exceptions; telemetry split mute vs kill.
+- [ ] Policy: ignition vs side-channel; integrity exceptions; telemetry split mute vs kill.
