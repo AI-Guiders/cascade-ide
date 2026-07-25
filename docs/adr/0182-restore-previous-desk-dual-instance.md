@@ -31,6 +31,6 @@
 
 ## Follow-up
 
-- [ ] LLM chat context restore / handoff (отдельный ADR).
+- [ ] LLM chat context restore / handoff — [0183](0183-cockpit-intercom-chat-continuity.md) (CIDE parked).
 - [ ] Shell habitat persist (0180 backlog).
 - [ ] CIDE palette IdeCommand → тот же MCP verb.
