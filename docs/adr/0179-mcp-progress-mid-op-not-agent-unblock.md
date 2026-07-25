@@ -57,6 +57,7 @@
 ## Последствия
 
 - Документировать честно: Cursor hosts = probe/result barrier; CIDE = место для progress UI + presence.
+- Twin follow-up: multimodal tool results — [0181](0181-mcp-imagecontent-agent-vision-opt-in.md) (ImageContent → agent vision; opt-in).
 - Kolb: `kj-20260723-1223-mcp-progress-why-unused`, `kj-20260723-1220-cdp-write-anchor-mcp-parallel`.
 
 ## Отклонённые альтернативы
