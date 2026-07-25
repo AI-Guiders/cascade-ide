@@ -266,6 +266,7 @@
 | [0182](0182-restore-previous-desk-dual-instance.md) | **Restore Previous desk:** `cdp_restore` after MCP kill (dual-instance); not LLM chat | Accepted · Implemented |
 | [0183](0183-cockpit-intercom-chat-continuity.md) | **Cockpit Intercom + chat continuity:** quiet card, toggle, workline statuses; CIDE (parked) | Proposed |
 | [0184](0184-harness-channel-mute-earplugs-cockpit.md) | **Harness channel mute («беруши»):** MCP / Intercom mute из кокпита; IDE-native DM | Proposed |
+| [0185](0185-life-thread-delayed-self-wake.md) | **Life thread:** `SendToLifeThread` delayed self-wake / harness enqueue completion | Proposed |
 
 ## Сборка в один документ (HTML, TXT, PDF)
 
