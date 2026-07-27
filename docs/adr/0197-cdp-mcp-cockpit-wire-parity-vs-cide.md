@@ -76,3 +76,4 @@ IdeCockpit вырос peel'ами. `op=as_built` уже сканирует пр�
 
 - **0.5.281** — DeskWireParityTests split SoftOrgans + Ccu (file_lines).
 - **0.5.282** — **ps1_scene** PowerShell ISE-analogue habitat (`cdp_ps1_scene` / `go=ps1_*`): put→buffer→AST check→`pwsh -File`→last under `.cdp/ps1/`. Soft-organ Meta (off ListTools thrash). Full-ready habitat axis — not Avalonia ISE clone.
+- **0.5.283** — **Ps1Desk SoftBoard**: SoftOrganKind + seat pin on M (`ps1_scene` pulse); put/run stay tool ops.
