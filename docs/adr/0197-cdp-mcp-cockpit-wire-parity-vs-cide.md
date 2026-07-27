@@ -71,3 +71,8 @@ IdeCockpit вырос peel'ами. `op=as_built` уже сканирует пр�
 - Arch board показывает gap без эссе в чате.
 - Следующий thin slice: [0198](0198-toolchain-ensure-vs-lsp.md) soft organ на DAL-adjacent.
 - Dual-agent: [0199](0199-dual-agent-process-profile-isolation.md), не смешивать с wire remap.
+
+## Ship notes (cdp-mcp)
+
+- **0.5.281** — DeskWireParityTests split SoftOrgans + Ccu (file_lines).
+- **0.5.282** — **ps1_scene** PowerShell ISE-analogue habitat (`cdp_ps1_scene` / `go=ps1_*`): put→buffer→AST check→`pwsh -File`→last under `.cdp/ps1/`. Soft-organ Meta (off ListTools thrash). Full-ready habitat axis — not Avalonia ISE clone.
