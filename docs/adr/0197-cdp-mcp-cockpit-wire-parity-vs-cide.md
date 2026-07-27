@@ -35,17 +35,17 @@ IdeCockpit вырос peel'ами. `op=as_built` уже сканирует пр�
 
 | Role | CIDE эталон | cdp-mcp статус | Примечание |
 |------|-------------|----------------|------------|
-| transport | 0094 ingest | **peel** `IdeCockpit.Transport` | Sync envelope into BuildAsync; not full Channel\<T\> yet |
-| ccu | 0097 ComputingUnits | **peel** `IdeCockpit.Build` | Свёртка ≠ полный CCU pack |
-| dal | 0102 DAL | **real-ish** `Cockpit/DataAcquisition` | Toolchain PATH probe; organ `IdeToolchainChannel` |
-| databus | 0099 IDataBus | **real** thin desk | `Cockpit/DataBus` sync InMemoryDataBus |
-| channel | IChannel | **peel** `IdeCockpit.Channel` | Soft-organ defer |
-| cds | ICdsRouter | **peel** `IdeCockpit.Cds` | Attention routing |
+| transport | 0094 ingest | **real** `Cockpit/Transport/DeskIngestionBus` | Bounded Channel\<T\>; peel publishes |
+| ccu | 0097 ComputingUnits | **real-ish** `AttentionRoutingUnit` + Build peel | Unit extracted; BuildAsync still thick |
+| dal | 0102 DAL | **real-ish** `Cockpit/DataAcquisition` | Toolchain PATH probe |
+| databus | 0099 IDataBus | **real** + host | DeskDataBusHost publishes DeskSurfaceBuilt |
+| channel | IChannel | **real** `DeferredSoftOrganChannel` | Peel delegates Peek |
+| cds | ICdsRouter | **real** `AttentionCdsRouter` | Peel NormalizeAttentionRouting |
 | ids | IdeDisplay | **peel** `IdeCockpit.Ids` | Orthogonal to CDS |
-| compositor | ISurfaceCompositor | **peel** `IdeCockpit.Compositor` | Seats/tiles |
+| compositor | ISurfaceCompositor | **contract** + peel compose | Interface present; seats compose still peel |
 | surface | Surface mounts | **peel** `IdeCockpit.Surface` | Desk surface (not Avalonia) |
-| instrument | Instrument deck | **peel** `IdeCockpit.Instrument` | Seats P\|F\|M as deck mounts |
-| gun | CASCOPE* | **CDPCOPE*** | ADR 0200 — same spirit, no Avalonia cabin rules |
+| instrument | Instrument deck | **real** `DeskInstrumentMountRegistry` | Seats sync → deck; JSON pulse on surface |
+| gun | CASCOPE* | **CDPCOPE*** | ADR 0200 |
 
 ### as_built
 
