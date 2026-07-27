@@ -36,14 +36,14 @@ IdeCockpit вырос peel'ами. `op=as_built` уже сканирует пр�
 | Role | CIDE эталон | cdp-mcp статус | Примечание |
 |------|-------------|----------------|------------|
 | transport | 0094 ingest | **real** `Cockpit/Transport/DeskIngestionBus` | Bounded Channel\<T\>; peel publishes |
-| ccu | 0097 ComputingUnits | **real-ish** multi-unit + Build peel | Attention/DeskDetail/WorldScene/Focus/GoVerbs; BuildAsync still orchestrator |
+| ccu | 0097 ComputingUnits | **real-ish** multi-unit + Build peel | Attention/DeskDetail/WorldScene/Focus/GoVerbs/OrganJsonPulse; BuildAsync still orchestrator |
 | dal | 0102 DAL | **real-ish** `Cockpit/DataAcquisition` | Toolchain PATH probe |
 | databus | 0099 IDataBus | **real** + host | DeskDataBusHost publishes DeskSurfaceBuilt |
 | channel | IChannel | **real** `DeferredSoftOrganChannel` | Peel delegates Peek |
 | cds | ICdsRouter | **real** `AttentionCdsRouter` | Peel NormalizeAttentionRouting |
 | ids | IdeDisplay | **real** `FeatureSearchUnit` | Peel SearchFeatures; Cockpit/Ids |
 | compositor | ISurfaceCompositor | **real** seats+tiles compositors | Peel projects; compose under Cockpit/ |
-| surface | Surface mounts | **real-ish** gate/match/presenter + SoftOrgans peel | Pane loop thin; organ Handle still peel |
+| surface | Surface mounts | **real-ish** gate/match/presenter/alias + SoftOrgans peel | Pane loop thin; OrganJsonPulse CCU; Handle still peel |
 | instrument | Instrument deck | **real** `DeskInstrumentMountRegistry` | Seats sync → deck; JSON pulse on surface |
 | gun | CASCOPE* | **CDPCOPE*** | ADR 0200 |
 
