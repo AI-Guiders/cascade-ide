@@ -35,7 +35,7 @@ IdeCockpit вырос peel'ами. `op=as_built` уже сканирует пр�
 
 | Role | CIDE эталон | cdp-mcp статус | Примечание |
 |------|-------------|----------------|------------|
-| transport | 0094 ingest | **missing** (desk) / partial (cide) | Peel отсутствует в IdeCockpit |
+| transport | 0094 ingest | **peel** `IdeCockpit.Transport` | Sync envelope into BuildAsync; not full Channel\<T\> yet |
 | ccu | 0097 ComputingUnits | **peel** `IdeCockpit.Build` | Свёртка ≠ полный CCU pack |
 | dal | 0102 DAL | **real-ish** `Cockpit/DataAcquisition` | Toolchain PATH probe; organ `IdeToolchainChannel` |
 | databus | 0099 IDataBus | **real** thin desk | `Cockpit/DataBus` sync InMemoryDataBus |
@@ -44,7 +44,7 @@ IdeCockpit вырос peel'ами. `op=as_built` уже сканирует пр�
 | ids | IdeDisplay | **peel** `IdeCockpit.Ids` | Orthogonal to CDS |
 | compositor | ISurfaceCompositor | **peel** `IdeCockpit.Compositor` | Seats/tiles |
 | surface | Surface mounts | **peel** `IdeCockpit.Surface` | Desk surface (not Avalonia) |
-| instrument | Instrument deck | **missing** (desk) / **real** (cide) | |
+| instrument | Instrument deck | **peel** `IdeCockpit.Instrument` | Seats P\|F\|M as deck mounts |
 | gun | CASCOPE* | **CDPCOPE*** | ADR 0200 — same spirit, no Avalonia cabin rules |
 
 ### as_built
