@@ -36,13 +36,13 @@ IdeCockpit вырос peel'ами. `op=as_built` уже сканирует пр�
 | Role | CIDE эталон | cdp-mcp статус | Примечание |
 |------|-------------|----------------|------------|
 | transport | 0094 ingest | **real** `Cockpit/Transport/DeskIngestionBus` | Bounded Channel\<T\>; peel publishes |
-| ccu | 0097 ComputingUnits | **real-ish** `AttentionRoutingUnit` + Build peel | Unit extracted; BuildAsync still thick |
+| ccu | 0097 ComputingUnits | **real-ish** `AttentionRoutingUnit` + `DeskDetailUnit` | Units extracted; BuildAsync still thick |
 | dal | 0102 DAL | **real-ish** `Cockpit/DataAcquisition` | Toolchain PATH probe |
 | databus | 0099 IDataBus | **real** + host | DeskDataBusHost publishes DeskSurfaceBuilt |
 | channel | IChannel | **real** `DeferredSoftOrganChannel` | Peel delegates Peek |
 | cds | ICdsRouter | **real** `AttentionCdsRouter` | Peel NormalizeAttentionRouting |
 | ids | IdeDisplay | **peel** `IdeCockpit.Ids` | Orthogonal to CDS |
-| compositor | ISurfaceCompositor | **contract** + peel compose | Interface present; seats compose still peel |
+| compositor | ISurfaceCompositor | **real** `SeatsSurfaceCompositor` | Peel projects seats/view; compose under Cockpit/ |
 | surface | Surface mounts | **peel** `IdeCockpit.Surface` | Desk surface (not Avalonia) |
 | instrument | Instrument deck | **real** `DeskInstrumentMountRegistry` | Seats sync → deck; JSON pulse on surface |
 | gun | CASCOPE* | **CDPCOPE*** | ADR 0200 |
