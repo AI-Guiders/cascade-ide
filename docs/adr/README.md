@@ -277,6 +277,10 @@
 | [0193](0193-agent-attention-channels-ccl.md) | **Agent attention channels + CCL** | Accepted · Shipped |
 | [0194](0194-anchor-edit-place-before-after.md) | **Anchor edit place before/after** | Accepted |
 | [0195](0195-voice-input-ptt-vad-harness-ear.md) | **Voice input:** harness ear PTT/VAD; не «слушай Nс» в ходе FM | Accepted |
+| [0196](0196-architecture-staging-board-arch-desk.md) | **Arch staging board** (`arch_desk` / as_built) | Accepted |
+| [0197](0197-cdp-mcp-cockpit-wire-parity-vs-cide.md) | **cdp-mcp wire parity vs CIDE** (DAL gap; peels) | Accepted |
+| [0198](0198-toolchain-ensure-vs-lsp.md) | **Toolchain ensure** vs LSP (any id; DAL-adjacent) | Accepted |
+| [0199](0199-dual-agent-process-profile-isolation.md) | **Dual-agent** process profile (`CDP_PROFILE`) | Accepted |
 
 ## Сборка в один документ (HTML, TXT, PDF)
 
