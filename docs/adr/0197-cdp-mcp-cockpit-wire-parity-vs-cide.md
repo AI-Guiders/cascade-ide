@@ -16,6 +16,7 @@
 | [0196](0196-architecture-staging-board-arch-desk.md) | Arch board / as_built |
 | [0198](0198-toolchain-ensure-vs-lsp.md) | Toolchain hangs on DAL |
 | [0199](0199-dual-agent-process-profile-isolation.md) | Process isolation (отдельно) |
+| [0200](0200-cdpcope-architecture-analyzers-desk-wire.md) | CDPCOPE gun (CASCOPE spirit, no Avalonia) |
 
 ## Резюме
 
@@ -36,20 +37,22 @@ IdeCockpit вырос peel'ами. `op=as_built` уже сканирует пр�
 |------|-------------|----------------|------------|
 | transport | 0094 ingest | **missing** (desk) / partial (cide) | Peel отсутствует в IdeCockpit |
 | ccu | 0097 ComputingUnits | **peel** `IdeCockpit.Build` | Свёртка ≠ полный CCU pack |
-| dal | 0102 DAL | **missing** | Слот gap; сюда toolchain ensure |
-| databus | 0099 IDataBus | **missing** (desk) / **real** (cide tree) | Desk: нет InMemoryDataBus |
+| dal | 0102 DAL | **real-ish** `Cockpit/DataAcquisition` | Toolchain PATH probe; organ `IdeToolchainChannel` |
+| databus | 0099 IDataBus | **real** thin desk | `Cockpit/DataBus` sync InMemoryDataBus |
 | channel | IChannel | **peel** `IdeCockpit.Channel` | Soft-organ defer |
 | cds | ICdsRouter | **peel** `IdeCockpit.Cds` | Attention routing |
 | ids | IdeDisplay | **peel** `IdeCockpit.Ids` | Orthogonal to CDS |
 | compositor | ISurfaceCompositor | **peel** `IdeCockpit.Compositor` | Seats/tiles |
-| surface | Surface mounts | **peel** `IdeCockpit.Surface` | Desk surface |
+| surface | Surface mounts | **peel** `IdeCockpit.Surface` | Desk surface (not Avalonia) |
 | instrument | Instrument deck | **missing** (desk) / **real** (cide) | |
+| gun | CASCOPE* | **CDPCOPE*** | ADR 0200 — same spirit, no Avalonia cabin rules |
 
 ### as_built
 
-- Profile `cdp_desk`: peels + **gap roles** (`dal`, `databus`, `transport`, `instrument`) со `status=open` и note `GAP`, даже без CodeAnchor.
-- Profile `cide`: seed существующих locus; **DAL** — gap role, пока нет явного каталога DAL в дереве.
+- Profile `cdp_desk`: peels + seed DAL/DataBus when `Cockpit/DataAcquisition` + `Cockpit/DataBus` present; else **gap** (`transport`, `instrument` remain GAP).
+- Profile `cide`: seed существующих locus; DAL — seed `Cockpit/DataAcquisition` when present, иначе gap.
 - Рёбра intended seams рисуются и для gap→peel (архитектурная видимость).
+- Gun: [0200](0200-cdpcope-architecture-analyzers-desk-wire.md).
 
 ### Toolchain placement
 
