@@ -1,8 +1,8 @@
-# ADR 0199: Dual-agent process profile isolation
+# ADR 0199: Dual-agent isolation (client workspace primary)
 
-**Статус:** Accepted  
+**Статус:** Accepted · Implemented  
 **Дата:** 2026-07-27  
-**Tags:** #cdp #isolation #profile #witdb #adr #cascade-ide
+**Tags:** #cdp #isolation #roots #witdb #adr #cascade-ide
 
 ## Связанные ADR
 
@@ -10,46 +10,50 @@
 |-----|------|
 | [0182](0182-restore-previous-desk-dual-instance.md) | Dual-instance deploy (`cdp` / `cdp-debug`) |
 | [0197](0197-cdp-mcp-cockpit-wire-parity-vs-cide.md) | Wire gap (ортогонально) |
-| [0198](0198-toolchain-ensure-vs-lsp.md) | Toolchain; profile-local recipe cache later |
+| [0198](0198-toolchain-ensure-vs-lsp.md) | Toolchain; state-scoped recipes |
 | [0166](0166-agent-centric-harness-model-comfort-and-pay-per-token-economics.md) | Habitat comfort |
 
 ## Резюме
 
-- Два агента в разных пространствах (Cursor habitat vs SSCAD/Dashspec) **не делят** WitDB / seats / pressure / project_root thrash.
-- Граница изоляции v0: **process profile** (`CDP_PROFILE`), не session-tenant в одном процессе.
-- Dual-instance dogfood (`cdp` vs `cdp-mcp-debug`) — прецедент; обобщаем до именованного профиля.
+- Два агента в разных пространствах **не делят** WitDB / seats / pressure thrash.
+- **Primary:** MCP **client roots** (`RequestRootsAsync`) → state under `%LocalAppData%/cdp-mcp/ws/<hash>/`.
+- **Fallback:** session `scm_root`/`ProjectRoot` после `cdp_open` (тот же `ws/<hash>/`).
+- **Override:** `CDP_PROFILE` env (явный process profile) — когда roots недоступны или нужен ручной split.
+- Один `mcp.json` entry достаточен, если клиент отдаёт разные roots на разные окна/workspaces.
 
 ## Контекст
 
-Сейчас один `%LocalAppData%/cdp-mcp/intent-workspace.witdb` и общий pressure-stash на процесс. Два окна-агента на одном MCP = взаимный overwrite desk/focus.
+v0 думал только про `CDP_PROFILE` + второй MCP entry. Это работает, но неуклюже при одном `mcp.json`. Изящнее брать workspace у клиента (MCP Roots).
 
 ## Решение
 
-### Process profile
+### Приоритет ключа изоляции
 
-| Env | Эффект |
-|-----|--------|
-| `CDP_PROFILE` (default `default`) | Суффикс путей состояния |
-| WitDB | `…/cdp-mcp/{profile}/intent-workspace.witdb` |
-| pressure stash | `…/cdp-mcp/{profile}/pressure-stash.json` |
-| user toolchain presets | под тем же profile root |
-| MCP mount name | оператор: отдельные entries `cdp` / `cdp-sscad` с разным `CDP_PROFILE` |
+1. `CDP_PROFILE` ≠ `default` → `%LocalAppData%/cdp-mcp/profiles/{name}/`
+2. иначе MCP client roots (sorted, hashed) → `…/cdp-mcp/ws/{hash12}/`
+3. иначе session project/scm → тот же `ws/{hash}/`
+4. иначе legacy flat `…/cdp-mcp/` (`kind=default`)
 
-### Не session-tenant v0
+Под StateRoot: `intent-workspace.witdb`, `pressure-stash.json`, `ide-settings.json`.
 
-Один процесс + `agent_id` в WitDB — отложено: сложнее, выше риск thrash на shared buffers/shell tabs.
+### Поведение
 
-### Связь с dual-instance
+- `CdpClientWorkspace.Wire(server)`: notification `roots/list_changed` + boot refresh.
+- CallTool: throttled refresh (~20s) + session fallback.
+- Смена StateRoot → invalidate settings cache + reopen WitDB на новом пути.
+- `cdp_health.isolation` — диагностика (`kind`, `state_root`, `client_roots`, last error).
 
-[0182](0182-restore-previous-desk-dual-instance.md) остаётся для **source vs live** deploy. Profile isolation — для **двух рабочих агентов**. Можно комбинировать: live+profile.
+### Dual-instance
+
+[0182](0182-restore-previous-desk-dual-instance.md) остаётся для live vs dogfood. Isolation — для двух рабочих пространств.
 
 ## Не делать
 
-- Смешивать с wire remap / toolchain ensure в одном «бог-коммите».
-- Force-push / один WitDB «на двоих» как норму.
+- Требовать второй `mcp.json` как норму.
+- Считать peel DataBus заменой изоляции.
 
 ## Последствия
 
-- Thin slice: читать `CDP_PROFILE` при `EnsureWorkspaceDb` / pressure path (cdp-mcp).
-- Документировать mcp.json example для второго агента.
-- Toolchain user recipes — profile-scoped when paths land.
+- Dogfood: два Cursor window с разными folder roots → разные `ws/*` без правки mcp.json.
+- Если Cursor не advertises roots: session fallback после `cdp_open`; иначе `CDP_PROFILE`.
+- cdp-mcp **0.5.251+**.

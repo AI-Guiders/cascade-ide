@@ -280,7 +280,7 @@
 | [0196](0196-architecture-staging-board-arch-desk.md) | **Arch staging board** (`arch_desk` / as_built) | Accepted |
 | [0197](0197-cdp-mcp-cockpit-wire-parity-vs-cide.md) | **cdp-mcp wire parity vs CIDE** (DAL gap; peels) | Accepted |
 | [0198](0198-toolchain-ensure-vs-lsp.md) | **Toolchain ensure** vs LSP (any id; DAL-adjacent) | Accepted |
-| [0199](0199-dual-agent-process-profile-isolation.md) | **Dual-agent** process profile (`CDP_PROFILE`) | Accepted |
+| [0199](0199-dual-agent-process-profile-isolation.md) | **Dual-agent** isolation (client roots primary; `CDP_PROFILE` override) | Accepted |
 
 ## Сборка в один документ (HTML, TXT, PDF)
 
