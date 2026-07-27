@@ -41,7 +41,7 @@ IdeCockpit вырос peel'ами. `op=as_built` уже сканирует пр�
 | databus | 0099 IDataBus | **real** + host | DeskDataBusHost publishes DeskSurfaceBuilt |
 | channel | IChannel | **real** `DeferredSoftOrganChannel` | Peel delegates Peek |
 | cds | ICdsRouter | **real** `AttentionCdsRouter` | Peel NormalizeAttentionRouting |
-| ids | IdeDisplay | **peel** `IdeCockpit.Ids` | Orthogonal to CDS |
+| ids | IdeDisplay | **real** `FeatureSearchUnit` | Peel SearchFeatures; Cockpit/Ids |
 | compositor | ISurfaceCompositor | **real** `SeatsSurfaceCompositor` | Peel projects seats/view; compose under Cockpit/ |
 | surface | Surface mounts | **peel** `IdeCockpit.Surface` | Desk surface (not Avalonia) |
 | instrument | Instrument deck | **real** `DeskInstrumentMountRegistry` | Seats sync → deck; JSON pulse on surface |
