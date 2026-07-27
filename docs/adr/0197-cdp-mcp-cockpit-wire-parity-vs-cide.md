@@ -43,7 +43,7 @@ IdeCockpit вырос peel'ами. `op=as_built` уже сканирует пр�
 | cds | ICdsRouter | **real** `AttentionCdsRouter` + `DeskGoMapCatalog` | Peel NormalizeAttentionRouting; GoMap → CDS catalog |
 | ids | IdeDisplay | **real** `FeatureSearchUnit` | Peel SearchFeatures; Cockpit/Ids |
 | compositor | ISurfaceCompositor | **real** seats+tiles compositors | Peel projects; compose under Cockpit/ |
-| surface | Surface mounts | **real-ish** gate/match/presenter/alias/meta+presentMode/pin+layout+placeable/world+editor+fallbackSnap + SoftOrgans | **ISoftOrganBoard** shared by seats + SoftDispatch (`SoftBoard`); SoftOrganSeatExtras for alert/sys/ecl/qrh/review |
+| surface | Surface mounts | **real-ish** gate/match/presenter/alias/meta+presentMode/pin+layout+placeable/world+editor+fallbackSnap + SoftOrgans | **ISoftOrganBoard** shared by seats + SoftDispatch (`SoftBoard`); SoftOrganSeatExtras for alert/sys/ecl/qrh/review; Quality SoftDispatch → SoftBoard+Present wantFull + path TileArgs (0.5.277) |
 | instrument | Instrument deck | **real** `DeskInstrumentMountRegistry` | Seats sync → deck; JSON pulse on surface |
 | gun | CASCOPE* | **CDPCOPE*** | ADR 0200 |
 
