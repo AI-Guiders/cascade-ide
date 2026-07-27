@@ -39,7 +39,7 @@ IdeCockpit вырос peel'ами. `op=as_built` уже сканирует пр�
 | ccu | 0097 ComputingUnits | **real-ish** multi-unit + Build peel | Attention/DeskDetail/WorldScene/Focus/DeskLoci/DeskNext/SniperLocus/SysOrgan/GoVerbs/OrganJsonPulse; BuildAsync thin; **WorldGo** + **LegacyTiles** peels (0.5.276) |
 | dal | 0102 DAL | **real-ish** `Cockpit/DataAcquisition` | Toolchain PATH probe |
 | databus | 0099 IDataBus | **real** + host | DeskDataBusHost publishes DeskSurfaceBuilt |
-| channel | IChannel | **real** `DeferredSoftOrganChannel` | Peel delegates Peek |
+| channel | IChannel | **real** `DeferredSoftOrganChannel` | Peel delegates Peek; ApplyDeferred → IdeSoftOrganBoard (0.5.279) |
 | cds | ICdsRouter | **real** `AttentionCdsRouter` + `DeskGoMapCatalog` | Peel NormalizeAttentionRouting; GoMap → CDS catalog |
 | ids | IdeDisplay | **real** `FeatureSearchUnit` | Peel SearchFeatures; Cockpit/Ids |
 | compositor | ISurfaceCompositor | **real** seats+tiles compositors | Peel projects; compose under Cockpit/ |
