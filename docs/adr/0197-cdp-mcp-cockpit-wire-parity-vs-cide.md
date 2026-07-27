@@ -36,14 +36,14 @@ IdeCockpit вырос peel'ами. `op=as_built` уже сканирует пр�
 | Role | CIDE эталон | cdp-mcp статус | Примечание |
 |------|-------------|----------------|------------|
 | transport | 0094 ingest | **real** `Cockpit/Transport/DeskIngestionBus` | Bounded Channel\<T\>; peel publishes |
-| ccu | 0097 ComputingUnits | **real-ish** multi-unit + Build peel | Attention/DeskDetail/WorldScene/Focus/DeskLoci/DeskNext/SniperLocus/GoVerbs/OrganJsonPulse; BuildAsync thin (probes+world-go+tiles); still orchestrator |
+| ccu | 0097 ComputingUnits | **real-ish** multi-unit + Build peel | Attention/DeskDetail/WorldScene/Focus/DeskLoci/DeskNext/SniperLocus/SysOrgan/GoVerbs/OrganJsonPulse; BuildAsync thin orchestrator |
 | dal | 0102 DAL | **real-ish** `Cockpit/DataAcquisition` | Toolchain PATH probe |
 | databus | 0099 IDataBus | **real** + host | DeskDataBusHost publishes DeskSurfaceBuilt |
 | channel | IChannel | **real** `DeferredSoftOrganChannel` | Peel delegates Peek |
 | cds | ICdsRouter | **real** `AttentionCdsRouter` | Peel NormalizeAttentionRouting |
 | ids | IdeDisplay | **real** `FeatureSearchUnit` | Peel SearchFeatures; Cockpit/Ids |
 | compositor | ISurfaceCompositor | **real** seats+tiles compositors | Peel projects; compose under Cockpit/ |
-| surface | Surface mounts | **real-ish** gate/match/presenter/alias/meta+presentMode/pin+layout+placeable/world+editor+fallbackSnap + SoftOrgans | Pins/Git peels; Present() by mode; Handle still peel |
+| surface | Surface mounts | **real-ish** gate/match/presenter/alias/meta+presentMode/pin+layout+placeable/world+editor+fallbackSnap + SoftOrgans | IdeCockpit root facade (~43); Pins/Git/Sys peels; Handle still peel |
 | instrument | Instrument deck | **real** `DeskInstrumentMountRegistry` | Seats sync → deck; JSON pulse on surface |
 | gun | CASCOPE* | **CDPCOPE*** | ADR 0200 |
 
