@@ -20,6 +20,9 @@ public partial class App : Application
     /// <summary>Human GUI → agent focus latch (focus-LATEST.json).</summary>
     static Features.Cdp.CdpFocusLatchPublisher? FocusPublisher { get; set; }
 
+    /// <summary>Agent Instant Save ↔ human Save shared dirty (disk-LATEST.json).</summary>
+    static Features.Cdp.CdpDiskSyncProjector? DiskSyncProjector { get; set; }
+
     /// <summary><c>cide://</c> из argv при cold start (ADR 0157).</summary>
     public static string? PendingMagicLinkUri { get; set; }
 
@@ -41,6 +44,7 @@ public partial class App : Application
             desktop.MainWindow = new MainWindow { DataContext = vm };
             LandProjector = Features.Cdp.CdpLandProjector.Start(vm.IdeMcp);
             FocusPublisher = Features.Cdp.CdpFocusLatchPublisher.Start();
+            DiskSyncProjector = Features.Cdp.CdpDiskSyncProjector.Start(vm.Documents);
             if (RunMcpStdio)
                 _ = RunMcpServerAsync(vm);
             if (!string.IsNullOrWhiteSpace(PendingMagicLinkUri))

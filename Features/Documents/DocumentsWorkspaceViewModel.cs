@@ -403,6 +403,7 @@ public sealed partial class DocumentsWorkspaceViewModel : ObservableObject
                 continue;
             doc.ReloadContent(doc.Content);
             _host.NotifyAgentEnvironmentDocumentWrite(doc.FilePath);
+            Features.Cdp.CdpDiskSyncProjector.Instance?.PublishHumanSave(doc.FilePath);
             saved++;
         }
 
@@ -543,6 +544,7 @@ public sealed partial class DocumentsWorkspaceViewModel : ObservableObject
             }
 
             _host.NotifyAgentEnvironmentDocumentWrite(target);
+            Features.Cdp.CdpDiskSyncProjector.Instance?.PublishHumanSave(target);
             return JsonSerializer.Serialize(new { file_path = target, bytes = Encoding.UTF8.GetByteCount(content) });
         }
 
@@ -562,6 +564,7 @@ public sealed partial class DocumentsWorkspaceViewModel : ObservableObject
 
         doc.ReloadContent(doc.Content);
         _host.NotifyAgentEnvironmentDocumentWrite(normalized);
+        Features.Cdp.CdpDiskSyncProjector.Instance?.PublishHumanSave(normalized);
         return JsonSerializer.Serialize(new { file_path = normalized, bytes = Encoding.UTF8.GetByteCount(doc.Content) });
     }
 
@@ -666,6 +669,38 @@ public sealed partial class DocumentsWorkspaceViewModel : ObservableObject
         existing.ReloadContent(text);
         if (IsActiveDocumentForHost(existing))
             _host.EditorText = existing.Content;
+    }
+
+    /// <summary>
+    /// Agent Instant Save disk-sync: force-reload open tab even if dirty (shared dirty glass).
+    /// Does not open new tabs — only clears dirty when the path is already open.
+    /// </summary>
+    public bool ForceReloadOpenDocumentFromDisk(string filePath)
+    {
+        if (string.IsNullOrWhiteSpace(filePath))
+            return false;
+        if (!SolutionTreePath.TryGetFullPath(filePath, out var normalized) || !File.Exists(normalized))
+            return false;
+
+        var existing = FindOpenDocument(normalized);
+        if (existing is null)
+            return false;
+
+        var text = SafeReadFile(normalized);
+        _isSwitchingDocument = true;
+        try
+        {
+            existing.ReloadContent(text);
+            if (IsActiveDocumentForHost(existing)
+                && !string.Equals(_host.EditorText, existing.Content, StringComparison.Ordinal))
+                _host.EditorText = existing.Content;
+        }
+        finally
+        {
+            _isSwitchingDocument = false;
+        }
+
+        return true;
     }
 
     private static string SafeReadFile(string path)
