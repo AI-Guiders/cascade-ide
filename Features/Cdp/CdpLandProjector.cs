@@ -112,10 +112,12 @@ internal sealed class CdpLandProjector : IDisposable
                 var line = doc.Line.Value;
                 // GoToPosition waits for Monaco dock — SelectInEditor races ScheduleOpenFile
                 // and leaves caret at top of a freshly opened tab.
+                CdpFocusLatchPublisher.Instance?.SuppressEcho();
                 _actions.GoToPosition(doc.Path, line, 1, line, 1);
             }
             else
             {
+                CdpFocusLatchPublisher.Instance?.SuppressEcho();
                 _actions.OpenFile(doc.Path);
             }
         }

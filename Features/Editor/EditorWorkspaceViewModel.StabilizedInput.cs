@@ -50,6 +50,7 @@ public sealed partial class EditorWorkspaceViewModel
 
         _activeEditorStabilizedHudHandler?.Invoke(d);
         _host.HostUpdateCodeNavigationMapCaretOffset(d.CaretOffset);
+        Features.Cdp.CdpFocusLatchPublisher.Instance?.OnStabilizedCaret(d, EditorText);
     }
 
     internal void ShutdownEditorStabilizedInput()

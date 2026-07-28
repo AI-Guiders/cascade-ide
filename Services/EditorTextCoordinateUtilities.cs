@@ -29,6 +29,36 @@ public static class EditorTextCoordinateUtilities
     }
 
     /// <summary>
+    /// 0-based offset → 1-based line/column. Newlines = <c>\n</c> only (same as <see cref="LineColumnToOffset"/>).
+    /// </summary>
+    public static bool TryOffsetToLineColumn(string text, int offset, out int line, out int column)
+    {
+        line = 1;
+        column = 1;
+        if (offset < 0)
+            return false;
+
+        text ??= "";
+        if (offset > text.Length)
+            offset = text.Length;
+
+        var lineStart = 0;
+        var lineNo = 1;
+        for (var i = 0; i < offset; i++)
+        {
+            if (text[i] == '\n')
+            {
+                lineNo++;
+                lineStart = i + 1;
+            }
+        }
+
+        line = lineNo;
+        column = offset - lineStart + 1;
+        return true;
+    }
+
+    /// <summary>
     /// Сравнивает пути к одному и тому же файлу (через <see cref="CanonicalFilePath"/> при возможности).
     /// </summary>
     public static bool PathsReferToSameFile(string a, string b)

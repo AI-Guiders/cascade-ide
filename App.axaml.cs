@@ -17,6 +17,9 @@ public partial class App : Application
     /// <summary>Agent land → GUI projector (land-LATEST.json).</summary>
     static Features.Cdp.CdpLandProjector? LandProjector { get; set; }
 
+    /// <summary>Human GUI → agent focus latch (focus-LATEST.json).</summary>
+    static Features.Cdp.CdpFocusLatchPublisher? FocusPublisher { get; set; }
+
     /// <summary><c>cide://</c> из argv при cold start (ADR 0157).</summary>
     public static string? PendingMagicLinkUri { get; set; }
 
@@ -37,6 +40,7 @@ public partial class App : Application
             vm.IsMcpServerMode = RunMcpStdio;
             desktop.MainWindow = new MainWindow { DataContext = vm };
             LandProjector = Features.Cdp.CdpLandProjector.Start(vm.IdeMcp);
+            FocusPublisher = Features.Cdp.CdpFocusLatchPublisher.Start();
             if (RunMcpStdio)
                 _ = RunMcpServerAsync(vm);
             if (!string.IsNullOrWhiteSpace(PendingMagicLinkUri))
