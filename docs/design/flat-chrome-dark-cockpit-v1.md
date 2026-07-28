@@ -39,6 +39,28 @@ Flat **не** означает «серый пустой экран». Озна�
 - Полный отказ от `message_bubble` в Skia-ленте (0123).
 - Перепись Fluent theme / Dock глобально (VS-like скруглённые вкладки — backlog).
 
+## Dark Cockpit — agent attention (parallel human)
+
+Та же политика внимания, что у человека (тихо в норме; salience только по отклонению), но каналы агента — не пиксели, а **alert / SA / next[] / pulse / eQRH / Autoi charge / pressure notify**.
+
+Полная формулировка и DoD для рантайма CDP: sibling repo [`cdp-mcp/docs/design/dark-cockpit-agent-v1.md`](../../../cdp-mcp/docs/design/dark-cockpit-agent-v1.md). Краткая норма ниже — канон-зеркало.
+
+| Ось | Human | Agent |
+|-----|-------|-------|
+| **Норма** | тихие лампы, center тёмный | `alert.level=clear`, без WARN/ECL на здоровой sit |
+| **Salience** | цвет только W/C/A | шум/токены только на **реальном** отклонении |
+| **Пустота** | center off ≠ поломка | intentional plateau / no focus после ship ≠ failure |
+
+**Контракт агента (обязан соблюдать):**
+
+1. Не эскалировать clear sit. Если toolchain OK, ship intentional, focus null по плану — не трактовать `sa WARN · ecl · plateau` как работу; это нарушение DC со стороны продукта/агента.
+2. Soft ≠ hard: Stage `@phase` affinity vs session phase — advisory, не WARN, пока каталог инструментов не ломается.
+3. `next[]` — бюджет actionable deviations; evergreen tourism (onboard/goto «на всякий») не маскировать под W/C.
+4. Autoi: charge/re-arm только при реальном TM focus / authorized work; blind plateau re-arm запрещён.
+5. Pressure L1 — stash quietly; не превращать notify в ритуал export в чат.
+
+**Антипример (dogfood):** leftover AC+DoD ship → focus null → `sa WARN · ecl · plateau` + `n-alert` — Dark Cockpit violation.
+
 ## Файлы
 
 | Артефакт | Изменение |
