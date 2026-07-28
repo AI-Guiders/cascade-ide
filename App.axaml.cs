@@ -14,6 +14,9 @@ public partial class App : Application
     /// <summary>Запуск с MCP-сервером на stdio (агент/Cursor подключается к IDE по stdin/stdout).</summary>
     public static bool RunMcpStdio { get; set; }
 
+    /// <summary>Agent land → GUI projector (land-LATEST.json).</summary>
+    static Features.Cdp.CdpLandProjector? LandProjector { get; set; }
+
     /// <summary><c>cide://</c> из argv при cold start (ADR 0157).</summary>
     public static string? PendingMagicLinkUri { get; set; }
 
@@ -33,6 +36,7 @@ public partial class App : Application
             var vm = new MainWindowViewModel();
             vm.IsMcpServerMode = RunMcpStdio;
             desktop.MainWindow = new MainWindow { DataContext = vm };
+            LandProjector = Features.Cdp.CdpLandProjector.Start(vm.IdeMcp);
             if (RunMcpStdio)
                 _ = RunMcpServerAsync(vm);
             if (!string.IsNullOrWhiteSpace(PendingMagicLinkUri))

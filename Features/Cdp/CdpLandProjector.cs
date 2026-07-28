@@ -1,0 +1,149 @@
+#nullable enable
+using System.Text.Json;
+using Avalonia.Threading;
+using CascadeIDE.Services;
+
+namespace CascadeIDE.Features.Cdp;
+
+/// <summary>
+/// Operator GUI projector for agent <c>cdp_land</c> open|goto.
+/// Watches %LocalAppData%/cdp-mcp/land-LATEST.json (written by CDP NavigationLandLatch).
+/// Applies <see cref="IIdeMcpActions.OpenFile"/> + optional <see cref="IIdeMcpActions.SelectInEditor"/>.
+/// Does not touch Intent Melody / CascadeIdeSettings.
+/// </summary>
+internal sealed class CdpLandProjector : IDisposable
+{
+    public const string Schema = "navigation_land_latch/v1";
+
+    readonly IIdeMcpActions _actions;
+    readonly FileSystemWatcher _watcher;
+    readonly object _gate = new();
+    DateTimeOffset _lastStamp = DateTimeOffset.MinValue;
+    string? _lastPath;
+    int? _lastLine;
+    bool _disposed;
+
+    CdpLandProjector(IIdeMcpActions actions, string stateRoot)
+    {
+        _actions = actions;
+        Directory.CreateDirectory(stateRoot);
+        _watcher = new FileSystemWatcher(stateRoot)
+        {
+            Filter = "land-LATEST.json",
+            NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.FileName | NotifyFilters.Size,
+            EnableRaisingEvents = true
+        };
+        _watcher.Changed += OnFsEvent;
+        _watcher.Created += OnFsEvent;
+        _watcher.Renamed += OnFsEvent;
+
+        // Catch latch written while GUI was down.
+        TryApplyFromDisk(force: true);
+    }
+
+    public static string StateRoot =>
+        Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+            "cdp-mcp");
+
+    public static string LatchPath => Path.Combine(StateRoot, "land-LATEST.json");
+
+    public static CdpLandProjector Start(IIdeMcpActions actions) =>
+        new(actions, StateRoot);
+
+    void OnFsEvent(object sender, FileSystemEventArgs e) =>
+        Dispatcher.UIThread.Post(() => TryApplyFromDisk(force: false));
+
+    void TryApplyFromDisk(bool force)
+    {
+        if (_disposed)
+            return;
+
+        string raw;
+        try
+        {
+            if (!File.Exists(LatchPath))
+                return;
+            // Brief settle — writers use temp+move but some FS still double-notify mid-write.
+            Thread.Sleep(30);
+            raw = File.ReadAllText(LatchPath);
+        }
+        catch
+        {
+            return;
+        }
+
+        LandLatchDoc? doc;
+        try
+        {
+            doc = JsonSerializer.Deserialize<LandLatchDoc>(raw, JsonOpts);
+        }
+        catch
+        {
+            return;
+        }
+
+        if (doc is null || string.IsNullOrWhiteSpace(doc.Path))
+            return;
+        if (!string.Equals(doc.Schema, Schema, StringComparison.OrdinalIgnoreCase))
+            return;
+
+        lock (_gate)
+        {
+            if (!force
+                && doc.StampedUtc <= _lastStamp
+                && string.Equals(doc.Path, _lastPath, StringComparison.OrdinalIgnoreCase)
+                && doc.Line == _lastLine)
+                return;
+
+            _lastStamp = doc.StampedUtc;
+            _lastPath = doc.Path;
+            _lastLine = doc.Line;
+        }
+
+        try
+        {
+            if (!File.Exists(doc.Path))
+                return;
+
+            _actions.OpenFile(doc.Path);
+            if (doc.Line is > 0)
+            {
+                var line = doc.Line.Value;
+                _actions.SelectInEditor(doc.Path, line, 1, line, 1);
+            }
+        }
+        catch
+        {
+            /* best-effort projector */
+        }
+    }
+
+    public void Dispose()
+    {
+        if (_disposed)
+            return;
+        _disposed = true;
+        _watcher.EnableRaisingEvents = false;
+        _watcher.Changed -= OnFsEvent;
+        _watcher.Created -= OnFsEvent;
+        _watcher.Renamed -= OnFsEvent;
+        _watcher.Dispose();
+    }
+
+    static readonly JsonSerializerOptions JsonOpts = new()
+    {
+        PropertyNameCaseInsensitive = true,
+        PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower
+    };
+
+    sealed class LandLatchDoc
+    {
+        public string? Schema { get; set; }
+        public string? Command { get; set; }
+        public string? Path { get; set; }
+        public int? Line { get; set; }
+        public string? Member { get; set; }
+        public DateTimeOffset StampedUtc { get; set; }
+    }
+}

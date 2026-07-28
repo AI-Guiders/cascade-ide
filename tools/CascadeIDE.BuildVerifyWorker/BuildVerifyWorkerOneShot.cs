@@ -52,7 +52,7 @@ internal static class BuildVerifyWorkerOneShot
             ? BuildTestToolRequestParser.DefaultTestTimeoutSeconds
             : BuildTestToolRequestParser.DefaultBuildTimeoutSeconds;
 
-        var enqueued = coordinator.TryEnqueue(kind.Value, path, includeRawOutput: true, timeout, dotnetOptions);
+        var enqueued = coordinator.TryEnqueue(kind.Value, path, includeRawOutput: true, detail: "auto", timeout, dotnetOptions);
         if (!enqueued.Accepted)
         {
             Console.WriteLine(

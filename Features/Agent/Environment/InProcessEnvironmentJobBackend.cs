@@ -22,7 +22,7 @@ public sealed class InProcessEnvironmentJobBackend : IEnvironmentJobBackend
         bool includeRawOutput,
         int timeoutSeconds,
         DotnetExecutionOptions dotnetOptions) =>
-        _coordinator.TryEnqueue(kind, path, includeRawOutput, timeoutSeconds, dotnetOptions);
+        _coordinator.TryEnqueue(kind, path, includeRawOutput, detail: "auto", timeoutSeconds, dotnetOptions);
 
     public Task<string?> WaitForCompletionAsync(string jobId, CancellationToken cancellationToken) =>
         _coordinator.WaitForCompletionAsync(jobId, cancellationToken);

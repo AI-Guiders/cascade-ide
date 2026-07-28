@@ -132,6 +132,7 @@ internal static class BuildVerifyWorkerServeLoop
             kind,
             Path.GetFullPath(path),
             includeRaw,
+            detail: "auto",
             timeout,
             dotnetOptions);
 
