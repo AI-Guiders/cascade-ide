@@ -61,6 +61,10 @@ Flat **не** означает «серый пустой экран». Озна�
 
 **Антипример (dogfood):** leftover AC+DoD ship → focus null → `sa WARN · ecl · plateau` + `n-alert` — Dark Cockpit violation.
 
+### Agent Scan Pattern (кратко)
+
+Human SP = geography `P→Forward→M`. Agent SP **шире**: `board → sa → next → drill` — geography остаётся якорем; sit/steer/meta-слои не обязаны сводиться к трём seat-строкам. SSOT: [`dark-cockpit-agent-v1.md`](../../../cdp-mcp/docs/design/dark-cockpit-agent-v1.md) § Agent Scan Pattern.
+
 ## Файлы
 
 | Артефакт | Изменение |
