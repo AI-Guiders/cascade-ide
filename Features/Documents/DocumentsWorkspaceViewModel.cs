@@ -165,11 +165,8 @@ public sealed partial class DocumentsWorkspaceViewModel : ObservableObject
         }
         else
         {
-            if (string.IsNullOrEmpty(existing.OriginalContent))
-            {
-                var text = SafeReadFile(normalized);
-                existing.ReloadContent(text);
-            }
+            // Clean tab: pull Instant Save / external disk writers (land goto uses this path).
+            TryReloadCleanOpenDocumentFromDisk(existing, normalized);
 
             if (existing.GroupIndex != targetGroup)
                 MoveDocumentToGroupInternal(existing, targetGroup);
@@ -183,6 +180,7 @@ public sealed partial class DocumentsWorkspaceViewModel : ObservableObject
     /// <summary>
     /// Для reveal с карты/anchor: не пересобирать dock, если файл уже открыт (ADR 0130).
     /// Новый файл — полный <see cref="OpenOrActivateDocument"/>.
+    /// Clean open tabs reload from disk so agent Instant Save is visible on land goto.
     /// </summary>
     public void ActivateDocumentForReveal(string filePath)
     {
@@ -198,6 +196,8 @@ public sealed partial class DocumentsWorkspaceViewModel : ObservableObject
             OpenOrActivateDocument(normalized);
             return;
         }
+
+        TryReloadCleanOpenDocumentFromDisk(existing, normalized);
 
         if (EditorTextCoordinateUtilities.PathsReferToSameFile(_host.CurrentFilePath, normalized))
             return;
@@ -648,6 +648,24 @@ public sealed partial class DocumentsWorkspaceViewModel : ObservableObject
                 SolutionTreeExpansionPolicy.TryExpandPathTo(_workspace.SolutionRoots, item);
             _workspace.SelectedSolutionItem = item;
         }
+    }
+
+    /// <summary>
+    /// Pull disk into a clean open tab (agent Instant Save / external writers).
+    /// Dirty tabs keep human edits — no silent clobber. Syncs Monaco when active.
+    /// </summary>
+    void TryReloadCleanOpenDocumentFromDisk(OpenDocumentViewModel existing, string normalizedPath)
+    {
+        if (existing.IsDirty)
+            return;
+
+        var text = SafeReadFile(normalizedPath);
+        if (string.Equals(existing.Content, text, StringComparison.Ordinal))
+            return;
+
+        existing.ReloadContent(text);
+        if (IsActiveDocumentForHost(existing))
+            _host.EditorText = existing.Content;
     }
 
     private static string SafeReadFile(string path)
