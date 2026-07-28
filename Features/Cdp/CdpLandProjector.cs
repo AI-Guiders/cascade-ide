@@ -8,7 +8,8 @@ namespace CascadeIDE.Features.Cdp;
 /// <summary>
 /// Operator GUI projector for agent <c>cdp_land</c> open|goto.
 /// Watches %LocalAppData%/cdp-mcp/land-LATEST.json (written by CDP NavigationLandLatch).
-/// Applies <see cref="IIdeMcpActions.OpenFile"/> + optional <see cref="IIdeMcpActions.SelectInEditor"/>.
+/// Applies <see cref="IIdeMcpActions.OpenFile"/> or, when line present,
+/// <see cref="IIdeMcpActions.GoToPosition"/> (waits for Monaco — SelectInEditor races open).
 /// Does not touch Intent Melody / CascadeIdeSettings.
 /// </summary>
 internal sealed class CdpLandProjector : IDisposable
@@ -106,11 +107,16 @@ internal sealed class CdpLandProjector : IDisposable
             if (!File.Exists(doc.Path))
                 return;
 
-            _actions.OpenFile(doc.Path);
             if (doc.Line is > 0)
             {
                 var line = doc.Line.Value;
-                _actions.SelectInEditor(doc.Path, line, 1, line, 1);
+                // GoToPosition waits for Monaco dock — SelectInEditor races ScheduleOpenFile
+                // and leaves caret at top of a freshly opened tab.
+                _actions.GoToPosition(doc.Path, line, 1, line, 1);
+            }
+            else
+            {
+                _actions.OpenFile(doc.Path);
             }
         }
         catch
