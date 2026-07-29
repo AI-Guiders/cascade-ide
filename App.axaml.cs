@@ -53,6 +53,9 @@ public partial class App : Application
     /// <summary>Agent Project Switch → quiet chrome (scope-LATEST.json).</summary>
     static Features.Cdp.CdpScopeProjector? ScopeProjector { get; set; }
 
+    /// <summary>Agent sys ops → quiet chrome (sys-LATEST.json).</summary>
+    static Features.Cdp.CdpSysProjector? SysProjector { get; set; }
+
     /// <summary><c>cide://</c> из argv при cold start (ADR 0157).</summary>
     public static string? PendingMagicLinkUri { get; set; }
 
@@ -85,6 +88,7 @@ public partial class App : Application
             PressureProjector = Features.Cdp.CdpPressureProjector.Start(vm);
             IgniteProjector = Features.Cdp.CdpIgniteProjector.Start(vm);
             ScopeProjector = Features.Cdp.CdpScopeProjector.Start(vm);
+            SysProjector = Features.Cdp.CdpSysProjector.Start(vm);
             if (RunMcpStdio)
                 _ = RunMcpServerAsync(vm);
             if (!string.IsNullOrWhiteSpace(PendingMagicLinkUri))
