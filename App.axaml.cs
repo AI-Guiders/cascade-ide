@@ -38,6 +38,9 @@ public partial class App : Application
     /// <summary>Agent SA/alert → EICAS bar (alert-LATEST.json).</summary>
     static Features.Cdp.CdpAlertProjector? AlertProjector { get; set; }
 
+    /// <summary>Agent eQRH suggest → EICAS advisory (qrh-LATEST.json).</summary>
+    static Features.Cdp.CdpQrhProjector? QrhProjector { get; set; }
+
     /// <summary><c>cide://</c> из argv при cold start (ADR 0157).</summary>
     public static string? PendingMagicLinkUri { get; set; }
 
@@ -65,6 +68,7 @@ public partial class App : Application
             SharedFileProjector = Features.Cdp.CdpSharedFileProjector.Start(vm.Documents);
             SeatsProjector = Features.Cdp.CdpSeatsProjector.Start(vm);
             AlertProjector = Features.Cdp.CdpAlertProjector.Start(vm.EicasLatchFeed);
+            QrhProjector = Features.Cdp.CdpQrhProjector.Start(vm.EicasLatchFeed);
             if (RunMcpStdio)
                 _ = RunMcpServerAsync(vm);
             if (!string.IsNullOrWhiteSpace(PendingMagicLinkUri))

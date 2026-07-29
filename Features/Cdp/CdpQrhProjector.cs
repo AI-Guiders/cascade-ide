@@ -6,12 +6,12 @@ using CascadeIDE.Cockpit.Channels.Eicas;
 namespace CascadeIDE.Features.Cdp;
 
 /// <summary>
-/// Agent SA/alert → CIDE EICAS bar.
-/// Watches alert-LATEST.json; maps clear/warn/fail → empty / Caution / Warning messages.
+/// Agent eQRH suggest → CIDE EICAS advisory lines.
+/// Watches qrh-LATEST.json; merges as source=qrh (below alert severity).
 /// </summary>
-internal sealed class CdpAlertProjector : IDisposable
+internal sealed class CdpQrhProjector : IDisposable
 {
-    public const string Schema = "cide_alert_latch/v1";
+    public const string Schema = "cide_qrh_latch/v1";
     public const string OriginAgent = "agent";
 
     static readonly JsonSerializerOptions ReadOpts = new()
@@ -27,22 +27,22 @@ internal sealed class CdpAlertProjector : IDisposable
     string? _lastFingerprint;
     bool _disposed;
 
-    public static CdpAlertProjector? Instance { get; private set; }
+    public static CdpQrhProjector? Instance { get; private set; }
 
     public static string StateRoot =>
         Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
             "cdp-mcp");
 
-    public static string LatchPath => Path.Combine(StateRoot, "alert-LATEST.json");
+    public static string LatchPath => Path.Combine(StateRoot, "qrh-LATEST.json");
 
-    CdpAlertProjector(LatchEicasFeed feed, string stateRoot)
+    CdpQrhProjector(LatchEicasFeed feed, string stateRoot)
     {
         _feed = feed;
         Directory.CreateDirectory(stateRoot);
         _watcher = new FileSystemWatcher(stateRoot)
         {
-            Filter = "alert-LATEST.json",
+            Filter = "qrh-LATEST.json",
             NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.FileName | NotifyFilters.Size,
             EnableRaisingEvents = true
         };
@@ -52,10 +52,10 @@ internal sealed class CdpAlertProjector : IDisposable
         Dispatcher.UIThread.Post(() => TryApplyFromDisk(force: true), DispatcherPriority.Loaded);
     }
 
-    public static CdpAlertProjector Start(LatchEicasFeed feed)
+    public static CdpQrhProjector Start(LatchEicasFeed feed)
     {
         Instance?.Dispose();
-        Instance = new CdpAlertProjector(feed, StateRoot);
+        Instance = new CdpQrhProjector(feed, StateRoot);
         return Instance;
     }
 
@@ -79,10 +79,10 @@ internal sealed class CdpAlertProjector : IDisposable
             return;
         }
 
-        AlertLatchDoc? doc;
+        QrhLatchDoc? doc;
         try
         {
-            doc = JsonSerializer.Deserialize<AlertLatchDoc>(raw, ReadOpts);
+            doc = JsonSerializer.Deserialize<QrhLatchDoc>(raw, ReadOpts);
         }
         catch
         {
@@ -108,38 +108,31 @@ internal sealed class CdpAlertProjector : IDisposable
             _lastFingerprint = fingerprint;
         }
 
-        _feed.ReplaceSource("alert", MapMessages(doc));
+        _feed.ReplaceSource("qrh", MapMessages(doc));
     }
 
-    internal static IReadOnlyList<EicasMessage> MapMessages(AlertLatchDoc doc)
+    internal static IReadOnlyList<EicasMessage> MapMessages(QrhLatchDoc doc)
     {
-        var level = (doc.Level ?? "clear").Trim().ToLowerInvariant();
-        if (level is "clear" or "")
+        if (string.IsNullOrWhiteSpace(doc.HotId))
             return Array.Empty<EicasMessage>();
 
-        var severity = level switch
-        {
-            "fail" => EicasSeverity.Warning,
-            "warn" => EicasSeverity.Caution,
-            _ => EicasSeverity.Advisory
-        };
-
         var stamp = doc.StampedUtc == default ? DateTimeOffset.UtcNow : doc.StampedUtc;
-        var lines = (doc.Lines ?? [])
-            .Where(static l => !string.IsNullOrWhiteSpace(l))
-            .Take(16)
-            .ToArray();
+        var list = new List<EicasMessage>();
 
-        if (lines.Length == 0)
+        var head = !string.IsNullOrWhiteSpace(doc.Pulse)
+            ? doc.Pulse!.Trim()
+            : (doc.HotTitle ?? doc.HotId!).Trim();
+        list.Add(new EicasMessage(EicasSeverity.Advisory, head, "cdp.qrh", stamp));
+
+        foreach (var rel in (doc.Related ?? []).Take(4))
         {
-            if (string.IsNullOrWhiteSpace(doc.Pulse))
-                return Array.Empty<EicasMessage>();
-            return [new EicasMessage(severity, doc.Pulse!.Trim(), "cdp.alert", stamp)];
+            if (rel is null || string.IsNullOrWhiteSpace(rel.Title) && string.IsNullOrWhiteSpace(rel.Id))
+                continue;
+            var text = !string.IsNullOrWhiteSpace(rel.Title) ? rel.Title!.Trim() : rel.Id!.Trim();
+            list.Add(new EicasMessage(EicasSeverity.Advisory, text, "cdp.qrh", stamp));
         }
 
-        return lines
-            .Select(l => new EicasMessage(severity, l.Trim(), "cdp.alert", stamp))
-            .ToArray();
+        return list;
     }
 
     public void Dispose()
@@ -152,20 +145,27 @@ internal sealed class CdpAlertProjector : IDisposable
             Instance = null;
     }
 
-    internal sealed class AlertLatchDoc
+    internal sealed class RelatedPage
     {
-        public string Schema { get; set; } = CdpAlertProjector.Schema;
+        public string? Id { get; set; }
+        public string? Title { get; set; }
+    }
+
+    internal sealed class QrhLatchDoc
+    {
+        public string Schema { get; set; } = CdpQrhProjector.Schema;
         public string Origin { get; set; } = OriginAgent;
         public DateTimeOffset StampedUtc { get; set; }
-        public string? Level { get; set; }
         public bool Ok { get; set; } = true;
         public string? Pulse { get; set; }
-        public string[]? Lines { get; set; }
+        public string? HotId { get; set; }
+        public string? HotTitle { get; set; }
+        public RelatedPage[]? Related { get; set; }
 
         public string Fingerprint() =>
             string.Join('|',
-                Level ?? "",
+                HotId ?? "",
                 Pulse ?? "",
-                string.Join(';', Lines ?? []));
+                string.Join(';', (Related ?? []).Select(r => (r.Id ?? "") + "=" + (r.Title ?? ""))));
     }
 }
