@@ -38,6 +38,13 @@ public sealed class IntercomOutboundSendHost
 
     public required Func<bool> GetChatMcpOnly { get; init; }
 
+    /// <summary>
+    /// Dual-cockpit @PF voice: publish latch/cannon only — do not also dispatch CursorACP/streaming
+    /// (open Cursor would otherwise get ACP turn + AutoIgnition inject = duplicate wake).
+    /// </summary>
+    public required Func<string, bool> IsPfDualCockpitVoice { get; init; }
+
+
     public required Func<string> GetActiveAiProvider { get; init; }
 
     public required Func<string, Task> SendCursorAcpAsync { get; init; }

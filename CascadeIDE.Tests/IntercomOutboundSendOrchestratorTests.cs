@@ -75,6 +75,23 @@ public sealed class IntercomOutboundSendOrchestratorTests
     }
 
     [Fact]
+    public async Task RunAsync_pf_voice_commits_without_provider()
+    {
+        var host = new RecordingHost
+        {
+            TrimmedInput = "@PF hello PF",
+            BuildResult = (true, new IntercomAttachmentMessageBuilder.Outbound("@PF hello PF", [], null), ""),
+            ActiveProvider = "CursorACP",
+            PfVoice = true,
+        };
+        await IntercomOutboundSendOrchestrator.RunAsync(host.ToHost());
+        Assert.Equal(1, host.CommitCount);
+        Assert.False(host.LastCommitStartProviderLoading);
+        Assert.Equal(0, host.ProviderDispatchCount);
+        Assert.Equal(0, host.EndProviderTurnCount);
+    }
+
+    [Fact]
     public async Task RunAsync_follow_up_defers_provider_and_enqueues()
     {
         var host = new RecordingHost
@@ -99,6 +116,7 @@ public sealed class IntercomOutboundSendOrchestratorTests
         public bool SlashHandled { get; init; }
         public (bool Ok, IntercomAttachmentMessageBuilder.Outbound Outbound, string Error) BuildResult { get; init; }
         public bool McpOnly { get; init; }
+        public bool PfVoice { get; init; }
         public string ActiveProvider { get; init; } = "CursorACP";
 
         public string DeliveryMode { get; init; } = "normal";
@@ -149,6 +167,7 @@ public sealed class IntercomOutboundSendOrchestratorTests
                 },
                 ProcessFollowUpQueueAsync = () => Task.CompletedTask,
                 GetChatMcpOnly = () => McpOnly,
+                IsPfDualCockpitVoice = _ => PfVoice,
                 GetActiveAiProvider = () => ActiveProvider,
                 SendCursorAcpAsync = input =>
                 {

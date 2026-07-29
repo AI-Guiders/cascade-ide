@@ -90,10 +90,12 @@ public static class IntercomOutboundSendOrchestrator
         var displayInput = prepared.Display;
         var agentInput = prepared.Agent!;
         var mcpOnly = host.GetChatMcpOnly();
+        var pfVoice = host.IsPfDualCockpitVoice(displayInput);
         var deliveryMode = host.ConsumeDeliveryMode();
         host.CancelActiveTurnIfSteer(deliveryMode);
         var deferProvider = host.ShouldDeferProviderDispatch(deliveryMode);
-        var startProviderLoading = !mcpOnly && !deferProvider;
+        // @PF → CDP Intercom cannon owns wake; skip local/CursorACP provider (open-Cursor duplicate).
+        var startProviderLoading = !mcpOnly && !deferProvider && !pfVoice;
         var dispatchedProvider = false;
 
         try
@@ -104,7 +106,7 @@ public static class IntercomOutboundSendOrchestrator
                 _ => host.CommitUserMessageAsync(displayInput, build.Outbound, startProviderLoading, deliveryMode))
                 .ConfigureAwait(false);
 
-            if (mcpOnly)
+            if (mcpOnly || pfVoice)
                 return;
 
             if (deferProvider)

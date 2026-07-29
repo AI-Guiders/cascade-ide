@@ -30,6 +30,7 @@ public partial class ChatPanelViewModel
             CommitUserMessageAsync = commitIntercomUserMessageAsync,
             ConsumeDeliveryMode = ConsumePendingDeliveryMode,
             ShouldDeferProviderDispatch = ShouldDeferProviderDispatch,
+            IsPfDualCockpitVoice = raw => CascadeIDE.Features.Cdp.CdpIntercomVoicePublisher.TryExtractPfBody(raw, out _),
             CancelActiveTurnIfSteer = CancelActiveAgentTurnIfSteer,
             EnqueueFollowUpAgentInputAsync = text =>
             {
