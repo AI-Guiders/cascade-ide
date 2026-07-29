@@ -74,6 +74,9 @@ public partial class App : Application
     /// <summary>Agent CRM callout → quiet chrome (crm-LATEST.json).</summary>
     static Features.Cdp.CdpCrmProjector? CrmProjector { get; set; }
 
+    /// <summary>Agent webcam capture → quiet chrome (webcam-LATEST.json).</summary>
+    static Features.Cdp.CdpWebcamProjector? WebcamProjector { get; set; }
+
     /// <summary><c>cide://</c> из argv при cold start (ADR 0157).</summary>
     public static string? PendingMagicLinkUri { get; set; }
 
@@ -113,6 +116,7 @@ public partial class App : Application
             PlanProjector = Features.Cdp.CdpPlanProjector.Start(vm);
             ReportProjector = Features.Cdp.CdpReportProjector.Start(vm);
             CrmProjector = Features.Cdp.CdpCrmProjector.Start(vm);
+            WebcamProjector = Features.Cdp.CdpWebcamProjector.Start(vm);
             if (RunMcpStdio)
                 _ = RunMcpServerAsync(vm);
             if (!string.IsNullOrWhiteSpace(PendingMagicLinkUri))

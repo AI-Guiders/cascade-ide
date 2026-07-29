@@ -34,7 +34,8 @@ public static class MainWindowPresentationCapabilitiesProjection
         bool showAgentMcpChromeHint = false,
         bool showAgentPlanChromeHint = false,
         bool showAgentReportChromeHint = false,
-        bool showAgentCrmChromeHint = false) =>
+        bool showAgentCrmChromeHint = false,
+        bool showAgentWebcamChromeHint = false) =>
         showIdeHealthStrip
         || showEicasAlertsBar
         || showAgentCabinChromeHint
@@ -47,7 +48,8 @@ public static class MainWindowPresentationCapabilitiesProjection
         || showAgentMcpChromeHint
         || showAgentPlanChromeHint
         || showAgentReportChromeHint
-        || showAgentCrmChromeHint;
+        || showAgentCrmChromeHint
+        || showAgentWebcamChromeHint;
 
     public static bool ShowWorkspaceBottomChrome(
         bool showIdeHealthStrip,
