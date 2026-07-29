@@ -36,6 +36,11 @@ public partial class MainWindowViewModel
     [NotifyPropertyChangedFor(nameof(ShowWorkspaceChromeBand))]
     private string? _agentOnboardChromeHint;
 
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ShowAgentArchChromeHint))]
+    [NotifyPropertyChangedFor(nameof(ShowWorkspaceChromeBand))]
+    private string? _agentArchChromeHint;
+
     public bool ShowAgentCabinChromeHint => !string.IsNullOrWhiteSpace(AgentCabinChromeHint);
 
     public bool ShowAgentPressureChromeHint => !string.IsNullOrWhiteSpace(AgentPressureChromeHint);
@@ -47,6 +52,8 @@ public partial class MainWindowViewModel
     public bool ShowAgentSysChromeHint => !string.IsNullOrWhiteSpace(AgentSysChromeHint);
 
     public bool ShowAgentOnboardChromeHint => !string.IsNullOrWhiteSpace(AgentOnboardChromeHint);
+
+    public bool ShowAgentArchChromeHint => !string.IsNullOrWhiteSpace(AgentArchChromeHint);
 
     /// <summary>Apply seats-latch chrome_hint (Dark Cockpit — only when non-empty).</summary>
     public void ApplyCabinOrganChromeHint(string? hint)
@@ -100,5 +107,14 @@ public partial class MainWindowViewModel
         if (string.Equals(AgentOnboardChromeHint, next, StringComparison.Ordinal))
             return;
         AgentOnboardChromeHint = next;
+    }
+
+    /// <summary>Apply arch-LATEST chrome_hint (board/as_built; empty clears).</summary>
+    public void ApplyArchChromeHint(string? hint)
+    {
+        var next = string.IsNullOrWhiteSpace(hint) ? null : hint.Trim();
+        if (string.Equals(AgentArchChromeHint, next, StringComparison.Ordinal))
+            return;
+        AgentArchChromeHint = next;
     }
 }

@@ -39,11 +39,17 @@
                        Text="{Binding AgentSysChromeHint}"
                        IsVisible="{Binding ShowAgentSysChromeHint}"/>
             <!-- Onboard cold-start pulse (onboard-LATEST) — not EICAS. -->
-            <TextBlock Margin="8,2"
+            <TextBlock Margin="8,2,8,0"
                        Opacity="0.8"
                        FontSize="11"
                        Text="{Binding AgentOnboardChromeHint}"
                        IsVisible="{Binding ShowAgentOnboardChromeHint}"/>
+            <!-- Arch board pulse (arch-LATEST) — not EICAS. -->
+            <TextBlock Margin="8,2"
+                       Opacity="0.8"
+                       FontSize="11"
+                       Text="{Binding AgentArchChromeHint}"
+                       IsVisible="{Binding ShowAgentArchChromeHint}"/>
         </StackPanel>
         <!-- Полоса Workspace Health: раньше выравнивалась по MainGrid; теперь зона — MFD, на всю ширину контейнера. -->
         <Grid Grid.Row="2" IsVisible="{Binding ShowIdeHealthStrip}">
