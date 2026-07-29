@@ -407,11 +407,19 @@ public static class IntercomAttachmentResolveAtSend
 
         anchor = anchor with { ResolvedAtUtc = anchor.ResolvedAtUtc ?? DateTimeOffset.UtcNow.ToString("O") };
 
-        if (!AttachmentAnchorPaths.TryResolveAbsolute(anchor.File, workspaceRoot, out var absolute, out var pathErr))
+        if (!AttachmentAnchorPaths.TryResolveAbsolute(
+                anchor.File,
+                workspaceRoot,
+                hintActiveFilePath: null,
+                out var absolute,
+                out var pathErr))
         {
             error = pathErr;
             return false;
         }
+
+        var storedFile = AttachmentAnchorPaths.ToWorkspaceRelative(absolute, workspaceRoot) ?? absolute;
+        anchor = anchor with { File = storedFile.Replace('\\', '/') };
 
         var cacheContext = buildResolveCacheContext(workspaceRoot, solutionPath, anchor.File);
 

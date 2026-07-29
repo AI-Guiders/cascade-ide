@@ -299,7 +299,13 @@ internal sealed class SkiaChatMessageFeedEntity : ISkiaChatEntity
             out var draft,
             out _)
             && !string.IsNullOrWhiteSpace(draft.File)
-            ? draft
+            && AttachmentAnchorPaths.TryResolveAbsolute(
+                draft.File,
+                workspaceRoot: null,
+                hintActiveFilePath: null,
+                out var absolute,
+                out _)
+            ? draft with { File = absolute.Replace('\\', '/') }
             : null;
     }
 
