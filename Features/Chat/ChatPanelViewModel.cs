@@ -851,6 +851,8 @@ public partial class ChatPanelViewModel : ViewModelBase
     private bool CanDismissClarificationBatch() => _activeClarificationBatch is not null;
 
     /// <summary>Добавить сообщение из внешнего MCP (<c>send_chat</c> с <c>role=assistant</c>).</summary>
+        /// <summary>Добавить сообщение из внешнего MCP (<c>send_chat</c> с <c>role=assistant</c>).
+    /// Dual-cockpit voice: never drop the bubble if bracket prepare fails — keep prose `[F:…]` for click-time resolve.</summary>
     public async Task<string> AppendMessageFromMcpAsync(string role, string content, CancellationToken cancellationToken = default)
     {
         var r = string.Equals(role, "assistant", StringComparison.OrdinalIgnoreCase) ? "assistant" : "user";
@@ -890,18 +892,19 @@ public partial class ChatPanelViewModel : ViewModelBase
                     return result;
                 }).ConfigureAwait(false);
 
-            if (!prepared.IsCommittable)
+            if (prepared.IsCommittable)
             {
-                var err = prepared.Error ?? "Не удалось собрать вложения.";
-                await UiScheduler.Default.InvokeAsync(() =>
-                    ClarificationStatusText = $"MCP: сообщение не добавлено — {err}").ConfigureAwait(false);
-                return err;
+                body = prepared.Outbound.Content;
+                attachments = prepared.Outbound.Attachments;
+                senderContext = prepared.Outbound.SenderWorkspaceContext;
+                statusHint = IntercomPreparedMessageCommit.FormatStatusHint(prepared);
             }
-
-            body = prepared.Outbound.Content;
-            attachments = prepared.Outbound.Attachments;
-            senderContext = prepared.Outbound.SenderWorkspaceContext;
-            statusHint = IntercomPreparedMessageCommit.FormatStatusHint(prepared);
+            else
+            {
+                // Keep original prose (incl. `[F:…]`) so the bubble still lands; reveal resolves on click.
+                var err = prepared.Error ?? "Не удалось собрать вложения.";
+                statusHint = $"MCP: вложения deferred — {err}";
+            }
         }
 
         // Commit только на UI-потоке; prepare — с ConfigureAwait(false), иначе дедлок с MCP на UI.
@@ -923,6 +926,7 @@ public partial class ChatPanelViewModel : ViewModelBase
             return "OK";
         }).ConfigureAwait(false);
     }
+
 
     public string SubmitClarificationResponseFromJson(string responseJson)
     {
