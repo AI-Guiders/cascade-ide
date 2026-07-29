@@ -7,13 +7,20 @@
     <Grid RowDefinitions="Auto,Auto,*">
         <views:EicasAlertsBarView Grid.Row="0"
                                   IsVisible="{Binding ShowEicasAlertsBar}"/>
-        <!-- Quiet dual-cockpit packing: agent organ name when no MFD page (0-sync). -->
-        <TextBlock Grid.Row="1"
-                   Margin="8,2"
-                   Opacity="0.72"
-                   FontSize="11"
-                   Text="{Binding AgentCabinChromeHint}"
-                   IsVisible="{Binding ShowAgentCabinChromeHint}"/>
+        <StackPanel Grid.Row="1">
+            <!-- Quiet dual-cockpit packing: agent organ name when no MFD page (0-sync). -->
+            <TextBlock Margin="8,2,8,0"
+                       Opacity="0.72"
+                       FontSize="11"
+                       Text="{Binding AgentCabinChromeHint}"
+                       IsVisible="{Binding ShowAgentCabinChromeHint}"/>
+            <!-- L1 pressure continuity pulse (pressure-LATEST) — not EICAS. -->
+            <TextBlock Margin="8,2"
+                       Opacity="0.8"
+                       FontSize="11"
+                       Text="{Binding AgentPressureChromeHint}"
+                       IsVisible="{Binding ShowAgentPressureChromeHint}"/>
+        </StackPanel>
         <!-- Полоса Workspace Health: раньше выравнивалась по MainGrid; теперь зона — MFD, на всю ширину контейнера. -->
         <Grid Grid.Row="2" IsVisible="{Binding ShowIdeHealthStrip}">
             <views:WorkspaceHealthStripView/>

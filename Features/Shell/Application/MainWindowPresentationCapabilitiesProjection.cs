@@ -24,8 +24,9 @@ public static class MainWindowPresentationCapabilitiesProjection
     public static bool ShowWorkspaceChromeBand(
         bool showIdeHealthStrip,
         bool showEicasAlertsBar,
-        bool showAgentCabinChromeHint = false) =>
-        showIdeHealthStrip || showEicasAlertsBar || showAgentCabinChromeHint;
+        bool showAgentCabinChromeHint = false,
+        bool showAgentPressureChromeHint = false) =>
+        showIdeHealthStrip || showEicasAlertsBar || showAgentCabinChromeHint || showAgentPressureChromeHint;
 
     public static bool ShowWorkspaceBottomChrome(
         bool showIdeHealthStrip,

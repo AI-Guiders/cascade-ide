@@ -44,6 +44,9 @@ public partial class App : Application
     /// <summary>Agent ECL checklist → EICAS advisory (ecl-LATEST.json).</summary>
     static Features.Cdp.CdpEclProjector? EclProjector { get; set; }
 
+    /// <summary>Agent L1 pressure → quiet chrome (pressure-LATEST.json).</summary>
+    static Features.Cdp.CdpPressureProjector? PressureProjector { get; set; }
+
     /// <summary><c>cide://</c> из argv при cold start (ADR 0157).</summary>
     public static string? PendingMagicLinkUri { get; set; }
 
@@ -73,6 +76,7 @@ public partial class App : Application
             AlertProjector = Features.Cdp.CdpAlertProjector.Start(vm.EicasLatchFeed);
             QrhProjector = Features.Cdp.CdpQrhProjector.Start(vm.EicasLatchFeed);
             EclProjector = Features.Cdp.CdpEclProjector.Start(vm.EicasLatchFeed);
+            PressureProjector = Features.Cdp.CdpPressureProjector.Start(vm);
             if (RunMcpStdio)
                 _ = RunMcpServerAsync(vm);
             if (!string.IsNullOrWhiteSpace(PendingMagicLinkUri))
