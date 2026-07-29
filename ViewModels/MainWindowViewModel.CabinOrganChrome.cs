@@ -1,4 +1,5 @@
 #nullable enable
+using CascadeIDE.Features.UiChrome;
 using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace CascadeIDE.ViewModels;
@@ -92,189 +93,192 @@ public partial class MainWindowViewModel
     private string? _agentLearnChromeHint;
 
     public bool ShowAgentCabinChromeHint => !string.IsNullOrWhiteSpace(AgentCabinChromeHint);
-
     public bool ShowAgentPressureChromeHint => !string.IsNullOrWhiteSpace(AgentPressureChromeHint);
-
     public bool ShowAgentIgniteChromeHint => !string.IsNullOrWhiteSpace(AgentIgniteChromeHint);
-
     public bool ShowAgentScopeChromeHint => !string.IsNullOrWhiteSpace(AgentScopeChromeHint);
-
     public bool ShowAgentSysChromeHint => !string.IsNullOrWhiteSpace(AgentSysChromeHint);
-
     public bool ShowAgentOnboardChromeHint => !string.IsNullOrWhiteSpace(AgentOnboardChromeHint);
-
     public bool ShowAgentArchChromeHint => !string.IsNullOrWhiteSpace(AgentArchChromeHint);
-
     public bool ShowAgentMcpChromeHint => !string.IsNullOrWhiteSpace(AgentMcpChromeHint);
-
     public bool ShowAgentPlanChromeHint => !string.IsNullOrWhiteSpace(AgentPlanChromeHint);
-
     public bool ShowAgentReportChromeHint => !string.IsNullOrWhiteSpace(AgentReportChromeHint);
-
     public bool ShowAgentCrmChromeHint => !string.IsNullOrWhiteSpace(AgentCrmChromeHint);
-
     public bool ShowAgentWebcamChromeHint => !string.IsNullOrWhiteSpace(AgentWebcamChromeHint);
-
     public bool ShowAgentToolchainChromeHint => !string.IsNullOrWhiteSpace(AgentToolchainChromeHint);
-
     public bool ShowAgentPluginsChromeHint => !string.IsNullOrWhiteSpace(AgentPluginsChromeHint);
-
     public bool ShowAgentRefactorChromeHint => !string.IsNullOrWhiteSpace(AgentRefactorChromeHint);
-
     public bool ShowAgentReviewChromeHint => !string.IsNullOrWhiteSpace(AgentReviewChromeHint);
-
     public bool ShowAgentLearnChromeHint => !string.IsNullOrWhiteSpace(AgentLearnChromeHint);
 
-    /// <summary>Apply seats-latch chrome_hint (Dark Cockpit — only when non-empty).</summary>
+    public IReadOnlyList<string> AgentChromeHintVisibleLines => BuildChromeHintDensity().VisibleLines;
+    public string? AgentChromeHintOverflow => BuildChromeHintDensity().OverflowLine;
+    public bool ShowAgentChromeHintOverflow => !string.IsNullOrWhiteSpace(AgentChromeHintOverflow);
+
+    AgentChromeHintDensityPolicy.Result BuildChromeHintDensity() =>
+        AgentChromeHintDensityPolicy.Collapse(CollectChromeHintCandidates());
+
+    IEnumerable<AgentChromeHintDensityPolicy.Hint> CollectChromeHintCandidates()
+    {
+        if (AgentChromeHintDensityPolicy.From("pressure", AgentPressureChromeHint) is { } p) yield return p;
+        if (AgentChromeHintDensityPolicy.From("ignite", AgentIgniteChromeHint) is { } i) yield return i;
+        if (AgentChromeHintDensityPolicy.From("plan", AgentPlanChromeHint) is { } pl) yield return pl;
+        if (AgentChromeHintDensityPolicy.From("cabin", AgentCabinChromeHint) is { } c) yield return c;
+        if (AgentChromeHintDensityPolicy.From("scope", AgentScopeChromeHint) is { } s) yield return s;
+        if (AgentChromeHintDensityPolicy.From("review", AgentReviewChromeHint) is { } r) yield return r;
+        if (AgentChromeHintDensityPolicy.From("refactor", AgentRefactorChromeHint) is { } rf) yield return rf;
+        if (AgentChromeHintDensityPolicy.From("plugins", AgentPluginsChromeHint) is { } pg) yield return pg;
+        if (AgentChromeHintDensityPolicy.From("toolchain", AgentToolchainChromeHint) is { } t) yield return t;
+        if (AgentChromeHintDensityPolicy.From("crm", AgentCrmChromeHint) is { } crm) yield return crm;
+        if (AgentChromeHintDensityPolicy.From("report", AgentReportChromeHint) is { } rp) yield return rp;
+        if (AgentChromeHintDensityPolicy.From("webcam", AgentWebcamChromeHint) is { } w) yield return w;
+        if (AgentChromeHintDensityPolicy.From("sys", AgentSysChromeHint) is { } sy) yield return sy;
+        if (AgentChromeHintDensityPolicy.From("onboard", AgentOnboardChromeHint) is { } o) yield return o;
+        if (AgentChromeHintDensityPolicy.From("arch", AgentArchChromeHint) is { } a) yield return a;
+        if (AgentChromeHintDensityPolicy.From("mcp", AgentMcpChromeHint) is { } m) yield return m;
+        if (AgentChromeHintDensityPolicy.From("learn", AgentLearnChromeHint) is { } l) yield return l;
+    }
+
+    void RaiseChromeHintDensity()
+    {
+        OnPropertyChanged(nameof(AgentChromeHintVisibleLines));
+        OnPropertyChanged(nameof(AgentChromeHintOverflow));
+        OnPropertyChanged(nameof(ShowAgentChromeHintOverflow));
+    }
+
+    partial void OnAgentCabinChromeHintChanged(string? value) => RaiseChromeHintDensity();
+    partial void OnAgentPressureChromeHintChanged(string? value) => RaiseChromeHintDensity();
+    partial void OnAgentIgniteChromeHintChanged(string? value) => RaiseChromeHintDensity();
+    partial void OnAgentScopeChromeHintChanged(string? value) => RaiseChromeHintDensity();
+    partial void OnAgentSysChromeHintChanged(string? value) => RaiseChromeHintDensity();
+    partial void OnAgentOnboardChromeHintChanged(string? value) => RaiseChromeHintDensity();
+    partial void OnAgentArchChromeHintChanged(string? value) => RaiseChromeHintDensity();
+    partial void OnAgentMcpChromeHintChanged(string? value) => RaiseChromeHintDensity();
+    partial void OnAgentPlanChromeHintChanged(string? value) => RaiseChromeHintDensity();
+    partial void OnAgentReportChromeHintChanged(string? value) => RaiseChromeHintDensity();
+    partial void OnAgentCrmChromeHintChanged(string? value) => RaiseChromeHintDensity();
+    partial void OnAgentWebcamChromeHintChanged(string? value) => RaiseChromeHintDensity();
+    partial void OnAgentToolchainChromeHintChanged(string? value) => RaiseChromeHintDensity();
+    partial void OnAgentPluginsChromeHintChanged(string? value) => RaiseChromeHintDensity();
+    partial void OnAgentRefactorChromeHintChanged(string? value) => RaiseChromeHintDensity();
+    partial void OnAgentReviewChromeHintChanged(string? value) => RaiseChromeHintDensity();
+    partial void OnAgentLearnChromeHintChanged(string? value) => RaiseChromeHintDensity();
+
     public void ApplyCabinOrganChromeHint(string? hint)
     {
         var next = string.IsNullOrWhiteSpace(hint) ? null : hint.Trim();
-        if (string.Equals(AgentCabinChromeHint, next, StringComparison.Ordinal))
-            return;
+        if (string.Equals(AgentCabinChromeHint, next, StringComparison.Ordinal)) return;
         AgentCabinChromeHint = next;
     }
 
-    /// <summary>Apply pressure-LATEST chrome_hint (L1 armed pulse; idle clears).</summary>
     public void ApplyPressureChromeHint(string? hint)
     {
         var next = string.IsNullOrWhiteSpace(hint) ? null : hint.Trim();
-        if (string.Equals(AgentPressureChromeHint, next, StringComparison.Ordinal))
-            return;
+        if (string.Equals(AgentPressureChromeHint, next, StringComparison.Ordinal)) return;
         AgentPressureChromeHint = next;
     }
 
-    /// <summary>Apply ignite-LATEST chrome_hint (continuity live; idle clears).</summary>
     public void ApplyIgniteChromeHint(string? hint)
     {
         var next = string.IsNullOrWhiteSpace(hint) ? null : hint.Trim();
-        if (string.Equals(AgentIgniteChromeHint, next, StringComparison.Ordinal))
-            return;
+        if (string.Equals(AgentIgniteChromeHint, next, StringComparison.Ordinal)) return;
         AgentIgniteChromeHint = next;
     }
 
-    /// <summary>Apply scope-LATEST chrome_hint (PRIMARY/SCOPE; empty clears).</summary>
     public void ApplyScopeChromeHint(string? hint)
     {
         var next = string.IsNullOrWhiteSpace(hint) ? null : hint.Trim();
-        if (string.Equals(AgentScopeChromeHint, next, StringComparison.Ordinal))
-            return;
+        if (string.Equals(AgentScopeChromeHint, next, StringComparison.Ordinal)) return;
         AgentScopeChromeHint = next;
     }
 
-    /// <summary>Apply sys-LATEST chrome_hint (ops pulse; idle clears).</summary>
     public void ApplySysChromeHint(string? hint)
     {
         var next = string.IsNullOrWhiteSpace(hint) ? null : hint.Trim();
-        if (string.Equals(AgentSysChromeHint, next, StringComparison.Ordinal))
-            return;
+        if (string.Equals(AgentSysChromeHint, next, StringComparison.Ordinal)) return;
         AgentSysChromeHint = next;
     }
 
-    /// <summary>Apply onboard-LATEST chrome_hint (cold-start map; empty clears).</summary>
     public void ApplyOnboardChromeHint(string? hint)
     {
         var next = string.IsNullOrWhiteSpace(hint) ? null : hint.Trim();
-        if (string.Equals(AgentOnboardChromeHint, next, StringComparison.Ordinal))
-            return;
+        if (string.Equals(AgentOnboardChromeHint, next, StringComparison.Ordinal)) return;
         AgentOnboardChromeHint = next;
     }
 
-    /// <summary>Apply arch-LATEST chrome_hint (board/as_built; empty clears).</summary>
     public void ApplyArchChromeHint(string? hint)
     {
         var next = string.IsNullOrWhiteSpace(hint) ? null : hint.Trim();
-        if (string.Equals(AgentArchChromeHint, next, StringComparison.Ordinal))
-            return;
+        if (string.Equals(AgentArchChromeHint, next, StringComparison.Ordinal)) return;
         AgentArchChromeHint = next;
     }
 
-    /// <summary>Apply mcp-LATEST chrome_hint (outlet guests; idle clears).</summary>
     public void ApplyMcpChromeHint(string? hint)
     {
         var next = string.IsNullOrWhiteSpace(hint) ? null : hint.Trim();
-        if (string.Equals(AgentMcpChromeHint, next, StringComparison.Ordinal))
-            return;
+        if (string.Equals(AgentMcpChromeHint, next, StringComparison.Ordinal)) return;
         AgentMcpChromeHint = next;
     }
 
-    /// <summary>Apply plan-LATEST chrome_hint (Task Manager focus; empty clears).</summary>
     public void ApplyPlanChromeHint(string? hint)
     {
         var next = string.IsNullOrWhiteSpace(hint) ? null : hint.Trim();
-        if (string.Equals(AgentPlanChromeHint, next, StringComparison.Ordinal))
-            return;
+        if (string.Equals(AgentPlanChromeHint, next, StringComparison.Ordinal)) return;
         AgentPlanChromeHint = next;
     }
 
-    /// <summary>Apply report-LATEST chrome_hint (evidence board; idle clears).</summary>
     public void ApplyReportChromeHint(string? hint)
     {
         var next = string.IsNullOrWhiteSpace(hint) ? null : hint.Trim();
-        if (string.Equals(AgentReportChromeHint, next, StringComparison.Ordinal))
-            return;
+        if (string.Equals(AgentReportChromeHint, next, StringComparison.Ordinal)) return;
         AgentReportChromeHint = next;
     }
 
-    /// <summary>Apply crm-LATEST chrome_hint (awaiting callout; idle clears).</summary>
     public void ApplyCrmChromeHint(string? hint)
     {
         var next = string.IsNullOrWhiteSpace(hint) ? null : hint.Trim();
-        if (string.Equals(AgentCrmChromeHint, next, StringComparison.Ordinal))
-            return;
+        if (string.Equals(AgentCrmChromeHint, next, StringComparison.Ordinal)) return;
         AgentCrmChromeHint = next;
     }
 
-    /// <summary>Apply webcam-LATEST chrome_hint (capture evidence; idle clears).</summary>
     public void ApplyWebcamChromeHint(string? hint)
     {
         var next = string.IsNullOrWhiteSpace(hint) ? null : hint.Trim();
-        if (string.Equals(AgentWebcamChromeHint, next, StringComparison.Ordinal))
-            return;
+        if (string.Equals(AgentWebcamChromeHint, next, StringComparison.Ordinal)) return;
         AgentWebcamChromeHint = next;
     }
 
-    /// <summary>Apply toolchain-LATEST chrome_hint (missing bins; all-ok clears).</summary>
     public void ApplyToolchainChromeHint(string? hint)
     {
         var next = string.IsNullOrWhiteSpace(hint) ? null : hint.Trim();
-        if (string.Equals(AgentToolchainChromeHint, next, StringComparison.Ordinal))
-            return;
+        if (string.Equals(AgentToolchainChromeHint, next, StringComparison.Ordinal)) return;
         AgentToolchainChromeHint = next;
     }
 
-    /// <summary>Apply plugins-LATEST chrome_hint (Mode A / attention gap; healthy clears).</summary>
     public void ApplyPluginsChromeHint(string? hint)
     {
         var next = string.IsNullOrWhiteSpace(hint) ? null : hint.Trim();
-        if (string.Equals(AgentPluginsChromeHint, next, StringComparison.Ordinal))
-            return;
+        if (string.Equals(AgentPluginsChromeHint, next, StringComparison.Ordinal)) return;
         AgentPluginsChromeHint = next;
     }
 
-    /// <summary>Apply refactor-LATEST chrome_hint (debt hotspots; none clears).</summary>
     public void ApplyRefactorChromeHint(string? hint)
     {
         var next = string.IsNullOrWhiteSpace(hint) ? null : hint.Trim();
-        if (string.Equals(AgentRefactorChromeHint, next, StringComparison.Ordinal))
-            return;
+        if (string.Equals(AgentRefactorChromeHint, next, StringComparison.Ordinal)) return;
         AgentRefactorChromeHint = next;
     }
 
-    /// <summary>Apply review-LATEST chrome_hint (dirty files / machine open; clean clears).</summary>
     public void ApplyReviewChromeHint(string? hint)
     {
         var next = string.IsNullOrWhiteSpace(hint) ? null : hint.Trim();
-        if (string.Equals(AgentReviewChromeHint, next, StringComparison.Ordinal))
-            return;
+        if (string.Equals(AgentReviewChromeHint, next, StringComparison.Ordinal)) return;
         AgentReviewChromeHint = next;
     }
 
-    /// <summary>Apply learn-LATEST chrome_hint (journal cards; empty clears).</summary>
     public void ApplyLearnChromeHint(string? hint)
     {
         var next = string.IsNullOrWhiteSpace(hint) ? null : hint.Trim();
-        if (string.Equals(AgentLearnChromeHint, next, StringComparison.Ordinal))
-            return;
+        if (string.Equals(AgentLearnChromeHint, next, StringComparison.Ordinal)) return;
         AgentLearnChromeHint = next;
     }
 }

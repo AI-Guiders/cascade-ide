@@ -8,108 +8,22 @@
         <views:EicasAlertsBarView Grid.Row="0"
                                   IsVisible="{Binding ShowEicasAlertsBar}"/>
         <StackPanel Grid.Row="1">
-            <!-- Quiet dual-cockpit packing: agent organ name when no MFD page (0-sync). -->
-            <TextBlock Margin="8,2,8,0"
-                       Opacity="0.72"
-                       FontSize="11"
-                       Text="{Binding AgentCabinChromeHint}"
-                       IsVisible="{Binding ShowAgentCabinChromeHint}"/>
-            <!-- L1 pressure continuity pulse (pressure-LATEST) — not EICAS. -->
-            <TextBlock Margin="8,2,8,0"
-                       Opacity="0.8"
-                       FontSize="11"
-                       Text="{Binding AgentPressureChromeHint}"
-                       IsVisible="{Binding ShowAgentPressureChromeHint}"/>
-            <!-- AutoIgnition continuity pulse (ignite-LATEST) — not EICAS. -->
-            <TextBlock Margin="8,2,8,0"
-                       Opacity="0.8"
-                       FontSize="11"
-                       Text="{Binding AgentIgniteChromeHint}"
-                       IsVisible="{Binding ShowAgentIgniteChromeHint}"/>
-            <!-- Project Switch PRIMARY/SCOPE (scope-LATEST) — not EICAS. -->
-            <TextBlock Margin="8,2,8,0"
-                       Opacity="0.8"
-                       FontSize="11"
-                       Text="{Binding AgentScopeChromeHint}"
-                       IsVisible="{Binding ShowAgentScopeChromeHint}"/>
-            <!-- Sys ops pulse (sys-LATEST) — not EICAS. -->
-            <TextBlock Margin="8,2,8,0"
-                       Opacity="0.8"
-                       FontSize="11"
-                       Text="{Binding AgentSysChromeHint}"
-                       IsVisible="{Binding ShowAgentSysChromeHint}"/>
-            <!-- Onboard cold-start pulse (onboard-LATEST) — not EICAS. -->
-            <TextBlock Margin="8,2,8,0"
-                       Opacity="0.8"
-                       FontSize="11"
-                       Text="{Binding AgentOnboardChromeHint}"
-                       IsVisible="{Binding ShowAgentOnboardChromeHint}"/>
-            <!-- Arch board pulse (arch-LATEST) — not EICAS. -->
-            <TextBlock Margin="8,2,8,0"
-                       Opacity="0.8"
-                       FontSize="11"
-                       Text="{Binding AgentArchChromeHint}"
-                       IsVisible="{Binding ShowAgentArchChromeHint}"/>
-            <!-- MCP outlet pulse (mcp-LATEST) — not EICAS. -->
-            <TextBlock Margin="8,2,8,0"
-                       Opacity="0.8"
-                       FontSize="11"
-                       Text="{Binding AgentMcpChromeHint}"
-                       IsVisible="{Binding ShowAgentMcpChromeHint}"/>
-            <!-- Task Manager pulse (plan-LATEST) — not EICAS. -->
-            <TextBlock Margin="8,2,8,0"
-                       Opacity="0.8"
-                       FontSize="11"
-                       Text="{Binding AgentPlanChromeHint}"
-                       IsVisible="{Binding ShowAgentPlanChromeHint}"/>
-            <!-- Report board pulse (report-LATEST) — not EICAS. -->
-            <TextBlock Margin="8,2,8,0"
-                       Opacity="0.8"
-                       FontSize="11"
-                       Text="{Binding AgentReportChromeHint}"
-                       IsVisible="{Binding ShowAgentReportChromeHint}"/>
-            <!-- CRM awaiting pulse (crm-LATEST) — not EICAS. -->
-            <TextBlock Margin="8,2,8,0"
-                       Opacity="0.8"
-                       FontSize="11"
-                       Text="{Binding AgentCrmChromeHint}"
-                       IsVisible="{Binding ShowAgentCrmChromeHint}"/>
-            <!-- Webcam capture pulse (webcam-LATEST) — not EICAS. -->
-            <TextBlock Margin="8,2,8,0"
-                       Opacity="0.8"
-                       FontSize="11"
-                       Text="{Binding AgentWebcamChromeHint}"
-                       IsVisible="{Binding ShowAgentWebcamChromeHint}"/>
-            <!-- Toolchain missing pulse (toolchain-LATEST) — not EICAS. -->
-            <TextBlock Margin="8,2,8,0"
-                       Opacity="0.8"
-                       FontSize="11"
-                       Text="{Binding AgentToolchainChromeHint}"
-                       IsVisible="{Binding ShowAgentToolchainChromeHint}"/>
-            <!-- Plugins Mode A / attention gap (plugins-LATEST) — not EICAS. -->
-            <TextBlock Margin="8,2,8,0"
-                       Opacity="0.8"
-                       FontSize="11"
-                       Text="{Binding AgentPluginsChromeHint}"
-                       IsVisible="{Binding ShowAgentPluginsChromeHint}"/>
-            <!-- Refactor debt hotspots (refactor-LATEST) — not EICAS. -->
-            <TextBlock Margin="8,2,8,0"
-                       Opacity="0.8"
-                       FontSize="11"
-                       Text="{Binding AgentRefactorChromeHint}"
-                       IsVisible="{Binding ShowAgentRefactorChromeHint}"/>
-            <!-- Review dirty / machine open (review-LATEST) — not EICAS. -->
-            <TextBlock Margin="8,2,8,0"
-                       Opacity="0.8"
-                       FontSize="11"
-                       Text="{Binding AgentReviewChromeHint}"
-                       IsVisible="{Binding ShowAgentReviewChromeHint}"/>
-            <!-- Learn journal cards (learn-LATEST) — not EICAS. -->
+            <!-- SoftOrgan chrome density: top-N priority lines + overflow (latches stay latch-first). -->
+            <ItemsControl ItemsSource="{Binding AgentChromeHintVisibleLines}">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate x:DataType="x:String">
+                        <TextBlock Margin="8,2,8,0"
+                                   Opacity="0.8"
+                                   FontSize="11"
+                                   Text="{Binding}"/>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
             <TextBlock Margin="8,2"
-                       Opacity="0.8"
+                       Opacity="0.55"
                        FontSize="11"
-                       Text="{Binding AgentLearnChromeHint}"
-                       IsVisible="{Binding ShowAgentLearnChromeHint}"/>
+                       Text="{Binding AgentChromeHintOverflow}"
+                       IsVisible="{Binding ShowAgentChromeHintOverflow}"/>
         </StackPanel>
         <!-- Полоса Workspace Health: раньше выравнивалась по MainGrid; теперь зона — MFD, на всю ширину контейнера. -->
         <Grid Grid.Row="2" IsVisible="{Binding ShowIdeHealthStrip}">
