@@ -35,6 +35,9 @@ public partial class App : Application
     /// <summary>Agent desk seats → cabin tool map (seats-LATEST.json).</summary>
     static Features.Cdp.CdpSeatsProjector? SeatsProjector { get; set; }
 
+    /// <summary>Agent SA/alert → EICAS bar (alert-LATEST.json).</summary>
+    static Features.Cdp.CdpAlertProjector? AlertProjector { get; set; }
+
     /// <summary><c>cide://</c> из argv при cold start (ADR 0157).</summary>
     public static string? PendingMagicLinkUri { get; set; }
 
@@ -61,6 +64,7 @@ public partial class App : Application
             IntercomVoiceProjector = Features.Cdp.CdpIntercomVoiceProjector.Start(vm);
             SharedFileProjector = Features.Cdp.CdpSharedFileProjector.Start(vm.Documents);
             SeatsProjector = Features.Cdp.CdpSeatsProjector.Start(vm);
+            AlertProjector = Features.Cdp.CdpAlertProjector.Start(vm.EicasLatchFeed);
             if (RunMcpStdio)
                 _ = RunMcpServerAsync(vm);
             if (!string.IsNullOrWhiteSpace(PendingMagicLinkUri))

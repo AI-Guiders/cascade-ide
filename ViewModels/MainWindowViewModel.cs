@@ -73,7 +73,10 @@ public partial class MainWindowViewModel : ViewModelBase, IAutonomousAgentSessio
     private readonly HybridIndexOrchestrator _hybridIndex;
     private readonly IIdeHealthChannel _workspaceHealth;
     private readonly IIdeHealthSurfaceCompositor _workspaceHealthSurfaceCompositor;
-    private readonly IEicasFeed _eicasFeed;
+    private readonly LatchEicasFeed _eicasFeed;
+
+    /// <summary>Dual-HCI alert latch feed (CdpAlertProjector).</summary>
+    internal LatchEicasFeed EicasLatchFeed => _eicasFeed;
     private readonly IEnvironmentReadinessChannel _environmentReadinessChannel;
     private readonly IEnvironmentReadinessSurfaceCompositor _environmentReadinessSurfaceCompositor;
     private Services.Presentation.PresentationParseResult _presentationParse;

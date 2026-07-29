@@ -232,7 +232,7 @@ public partial class MainWindowViewModel
         Chrome.AfterGitWorkspaceHealthSummaryApplied = PublishGitToIdeDataBusAndRebuildIdeHealth;
         _workspaceHealthSurfaceCompositor = new IdeHealthSurfaceCompositor();
 
-        _eicasFeed = new EmptyEicasFeed();
+        _eicasFeed = new LatchEicasFeed();
         _eicasFeed.MessagesChanged += (_, _) => RebuildEicas();
         _environmentReadinessChannel = new EnvironmentReadinessChannel();
         _environmentReadinessSurfaceCompositor = new EnvironmentReadinessSurfaceCompositor();
