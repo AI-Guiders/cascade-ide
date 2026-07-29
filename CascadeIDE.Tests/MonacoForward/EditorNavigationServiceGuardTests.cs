@@ -1,4 +1,5 @@
 using CascadeIDE.Features.Editor.Application.Monaco;
+using CascadeIDE.Services;
 using Xunit;
 
 namespace CascadeIDE.Tests.MonacoForward;
@@ -21,5 +22,29 @@ public sealed class EditorNavigationServiceGuardTests
         var vm = new ViewModels.MainWindowViewModel();
         var nav = new EditorNavigationService(vm);
         Assert.True(nav.TryNavigateGoTo(@"D:\Fake\File.cs", line: 10, column: 3));
+    }
+
+    [Fact]
+    public void ResolveRevealPresentation_null_duration_is_transient_default()
+    {
+        var (presentation, ms) = EditorNavigationService.ResolveRevealPresentation(null);
+        Assert.Equal(EditorNavigationPresentation.RevealTransient, presentation);
+        Assert.Equal(EditorRevealDuration.DefaultMs, ms);
+    }
+
+    [Fact]
+    public void ResolveRevealPresentation_positive_duration_clamped_transient()
+    {
+        var (presentation, ms) = EditorNavigationService.ResolveRevealPresentation(5000);
+        Assert.Equal(EditorNavigationPresentation.RevealTransient, presentation);
+        Assert.Equal(5000, ms);
+    }
+
+    [Fact]
+    public void ResolveRevealPresentation_zero_duration_defaults_transient()
+    {
+        var (presentation, ms) = EditorNavigationService.ResolveRevealPresentation(0);
+        Assert.Equal(EditorNavigationPresentation.RevealTransient, presentation);
+        Assert.Equal(EditorRevealDuration.DefaultMs, ms);
     }
 }

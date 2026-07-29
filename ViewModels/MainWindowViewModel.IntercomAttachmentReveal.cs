@@ -43,7 +43,7 @@ public partial class MainWindowViewModel
                     anchor,
                     selectExplicit: select,
                     shiftSelect: false,
-                    durationMs: null,
+                    durationMs: EditorRevealDuration.DefaultMs,
                     solutionPath: ChatPanel.ResolveAttachSolutionPath()))
             .ConfigureAwait(false);
     }

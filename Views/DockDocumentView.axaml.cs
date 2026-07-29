@@ -194,13 +194,9 @@ public partial class DockDocumentView : UserControl
         if (_docVm is null || _vm is null || _monacoHost is null)
             return false;
 
-        if (durationMs is > 0)
-        {
-            _ = _monacoHost.PushAgentRevealAsync(startLine, endLine, persistent: false, durationMs);
-            return true;
-        }
-
-        _ = _monacoHost.PushRevealRangeAsync(startLine, endLine);
+        // Omitted/non-positive duration still paints transient frame (not scroll-only).
+        var ms = durationMs is > 0 ? durationMs : EditorRevealDuration.DefaultMs;
+        _ = _monacoHost.PushAgentRevealAsync(startLine, endLine, persistent: false, ms);
         return true;
     }
 

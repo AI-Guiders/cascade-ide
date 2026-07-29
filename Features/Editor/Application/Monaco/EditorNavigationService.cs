@@ -1,3 +1,4 @@
+using CascadeIDE.Services;
 using CascadeIDE.ViewModels;
 using CascadeIDE.Views;
 
@@ -6,11 +7,21 @@ namespace CascadeIDE.Features.Editor.Application.Monaco;
 /// <summary>Unifies reveal/goto paths into Monaco (ADR 0163 §2.4).</summary>
 public sealed class EditorNavigationService : IEditorNavigationService
 {
-    private const int NavigationMapRevealDurationMs = 3000;
-
     private readonly MainWindowViewModel _vm;
 
     public EditorNavigationService(MainWindowViewModel vm) => _vm = vm;
+
+    /// <summary>
+    /// Reveal API (ADR 0130): omitted/non-positive duration → transient frame @ <see cref="EditorRevealDuration.DefaultMs"/>.
+    /// Select stays on <c>SelectInEditor</c> / Shift-click, not on null duration.
+    /// </summary>
+    internal static (EditorNavigationPresentation Presentation, int DurationMs) ResolveRevealPresentation(int? durationMs)
+    {
+        var ms = durationMs is > 0
+            ? EditorRevealDuration.ClampOptional(durationMs)!.Value
+            : EditorRevealDuration.DefaultMs;
+        return (EditorNavigationPresentation.RevealTransient, ms);
+    }
 
     public async Task<bool> NavigateAsync(EditorNavigationTarget target, CancellationToken cancellationToken = default)
     {
@@ -42,16 +53,14 @@ public sealed class EditorNavigationService : IEditorNavigationService
         if (string.IsNullOrWhiteSpace(filePath))
             return false;
 
-        var presentation = durationMs is > 0
-            ? EditorNavigationPresentation.RevealTransient
-            : EditorNavigationPresentation.SelectAndReveal;
+        var (presentation, ms) = ResolveRevealPresentation(durationMs);
 
         _ = NavigateAsync(new EditorNavigationTarget(
             filePath,
             startLine,
             endLine,
             Presentation: presentation,
-            DurationMs: durationMs,
+            DurationMs: ms,
             Source: source));
 
         return true;
@@ -128,7 +137,7 @@ public sealed class EditorNavigationService : IEditorNavigationService
                     target.StartLine,
                     target.EndLine,
                     persistent: false,
-                    durationMs: target.DurationMs ?? NavigationMapRevealDurationMs).ConfigureAwait(true);
+                    durationMs: target.DurationMs ?? EditorRevealDuration.DefaultMs).ConfigureAwait(true);
                 return true;
 
             case EditorNavigationPresentation.RevealPersistent:
@@ -154,7 +163,7 @@ public sealed class EditorNavigationService : IEditorNavigationService
                         target.StartLine,
                         target.EndLine,
                         persistent: false,
-                        durationMs: NavigationMapRevealDurationMs).ConfigureAwait(true);
+                        durationMs: EditorRevealDuration.DefaultMs).ConfigureAwait(true);
                     return true;
                 }
 
