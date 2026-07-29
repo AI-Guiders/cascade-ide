@@ -19,11 +19,11 @@ public partial class MainWindowViewModel
     /// <summary>MCP и палитра: перейти на страницу оболочки Mfd, если она разрешена пресетом.</summary>
     public void TryNavigateToMfdShellPage(MfdShellPage page)
     {
-        EnsureMfdShellSurfaceForLayout();
         if (IsMfdShellPageAllowed(page))
             CurrentMfdShellPage = page;
         else
             CoerceMfdShellPageToAllowed();
+        EnsureMfdShellSurfaceForLayout();
     }
 
     /// <summary>

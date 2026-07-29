@@ -50,7 +50,9 @@ internal sealed class CdpPresentationProjector : IDisposable
         _watcher.Changed += OnFsEvent;
         _watcher.Created += OnFsEvent;
         _watcher.Renamed += OnFsEvent;
-        TryApplyFromDisk(force: true);
+        // Defer cold apply: MainWindow is not Visible yet during App setup — Sync apply
+        // of mfd_page crashed with "Cannot show window with non-visible owner".
+        Dispatcher.UIThread.Post(() => TryApplyFromDisk(force: true), DispatcherPriority.Loaded);
     }
 
     public static CdpPresentationProjector Start(MainWindowViewModel vm)

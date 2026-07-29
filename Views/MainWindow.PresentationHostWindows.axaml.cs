@@ -73,7 +73,11 @@ public partial class MainWindow
             vm.MaximizePresentationHostWindowsOnDedicatedScreens);
         vm.SetMfdHostWindowShellOpen(true);
         _mfdHostWindow = w;
-        w.Show(this);
+        // Owner must be visible for Show(owner); cold presentation latch can fire at boot.
+        if (IsVisible)
+            w.Show(this);
+        else
+            w.Show();
     }
 
     private void TogglePmSplitHostWindow()
