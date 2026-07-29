@@ -21,8 +21,11 @@ public static class MainWindowPresentationCapabilitiesProjection
     public static bool ShowEicasAlertsBar(UiModeCapabilities c, int eicasMessageCount) =>
         c.EicasAlertsBarEnabled && eicasMessageCount > 0;
 
-    public static bool ShowWorkspaceChromeBand(bool showIdeHealthStrip, bool showEicasAlertsBar) =>
-        showIdeHealthStrip || showEicasAlertsBar;
+    public static bool ShowWorkspaceChromeBand(
+        bool showIdeHealthStrip,
+        bool showEicasAlertsBar,
+        bool showAgentCabinChromeHint = false) =>
+        showIdeHealthStrip || showEicasAlertsBar || showAgentCabinChromeHint;
 
     public static bool ShowWorkspaceBottomChrome(
         bool showIdeHealthStrip,

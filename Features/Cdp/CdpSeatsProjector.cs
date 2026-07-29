@@ -109,9 +109,11 @@ internal sealed class CdpSeatsProjector : IDisposable
             _lastFingerprint = fingerprint;
         }
 
-        // Chrome hint stays on latch for later glass badge; v0 applies mappable MFD only.
+        // Packing: apply mappable MFD and/or quiet chrome hint (desk-only organs).
         if (!string.IsNullOrWhiteSpace(doc.MfdPage))
             _vm.ApplyPresentationGlassPatch(mfdPage: doc.MfdPage);
+
+        _vm.ApplyCabinOrganChromeHint(doc.ChromeHint);
     }
 
     public void Dispose()
