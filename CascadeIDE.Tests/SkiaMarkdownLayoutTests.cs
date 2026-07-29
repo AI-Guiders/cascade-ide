@@ -42,6 +42,26 @@ public sealed class SkiaMarkdownLayoutTests
     }
 
     [Fact]
+    public void ParseInline_snake_case_underscore_does_not_hang()
+    {
+        var sw = System.Diagnostics.Stopwatch.StartNew();
+        var runs = SkiaMarkdownLayout.ParseInline("hello_world and Foo_Bar_Baz");
+        sw.Stop();
+        Assert.NotEmpty(runs);
+        Assert.True(sw.ElapsedMilliseconds < 100, $"ParseInline hung/slow: {sw.ElapsedMilliseconds}ms");
+        Assert.Contains(runs, r => r.Text.Contains('_', StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public void ParseInline_unmatched_markers_complete()
+    {
+        var runs = SkiaMarkdownLayout.ParseInline("a [ open * star ` tick");
+        Assert.NotEmpty(runs);
+        Assert.Equal("a [ open * star ` tick", string.Concat(runs.Select(r => r.Text)));
+    }
+
+
+    [Fact]
     public void Feed_measure_of_large_plain_body_stays_under_budget()
     {
         var body = new string('x', SkiaChatRenderLimits.MaxProseBodyChars * 4);

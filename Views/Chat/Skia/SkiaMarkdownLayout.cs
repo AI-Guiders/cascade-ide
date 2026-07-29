@@ -90,6 +90,15 @@ internal static class SkiaMarkdownLayout
                    && text[i] != '[')
                 i++;
 
+            // Unmatched marker (* _ ` [) — emit as plain and advance.
+            // Without this, snake_case `foo_bar` infinite-loops (TryEmphasis fails, i stuck).
+            if (i == plainStart)
+            {
+                AppendRun(runs, text[i..(i + 1)], SkiaMarkdownStyle.Plain);
+                i++;
+                continue;
+            }
+
             AppendRun(runs, text[plainStart..i], SkiaMarkdownStyle.Plain);
         }
 
