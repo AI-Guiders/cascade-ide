@@ -62,6 +62,9 @@ public partial class App : Application
     /// <summary>Agent arch board → quiet chrome (arch-LATEST.json).</summary>
     static Features.Cdp.CdpArchProjector? ArchProjector { get; set; }
 
+    /// <summary>Agent MCP outlet → quiet chrome (mcp-LATEST.json).</summary>
+    static Features.Cdp.CdpMcpProjector? McpProjector { get; set; }
+
     /// <summary><c>cide://</c> из argv при cold start (ADR 0157).</summary>
     public static string? PendingMagicLinkUri { get; set; }
 
@@ -97,6 +100,7 @@ public partial class App : Application
             SysProjector = Features.Cdp.CdpSysProjector.Start(vm);
             OnboardProjector = Features.Cdp.CdpOnboardProjector.Start(vm);
             ArchProjector = Features.Cdp.CdpArchProjector.Start(vm);
+            McpProjector = Features.Cdp.CdpMcpProjector.Start(vm);
             if (RunMcpStdio)
                 _ = RunMcpServerAsync(vm);
             if (!string.IsNullOrWhiteSpace(PendingMagicLinkUri))
