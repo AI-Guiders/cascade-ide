@@ -50,6 +50,9 @@ public partial class App : Application
     /// <summary>Agent AutoIgnition → quiet chrome (ignite-LATEST.json).</summary>
     static Features.Cdp.CdpIgniteProjector? IgniteProjector { get; set; }
 
+    /// <summary>Agent Project Switch → quiet chrome (scope-LATEST.json).</summary>
+    static Features.Cdp.CdpScopeProjector? ScopeProjector { get; set; }
+
     /// <summary><c>cide://</c> из argv при cold start (ADR 0157).</summary>
     public static string? PendingMagicLinkUri { get; set; }
 
@@ -81,6 +84,7 @@ public partial class App : Application
             EclProjector = Features.Cdp.CdpEclProjector.Start(vm.EicasLatchFeed);
             PressureProjector = Features.Cdp.CdpPressureProjector.Start(vm);
             IgniteProjector = Features.Cdp.CdpIgniteProjector.Start(vm);
+            ScopeProjector = Features.Cdp.CdpScopeProjector.Start(vm);
             if (RunMcpStdio)
                 _ = RunMcpServerAsync(vm);
             if (!string.IsNullOrWhiteSpace(PendingMagicLinkUri))

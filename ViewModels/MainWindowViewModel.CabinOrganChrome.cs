@@ -21,11 +21,18 @@ public partial class MainWindowViewModel
     [NotifyPropertyChangedFor(nameof(ShowWorkspaceChromeBand))]
     private string? _agentIgniteChromeHint;
 
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ShowAgentScopeChromeHint))]
+    [NotifyPropertyChangedFor(nameof(ShowWorkspaceChromeBand))]
+    private string? _agentScopeChromeHint;
+
     public bool ShowAgentCabinChromeHint => !string.IsNullOrWhiteSpace(AgentCabinChromeHint);
 
     public bool ShowAgentPressureChromeHint => !string.IsNullOrWhiteSpace(AgentPressureChromeHint);
 
     public bool ShowAgentIgniteChromeHint => !string.IsNullOrWhiteSpace(AgentIgniteChromeHint);
+
+    public bool ShowAgentScopeChromeHint => !string.IsNullOrWhiteSpace(AgentScopeChromeHint);
 
     /// <summary>Apply seats-latch chrome_hint (Dark Cockpit — only when non-empty).</summary>
     public void ApplyCabinOrganChromeHint(string? hint)
@@ -52,5 +59,14 @@ public partial class MainWindowViewModel
         if (string.Equals(AgentIgniteChromeHint, next, StringComparison.Ordinal))
             return;
         AgentIgniteChromeHint = next;
+    }
+
+    /// <summary>Apply scope-LATEST chrome_hint (PRIMARY/SCOPE; empty clears).</summary>
+    public void ApplyScopeChromeHint(string? hint)
+    {
+        var next = string.IsNullOrWhiteSpace(hint) ? null : hint.Trim();
+        if (string.Equals(AgentScopeChromeHint, next, StringComparison.Ordinal))
+            return;
+        AgentScopeChromeHint = next;
     }
 }

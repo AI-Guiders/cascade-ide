@@ -26,12 +26,14 @@ public static class MainWindowPresentationCapabilitiesProjection
         bool showEicasAlertsBar,
         bool showAgentCabinChromeHint = false,
         bool showAgentPressureChromeHint = false,
-        bool showAgentIgniteChromeHint = false) =>
+        bool showAgentIgniteChromeHint = false,
+        bool showAgentScopeChromeHint = false) =>
         showIdeHealthStrip
         || showEicasAlertsBar
         || showAgentCabinChromeHint
         || showAgentPressureChromeHint
-        || showAgentIgniteChromeHint;
+        || showAgentIgniteChromeHint
+        || showAgentScopeChromeHint;
 
     public static bool ShowWorkspaceBottomChrome(
         bool showIdeHealthStrip,
