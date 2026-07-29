@@ -1,6 +1,5 @@
 #nullable enable
 using System.Text.Json;
-using Avalonia.Threading;
 using CascadeIDE.Services;
 
 namespace CascadeIDE.Features.Cdp;
@@ -53,7 +52,7 @@ internal sealed class CdpLandProjector : IDisposable
         new(actions, StateRoot);
 
     void OnFsEvent(object sender, FileSystemEventArgs e) =>
-        Dispatcher.UIThread.Post(() => TryApplyFromDisk(force: false));
+        CdpLatchFs.PostApply(() => TryApplyFromDisk(force: false));
 
     void TryApplyFromDisk(bool force)
     {
@@ -65,8 +64,7 @@ internal sealed class CdpLandProjector : IDisposable
         {
             if (!File.Exists(LatchPath))
                 return;
-            // Brief settle — writers use temp+move but some FS still double-notify mid-write.
-            Thread.Sleep(30);
+            // Writers use temp+move; settle already ran off-UI in CdpLatchFs.PostApply.
             raw = File.ReadAllText(LatchPath);
         }
         catch

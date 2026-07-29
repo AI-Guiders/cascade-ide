@@ -1,7 +1,6 @@
 #nullable enable
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using Avalonia.Threading;
 using CascadeIDE.Features.Documents;
 
 namespace CascadeIDE.Features.Cdp;
@@ -70,7 +69,7 @@ internal sealed class CdpDiskSyncProjector : IDisposable
     }
 
     void OnFsEvent(object sender, FileSystemEventArgs e) =>
-        Dispatcher.UIThread.Post(() => TryApplyFromDisk(force: false));
+        CdpLatchFs.PostApply(() => TryApplyFromDisk(force: false));
 
     void TryApplyFromDisk(bool force)
     {
@@ -82,7 +81,6 @@ internal sealed class CdpDiskSyncProjector : IDisposable
         {
             if (!File.Exists(LatchPath))
                 return;
-            Thread.Sleep(30);
             var raw = File.ReadAllText(LatchPath);
             doc = JsonSerializer.Deserialize<DiskSyncDoc>(raw, ReadOpts);
         }

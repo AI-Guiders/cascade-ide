@@ -1,6 +1,5 @@
 #nullable enable
 using System.Text.Json;
-using Avalonia.Threading;
 using CascadeIDE.ViewModels;
 
 namespace CascadeIDE.Features.Cdp;
@@ -71,7 +70,7 @@ internal sealed class CdpIntercomVoiceProjector : IDisposable
     }
 
     void OnFsEvent(object sender, FileSystemEventArgs e) =>
-        Dispatcher.UIThread.Post(() => TryApplyFromDisk(force: false));
+        CdpLatchFs.PostApply(() => TryApplyFromDisk(force: false));
 
     void TryApplyFromDisk(bool force)
     {
@@ -83,7 +82,6 @@ internal sealed class CdpIntercomVoiceProjector : IDisposable
         {
             if (!File.Exists(LatchPath))
                 return;
-            Thread.Sleep(30);
             raw = File.ReadAllText(LatchPath);
         }
         catch

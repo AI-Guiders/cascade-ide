@@ -63,7 +63,7 @@ internal sealed class CdpPresentationProjector : IDisposable
     }
 
     void OnFsEvent(object sender, FileSystemEventArgs e) =>
-        Dispatcher.UIThread.Post(() => TryApplyFromDisk(force: false));
+        CdpLatchFs.PostApply(() => TryApplyFromDisk(force: false));
 
     void TryApplyFromDisk(bool force)
     {
@@ -75,7 +75,6 @@ internal sealed class CdpPresentationProjector : IDisposable
         {
             if (!File.Exists(LatchPath))
                 return;
-            Thread.Sleep(30);
             raw = File.ReadAllText(LatchPath);
         }
         catch
