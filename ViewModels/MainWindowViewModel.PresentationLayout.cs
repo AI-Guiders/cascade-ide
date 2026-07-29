@@ -31,7 +31,7 @@ public partial class MainWindowViewModel
                     UiWorkspaceLayoutRuntimeMetrics.MfdRegionCollapsedWidthPixels);
             }
 
-            if (UsesUltrawideCockpitLayout)
+            if (UsesUltrawideCockpitLayout && !_presentationTripleOneAnchorPerZone)
             {
                 return PresentationUltrawideCockpitLayoutBuilder.Build(
                     _presentationMonitorSnapshot.PrimaryWorkingAreaWidthPx,

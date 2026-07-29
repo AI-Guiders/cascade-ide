@@ -101,5 +101,23 @@ public sealed class PresentationMainGridLayoutFrameBuilderTests
         Assert.Equal("0,4,*,4,0", frame.ColumnDefinitions);
         Assert.Equal(1, frame.ContentZoneCount);
     }
+
+    [Fact]
+    public void TripleOneAnchor_WithoutHostSuppress_StillForwardOnlyMainGrid()
+    {
+        var parse = PresentationParser.Parse("(P)(F)(M)", ShortGrammar);
+        Assert.True(parse.IsSuccess);
+
+        // Live apply before hosts open: suppress flags false must not leave 220/340 voids.
+        var frame = PresentationMainGridLayoutFrameBuilder.Build(
+            parse,
+            dedicatedMfdSecondScreen: false,
+            mfdColumnSuppressedForHost: false,
+            tripleOneAnchorPerZone: true,
+            suppressPfdColumnForPfdHostWindow: false);
+
+        Assert.Equal("0,4,*,4,0", frame.ColumnDefinitions);
+        Assert.Equal(1, frame.ContentZoneCount);
+    }
 }
 

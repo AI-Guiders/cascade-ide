@@ -29,7 +29,9 @@ public static class PresentationMainGridLayoutFrameBuilder
         if (tripleOneAnchorPerZone
             && PresentationLayoutAnalyzer.IsTripleOneAnchorPerZonePreset(parse.Screens))
         {
-            return BuildTripleMainWindowFrame(mfdColumnSuppressedForHost, suppressPfdColumnForPfdHostWindow);
+            // Main = Forward only; P/M live on host TopLevels. Never leave non-zero side
+            // columns when hosts are not yet open — that paints invisible voids around Forward.
+            return BuildForwardOnlyMainWindowFrame();
         }
 
         var clampedMain = Math.Clamp(mainWindowPresentationScreenIndex, 0, parse.Screens.Count - 1);
@@ -93,26 +95,6 @@ public static class PresentationMainGridLayoutFrameBuilder
 
     private static PresentationMainGridLayoutFrame DefaultFrame(int contentZoneCount) =>
         new(DefaultColumnDefinitions, contentZoneCount, false, Array.Empty<double>(), Array.Empty<PresentationZoneBound>());
-
-    /// <summary>
-    /// Три физических экрана под <c>P</c>/<c>F</c>/<c>M</c>: в главном окне остаётся лобовое; колонки P/M — по флагам подавления хостов.
-    /// </summary>
-    private static PresentationMainGridLayoutFrame BuildTripleMainWindowFrame(
-        bool mfdColumnSuppressedForHost,
-        bool suppressPfdColumnForPfdHostWindow)
-    {
-        const string defaultPfd = "220";
-        const string defaultMfdTail = "340";
-        var pfdCol = suppressPfdColumnForPfdHostWindow ? "0" : defaultPfd;
-        var mfdCol = mfdColumnSuppressedForHost ? "0" : defaultMfdTail;
-        var columns = $"{pfdCol},4,*,4,{mfdCol}";
-        return new PresentationMainGridLayoutFrame(
-            columns,
-            3,
-            false,
-            Array.Empty<double>(),
-            Array.Empty<PresentationZoneBound>());
-    }
 
     private static bool HasExplicitWeights(IReadOnlyList<PresentationAnchorSlot> first)
     {
