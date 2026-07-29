@@ -171,7 +171,8 @@ public partial class MainWindowViewModel
             ShowIdeHealthStrip,
             ShowEicasAlertsBar,
             ShowAgentCabinChromeHint,
-            ShowAgentPressureChromeHint);
+            ShowAgentPressureChromeHint,
+            ShowAgentIgniteChromeHint);
 
     /// <summary>Зона под чатом в MFD: полоса EICAS / IDE Health и/или док (терминал, сборка, Problems, Git, инструменты).</summary>
     public bool ShowWorkspaceBottomChrome =>

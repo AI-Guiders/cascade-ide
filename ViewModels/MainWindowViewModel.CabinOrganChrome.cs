@@ -3,7 +3,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace CascadeIDE.ViewModels;
 
-/// <summary>Dual-cockpit cabin packing + L1 pressure continuity chrome.</summary>
+/// <summary>Dual-cockpit cabin packing + L1 pressure / AutoIgnition continuity chrome.</summary>
 public partial class MainWindowViewModel
 {
     [ObservableProperty]
@@ -16,9 +16,16 @@ public partial class MainWindowViewModel
     [NotifyPropertyChangedFor(nameof(ShowWorkspaceChromeBand))]
     private string? _agentPressureChromeHint;
 
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ShowAgentIgniteChromeHint))]
+    [NotifyPropertyChangedFor(nameof(ShowWorkspaceChromeBand))]
+    private string? _agentIgniteChromeHint;
+
     public bool ShowAgentCabinChromeHint => !string.IsNullOrWhiteSpace(AgentCabinChromeHint);
 
     public bool ShowAgentPressureChromeHint => !string.IsNullOrWhiteSpace(AgentPressureChromeHint);
+
+    public bool ShowAgentIgniteChromeHint => !string.IsNullOrWhiteSpace(AgentIgniteChromeHint);
 
     /// <summary>Apply seats-latch chrome_hint (Dark Cockpit — only when non-empty).</summary>
     public void ApplyCabinOrganChromeHint(string? hint)
@@ -36,5 +43,14 @@ public partial class MainWindowViewModel
         if (string.Equals(AgentPressureChromeHint, next, StringComparison.Ordinal))
             return;
         AgentPressureChromeHint = next;
+    }
+
+    /// <summary>Apply ignite-LATEST chrome_hint (continuity live; idle clears).</summary>
+    public void ApplyIgniteChromeHint(string? hint)
+    {
+        var next = string.IsNullOrWhiteSpace(hint) ? null : hint.Trim();
+        if (string.Equals(AgentIgniteChromeHint, next, StringComparison.Ordinal))
+            return;
+        AgentIgniteChromeHint = next;
     }
 }
