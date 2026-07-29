@@ -93,11 +93,17 @@
                        Text="{Binding AgentPluginsChromeHint}"
                        IsVisible="{Binding ShowAgentPluginsChromeHint}"/>
             <!-- Refactor debt hotspots (refactor-LATEST) — not EICAS. -->
-            <TextBlock Margin="8,2"
+            <TextBlock Margin="8,2,8,0"
                        Opacity="0.8"
                        FontSize="11"
                        Text="{Binding AgentRefactorChromeHint}"
                        IsVisible="{Binding ShowAgentRefactorChromeHint}"/>
+            <!-- Review dirty / machine open (review-LATEST) — not EICAS. -->
+            <TextBlock Margin="8,2"
+                       Opacity="0.8"
+                       FontSize="11"
+                       Text="{Binding AgentReviewChromeHint}"
+                       IsVisible="{Binding ShowAgentReviewChromeHint}"/>
         </StackPanel>
         <!-- Полоса Workspace Health: раньше выравнивалась по MainGrid; теперь зона — MFD, на всю ширину контейнера. -->
         <Grid Grid.Row="2" IsVisible="{Binding ShowIdeHealthStrip}">

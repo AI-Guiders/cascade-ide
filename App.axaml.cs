@@ -86,6 +86,9 @@ public partial class App : Application
     /// <summary>Agent refactor debt → quiet chrome (refactor-LATEST.json).</summary>
     static Features.Cdp.CdpRefactorProjector? RefactorProjector { get; set; }
 
+    /// <summary>Agent review judgment → quiet chrome (review-LATEST.json).</summary>
+    static Features.Cdp.CdpReviewProjector? ReviewProjector { get; set; }
+
     /// <summary><c>cide://</c> из argv при cold start (ADR 0157).</summary>
     public static string? PendingMagicLinkUri { get; set; }
 
@@ -129,6 +132,7 @@ public partial class App : Application
             ToolchainProjector = Features.Cdp.CdpToolchainProjector.Start(vm);
             PluginsProjector = Features.Cdp.CdpPluginsProjector.Start(vm);
             RefactorProjector = Features.Cdp.CdpRefactorProjector.Start(vm);
+            ReviewProjector = Features.Cdp.CdpReviewProjector.Start(vm);
             if (RunMcpStdio)
                 _ = RunMcpServerAsync(vm);
             if (!string.IsNullOrWhiteSpace(PendingMagicLinkUri))
