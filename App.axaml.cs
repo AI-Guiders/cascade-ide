@@ -80,6 +80,9 @@ public partial class App : Application
     /// <summary>Agent toolchain health → quiet chrome (toolchain-LATEST.json).</summary>
     static Features.Cdp.CdpToolchainProjector? ToolchainProjector { get; set; }
 
+    /// <summary>Agent plugins attention → quiet chrome (plugins-LATEST.json).</summary>
+    static Features.Cdp.CdpPluginsProjector? PluginsProjector { get; set; }
+
     /// <summary><c>cide://</c> из argv при cold start (ADR 0157).</summary>
     public static string? PendingMagicLinkUri { get; set; }
 
@@ -121,6 +124,7 @@ public partial class App : Application
             CrmProjector = Features.Cdp.CdpCrmProjector.Start(vm);
             WebcamProjector = Features.Cdp.CdpWebcamProjector.Start(vm);
             ToolchainProjector = Features.Cdp.CdpToolchainProjector.Start(vm);
+            PluginsProjector = Features.Cdp.CdpPluginsProjector.Start(vm);
             if (RunMcpStdio)
                 _ = RunMcpServerAsync(vm);
             if (!string.IsNullOrWhiteSpace(PendingMagicLinkUri))
