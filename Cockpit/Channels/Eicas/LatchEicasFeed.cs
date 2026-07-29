@@ -37,8 +37,8 @@ public sealed class LatchEicasFeed : IEicasFeed
     static IReadOnlyList<EicasMessage> Compose(
         Dictionary<string, IReadOnlyList<EicasMessage>> sources)
     {
-        // Stable order: alert (SA) before qrh (handbook), then others.
-        string[] order = ["alert", "qrh", "default"];
+        // Stable order: alert (SA) before qrh/ecl (handbook), then others.
+        string[] order = ["alert", "qrh", "ecl", "default"];
         var seen = new HashSet<string>(StringComparer.Ordinal);
         var list = new List<EicasMessage>();
         foreach (var key in order)
