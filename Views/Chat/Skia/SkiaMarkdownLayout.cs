@@ -18,6 +18,14 @@ internal readonly record struct SkiaMarkdownLine(IReadOnlyList<SkiaMarkdownRun> 
 /// <summary>Inline Markdown subset v1: **bold**, *italic*, `code` (ADR 0123 фаза 3).</summary>
 internal static class SkiaMarkdownLayout
 {
+    /// <summary>True when text may need inline markdown parse (* ` _ [).</summary>
+    public static bool HasInlineMarkup(string? text)
+    {
+        if (string.IsNullOrEmpty(text))
+            return false;
+        return text.AsSpan().IndexOfAny(['*', '`', '_', '[']) >= 0;
+    }
+
     public static IReadOnlyList<SkiaMarkdownRun> ParseInline(string text)
     {
         if (string.IsNullOrEmpty(text))

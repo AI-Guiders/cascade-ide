@@ -47,7 +47,7 @@ internal static class SkiaChatBubbleRenderer
         var maxChars = spec.Kind == SkiaChatBubbleKind.Feed
             ? feed.MaxCharsForWidth(context.ContentWidth)
             : Math.Max(24, context.MaxChars);
-        var body = Trim(spec.Body, 32_000);
+        var body = Trim(spec.Body, SkiaChatRenderLimits.MaxProseBodyChars);
         var maxBodyLines = EffectiveMaxBodyLines(spec);
         var titleHeight = string.IsNullOrWhiteSpace(spec.Title) ? 0 : spec.TitleHeight;
         var footerHeight = string.IsNullOrWhiteSpace(spec.Footer) ? 0 : spec.FooterHeight;
@@ -73,6 +73,32 @@ internal static class SkiaChatBubbleRenderer
 
         var bodyColor = ResolveBodyColor(spec.BodyTone);
         var codeColor = new SKColor(180, 190, 210);
+
+        // Plain bodies skip ParseInline/RichTextKit — topic-open hung in ParseInline on UI thread.
+        if (!ChatMessageBodyPresentation.ShouldUseDocumentLayout(body)
+            && !SkiaMarkdownLayout.HasInlineMarkup(body))
+        {
+            var plain = SkiaRichTextKitMarkdown.TryMeasurePlain(
+                body,
+                bodyWidth,
+                ProseFontSize(spec, feed),
+                bodyColor,
+                maxBodyLines,
+                spec.LineHeight,
+                fontFamily: feed.ProseFamily);
+            if (plain is not null)
+            {
+                var placeholder = new SkiaMarkdownLine([new SkiaMarkdownRun("", SkiaMarkdownStyle.Plain)]);
+                return new SkiaChatBubbleMetrics(
+                    [placeholder],
+                    spec.Footer,
+                    titleHeight,
+                    footerHeight,
+                    spec.LineHeight,
+                    plain);
+            }
+        }
+
         if (ChatMessageBodyPresentation.ShouldUseDocumentLayout(body))
         {
             var document = SkiaRichTextKitMarkdown.TryMeasureDocument(

@@ -32,4 +32,38 @@ public sealed class SkiaMarkdownLayoutTests
         var lines = SkiaMarkdownLayout.WrapLines(runs, 40);
         Assert.Equal("x", SkiaMarkdownLayout.ToPlainText(lines));
     }
+
+    [Fact]
+    public void HasInlineMarkup_detects_markers()
+    {
+        Assert.False(SkiaMarkdownLayout.HasInlineMarkup("plain text only"));
+        Assert.True(SkiaMarkdownLayout.HasInlineMarkup("has *star*"));
+        Assert.True(SkiaMarkdownLayout.HasInlineMarkup("[F:Foo.cs]"));
+    }
+
+    [Fact]
+    public void Feed_measure_of_large_plain_body_stays_under_budget()
+    {
+        var body = new string('x', SkiaChatRenderLimits.MaxProseBodyChars * 4);
+        var ctx = new SkiaChatMeasureContext(60, 480);
+        var spec = new SkiaChatBubbleSpec(
+            Title: "agent",
+            Body: body,
+            Footer: null,
+            Kind: SkiaChatBubbleKind.Feed,
+            FillRole: SkiaBubbleFillRole.MessageAssistant,
+            BodyTone: SkiaChatBodyTone.Normal,
+            IsPending: false,
+            IsSelected: false,
+            StartsBranch: false,
+            MessageIndex: 1);
+
+        var sw = System.Diagnostics.Stopwatch.StartNew();
+        var metrics = SkiaChatBubbleRenderer.Measure(ctx, spec);
+        sw.Stop();
+
+        Assert.NotNull(metrics.RichTextBody);
+        Assert.True(sw.ElapsedMilliseconds < 750, $"measure took {sw.ElapsedMilliseconds}ms");
+    }
+
 }

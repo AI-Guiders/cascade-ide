@@ -462,7 +462,7 @@ public partial class SkiaChatSurfaceControl : Control
     }
 
     private string BuildFeedLayoutCacheKey(ChatSurfaceSnapshot snapshot) =>
-        $"{snapshot.State.ActiveThreadId:N}|{OverviewMode}|{DetailThreadId:N}|{snapshot.Layout.Lanes.Count}|{snapshot.Layout.Overview.Count}|{_scrollOffset:F0}|{SelectedMessageIndex}|{ComfortableFeed}|{ForwardHost}";
+        $"{snapshot.State.ActiveThreadId:N}|{OverviewMode}|{DetailThreadId:N}|{snapshot.Layout.Lanes.Count}|{snapshot.Layout.Overview.Count}|{SelectedMessageIndex}|{ComfortableFeed}|{ForwardHost}";
 
     protected override AutomationPeer OnCreateAutomationPeer() =>
         new SkiaComposerAutomationPeer(this);
@@ -656,9 +656,16 @@ public partial class SkiaChatSurfaceControl : Control
         }
         else
         {
+            var feedTop = scrollOffset - chromeTop;
+            var feedBottom = feedTop + (contentBottom - chromeTop);
+            const float cullPad = 240f;
             for (var i = 0; i < placed.Count; i++)
             {
                 var item = placed[i];
+                var itemBottom = item.Top + item.Layout.Height;
+                if (itemBottom < feedTop - cullPad || item.Top > feedBottom + cullPad)
+                    continue;
+
                 var itemLeft = float.IsNaN(item.Left) ? contentLeft : item.Left;
                 var itemWidth = float.IsNaN(item.Width) ? contentWidth : item.Width;
                 var drawContext = new SkiaChatDrawContext
