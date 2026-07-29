@@ -32,6 +32,9 @@ public partial class App : Application
     /// <summary>Agent/desk co-presence chrome (shared-LATEST.json).</summary>
     static Features.Cdp.CdpSharedFileProjector? SharedFileProjector { get; set; }
 
+    /// <summary>Agent desk seats → cabin tool map (seats-LATEST.json).</summary>
+    static Features.Cdp.CdpSeatsProjector? SeatsProjector { get; set; }
+
     /// <summary><c>cide://</c> из argv при cold start (ADR 0157).</summary>
     public static string? PendingMagicLinkUri { get; set; }
 
@@ -57,6 +60,7 @@ public partial class App : Application
             PresentationProjector = Features.Cdp.CdpPresentationProjector.Start(vm);
             IntercomVoiceProjector = Features.Cdp.CdpIntercomVoiceProjector.Start(vm);
             SharedFileProjector = Features.Cdp.CdpSharedFileProjector.Start(vm.Documents);
+            SeatsProjector = Features.Cdp.CdpSeatsProjector.Start(vm);
             if (RunMcpStdio)
                 _ = RunMcpServerAsync(vm);
             if (!string.IsNullOrWhiteSpace(PendingMagicLinkUri))
