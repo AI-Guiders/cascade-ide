@@ -264,6 +264,72 @@ public partial class MainWindowViewModel
         EnsureAgentEnvironmentWiring();
     }
 
+    /// <summary>
+    /// Live apply operator presentation topology (agent desk wire / settings).
+    /// Persists <c>display.screens.topology</c>, reparses layout flags, notifies MainGrid.
+    /// Host TopLevel open/close may need a follow-up if screen count changes.
+    /// </summary>
+    public bool ApplyPresentationTopology(string topology)
+    {
+        if (string.IsNullOrWhiteSpace(topology))
+            return false;
+
+        var next = topology.Trim();
+        if (string.Equals(_settings.Display.Screens.Topology?.Trim(), next, StringComparison.Ordinal))
+        {
+            ReparsePresentationFromSettings();
+            NotifyPresentationLayoutChanged();
+            return true;
+        }
+
+        _settings.Display.Screens.Topology = next;
+        SettingsService.Save(_settings);
+        ReparsePresentationFromSettings();
+        NotifyPresentationLayoutChanged();
+        return _presentationParse.IsSuccess;
+    }
+
+    void ReparsePresentationFromSettings()
+    {
+        var pg = _settings.GetEffectivePresentationGrammar();
+        var grammar = PresentationGrammarTokens.FromSettings(
+            pg.Brackets,
+            pg.BetweenScreens,
+            pg.BetweenZones,
+            pg.Pfd,
+            pg.Forward,
+            pg.Mfd);
+        _presentationParse = PresentationParser.Parse(_settings.GetEffectivePresentationLine(), grammar);
+        var topologyFlags = PresentationTopologyResolver.ResolveFlags(_presentationParse);
+        _presentationDedicatedMfdSecondScreen = topologyFlags.DedicatedMfdSecondScreen;
+        _presentationTripleOneAnchorPerZone = topologyFlags.TripleOneAnchorPerZone;
+        _presentationMfdHostTopology = topologyFlags.MfdHostTopology;
+        _presentationPmForwardTwoScreen = topologyFlags.PmForwardTwoScreen;
+        _presentationPmHostTopology = topologyFlags.PmHostTopology;
+        InitializePresentationTier();
+    }
+
+    void NotifyPresentationLayoutChanged()
+    {
+        OnPropertyChanged(nameof(EffectivePresentationLine));
+        OnPropertyChanged(nameof(PresentationParse));
+        OnPropertyChanged(nameof(MainGridColumnDefinitions));
+        OnPropertyChanged(nameof(MainGridLayoutFrame));
+        OnPropertyChanged(nameof(PresentationRequestsMainWindowMaximized));
+        OnPropertyChanged(nameof(PresentationRequestsDedicatedMfdSecondScreen));
+        OnPropertyChanged(nameof(PresentationRequestsTriplePfdForwardMfd));
+        OnPropertyChanged(nameof(PresentationRequestsPfdHostWindow));
+        OnPropertyChanged(nameof(PresentationRequestsMfdHostWindow));
+        OnPropertyChanged(nameof(PresentationRequestsPmSplitHostWindow));
+        OnPropertyChanged(nameof(PresentationRequestsPmSplitMainWindowScreenPlacement));
+        OnPropertyChanged(nameof(MfdHostPresentationScreenIndex));
+        OnPropertyChanged(nameof(PfdHostPresentationScreenIndex));
+        OnPropertyChanged(nameof(PmSplitHostPresentationScreenIndex));
+        OnPropertyChanged(nameof(PmSplitHostColumnDefinitions));
+        OnPropertyChanged(nameof(MainWindowPresentationScreenIndex));
+        NotifyDockedInstrumentSlotBindings();
+    }
+
     private IReadOnlyList<(string Path, string Content)> GetOpenCsDocumentsForDiagnoseFiles()
     {
         var list = new List<(string Path, string Content)>();

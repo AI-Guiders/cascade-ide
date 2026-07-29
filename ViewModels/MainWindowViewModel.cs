@@ -76,12 +76,12 @@ public partial class MainWindowViewModel : ViewModelBase, IAutonomousAgentSessio
     private readonly IEicasFeed _eicasFeed;
     private readonly IEnvironmentReadinessChannel _environmentReadinessChannel;
     private readonly IEnvironmentReadinessSurfaceCompositor _environmentReadinessSurfaceCompositor;
-    private readonly Services.Presentation.PresentationParseResult _presentationParse;
-    private readonly bool _presentationDedicatedMfdSecondScreen;
-    private readonly bool _presentationTripleOneAnchorPerZone;
-    private readonly bool _presentationMfdHostTopology;
-    private readonly bool _presentationPmForwardTwoScreen;
-    private readonly bool _presentationPmHostTopology;
+    private Services.Presentation.PresentationParseResult _presentationParse;
+    private bool _presentationDedicatedMfdSecondScreen;
+    private bool _presentationTripleOneAnchorPerZone;
+    private bool _presentationMfdHostTopology;
+    private bool _presentationPmForwardTwoScreen;
+    private bool _presentationPmHostTopology;
     private readonly IInstrumentMountPolicyResolver _instrumentMountPolicyResolver;
     private bool _suppressMfdColumnForMfdHostWindow;
     private bool _suppressPfdColumnForPfdHostWindow;

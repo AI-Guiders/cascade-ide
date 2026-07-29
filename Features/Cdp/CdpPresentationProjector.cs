@@ -1,0 +1,132 @@
+#nullable enable
+using System.Text.Json;
+using Avalonia.Threading;
+using CascadeIDE.ViewModels;
+
+namespace CascadeIDE.Features.Cdp;
+
+/// <summary>
+/// Agent desk → live CIDE presentation topology.
+/// Watches %LocalAppData%/cdp-mcp/presentation-LATEST.json; applies origin=agent via
+/// <see cref="MainWindowViewModel.ApplyPresentationTopology"/>.
+/// </summary>
+internal sealed class CdpPresentationProjector : IDisposable
+{
+    public const string Schema = "cide_presentation_latch/v1";
+    public const string OriginAgent = "agent";
+
+    static readonly JsonSerializerOptions ReadOpts = new()
+    {
+        PropertyNameCaseInsensitive = true,
+        PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower
+    };
+
+    readonly MainWindowViewModel _vm;
+    readonly FileSystemWatcher _watcher;
+    readonly object _gate = new();
+    DateTimeOffset _lastStamp = DateTimeOffset.MinValue;
+    string? _lastTopology;
+    bool _disposed;
+
+    public static CdpPresentationProjector? Instance { get; private set; }
+
+    public static string StateRoot =>
+        Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+            "cdp-mcp");
+
+    public static string LatchPath => Path.Combine(StateRoot, "presentation-LATEST.json");
+
+    CdpPresentationProjector(MainWindowViewModel vm, string stateRoot)
+    {
+        _vm = vm;
+        Directory.CreateDirectory(stateRoot);
+        _watcher = new FileSystemWatcher(stateRoot)
+        {
+            Filter = "presentation-LATEST.json",
+            NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.FileName | NotifyFilters.Size,
+            EnableRaisingEvents = true
+        };
+        _watcher.Changed += OnFsEvent;
+        _watcher.Created += OnFsEvent;
+        _watcher.Renamed += OnFsEvent;
+        TryApplyFromDisk(force: true);
+    }
+
+    public static CdpPresentationProjector Start(MainWindowViewModel vm)
+    {
+        Instance?.Dispose();
+        Instance = new CdpPresentationProjector(vm, StateRoot);
+        return Instance;
+    }
+
+    void OnFsEvent(object sender, FileSystemEventArgs e) =>
+        Dispatcher.UIThread.Post(() => TryApplyFromDisk(force: false));
+
+    void TryApplyFromDisk(bool force)
+    {
+        if (_disposed)
+            return;
+
+        string raw;
+        try
+        {
+            if (!File.Exists(LatchPath))
+                return;
+            Thread.Sleep(30);
+            raw = File.ReadAllText(LatchPath);
+        }
+        catch
+        {
+            return;
+        }
+
+        PresentationLatchDoc? doc;
+        try
+        {
+            doc = JsonSerializer.Deserialize<PresentationLatchDoc>(raw, ReadOpts);
+        }
+        catch
+        {
+            return;
+        }
+
+        if (doc is null || string.IsNullOrWhiteSpace(doc.Topology))
+            return;
+        if (!string.Equals(doc.Schema, Schema, StringComparison.OrdinalIgnoreCase))
+            return;
+        if (!string.Equals(doc.Origin, OriginAgent, StringComparison.OrdinalIgnoreCase))
+            return;
+
+        lock (_gate)
+        {
+            if (!force
+                && doc.StampedUtc <= _lastStamp
+                && string.Equals(doc.Topology, _lastTopology, StringComparison.Ordinal))
+                return;
+
+            _lastStamp = doc.StampedUtc;
+            _lastTopology = doc.Topology;
+        }
+
+        _vm.ApplyPresentationTopology(doc.Topology);
+    }
+
+    public void Dispose()
+    {
+        if (_disposed)
+            return;
+        _disposed = true;
+        _watcher.Dispose();
+        if (ReferenceEquals(Instance, this))
+            Instance = null;
+    }
+
+    sealed class PresentationLatchDoc
+    {
+        public string Schema { get; set; } = CdpPresentationProjector.Schema;
+        public string Topology { get; set; } = "";
+        public string Origin { get; set; } = OriginAgent;
+        public DateTimeOffset StampedUtc { get; set; }
+    }
+}
