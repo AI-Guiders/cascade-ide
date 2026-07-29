@@ -66,6 +66,11 @@ public partial class MainWindowViewModel
     [NotifyPropertyChangedFor(nameof(ShowWorkspaceChromeBand))]
     private string? _agentWebcamChromeHint;
 
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ShowAgentToolchainChromeHint))]
+    [NotifyPropertyChangedFor(nameof(ShowWorkspaceChromeBand))]
+    private string? _agentToolchainChromeHint;
+
     public bool ShowAgentCabinChromeHint => !string.IsNullOrWhiteSpace(AgentCabinChromeHint);
 
     public bool ShowAgentPressureChromeHint => !string.IsNullOrWhiteSpace(AgentPressureChromeHint);
@@ -89,6 +94,8 @@ public partial class MainWindowViewModel
     public bool ShowAgentCrmChromeHint => !string.IsNullOrWhiteSpace(AgentCrmChromeHint);
 
     public bool ShowAgentWebcamChromeHint => !string.IsNullOrWhiteSpace(AgentWebcamChromeHint);
+
+    public bool ShowAgentToolchainChromeHint => !string.IsNullOrWhiteSpace(AgentToolchainChromeHint);
 
     /// <summary>Apply seats-latch chrome_hint (Dark Cockpit — only when non-empty).</summary>
     public void ApplyCabinOrganChromeHint(string? hint)
@@ -196,5 +203,14 @@ public partial class MainWindowViewModel
         if (string.Equals(AgentWebcamChromeHint, next, StringComparison.Ordinal))
             return;
         AgentWebcamChromeHint = next;
+    }
+
+    /// <summary>Apply toolchain-LATEST chrome_hint (missing bins; all-ok clears).</summary>
+    public void ApplyToolchainChromeHint(string? hint)
+    {
+        var next = string.IsNullOrWhiteSpace(hint) ? null : hint.Trim();
+        if (string.Equals(AgentToolchainChromeHint, next, StringComparison.Ordinal))
+            return;
+        AgentToolchainChromeHint = next;
     }
 }
