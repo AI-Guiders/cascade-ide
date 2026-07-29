@@ -269,24 +269,73 @@ public partial class MainWindowViewModel
     /// Persists <c>display.screens.topology</c>, reparses layout flags, notifies MainGrid.
     /// Host TopLevel open/close may need a follow-up if screen count changes.
     /// </summary>
-    public bool ApplyPresentationTopology(string topology)
-    {
-        if (string.IsNullOrWhiteSpace(topology))
-            return false;
+    public bool ApplyPresentationTopology(string topology) =>
+        ApplyPresentationGlassPatch(topology: topology);
 
-        var next = topology.Trim();
-        if (string.Equals(_settings.Display.Screens.Topology?.Trim(), next, StringComparison.Ordinal))
+    /// <summary>
+    /// Live apply operator glass patch from agent desk latch (topology / tier / instruments / mfd page).
+    /// Persists user <c>settings.toml</c> display fields; does not mutate repo <c>workspace.toml</c>.
+    /// </summary>
+    public bool ApplyPresentationGlassPatch(
+        string? topology = null,
+        string? tier = null,
+        IReadOnlyDictionary<string, string>? instruments = null,
+        string? mfdPage = null)
+    {
+        var dirty = false;
+
+        if (!string.IsNullOrWhiteSpace(topology))
         {
-            ReparsePresentationFromSettings();
-            NotifyPresentationLayoutChanged();
-            return true;
+            var next = topology.Trim();
+            if (!string.Equals(_settings.Display.Screens.Topology?.Trim(), next, StringComparison.Ordinal))
+            {
+                _settings.Display.Screens.Topology = next;
+                dirty = true;
+            }
         }
 
-        _settings.Display.Screens.Topology = next;
-        SettingsService.Save(_settings);
+        if (!string.IsNullOrWhiteSpace(tier))
+        {
+            var nextTier = tier.Trim().ToLowerInvariant();
+            if (!string.Equals(_settings.Display.Presentation.Tier?.Trim(), nextTier, StringComparison.OrdinalIgnoreCase))
+            {
+                _settings.Display.Presentation.Tier = nextTier;
+                dirty = true;
+            }
+        }
+
+        if (instruments is { Count: > 0 })
+        {
+            _settings.Display.Instruments ??= new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            foreach (var (k, v) in instruments)
+            {
+                if (string.IsNullOrWhiteSpace(k) || string.IsNullOrWhiteSpace(v))
+                    continue;
+                var key = k.Trim();
+                var val = v.Trim();
+                if (_settings.Display.Instruments.TryGetValue(key, out var cur)
+                    && string.Equals(cur, val, StringComparison.OrdinalIgnoreCase))
+                    continue;
+                _settings.Display.Instruments[key] = val;
+                dirty = true;
+            }
+        }
+
+        if (dirty)
+            SettingsService.Save(_settings);
+
         ReparsePresentationFromSettings();
         NotifyPresentationLayoutChanged();
-        return _presentationParse.IsSuccess;
+
+        if (!string.IsNullOrWhiteSpace(mfdPage)
+            && Enum.TryParse<MfdShellPage>(mfdPage.Trim(), ignoreCase: true, out var page))
+        {
+            TryNavigateToMfdShellPage(page);
+        }
+
+        return !string.IsNullOrWhiteSpace(topology)
+            ? _presentationParse.IsSuccess
+            : true;
     }
 
     void ReparsePresentationFromSettings()

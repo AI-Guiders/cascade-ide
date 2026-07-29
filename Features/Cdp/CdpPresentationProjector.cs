@@ -6,9 +6,9 @@ using CascadeIDE.ViewModels;
 namespace CascadeIDE.Features.Cdp;
 
 /// <summary>
-/// Agent desk → live CIDE presentation topology.
+/// Agent desk → live CIDE operator glass.
 /// Watches %LocalAppData%/cdp-mcp/presentation-LATEST.json; applies origin=agent via
-/// <see cref="MainWindowViewModel.ApplyPresentationTopology"/>.
+/// <see cref="MainWindowViewModel.ApplyPresentationGlassPatch"/>.
 /// </summary>
 internal sealed class CdpPresentationProjector : IDisposable
 {
@@ -25,7 +25,7 @@ internal sealed class CdpPresentationProjector : IDisposable
     readonly FileSystemWatcher _watcher;
     readonly object _gate = new();
     DateTimeOffset _lastStamp = DateTimeOffset.MinValue;
-    string? _lastTopology;
+    string? _lastFingerprint;
     bool _disposed;
 
     public static CdpPresentationProjector? Instance { get; private set; }
@@ -91,25 +91,30 @@ internal sealed class CdpPresentationProjector : IDisposable
             return;
         }
 
-        if (doc is null || string.IsNullOrWhiteSpace(doc.Topology))
+        if (doc is null || !doc.HasAny)
             return;
         if (!string.Equals(doc.Schema, Schema, StringComparison.OrdinalIgnoreCase))
             return;
         if (!string.Equals(doc.Origin, OriginAgent, StringComparison.OrdinalIgnoreCase))
             return;
 
+        var fingerprint = doc.Fingerprint();
         lock (_gate)
         {
             if (!force
                 && doc.StampedUtc <= _lastStamp
-                && string.Equals(doc.Topology, _lastTopology, StringComparison.Ordinal))
+                && string.Equals(fingerprint, _lastFingerprint, StringComparison.Ordinal))
                 return;
 
             _lastStamp = doc.StampedUtc;
-            _lastTopology = doc.Topology;
+            _lastFingerprint = fingerprint;
         }
 
-        _vm.ApplyPresentationTopology(doc.Topology);
+        _vm.ApplyPresentationGlassPatch(
+            topology: doc.Topology,
+            tier: doc.Tier,
+            instruments: doc.Instruments,
+            mfdPage: doc.MfdPage);
     }
 
     public void Dispose()
@@ -125,8 +130,30 @@ internal sealed class CdpPresentationProjector : IDisposable
     sealed class PresentationLatchDoc
     {
         public string Schema { get; set; } = CdpPresentationProjector.Schema;
-        public string Topology { get; set; } = "";
+        public string? Topology { get; set; }
+        public string? Tier { get; set; }
+        public Dictionary<string, string>? Instruments { get; set; }
+        public string? MfdPage { get; set; }
         public string Origin { get; set; } = OriginAgent;
         public DateTimeOffset StampedUtc { get; set; }
+
+        public bool HasAny =>
+            !string.IsNullOrWhiteSpace(Topology)
+            || !string.IsNullOrWhiteSpace(Tier)
+            || (Instruments is { Count: > 0 })
+            || !string.IsNullOrWhiteSpace(MfdPage);
+
+        public string Fingerprint()
+        {
+            var instruments = Instruments is null
+                ? ""
+                : string.Join(';', Instruments.OrderBy(kv => kv.Key, StringComparer.OrdinalIgnoreCase)
+                    .Select(kv => kv.Key + '=' + kv.Value));
+            return string.Join('|',
+                Topology ?? "",
+                Tier ?? "",
+                instruments,
+                MfdPage ?? "");
+        }
     }
 }
