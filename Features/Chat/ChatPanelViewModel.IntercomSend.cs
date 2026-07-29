@@ -160,6 +160,7 @@ public partial class ChatPanelViewModel
             ChatMessages.Add(userMsg);
             SelectedChatThreadId = _activeThreadId;
             _ = PersistEventAsync(ChatHistoryEventKind.MessageAdded, ChatHistoryPayloadMapping.ToMessagePayload(userMsg));
+            CascadeIDE.Features.Cdp.CdpIntercomVoicePublisher.TryPublishFromOperator(displayInput);
             _ = MaybeMaterializeContextCardAsync(outbound.Attachments, "attach");
             _ = TryAutoConnectIntercomTransportAsync();
             RefreshChatSurfaceSnapshot();
