@@ -24,7 +24,7 @@ public sealed class SkiaRichTextKitMarkdownTests
     }
 
     [Fact]
-    public void Feed_bubble_uses_rich_text_layout()
+    public void Feed_bubble_uses_wrap_lines_not_rich_textkit()
     {
         var ctx = new SkiaChatMeasureContext(60, 480);
         var spec = new SkiaChatBubbleSpec(
@@ -40,7 +40,8 @@ public sealed class SkiaRichTextKitMarkdownTests
             MessageIndex: 1);
 
         var metrics = SkiaChatBubbleRenderer.Measure(ctx, spec);
-        Assert.NotNull(metrics.RichTextBody);
+        Assert.Null(metrics.RichTextBody);
+        Assert.Contains(metrics.ContentLines, line => line.Runs.Any(r => r.Style == SkiaMarkdownStyle.Bold));
         Assert.True(SkiaChatBubbleRenderer.MeasureHeight(spec, metrics) > 20f);
     }
 

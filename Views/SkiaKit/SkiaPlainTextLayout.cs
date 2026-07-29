@@ -57,7 +57,6 @@ internal static class SkiaPlainTextLayout
             LineHeight = lineHeight,
             BodyHeight = height,
             FontFamily = fontFamily,
-            CachedRichString = rs,
         };
     }
 

@@ -23,8 +23,8 @@ internal sealed class SkiaRichTextKitBodyLayout
 
     public string MonoFamily { get; init; } = "Cascadia Mono,Consolas";
 
-    /// <summary>Measured RichString kept for Paint — avoid re-ParseInline on every frame.</summary>
-    internal RichString? CachedRichString { get; init; }
+    // Intentionally no retained RichString: caching every bubble blew WS (~1.4GB).
+    // Paint rebuilds only for viewport-culled draws (ParseInline hang fixed separately).
 }
 
 internal static class SkiaRichTextKitMarkdown
@@ -59,7 +59,6 @@ internal static class SkiaRichTextKitMarkdown
             BodyHeight = height,
             FontFamily = fontFamily,
             MonoFamily = mono,
-            CachedRichString = rs,
         };
     }
 
@@ -104,7 +103,6 @@ internal static class SkiaRichTextKitMarkdown
             ForwardHost = forwardHost,
             FontFamily = fontFamily,
             MonoFamily = mono,
-            CachedRichString = rs,
         };
     }
 
@@ -145,38 +143,35 @@ internal static class SkiaRichTextKitMarkdown
 
     public static void Paint(SKCanvas canvas, SKPoint origin, SkiaRichTextKitBodyLayout layout, SKColor contentColor, SKColor codeColor)
     {
-        var rs = layout.CachedRichString;
-        if (rs is null)
+        RichString? rs;
+        if (layout.IsDocument)
         {
-            if (layout.IsDocument)
-            {
-                var maxChars = Math.Max(8, (int)(layout.MaxWidth / 6.5f));
-                var rows = SkiaMarkdownDocument.Layout(layout.Body, maxChars);
-                rs = BuildRichStringFromDocument(
-                    rows,
-                    layout.MaxWidth,
-                    layout.FontSize,
-                    contentColor,
-                    codeColor,
-                    layout.ForwardHost,
-                    layout.FontFamily,
-                    layout.MonoFamily);
-                if (rs is not null && layout.MaxBodyLines > 0 && layout.MaxBodyLines < int.MaxValue)
-                    rs.MaxHeight = layout.MaxBodyLines * layout.LineHeight;
-            }
-            else
-            {
-                rs = TryBuildRichString(
-                    layout.Body,
-                    layout.MaxWidth,
-                    layout.FontSize,
-                    contentColor,
-                    codeColor,
-                    layout.MaxBodyLines,
-                    layout.LineHeight,
-                    layout.FontFamily,
-                    layout.MonoFamily);
-            }
+            var maxChars = Math.Max(8, (int)(layout.MaxWidth / 6.5f));
+            var rows = SkiaMarkdownDocument.Layout(layout.Body, maxChars);
+            rs = BuildRichStringFromDocument(
+                rows,
+                layout.MaxWidth,
+                layout.FontSize,
+                contentColor,
+                codeColor,
+                layout.ForwardHost,
+                layout.FontFamily,
+                layout.MonoFamily);
+            if (rs is not null && layout.MaxBodyLines > 0 && layout.MaxBodyLines < int.MaxValue)
+                rs.MaxHeight = layout.MaxBodyLines * layout.LineHeight;
+        }
+        else
+        {
+            rs = TryBuildRichString(
+                layout.Body,
+                layout.MaxWidth,
+                layout.FontSize,
+                contentColor,
+                codeColor,
+                layout.MaxBodyLines,
+                layout.LineHeight,
+                layout.FontFamily,
+                layout.MonoFamily);
         }
 
         rs?.Paint(canvas, origin);

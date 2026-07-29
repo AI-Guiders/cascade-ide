@@ -82,7 +82,8 @@ public sealed class SkiaMarkdownLayoutTests
         var metrics = SkiaChatBubbleRenderer.Measure(ctx, spec);
         sw.Stop();
 
-        Assert.NotNull(metrics.RichTextBody);
+        Assert.Null(metrics.RichTextBody);
+        Assert.NotEmpty(metrics.ContentLines);
         Assert.True(sw.ElapsedMilliseconds < 750, $"measure took {sw.ElapsedMilliseconds}ms");
     }
 
