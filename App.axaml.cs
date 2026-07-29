@@ -89,6 +89,9 @@ public partial class App : Application
     /// <summary>Agent review judgment → quiet chrome (review-LATEST.json).</summary>
     static Features.Cdp.CdpReviewProjector? ReviewProjector { get; set; }
 
+    /// <summary>Agent learn journal → quiet chrome (learn-LATEST.json).</summary>
+    static Features.Cdp.CdpLearnProjector? LearnProjector { get; set; }
+
     /// <summary><c>cide://</c> из argv при cold start (ADR 0157).</summary>
     public static string? PendingMagicLinkUri { get; set; }
 
@@ -133,6 +136,7 @@ public partial class App : Application
             PluginsProjector = Features.Cdp.CdpPluginsProjector.Start(vm);
             RefactorProjector = Features.Cdp.CdpRefactorProjector.Start(vm);
             ReviewProjector = Features.Cdp.CdpReviewProjector.Start(vm);
+            LearnProjector = Features.Cdp.CdpLearnProjector.Start(vm);
             if (RunMcpStdio)
                 _ = RunMcpServerAsync(vm);
             if (!string.IsNullOrWhiteSpace(PendingMagicLinkUri))

@@ -86,6 +86,11 @@ public partial class MainWindowViewModel
     [NotifyPropertyChangedFor(nameof(ShowWorkspaceChromeBand))]
     private string? _agentReviewChromeHint;
 
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ShowAgentLearnChromeHint))]
+    [NotifyPropertyChangedFor(nameof(ShowWorkspaceChromeBand))]
+    private string? _agentLearnChromeHint;
+
     public bool ShowAgentCabinChromeHint => !string.IsNullOrWhiteSpace(AgentCabinChromeHint);
 
     public bool ShowAgentPressureChromeHint => !string.IsNullOrWhiteSpace(AgentPressureChromeHint);
@@ -117,6 +122,8 @@ public partial class MainWindowViewModel
     public bool ShowAgentRefactorChromeHint => !string.IsNullOrWhiteSpace(AgentRefactorChromeHint);
 
     public bool ShowAgentReviewChromeHint => !string.IsNullOrWhiteSpace(AgentReviewChromeHint);
+
+    public bool ShowAgentLearnChromeHint => !string.IsNullOrWhiteSpace(AgentLearnChromeHint);
 
     /// <summary>Apply seats-latch chrome_hint (Dark Cockpit — only when non-empty).</summary>
     public void ApplyCabinOrganChromeHint(string? hint)
@@ -260,5 +267,14 @@ public partial class MainWindowViewModel
         if (string.Equals(AgentReviewChromeHint, next, StringComparison.Ordinal))
             return;
         AgentReviewChromeHint = next;
+    }
+
+    /// <summary>Apply learn-LATEST chrome_hint (journal cards; empty clears).</summary>
+    public void ApplyLearnChromeHint(string? hint)
+    {
+        var next = string.IsNullOrWhiteSpace(hint) ? null : hint.Trim();
+        if (string.Equals(AgentLearnChromeHint, next, StringComparison.Ordinal))
+            return;
+        AgentLearnChromeHint = next;
     }
 }
