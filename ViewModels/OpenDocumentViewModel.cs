@@ -4,6 +4,8 @@ namespace CascadeIDE.ViewModels;
 
 public partial class OpenDocumentViewModel : ObservableObject
 {
+    public const string SharedWithAgentSuffix = " · shared";
+
     public OpenDocumentViewModel(string filePath, string title, string content)
     {
         FilePath = filePath;
@@ -15,7 +17,19 @@ public partial class OpenDocumentViewModel : ObservableObject
     public string FilePath { get; }
     public string Title { get; }
     public string OriginalContent { get; private set; }
-    public string DisplayTitle => IsPinned ? $"[P] {Title}{(IsDirty ? "*" : "")}" : $"{Title}{(IsDirty ? "*" : "")}";
+
+    public string DisplayTitle
+    {
+        get
+        {
+            var core = IsPinned ? $"[P] {Title}" : Title;
+            if (IsDirty)
+                core += "*";
+            if (IsSharedWithAgent)
+                core += SharedWithAgentSuffix;
+            return core;
+        }
+    }
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(DisplayTitle))]
@@ -28,6 +42,11 @@ public partial class OpenDocumentViewModel : ObservableObject
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(DisplayTitle))]
     private bool _isDirty;
+
+    /// <summary>Co-presence with agent open buffer (shared-LATEST latch → glass tab chrome).</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(DisplayTitle))]
+    private bool _isSharedWithAgent;
 
     [ObservableProperty]
     private int _groupIndex = 1;

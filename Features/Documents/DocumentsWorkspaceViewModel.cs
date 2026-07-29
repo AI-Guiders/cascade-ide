@@ -69,6 +69,40 @@ public sealed partial class DocumentsWorkspaceViewModel : ObservableObject
         return list;
     }
 
+    /// <summary>
+    /// Apply dual-cockpit co-presence chrome from shared-LATEST (CDP desk latch).
+    /// Marks matching open tab with <see cref="OpenDocumentViewModel.SharedWithAgentSuffix"/>.
+    /// </summary>
+    public void ApplySharedFileChrome(string? path, bool shared)
+    {
+        foreach (var doc in OpenDocuments)
+        {
+            var match = shared
+                && !string.IsNullOrWhiteSpace(path)
+                && PathsReferToSameFile(doc.FilePath, path);
+            if (doc.IsSharedWithAgent != match)
+                doc.IsSharedWithAgent = match;
+        }
+    }
+
+    static bool PathsReferToSameFile(string? a, string? b)
+    {
+        if (string.IsNullOrWhiteSpace(a) || string.IsNullOrWhiteSpace(b))
+            return false;
+        try
+        {
+            return string.Equals(
+                Path.GetFullPath(a),
+                Path.GetFullPath(b),
+                StringComparison.OrdinalIgnoreCase);
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+
     [ObservableProperty]
     private IDockable? _dockActiveDocument;
 
@@ -747,16 +781,20 @@ public sealed partial class DocumentsWorkspaceViewModel : ObservableObject
     }
 
     /// <summary>Dock tab title is a projection of <see cref="OpenDocumentViewModel.DisplayTitle"/>.</summary>
+        /// <summary>Dock tab title is a projection of <see cref="OpenDocumentViewModel.DisplayTitle"/>.</summary>
     private void BindDockChrome(OpenDocumentViewModel doc, DockDocumentViewModel dock)
     {
         PropertyChangedEventHandler handler = (_, e) =>
         {
-            if (e.PropertyName is nameof(OpenDocumentViewModel.IsDirty) or nameof(OpenDocumentViewModel.IsPinned))
+            if (e.PropertyName is nameof(OpenDocumentViewModel.IsDirty)
+                or nameof(OpenDocumentViewModel.IsPinned)
+                or nameof(OpenDocumentViewModel.IsSharedWithAgent))
                 dock.Title = doc.DisplayTitle;
         };
         doc.PropertyChanged += handler;
         _dockChromeBindings[doc] = (dock, handler);
     }
+
 
     private void UnbindDockChrome(OpenDocumentViewModel doc)
     {

@@ -29,6 +29,9 @@ public partial class App : Application
     /// <summary>Agent desk ↔ Intercom @PF/@PM voice (intercom-LATEST.json).</summary>
     static Features.Cdp.CdpIntercomVoiceProjector? IntercomVoiceProjector { get; set; }
 
+    /// <summary>Agent/desk co-presence chrome (shared-LATEST.json).</summary>
+    static Features.Cdp.CdpSharedFileProjector? SharedFileProjector { get; set; }
+
     /// <summary><c>cide://</c> из argv при cold start (ADR 0157).</summary>
     public static string? PendingMagicLinkUri { get; set; }
 
@@ -53,6 +56,7 @@ public partial class App : Application
             DiskSyncProjector = Features.Cdp.CdpDiskSyncProjector.Start(vm.Documents);
             PresentationProjector = Features.Cdp.CdpPresentationProjector.Start(vm);
             IntercomVoiceProjector = Features.Cdp.CdpIntercomVoiceProjector.Start(vm);
+            SharedFileProjector = Features.Cdp.CdpSharedFileProjector.Start(vm.Documents);
             if (RunMcpStdio)
                 _ = RunMcpServerAsync(vm);
             if (!string.IsNullOrWhiteSpace(PendingMagicLinkUri))
