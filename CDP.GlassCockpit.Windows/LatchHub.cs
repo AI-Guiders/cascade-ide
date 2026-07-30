@@ -1,5 +1,6 @@
 #nullable enable
 using System.IO;
+using CascadeIDE.Features.Cdp;
 
 namespace CDP.GlassCockpit.Windows;
 
@@ -11,17 +12,14 @@ internal sealed class LatchHub : IDisposable
 {
     FileSystemWatcher? _watcher;
 
-    public string StateRoot { get; } =
-        Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-            "cdp-mcp");
+    public string StateRoot { get; } = CdpHabitatPaths.StateRoot;
 
     public event Action<string>? IntercomChanged;
     public event Action<string>? PresentationChanged;
 
     public void Start()
     {
-        Directory.CreateDirectory(StateRoot);
+        CdpHabitatPaths.EnsureStateRoot();
         _watcher = new FileSystemWatcher(StateRoot)
         {
             Filter = "*-LATEST.json",
@@ -32,8 +30,8 @@ internal sealed class LatchHub : IDisposable
         _watcher.Created += OnFs;
         _watcher.Renamed += (_, e) => OnFs(_watcher, new FileSystemEventArgs(WatcherChangeTypes.Changed, StateRoot, e.Name));
 
-        TryFireExisting("intercom-LATEST.json", IntercomChanged);
-        TryFireExisting("presentation-LATEST.json", PresentationChanged);
+        TryFireExisting(CdpHabitatPaths.IntercomLatchFileName, IntercomChanged);
+        TryFireExisting(CdpHabitatPaths.PresentationLatchFileName, PresentationChanged);
     }
 
     void OnFs(object sender, FileSystemEventArgs e)
@@ -42,15 +40,15 @@ internal sealed class LatchHub : IDisposable
             return;
 
         var name = e.Name;
-        if (name.Equals("intercom-LATEST.json", StringComparison.OrdinalIgnoreCase))
-            DebounceFire(Path.Combine(StateRoot, name), IntercomChanged);
-        else if (name.Equals("presentation-LATEST.json", StringComparison.OrdinalIgnoreCase))
-            DebounceFire(Path.Combine(StateRoot, name), PresentationChanged);
+        if (name.Equals(CdpHabitatPaths.IntercomLatchFileName, StringComparison.OrdinalIgnoreCase))
+            DebounceFire(CdpHabitatPaths.GetLatchPath(name), IntercomChanged);
+        else if (name.Equals(CdpHabitatPaths.PresentationLatchFileName, StringComparison.OrdinalIgnoreCase))
+            DebounceFire(CdpHabitatPaths.GetLatchPath(name), PresentationChanged);
     }
 
     void TryFireExisting(string fileName, Action<string>? sink)
     {
-        var path = Path.Combine(StateRoot, fileName);
+        var path = CdpHabitatPaths.GetLatchPath(fileName);
         if (File.Exists(path))
             sink?.Invoke(path);
     }

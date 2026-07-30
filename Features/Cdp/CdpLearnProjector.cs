@@ -31,10 +31,7 @@ internal sealed class CdpLearnProjector : IDisposable
 
     public static CdpLearnProjector? Instance { get; private set; }
 
-    public static string StateRoot =>
-        Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-            "cdp-mcp");
+    public static string StateRoot => CdpHabitatPaths.StateRoot;
 
     public static string LatchPath => Path.Combine(StateRoot, "learn-LATEST.json");
 

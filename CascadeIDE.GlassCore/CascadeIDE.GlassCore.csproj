@@ -125,6 +125,8 @@
     <Compile Include="..\Features\Workspace\DataAcquisition\WorkspaceCascadePaths.cs" Link="Features\Workspace\DataAcquisition\WorkspaceCascadePaths.cs" />
     <!-- Peel7: defaults-settings.toml discovery (host SettingsDefaultsLoader still owns BundledAppContent merge). -->
     <Compile Include="..\Features\Settings\DataAcquisition\SettingsDefaultsPaths.cs" Link="Features\Settings\DataAcquisition\SettingsDefaultsPaths.cs" />
+    <!-- Peel8: cdp-mcp latch state root + named LATEST paths (watchers stay host). -->
+    <Compile Include="..\Features\Cdp\CdpHabitatPaths.cs" Link="Features\Cdp\CdpHabitatPaths.cs" />
   </ItemGroup>
 
   <ItemGroup>

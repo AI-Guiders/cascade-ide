@@ -24,12 +24,9 @@ internal static partial class CdpIntercomVoicePublisher
         DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
     };
 
-    public static string StateRoot =>
-        Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-            "cdp-mcp");
+    public static string StateRoot => CdpHabitatPaths.StateRoot;
 
-    public static string LatchPath => Path.Combine(StateRoot, "intercom-LATEST.json");
+    public static string LatchPath => CdpHabitatPaths.IntercomLatchPath;
 
     /// <summary>True when body addresses @PF (word boundary).</summary>
     public static bool TryExtractPfBody(string? raw, out string body)

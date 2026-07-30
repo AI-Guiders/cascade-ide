@@ -30,12 +30,9 @@ internal sealed class CdpPresentationProjector : IDisposable
 
     public static CdpPresentationProjector? Instance { get; private set; }
 
-    public static string StateRoot =>
-        Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-            "cdp-mcp");
+    public static string StateRoot => CdpHabitatPaths.StateRoot;
 
-    public static string LatchPath => Path.Combine(StateRoot, "presentation-LATEST.json");
+    public static string LatchPath => CdpHabitatPaths.PresentationLatchPath;
 
     CdpPresentationProjector(MainWindowViewModel vm, string stateRoot)
     {

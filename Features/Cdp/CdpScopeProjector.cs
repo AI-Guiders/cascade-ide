@@ -31,10 +31,7 @@ internal sealed class CdpScopeProjector : IDisposable
 
     public static CdpScopeProjector? Instance { get; private set; }
 
-    public static string StateRoot =>
-        Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-            "cdp-mcp");
+    public static string StateRoot => CdpHabitatPaths.StateRoot;
 
     public static string LatchPath => Path.Combine(StateRoot, "scope-LATEST.json");
 

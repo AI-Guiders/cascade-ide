@@ -29,10 +29,7 @@ internal sealed class CdpAlertProjector : IDisposable
 
     public static CdpAlertProjector? Instance { get; private set; }
 
-    public static string StateRoot =>
-        Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-            "cdp-mcp");
+    public static string StateRoot => CdpHabitatPaths.StateRoot;
 
     public static string LatchPath => Path.Combine(StateRoot, "alert-LATEST.json");
 

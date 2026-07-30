@@ -1,6 +1,7 @@
 #nullable enable
 
 using System.Text.Json;
+using CascadeIDE.Features.Cdp;
 
 namespace CascadeIDE.Services.Intercom;
 
@@ -98,10 +99,7 @@ internal static class AttachmentAnchorPaths
         absolute = "";
         try
         {
-            var latchPath = Path.Combine(
-                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-                "cdp-mcp",
-                "focus-LATEST.json");
+            var latchPath = CdpHabitatPaths.GetLatchPath("focus-LATEST.json");
             if (!File.Exists(latchPath))
                 return false;
 

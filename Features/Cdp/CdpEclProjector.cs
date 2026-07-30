@@ -30,10 +30,7 @@ internal sealed class CdpEclProjector : IDisposable
 
     public static CdpEclProjector? Instance { get; private set; }
 
-    public static string StateRoot =>
-        Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-            "cdp-mcp");
+    public static string StateRoot => CdpHabitatPaths.StateRoot;
 
     public static string LatchPath => Path.Combine(StateRoot, "ecl-LATEST.json");
 

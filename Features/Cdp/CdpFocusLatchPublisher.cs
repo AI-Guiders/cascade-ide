@@ -31,12 +31,9 @@ internal sealed class CdpFocusLatchPublisher : IDisposable
     int _lastColumn;
     bool _disposed;
 
-    public static string StateRoot =>
-        Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-            "cdp-mcp");
+    public static string StateRoot => CdpHabitatPaths.StateRoot;
 
-    public static string LatchPath => Path.Combine(StateRoot, "focus-LATEST.json");
+    public static string LatchPath => CdpHabitatPaths.GetLatchPath("focus-LATEST.json");
 
     public static CdpFocusLatchPublisher? Instance { get; private set; }
 

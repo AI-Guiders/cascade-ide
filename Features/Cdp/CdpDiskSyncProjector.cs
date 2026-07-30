@@ -38,10 +38,7 @@ internal sealed class CdpDiskSyncProjector : IDisposable
 
     public static CdpDiskSyncProjector? Instance { get; private set; }
 
-    public static string StateRoot =>
-        Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-            "cdp-mcp");
+    public static string StateRoot => CdpHabitatPaths.StateRoot;
 
     public static string LatchPath => Path.Combine(StateRoot, "disk-LATEST.json");
 
