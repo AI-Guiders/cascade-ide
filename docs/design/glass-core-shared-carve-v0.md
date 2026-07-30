@@ -34,10 +34,16 @@ North star: Avalonia CIDE + WPF glass both **ProjectReference** `CascadeIDE.Glas
 - `WorkspaceCascadePaths` (path + cwd discovery) shared via GlassCore.
 - `IdeGlassSettings` + `RepositoryWorkspaceTomlLoader` use it; typed `RepositoryWorkspaceToml` stays host.
 
+## Peel7 (done)
+
+- `SettingsDefaultsPaths` — discovery/read for `defaults-settings.toml` (disk / walk-up / embedded).
+- `IdeGlassSettings` delegates; `SettingsDefaultsLoader.BundledRelativePath` aliases the shared constant.
+- Host still owns `BundledAppContent` + typed `CascadeIdeSettings` merge.
+
 ## Next peels
 
 1. Defer: `PrimitivesKit`, `UiLayoutSnapshot`, Avalonia Views/VMs.
-2. Optional next: presentation latch helpers / thin defaults discovery extract.
+2. Optional next: presentation latch path helpers (`presentation-LATEST.json` state root) shared thin.
 3. Keep host: `DataBusEventPolicyLoader`, `IGraphDataSource` / navigation JSON request, full `SettingsService` + typed workspace overlay.
 
 Map: inventory `glass-core-settings-inventory-v0.md`; reuse note `glass-wpf-reuse-cide-settings-v0.md`.
