@@ -12,6 +12,7 @@
   <ItemGroup>
     <PackageReference Include="Eto.Parse" Version="1.6.0" />
     <PackageReference Include="Tomlyn" Version="2.3.2" />
+    <ProjectReference Include="..\CascadeIDE.Contracts\CascadeIDE.Contracts.csproj" />
   </ItemGroup>
 
   <!-- Factory defaults: same file as CascadeIDE (disk under host exe or embedded). -->
@@ -115,6 +116,8 @@
     <Compile Include="..\Cockpit\Graph\Layout\StarGraphLayoutEngine.cs" Link="Cockpit\Graph\Layout\StarGraphLayoutEngine.cs" />
     <Compile Include="..\Cockpit\Graph\Layout\GraphRelatedFileHierarchyLayoutEngine.cs" Link="Cockpit\Graph\Layout\GraphRelatedFileHierarchyLayoutEngine.cs" />
     <Compile Include="..\Cockpit\Graph\Layout\ControlFlowGraphLayoutEngine.cs" Link="Cockpit\Graph\Layout\ControlFlowGraphLayoutEngine.cs" />
+    <!-- Peel6: shared LocalAppData settings paths (SettingsService still host). -->
+    <Compile Include="..\Features\Settings\DataAcquisition\UserSettingsPaths.cs" Link="Features\Settings\DataAcquisition\UserSettingsPaths.cs" />
   </ItemGroup>
 
   <ItemGroup>

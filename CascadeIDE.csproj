@@ -133,6 +133,8 @@
     <Compile Remove="Cockpit\Graph\Layout\StarGraphLayoutEngine.cs" />
     <Compile Remove="Cockpit\Graph\Layout\GraphRelatedFileHierarchyLayoutEngine.cs" />
     <Compile Remove="Cockpit\Graph\Layout\ControlFlowGraphLayoutEngine.cs" />
+    <!-- Peel6: UserSettingsPaths lives in GlassCore -->
+    <Compile Remove="Features\Settings\DataAcquisition\UserSettingsPaths.cs" />
     <Compile Remove="CasaField.Core.Bench\**\*.cs" />
     <!-- Внешний субмодуль/вендор: не компилировать в IDE (иначе sandbox с top-level Main перехватывает входную точку). -->
     <Compile Remove="externals\**\*.cs" />

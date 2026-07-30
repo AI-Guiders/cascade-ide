@@ -1,4 +1,5 @@
 #nullable enable
+using CascadeIDE.Features.Settings.DataAcquisition;
 using Tomlyn;
 using Tomlyn.Model;
 
@@ -21,11 +22,7 @@ public sealed class IdeGlassSettings
     public string? DefaultsPath { get; init; }
     public string? WorkspaceRoot { get; init; }
 
-    public static string DefaultSettingsPath =>
-        Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-            "CascadeIDE",
-            "settings.toml");
+    public static string DefaultSettingsPath => UserSettingsPaths.GetSettingsFilePath();
 
     /// <param name="settingsPath">User settings.toml; default LocalAppData.</param>
     /// <param name="workspaceRoot">Repo root with <c>.cascade/workspace.toml</c>; null = try discover from cwd.</param>
