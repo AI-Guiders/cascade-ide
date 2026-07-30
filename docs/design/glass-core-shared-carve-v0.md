@@ -18,10 +18,16 @@ North star: Avalonia CIDE + WPF glass both **ProjectReference** `CascadeIDE.Glas
 - Thin Models: DetailLevel / RelatedGraphLayoutKind / LevelKind / ControlFlowMainAxisKind.
 - `LevelKind.Normalize` owns depth; `Settings.NormalizeDepth` delegates (no Settings pull into GlassCore).
 
+## Peel6 (done)
+
+- `UserSettingsPaths` linked into GlassCore; `IdeGlassSettings.DefaultSettingsPath` delegates to it.
+- GlassCore ProjectReference `CascadeIDE.Contracts` (for `[IoBoundary]`).
+- Full `SettingsService` / `CascadeIdeSettings` / OutWit stay host.
+
 ## Next peels
 
 1. Defer: `PrimitivesKit`, `UiLayoutSnapshot`, Avalonia Views/VMs.
-2. Optional: grow peel toward full `SettingsService` without OutWit in GlassCore.
-3. Keep host: `DataBusEventPolicyLoader`, `IGraphDataSource` / navigation JSON request.
+2. Optional next: `UserSettingsTomlFileAccess` / thin load-save without full CascadeIdeSettings graph.
+3. Keep host: `DataBusEventPolicyLoader`, `IGraphDataSource` / navigation JSON request, full `SettingsService`.
 
 Map: inventory `glass-core-settings-inventory-v0.md`; reuse note `glass-wpf-reuse-cide-settings-v0.md`.
