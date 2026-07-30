@@ -17,6 +17,8 @@ internal static class LatchPaint
     public sealed record PresentationView(
         string Headline,
         string Detail,
+        string? Topology,
+        string? Tier,
         string? MfdPage,
         string StatusLine);
 
@@ -88,6 +90,8 @@ internal static class LatchPaint
             return new PresentationView(
                 headline,
                 detail.ToString().TrimEnd(),
+                topology,
+                tier,
                 mfd,
                 $"presentation · {tier ?? "—"} · {mfd ?? "—"}");
         }
@@ -96,6 +100,8 @@ internal static class LatchPaint
             return new PresentationView(
                 "Presentation",
                 ex.Message,
+                null,
+                null,
                 null,
                 $"presentation · parse fail · {ex.Message}");
         }

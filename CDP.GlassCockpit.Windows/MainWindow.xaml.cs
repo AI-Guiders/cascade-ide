@@ -10,6 +10,7 @@ namespace CDP.GlassCockpit.Windows;
 public partial class MainWindow : Window
 {
     readonly LatchHub _latches;
+    readonly GlassSession _session;
     readonly ObservableCollection<ChatBubble> _feed = new();
 
     public MainWindow()
@@ -17,18 +18,41 @@ public partial class MainWindow : Window
         InitializeComponent();
         MessageFeed.ItemsSource = _feed;
 
+        _session = new GlassSession();
+        ApplyLayoutFromSession();
+        ApplyPrimaryWorkSurface();
+
         _feed.Add(new ChatBubble(
             "system",
-            "Forward = Intercom. Latch messages paint as bubbles — not raw JSON.",
+            "Forward = Intercom. Settings/topology from CascadeIDE settings.toml + presentation latch.",
             DateTime.Now.ToString("HH:mm")));
 
         _latches = new LatchHub();
         _latches.IntercomChanged += OnIntercomChanged;
         _latches.PresentationChanged += OnPresentationChanged;
         _latches.Start();
-        StatusText.Text = $"glass · watching {_latches.StateRoot}";
+
+        StatusText.Text =
+            $"glass · {_session.Layout.Topology} · cols={_session.Layout.ColumnDefinitions} · {_latches.StateRoot}";
         Closed += (_, _) => _latches.Dispose();
         UpdateMfdBody();
+    }
+
+    void ApplyLayoutFromSession()
+    {
+        WpfMainGridColumns.Apply(MainGrid, _session.Layout.ColumnDefinitions);
+        TopologyBadge.Text = _session.Layout.Topology;
+        ChromeHint.Text =
+            $"settings.toml · {_session.Settings.PrimaryWorkSurface} · tier={_session.Settings.Tier}" +
+            (_session.Layout.ParseOk ? "" : $" · parse fail: {_session.Layout.ParseError}");
+    }
+
+    void ApplyPrimaryWorkSurface()
+    {
+        var intercom = _session.IsIntercomForward;
+        IntercomSurface.Visibility = intercom ? Visibility.Visible : Visibility.Collapsed;
+        EditorSurface.Visibility = intercom ? Visibility.Collapsed : Visibility.Visible;
+        ForwardTitle.Text = intercom ? "F · Intercom" : "F · Editor";
     }
 
     void OnIntercomChanged(string path)
@@ -41,7 +65,6 @@ public partial class MainWindow : Window
                 var view = LatchPaint.PaintIntercom(raw);
                 IntercomSubtitle.Text = view.Header;
 
-                // Keep a short history of latch paints as bubbles (v0 = latest latch + prior).
                 _feed.Add(new ChatBubble(
                     view.RoleLabel,
                     view.Body,
@@ -70,9 +93,15 @@ public partial class MainWindow : Window
                 var view = LatchPaint.PaintPresentation(raw);
                 PlanTitle.Text = string.IsNullOrWhiteSpace(view.Headline) ? "Presentation" : view.Headline;
                 PlanMeta.Text = view.Detail;
+
+                var layout = _session.ApplyTopology(view.Topology);
+                WpfMainGridColumns.Apply(MainGrid, layout.ColumnDefinitions);
+                TopologyBadge.Text = layout.Topology;
+
                 SelectMfdPage(view.MfdPage);
                 MfdHealth.Text = $"EICAS · {view.StatusLine}";
-                StatusText.Text = $"glass · {view.StatusLine} · {DateTime.Now:HH:mm:ss}";
+                StatusText.Text =
+                    $"glass · {view.StatusLine} · cols={layout.ColumnDefinitions} · {DateTime.Now:HH:mm:ss}";
             }
             catch (Exception ex)
             {

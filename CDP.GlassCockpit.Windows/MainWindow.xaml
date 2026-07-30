@@ -20,23 +20,27 @@
   </Window.Resources>
 
   <DockPanel>
-    <!-- Top chrome (CIDE-like band, peel1) -->
+    <!-- Top chrome (CIDE-like band) -->
     <Border DockPanel.Dock="Top" Background="#1A1A1A" BorderBrush="#2E2E2E" BorderThickness="0,0,0,1" Padding="10,8">
       <Grid>
         <Grid.ColumnDefinitions>
           <ColumnDefinition Width="Auto"/>
+          <ColumnDefinition Width="Auto"/>
           <ColumnDefinition Width="*"/>
           <ColumnDefinition Width="Auto"/>
         </Grid.ColumnDefinitions>
-        <Border Background="#5A1A1A" BorderBrush="#C88A2A" BorderThickness="1" CornerRadius="4" Padding="8,3" Margin="0,0,12,0">
+        <Border Background="#5A1A1A" BorderBrush="#C88A2A" BorderThickness="1" CornerRadius="4" Padding="8,3" Margin="0,0,8,0">
           <TextBlock Text="ON GND" Foreground="#FFD27A" FontWeight="SemiBold" FontSize="11"/>
         </Border>
-        <Border Grid.Column="1" Background="#1E2A3A" BorderBrush="#2F4A6A" BorderThickness="1" CornerRadius="4" Padding="10,5">
-          <TextBlock Text="Ctrl+K — command (later) · Forward = Intercom" Foreground="#9BB6D4" FontSize="12"/>
+        <Border Grid.Column="1" Background="#1A2A22" BorderBrush="#2A5A40" BorderThickness="1" CornerRadius="4" Padding="8,3" Margin="0,0,8,0">
+          <TextBlock x:Name="TopologyBadge" Text="(F)" Foreground="#8FD4A8" FontFamily="Consolas" FontSize="11"/>
         </Border>
-        <TextBlock Grid.Column="2" VerticalAlignment="Center" Margin="12,0,0,0"
+        <Border Grid.Column="2" Background="#1E2A3A" BorderBrush="#2F4A6A" BorderThickness="1" CornerRadius="4" Padding="10,5">
+          <TextBlock x:Name="ChromeHint" Text="settings.toml · loading…" Foreground="#9BB6D4" FontSize="12"/>
+        </Border>
+        <TextBlock Grid.Column="3" VerticalAlignment="Center" Margin="12,0,0,0"
                    Foreground="#888" FontSize="11"
-                   Text="GlassCockpit.Windows · ADR-0021"/>
+                   Text="GlassCockpit.Windows · GlassCore"/>
       </Grid>
     </Border>
 
@@ -46,10 +50,10 @@
       </StatusBarItem>
     </StatusBar>
 
-    <!-- P | F | M — same proportions as CIDE MainGrid 220|4|*|4|340 -->
-    <Grid Margin="0">
+    <!-- P | F | M — widths from GlassCore PresentationMainGridLayoutFrameBuilder -->
+    <Grid x:Name="MainGrid" Margin="0">
       <Grid.ColumnDefinitions>
-        <ColumnDefinition Width="240"/>
+        <ColumnDefinition Width="220"/>
         <ColumnDefinition Width="4"/>
         <ColumnDefinition Width="*"/>
         <ColumnDefinition Width="4"/>
@@ -72,56 +76,68 @@
 
       <GridSplitter Grid.Column="1" Width="4" HorizontalAlignment="Stretch" Background="#222"/>
 
-      <!-- F Intercom chat -->
+      <!-- F Intercom / Editor (primary_work_surface) -->
       <Border Grid.Column="2" BorderBrush="#4A3A10" BorderThickness="1" Background="#141414" Margin="0,4">
         <DockPanel>
           <Border DockPanel.Dock="Top" Background="#1E1E1E" Padding="12,8" BorderBrush="#2A2A2A" BorderThickness="0,0,0,1">
             <DockPanel>
-              <TextBlock DockPanel.Dock="Left" Text="F · Intercom" FontWeight="SemiBold" FontSize="12" Foreground="#FFC75A" VerticalAlignment="Center"/>
+              <TextBlock x:Name="ForwardTitle" DockPanel.Dock="Left" Text="F · Intercom" FontWeight="SemiBold" FontSize="12" Foreground="#FFC75A" VerticalAlignment="Center"/>
               <TextBlock x:Name="IntercomSubtitle" HorizontalAlignment="Right" FontSize="11" Foreground="#888" VerticalAlignment="Center"/>
             </DockPanel>
           </Border>
 
-          <Border DockPanel.Dock="Bottom" Background="#1A1A1A" BorderBrush="#2A2A2A" BorderThickness="0,1,0,0" Padding="10">
-            <DockPanel>
-              <Button x:Name="SendBtn" DockPanel.Dock="Right" Content="Send" Style="{StaticResource ChromeBtn}"
-                      Click="SendBtn_OnClick" IsEnabled="False" ToolTip="Reply wire later"/>
-              <TextBox x:Name="ComposerBox"
-                       AcceptsReturn="True"
-                       TextWrapping="Wrap"
-                       MinHeight="56" MaxHeight="120"
-                       VerticalScrollBarVisibility="Auto"
-                       Background="#222"
-                       Foreground="#EEE"
-                       BorderBrush="#3F3F46"
-                       BorderThickness="1"
-                       Padding="8"
-                       FontFamily="Segoe UI"
-                       FontSize="14"
-                       Margin="0,0,8,0"
-                       Text="Message @PM…"/>
-            </DockPanel>
-          </Border>
+          <Grid>
+            <DockPanel x:Name="IntercomSurface">
+              <Border DockPanel.Dock="Bottom" Background="#1A1A1A" BorderBrush="#2A2A2A" BorderThickness="0,1,0,0" Padding="10">
+                <DockPanel>
+                  <Button x:Name="SendBtn" DockPanel.Dock="Right" Content="Send" Style="{StaticResource ChromeBtn}"
+                          Click="SendBtn_OnClick" IsEnabled="False" ToolTip="Reply wire later"/>
+                  <TextBox x:Name="ComposerBox"
+                           AcceptsReturn="True"
+                           TextWrapping="Wrap"
+                           MinHeight="56" MaxHeight="120"
+                           VerticalScrollBarVisibility="Auto"
+                           Background="#222"
+                           Foreground="#EEE"
+                           BorderBrush="#3F3F46"
+                           BorderThickness="1"
+                           Padding="8"
+                           FontFamily="Segoe UI"
+                           FontSize="14"
+                           Margin="0,0,8,0"
+                           Text="Message @PM…"/>
+                </DockPanel>
+              </Border>
 
-          <ScrollViewer x:Name="FeedScroll" VerticalScrollBarVisibility="Auto" Padding="12">
-            <ItemsControl x:Name="MessageFeed">
-              <ItemsControl.ItemTemplate>
-                <DataTemplate>
-                  <Border Margin="0,0,0,12" Padding="12,10" CornerRadius="8"
-                          Background="#1C2430" BorderBrush="#2F3F55" BorderThickness="1"
-                          HorizontalAlignment="Stretch">
-                    <StackPanel>
-                      <DockPanel Margin="0,0,0,6">
-                        <TextBlock Text="{Binding Role}" FontSize="11" FontWeight="SemiBold" Foreground="#7EB6FF"/>
-                        <TextBlock DockPanel.Dock="Right" Text="{Binding When}" FontSize="10" Foreground="#666" HorizontalAlignment="Right"/>
-                      </DockPanel>
-                      <TextBlock Text="{Binding Body}" FontSize="14" TextWrapping="Wrap" Foreground="#E8E8E8" LineHeight="20"/>
-                    </StackPanel>
-                  </Border>
-                </DataTemplate>
-              </ItemsControl.ItemTemplate>
-            </ItemsControl>
-          </ScrollViewer>
+              <ScrollViewer x:Name="FeedScroll" VerticalScrollBarVisibility="Auto" Padding="12">
+                <ItemsControl x:Name="MessageFeed">
+                  <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                      <Border Margin="0,0,0,12" Padding="12,10" CornerRadius="8"
+                              Background="#1C2430" BorderBrush="#2F3F55" BorderThickness="1"
+                              HorizontalAlignment="Stretch">
+                        <StackPanel>
+                          <DockPanel Margin="0,0,0,6">
+                            <TextBlock Text="{Binding Role}" FontSize="11" FontWeight="SemiBold" Foreground="#7EB6FF"/>
+                            <TextBlock DockPanel.Dock="Right" Text="{Binding When}" FontSize="10" Foreground="#666" HorizontalAlignment="Right"/>
+                          </DockPanel>
+                          <TextBlock Text="{Binding Body}" FontSize="14" TextWrapping="Wrap" Foreground="#E8E8E8" LineHeight="20"/>
+                        </StackPanel>
+                      </Border>
+                    </DataTemplate>
+                  </ItemsControl.ItemTemplate>
+                </ItemsControl>
+              </ScrollViewer>
+            </DockPanel>
+
+            <Border x:Name="EditorSurface" Visibility="Collapsed" Background="#121212" Padding="16">
+              <StackPanel VerticalAlignment="Center">
+                <TextBlock Text="Editor surface" FontSize="16" FontWeight="SemiBold" Foreground="#DDD" Margin="0,0,0,8"/>
+                <TextBlock Text="primary_work_surface = editor (from CascadeIDE settings.toml). Monaco/AvalonEdit peel later; same switch as CIDE Forward."
+                           FontSize="13" Foreground="#999" TextWrapping="Wrap"/>
+              </StackPanel>
+            </Border>
+          </Grid>
         </DockPanel>
       </Border>
 
