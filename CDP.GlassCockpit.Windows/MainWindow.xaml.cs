@@ -11,6 +11,7 @@ public partial class MainWindow : Window
 {
     readonly LatchHub _latches;
     readonly GlassSession _session;
+    readonly SoftOrganChromeAggregator _softOrgans = new();
     readonly ObservableCollection<ChatBubble> _feed = new();
 
     public MainWindow()
@@ -24,12 +25,13 @@ public partial class MainWindow : Window
 
         _feed.Add(new ChatBubble(
             "system",
-            "Forward = Intercom. Settings/topology from CascadeIDE settings.toml + presentation latch.",
+            "Forward = Intercom. SoftOrgan latches → top chrome band. Settings from GlassCore.",
             DateTime.Now.ToString("HH:mm")));
 
         _latches = new LatchHub();
         _latches.IntercomChanged += OnIntercomChanged;
         _latches.PresentationChanged += OnPresentationChanged;
+        _latches.SoftOrganChanged += OnSoftOrganChanged;
         _latches.Start();
 
         StatusText.Text =
@@ -106,6 +108,25 @@ public partial class MainWindow : Window
             catch (Exception ex)
             {
                 StatusText.Text = $"glass · presentation fail · {ex.Message}";
+            }
+        }, DispatcherPriority.Background);
+    }
+
+    void OnSoftOrganChanged(string organId, string? chromeHint)
+    {
+        Dispatcher.BeginInvoke(() =>
+        {
+            _softOrgans.Apply(organId, chromeHint);
+            var band = _softOrgans.BandLine;
+            if (string.IsNullOrWhiteSpace(band))
+            {
+                SoftOrganHint.Text = "";
+                SoftOrganHint.Visibility = Visibility.Collapsed;
+            }
+            else
+            {
+                SoftOrganHint.Text = band;
+                SoftOrganHint.Visibility = Visibility.Visible;
             }
         }, DispatcherPriority.Background);
     }

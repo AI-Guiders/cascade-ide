@@ -36,7 +36,11 @@
           <TextBlock x:Name="TopologyBadge" Text="(F)" Foreground="#8FD4A8" FontFamily="Consolas" FontSize="11"/>
         </Border>
         <Border Grid.Column="2" Background="#1E2A3A" BorderBrush="#2F4A6A" BorderThickness="1" CornerRadius="4" Padding="10,5">
-          <TextBlock x:Name="ChromeHint" Text="settings.toml · loading…" Foreground="#9BB6D4" FontSize="12"/>
+          <StackPanel>
+            <TextBlock x:Name="ChromeHint" Text="settings.toml · loading…" Foreground="#9BB6D4" FontSize="12"/>
+            <TextBlock x:Name="SoftOrganHint" Text="" Foreground="#C9B896" FontSize="11" Margin="0,2,0,0"
+                       Visibility="Collapsed" TextWrapping="Wrap"/>
+          </StackPanel>
         </Border>
         <TextBlock Grid.Column="3" VerticalAlignment="Center" Margin="12,0,0,0"
                    Foreground="#888" FontSize="11"
