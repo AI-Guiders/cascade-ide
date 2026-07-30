@@ -41,9 +41,9 @@ internal sealed class LatchHub : IDisposable
 
         var name = e.Name;
         if (name.Equals(CdpHabitatPaths.IntercomLatchFileName, StringComparison.OrdinalIgnoreCase))
-            DebounceFire(CdpHabitatPaths.GetLatchPath(name), IntercomChanged);
+            CdpLatchIo.PostSettledIfExists(CdpHabitatPaths.GetLatchPath(name), p => IntercomChanged?.Invoke(p));
         else if (name.Equals(CdpHabitatPaths.PresentationLatchFileName, StringComparison.OrdinalIgnoreCase))
-            DebounceFire(CdpHabitatPaths.GetLatchPath(name), PresentationChanged);
+            CdpLatchIo.PostSettledIfExists(CdpHabitatPaths.GetLatchPath(name), p => PresentationChanged?.Invoke(p));
     }
 
     void TryFireExisting(string fileName, Action<string>? sink)
@@ -51,24 +51,6 @@ internal sealed class LatchHub : IDisposable
         var path = CdpHabitatPaths.GetLatchPath(fileName);
         if (File.Exists(path))
             sink?.Invoke(path);
-    }
-
-    static void DebounceFire(string path, Action<string>? sink)
-    {
-        // Tiny settle — writers often replace via temp+rename / multi-write.
-        ThreadPool.QueueUserWorkItem(_ =>
-        {
-            try
-            {
-                Thread.Sleep(40);
-                if (File.Exists(path))
-                    sink?.Invoke(path);
-            }
-            catch
-            {
-                /* best-effort */
-            }
-        });
     }
 
     public void Dispose()

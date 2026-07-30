@@ -67,17 +67,9 @@ internal sealed class CdpPresentationProjector : IDisposable
         if (_disposed)
             return;
 
-        string raw;
-        try
-        {
-            if (!File.Exists(LatchPath))
-                return;
-            raw = File.ReadAllText(LatchPath);
-        }
-        catch
-        {
+        string? raw = CdpLatchIo.TryReadAllTextIfExists(LatchPath);
+        if (raw is null)
             return;
-        }
 
         PresentationLatchDoc? doc;
         try
