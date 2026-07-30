@@ -37,7 +37,30 @@
     <Compile Remove="**/bin/**" />
     <!-- Contracts project lives inside repo; exclude its sources from main app compilation (use ProjectReference). -->
     <Compile Remove="CascadeIDE.Contracts\**\*.cs" />
+    <Compile Remove="CascadeIDE.GlassCore\**\*.cs" />
+    <Compile Remove="CDP.GlassCockpit.Windows\**\*.cs" />
     <Compile Remove="CasaField.Core\**\*.cs" />
+    <!-- Presentation math + CDS policy live in GlassCore; Avalonia monitor probes stay here. -->
+    <Compile Remove="Services\Presentation\PresentationAnchorKind.cs" />
+    <Compile Remove="Services\Presentation\PresentationAnchorSlot.cs" />
+    <Compile Remove="Services\Presentation\PresentationGrammarTokens.cs" />
+    <Compile Remove="Services\Presentation\PresentationInnerEtoGrammar.cs" />
+    <Compile Remove="Services\Presentation\PresentationLayoutAnalyzer.cs" />
+    <Compile Remove="Services\Presentation\PresentationMainGridColumnDefinitions.cs" />
+    <Compile Remove="Services\Presentation\PresentationMainGridLayoutFrame.cs" />
+    <Compile Remove="Services\Presentation\PresentationMainGridLayoutFrameBuilder.cs" />
+    <Compile Remove="Services\Presentation\PresentationParseResult.cs" />
+    <Compile Remove="Services\Presentation\PresentationParser.cs" />
+    <Compile Remove="Services\Presentation\PresentationTopologyResolver.cs" />
+    <Compile Remove="Services\Presentation\PresentationZoneBound.cs" />
+    <Compile Remove="Services\Presentation\PresentationZoneWeights.cs" />
+    <Compile Remove="Services\Presentation\CompactIdeLayoutMetrics.cs" />
+    <Compile Remove="Services\Presentation\PresentationCompactMainGridLayoutBuilder.cs" />
+    <Compile Remove="Services\Presentation\PresentationMonitorSnapshot.cs" />
+    <Compile Remove="Services\Presentation\PresentationPmSplitHostColumnBuilder.cs" />
+    <Compile Remove="Services\Presentation\PresentationUltrawideCockpitLayoutBuilder.cs" />
+    <Compile Remove="Models\PresentationTierKind.cs" />
+    <Compile Remove="Cockpit\Cds\CockpitPresentationLayoutPolicy.cs" />
     <Compile Remove="CasaField.Core.Bench\**\*.cs" />
     <!-- Внешний субмодуль/вендор: не компилировать в IDE (иначе sandbox с top-level Main перехватывает входную точку). -->
     <Compile Remove="externals\**\*.cs" />
@@ -103,6 +126,7 @@
     <PackageReference Include="AIGuiders.Cdp.Core" Version="0.3.0" Condition="!Exists('..\cdp-core\Cdp.Core.csproj')" />
     <PackageReference Include="AIGuiders.AgentNotes.Core" Version="2.1.2" Condition="!Exists('..\agent-notes-core\AgentNotes.Core.csproj')" />
     <PackageReference Include="AIGuiders.GitMcp.Core" Version="1.0.1" />
+    <ProjectReference Include="CascadeIDE.GlassCore\CascadeIDE.GlassCore.csproj" />
     <ProjectReference Include="CascadeIDE.Contracts\CascadeIDE.Contracts.csproj" />
     <ProjectReference Include="CasaField.Core\CasaField.Core.csproj" />
     <!-- RoslynMcp передаёт RoslynMcpWorkspace=true: не ссылаться на локальный анализатор, иначе DLL в bin держит процесс MCP и ломает dotnet build. -->

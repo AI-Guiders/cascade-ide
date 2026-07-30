@@ -6,10 +6,13 @@
 
 | Layer | Source |
 |---|---|
-| Durable settings | `%LocalAppData%/CascadeIDE/settings.toml` (same as Avalonia CIDE) |
-| Live desk patch | `%LocalAppData%/cdp-mcp/presentation-LATEST.json` (topology/tier/mfd) |
 | Layout math | `CascadeIDE.GlassCore` → linked `Services/Presentation/*` (parser, topology flags, main-grid frame) |
+| Durable settings (user) | `%LocalAppData%/CascadeIDE/settings.toml` |
+| Repo overlay | `<repo>/.cascade/workspace.toml` |
+| Live desk patch | `%LocalAppData%/cdp-mcp/presentation-LATEST.json` (→ usually persists into settings, not workspace) |
 | UI | WPF only — `WpfMainGridColumns.Apply` replaces Avalonia `ColumnDefinitions.Parse` + binding notify map |
+
+Inventory: [glass-core-settings-inventory-v0.md](glass-core-settings-inventory-v0.md).
 
 ## Peel0 shipped
 
@@ -17,9 +20,14 @@
 - Glass host loads settings on start; presentation latch re-applies topology columns
 - `primary_work_surface` switches Forward Intercom ↔ Editor placeholder
 
+## Peel1 shipped
+
+- Merge: defaults → `.cascade/workspace.toml` → user `settings.toml`
+- CascadeIDE ProjectReference GlassCore (presentation + CDS policy single compile)
+- Carve plan: [glass-core-shared-carve-v0.md](glass-core-shared-carve-v0.md)
+
 ## Next
 
-1. Extract full `SettingsService`/`CascadeIdeSettings` into GlassCore (drop Tomlyn peel)
-2. CascadeIDE ProjectReference GlassCore (single compile of presentation)
-3. Delete Avalonia UI hacks as WPF seats reach parity (Skia mirrors, `$parent` climbs, UIThread latch posts where WPF bindings work)
-4. Intercom reply latch / Monaco / MFD organs
+1. Peel Cockpit Cds/HostSurface/DataBus into GlassCore
+2. Grow toward full settings path without OutWit in GlassCore
+3. WPF Intercom reply / Monaco / MFD organs; drop Avalonia UI hacks as parity grows
