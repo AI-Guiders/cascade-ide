@@ -19,13 +19,13 @@ public static class InstrumentPlacementRuntime
             [BuildKey(MainWindowHostSurfaceIds.PlusPfdMfdHostTopLevel, CockpitSlotIds.Pfd)] = CockpitStandardInstrumentIds.SolutionExplorerTree,
         };
 
-    internal static void ResetToCodeDefaults()
+    public static void ResetToCodeDefaults()
     {
         lock (Gate)
             _workspaceMap = BuildCodeDefaults();
     }
 
-    internal static void ApplyWorkspaceInstrumentRouting(IReadOnlyDictionary<string, string>? routing)
+    public static void ApplyWorkspaceInstrumentRouting(IReadOnlyDictionary<string, string>? routing)
     {
         lock (Gate)
         {

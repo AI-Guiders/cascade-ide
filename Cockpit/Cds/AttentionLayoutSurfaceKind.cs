@@ -1,10 +1,8 @@
-using CascadeIDE.Contracts.Experimental;
-
 namespace CascadeIDE.Cockpit.Cds;
 
 /// <summary>
 /// Топология презентации зон внимания: <strong>где физически</strong> размещены регионы (одно окно, несколько окон, мониторы).
-/// Не путать с <see cref="AttentionZoneCanonicalIds"/> — это семантика зоны («pfd» / «mfd» / «forward»), а не форма раскладки.
+/// Не путать с AttentionZoneCanonicalIds — это семантика зоны («pfd» / «mfd» / «forward»), а не форма раскладки.
 /// </summary>
 /// <remarks>
 /// Сейчас реализована только <see cref="MainWindowDockedGrid"/>; иные сценарии — ADR 0021 §13, ADR 0017.

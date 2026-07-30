@@ -40,7 +40,7 @@
     <Compile Remove="CascadeIDE.GlassCore\**\*.cs" />
     <Compile Remove="CDP.GlassCockpit.Windows\**\*.cs" />
     <Compile Remove="CasaField.Core\**\*.cs" />
-    <!-- Presentation math + CDS policy live in GlassCore; Avalonia monitor probes stay here. -->
+    <!-- Presentation math + CDS policy + peel2 HostSurface/Cds live in GlassCore; Avalonia monitor probes stay here. -->
     <Compile Remove="Services\Presentation\PresentationAnchorKind.cs" />
     <Compile Remove="Services\Presentation\PresentationAnchorSlot.cs" />
     <Compile Remove="Services\Presentation\PresentationGrammarTokens.cs" />
@@ -61,6 +61,37 @@
     <Compile Remove="Services\Presentation\PresentationUltrawideCockpitLayoutBuilder.cs" />
     <Compile Remove="Models\PresentationTierKind.cs" />
     <Compile Remove="Cockpit\Cds\CockpitPresentationLayoutPolicy.cs" />
+    <!-- Peel2: Cds DTO + HostSurface IDs/placement/compositors + Display* POCOs -->
+    <Compile Remove="Cockpit\Cds\ICdsRouter.cs" />
+    <Compile Remove="Cockpit\Cds\CockpitSurfaceState.cs" />
+    <Compile Remove="Cockpit\Cds\AttentionLayoutSurfaceKind.cs" />
+    <Compile Remove="Cockpit\Composition\CockpitInstrumentDescriptor.cs" />
+    <Compile Remove="Cockpit\Composition\Shell\MainWindowShellSurfaceCompositor.cs" />
+    <Compile Remove="Cockpit\Composition\HostSurface\CockpitHostSurfaceIds.cs" />
+    <Compile Remove="Cockpit\Composition\HostSurface\MainWindowHostSurfaceIds.cs" />
+    <Compile Remove="Cockpit\Composition\HostSurface\InstrumentPlacementSpecifications.cs" />
+    <Compile Remove="Cockpit\Composition\HostSurface\InstrumentRoutingAliasResolver.cs" />
+    <Compile Remove="Cockpit\Composition\HostSurface\CockpitInstrumentPlacementRules.cs" />
+    <Compile Remove="Cockpit\Composition\HostSurface\InstrumentPlacementRuntime.cs" />
+    <Compile Remove="Cockpit\Composition\HostSurface\MainWindowHostSurfaceFrame.cs" />
+    <Compile Remove="Cockpit\Composition\HostSurface\MainWindowHostSurfaceCompositor.cs" />
+    <Compile Remove="Cockpit\Composition\HostSurface\IMainWindowHostSurfaceInput.cs" />
+    <Compile Remove="Cockpit\Composition\HostSurface\MainWindowHostSurfaceProjection.cs" />
+    <Compile Remove="Cockpit\Composition\HostSurface\ISurfaceSlotInstrumentBindingProvider.cs" />
+    <Compile Remove="Cockpit\Composition\HostSurface\DefaultSurfaceSlotInstrumentBindingProvider.cs" />
+    <Compile Remove="Features\Agent\Environment\AgentSafetyLevel.cs" />
+    <Compile Remove="Models\InstrumentRoutingSlotKeys.cs" />
+    <Compile Remove="Models\InstrumentMountPolicyIds.cs" />
+    <Compile Remove="Models\InstrumentMountPolicyRuleSettings.cs" />
+    <Compile Remove="Models\PresentationGrammarSettings.cs" />
+    <Compile Remove="Models\DisplayPresentationSettings.cs" />
+    <Compile Remove="Models\DisplayPfdHostSettings.cs" />
+    <Compile Remove="Models\DisplayMfdHostSettings.cs" />
+    <Compile Remove="Models\DisplayPmHostSettings.cs" />
+    <Compile Remove="Models\DisplaySkiaSettings.cs" />
+    <Compile Remove="Models\DisplayScreensSettings.cs" />
+    <Compile Remove="Models\DisplayMountSettings.cs" />
+    <Compile Remove="Models\DisplaySettings.cs" />
     <Compile Remove="CasaField.Core.Bench\**\*.cs" />
     <!-- Внешний субмодуль/вендор: не компилировать в IDE (иначе sandbox с top-level Main перехватывает входную точку). -->
     <Compile Remove="externals\**\*.cs" />

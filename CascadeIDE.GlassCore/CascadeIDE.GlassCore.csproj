@@ -43,6 +43,37 @@
     <Compile Include="..\Services\Presentation\PresentationUltrawideCockpitLayoutBuilder.cs" Link="Presentation\PresentationUltrawideCockpitLayoutBuilder.cs" />
     <Compile Include="..\Models\PresentationTierKind.cs" Link="Models\PresentationTierKind.cs" />
     <Compile Include="..\Cockpit\Cds\CockpitPresentationLayoutPolicy.cs" Link="Cockpit\Cds\CockpitPresentationLayoutPolicy.cs" />
+    <!-- Peel2: Cds DTO + HostSurface IDs/placement/compositors (Avalonia-free). -->
+    <Compile Include="..\Cockpit\Cds\ICdsRouter.cs" Link="Cockpit\Cds\ICdsRouter.cs" />
+    <Compile Include="..\Cockpit\Cds\CockpitSurfaceState.cs" Link="Cockpit\Cds\CockpitSurfaceState.cs" />
+    <Compile Include="..\Cockpit\Cds\AttentionLayoutSurfaceKind.cs" Link="Cockpit\Cds\AttentionLayoutSurfaceKind.cs" />
+    <Compile Include="..\Cockpit\Composition\CockpitInstrumentDescriptor.cs" Link="Cockpit\Composition\CockpitInstrumentDescriptor.cs" />
+    <Compile Include="..\Cockpit\Composition\Shell\MainWindowShellSurfaceCompositor.cs" Link="Cockpit\Composition\Shell\MainWindowShellSurfaceCompositor.cs" />
+    <Compile Include="..\Cockpit\Composition\HostSurface\CockpitHostSurfaceIds.cs" Link="Cockpit\Composition\HostSurface\CockpitHostSurfaceIds.cs" />
+    <Compile Include="..\Cockpit\Composition\HostSurface\MainWindowHostSurfaceIds.cs" Link="Cockpit\Composition\HostSurface\MainWindowHostSurfaceIds.cs" />
+    <Compile Include="..\Cockpit\Composition\HostSurface\InstrumentPlacementSpecifications.cs" Link="Cockpit\Composition\HostSurface\InstrumentPlacementSpecifications.cs" />
+    <Compile Include="..\Cockpit\Composition\HostSurface\InstrumentRoutingAliasResolver.cs" Link="Cockpit\Composition\HostSurface\InstrumentRoutingAliasResolver.cs" />
+    <Compile Include="..\Cockpit\Composition\HostSurface\CockpitInstrumentPlacementRules.cs" Link="Cockpit\Composition\HostSurface\CockpitInstrumentPlacementRules.cs" />
+    <Compile Include="..\Cockpit\Composition\HostSurface\InstrumentPlacementRuntime.cs" Link="Cockpit\Composition\HostSurface\InstrumentPlacementRuntime.cs" />
+    <Compile Include="..\Cockpit\Composition\HostSurface\MainWindowHostSurfaceFrame.cs" Link="Cockpit\Composition\HostSurface\MainWindowHostSurfaceFrame.cs" />
+    <Compile Include="..\Cockpit\Composition\HostSurface\MainWindowHostSurfaceCompositor.cs" Link="Cockpit\Composition\HostSurface\MainWindowHostSurfaceCompositor.cs" />
+    <Compile Include="..\Cockpit\Composition\HostSurface\IMainWindowHostSurfaceInput.cs" Link="Cockpit\Composition\HostSurface\IMainWindowHostSurfaceInput.cs" />
+    <Compile Include="..\Cockpit\Composition\HostSurface\MainWindowHostSurfaceProjection.cs" Link="Cockpit\Composition\HostSurface\MainWindowHostSurfaceProjection.cs" />
+    <Compile Include="..\Cockpit\Composition\HostSurface\ISurfaceSlotInstrumentBindingProvider.cs" Link="Cockpit\Composition\HostSurface\ISurfaceSlotInstrumentBindingProvider.cs" />
+    <Compile Include="..\Cockpit\Composition\HostSurface\DefaultSurfaceSlotInstrumentBindingProvider.cs" Link="Cockpit\Composition\HostSurface\DefaultSurfaceSlotInstrumentBindingProvider.cs" />
+    <Compile Include="..\Features\Agent\Environment\AgentSafetyLevel.cs" Link="Features\Agent\Environment\AgentSafetyLevel.cs" />
+    <Compile Include="..\Models\InstrumentRoutingSlotKeys.cs" Link="Models\InstrumentRoutingSlotKeys.cs" />
+    <Compile Include="..\Models\InstrumentMountPolicyIds.cs" Link="Models\InstrumentMountPolicyIds.cs" />
+    <Compile Include="..\Models\InstrumentMountPolicyRuleSettings.cs" Link="Models\InstrumentMountPolicyRuleSettings.cs" />
+    <Compile Include="..\Models\PresentationGrammarSettings.cs" Link="Models\PresentationGrammarSettings.cs" />
+    <Compile Include="..\Models\DisplayPresentationSettings.cs" Link="Models\DisplayPresentationSettings.cs" />
+    <Compile Include="..\Models\DisplayPfdHostSettings.cs" Link="Models\DisplayPfdHostSettings.cs" />
+    <Compile Include="..\Models\DisplayMfdHostSettings.cs" Link="Models\DisplayMfdHostSettings.cs" />
+    <Compile Include="..\Models\DisplayPmHostSettings.cs" Link="Models\DisplayPmHostSettings.cs" />
+    <Compile Include="..\Models\DisplaySkiaSettings.cs" Link="Models\DisplaySkiaSettings.cs" />
+    <Compile Include="..\Models\DisplayScreensSettings.cs" Link="Models\DisplayScreensSettings.cs" />
+    <Compile Include="..\Models\DisplayMountSettings.cs" Link="Models\DisplayMountSettings.cs" />
+    <Compile Include="..\Models\DisplaySettings.cs" Link="Models\DisplaySettings.cs" />
   </ItemGroup>
 
   <ItemGroup>
