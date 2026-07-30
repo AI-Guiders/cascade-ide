@@ -129,6 +129,8 @@
     <Compile Include="..\Features\Cdp\CdpHabitatPaths.cs" Link="Features\Cdp\CdpHabitatPaths.cs" />
     <!-- Peel9: latch settle + safe text read (Avalonia PostApply stays host CdpLatchFs). -->
     <Compile Include="..\Features\Cdp\CdpLatchIo.cs" Link="Features\Cdp\CdpLatchIo.cs" />
+    <!-- Peel12: canonical path normalize/compare (breakpoints, DAP, focus latch). -->
+    <Compile Include="..\Services\CanonicalFilePath.cs" Link="Services\CanonicalFilePath.cs" />
   </ItemGroup>
 
   <ItemGroup>

@@ -140,6 +140,11 @@
     <Compile Remove="Features\Settings\DataAcquisition\UserSettingsTomlFileAccess.cs" />
     <!-- Peel6c: workspace.toml path discovery -->
     <Compile Remove="Features\Workspace\DataAcquisition\WorkspaceCascadePaths.cs" />
+    <!-- Peel7–9 + peel12: live in GlassCore (single compile) -->
+    <Compile Remove="Features\Settings\DataAcquisition\SettingsDefaultsPaths.cs" />
+    <Compile Remove="Features\Cdp\CdpHabitatPaths.cs" />
+    <Compile Remove="Features\Cdp\CdpLatchIo.cs" />
+    <Compile Remove="Services\CanonicalFilePath.cs" />
     <Compile Remove="CasaField.Core.Bench\**\*.cs" />
     <!-- Внешний субмодуль/вендор: не компилировать в IDE (иначе sandbox с top-level Main перехватывает входную точку). -->
     <Compile Remove="externals\**\*.cs" />

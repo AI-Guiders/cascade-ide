@@ -53,15 +53,11 @@ public sealed class IdeGlassSettings
             }
         }
 
-        if (File.Exists(userPath))
+        if (TextFileReadWrite.TryReadAllTextIfExists(userPath) is { } userText)
         {
-            var userText = TextFileReadWrite.TryReadAllTextIfExists(userPath);
-            if (userText is not null)
-            {
-                merged = string.IsNullOrWhiteSpace(merged)
-                    ? userText
-                    : GlassTomlMerge.MergeDocuments(merged, userText);
-            }
+            merged = string.IsNullOrWhiteSpace(merged)
+                ? userText
+                : GlassTomlMerge.MergeDocuments(merged, userText);
         }
 
         if (string.IsNullOrWhiteSpace(merged))
