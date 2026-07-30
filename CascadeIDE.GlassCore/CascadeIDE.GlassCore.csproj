@@ -123,6 +123,8 @@
     <Compile Include="..\Features\Settings\DataAcquisition\UserSettingsTomlFileAccess.cs" Link="Features\Settings\DataAcquisition\UserSettingsTomlFileAccess.cs" />
     <!-- Peel6c: workspace.toml path + root discovery (typed overlay stays host). -->
     <Compile Include="..\Features\Workspace\DataAcquisition\WorkspaceCascadePaths.cs" Link="Features\Workspace\DataAcquisition\WorkspaceCascadePaths.cs" />
+    <!-- Peel7: defaults-settings.toml discovery (host SettingsDefaultsLoader still owns BundledAppContent merge). -->
+    <Compile Include="..\Features\Settings\DataAcquisition\SettingsDefaultsPaths.cs" Link="Features\Settings\DataAcquisition\SettingsDefaultsPaths.cs" />
   </ItemGroup>
 
   <ItemGroup>

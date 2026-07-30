@@ -1,3 +1,4 @@
+using CascadeIDE.Features.Settings.DataAcquisition;
 using CascadeIDE.Models;
 
 namespace CascadeIDE.Services;
@@ -9,7 +10,7 @@ namespace CascadeIDE.Services;
 public static class SettingsDefaultsLoader
 {
     /// <summary>Относительный путь от <see cref="AppContext.BaseDirectory"/> (опциональный override поверх встроенного бандла).</summary>
-    public const string BundledRelativePath = "Settings/defaults-settings.toml";
+    public const string BundledRelativePath = SettingsDefaultsPaths.BundledRelativePath;
 
     /// <summary>
     /// Текст шипнутого <c>defaults-settings.toml</c>: сначала файл под <see cref="AppContext.BaseDirectory"/>,

@@ -113,78 +113,8 @@ public sealed class IdeGlassSettings
         };
     }
 
-    static string? TryReadDefaultsToml(string? explicitPath, out string? resolvedPath)
-    {
-        resolvedPath = null;
-
-        if (!string.IsNullOrWhiteSpace(explicitPath) && File.Exists(explicitPath))
-        {
-            resolvedPath = explicitPath;
-            return File.ReadAllText(explicitPath);
-        }
-
-        var underBase = Path.Combine(AppContext.BaseDirectory, "Settings", "defaults-settings.toml");
-        if (File.Exists(underBase))
-        {
-            resolvedPath = underBase;
-            return File.ReadAllText(underBase);
-        }
-
-        var walked = WalkUpForDefaults();
-        if (walked is not null)
-        {
-            resolvedPath = walked;
-            return File.ReadAllText(walked);
-        }
-
-        var embedded = TryReadEmbeddedDefaults();
-        if (embedded is not null)
-        {
-            resolvedPath = "embedded:Settings/defaults-settings.toml";
-            return embedded;
-        }
-
-        return null;
-    }
-
-    static string? WalkUpForDefaults()
-    {
-        try
-        {
-            var dir = new DirectoryInfo(Environment.CurrentDirectory);
-            for (var i = 0; i < 8 && dir is not null; i++, dir = dir.Parent)
-            {
-                var candidate = Path.Combine(dir.FullName, "Settings", "defaults-settings.toml");
-                if (File.Exists(candidate))
-                    return candidate;
-            }
-        }
-        catch
-        {
-            // ignore discovery failures
-        }
-
-        return null;
-    }
-
-    static string? TryReadEmbeddedDefaults()
-    {
-        var asm = typeof(IdeGlassSettings).Assembly;
-        foreach (var name in asm.GetManifestResourceNames())
-        {
-            if (!name.EndsWith("defaults-settings.toml", StringComparison.OrdinalIgnoreCase)
-                && !name.Contains("defaults-settings.toml", StringComparison.OrdinalIgnoreCase))
-                continue;
-
-            using var stream = asm.GetManifestResourceStream(name);
-            if (stream is null)
-                continue;
-            using var reader = new StreamReader(stream);
-            return reader.ReadToEnd();
-        }
-
-        return null;
-    }
+    static string? TryReadDefaultsToml(string? explicitPath, out string? resolvedPath) =>
+        SettingsDefaultsPaths.TryReadToml(explicitPath, typeof(IdeGlassSettings).Assembly, out resolvedPath);
 
     static string? GetString(TomlTable root, params string[] path)
     {
