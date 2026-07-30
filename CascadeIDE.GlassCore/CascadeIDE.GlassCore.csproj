@@ -4,6 +4,7 @@
     <TargetFramework>net10.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <LangVersion>14</LangVersion>
     <RootNamespace>CascadeIDE</RootNamespace>
     <Description>Avalonia-free CIDE glass core: presentation topology + settings peel for WPF/Linux glass.</Description>
   </PropertyGroup>
@@ -11,6 +12,12 @@
   <ItemGroup>
     <PackageReference Include="Eto.Parse" Version="1.6.0" />
     <PackageReference Include="Tomlyn" Version="2.3.2" />
+  </ItemGroup>
+
+  <!-- Factory defaults: same file as CascadeIDE (disk under host exe or embedded). -->
+  <ItemGroup>
+    <EmbeddedResource Include="..\Settings\defaults-settings.toml" Link="Settings\defaults-settings.toml" />
+    <None Include="..\Settings\defaults-settings.toml" Link="Settings\defaults-settings.toml" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
   <!-- Same presentation sources as CascadeIDE — toolkit-agnostic. Avalonia monitor probes stay in CascadeIDE. -->
@@ -25,9 +32,17 @@
     <Compile Include="..\Services\Presentation\PresentationMainGridLayoutFrameBuilder.cs" Link="Presentation\PresentationMainGridLayoutFrameBuilder.cs" />
     <Compile Include="..\Services\Presentation\PresentationParseResult.cs" Link="Presentation\PresentationParseResult.cs" />
     <Compile Include="..\Services\Presentation\PresentationParser.cs" Link="Presentation\PresentationParser.cs" />
+    
     <Compile Include="..\Services\Presentation\PresentationTopologyResolver.cs" Link="Presentation\PresentationTopologyResolver.cs" />
     <Compile Include="..\Services\Presentation\PresentationZoneBound.cs" Link="Presentation\PresentationZoneBound.cs" />
     <Compile Include="..\Services\Presentation\PresentationZoneWeights.cs" Link="Presentation\PresentationZoneWeights.cs" />
+    <Compile Include="..\Services\Presentation\CompactIdeLayoutMetrics.cs" Link="Presentation\CompactIdeLayoutMetrics.cs" />
+    <Compile Include="..\Services\Presentation\PresentationCompactMainGridLayoutBuilder.cs" Link="Presentation\PresentationCompactMainGridLayoutBuilder.cs" />
+    <Compile Include="..\Services\Presentation\PresentationMonitorSnapshot.cs" Link="Presentation\PresentationMonitorSnapshot.cs" />
+    <Compile Include="..\Services\Presentation\PresentationPmSplitHostColumnBuilder.cs" Link="Presentation\PresentationPmSplitHostColumnBuilder.cs" />
+    <Compile Include="..\Services\Presentation\PresentationUltrawideCockpitLayoutBuilder.cs" Link="Presentation\PresentationUltrawideCockpitLayoutBuilder.cs" />
+    <Compile Include="..\Models\PresentationTierKind.cs" Link="Models\PresentationTierKind.cs" />
+    <Compile Include="..\Cockpit\Cds\CockpitPresentationLayoutPolicy.cs" Link="Cockpit\Cds\CockpitPresentationLayoutPolicy.cs" />
   </ItemGroup>
 
   <ItemGroup>

@@ -10,15 +10,17 @@ internal sealed class GlassSession
     public IdeGlassSettings Settings { get; private set; }
     public GlassPresentationLayout.Snapshot Layout { get; private set; }
 
-    public GlassSession()
+    public GlassSession(string? workspaceRoot = null)
     {
-        Settings = IdeGlassSettings.Load();
+        Settings = IdeGlassSettings.Load(workspaceRoot: workspaceRoot);
         Layout = GlassPresentationLayout.Resolve(Settings);
     }
 
     public void ReloadSettings()
     {
-        Settings = IdeGlassSettings.Load(Settings.SettingsPath);
+        Settings = IdeGlassSettings.Load(
+            settingsPath: Settings.SettingsPath,
+            workspaceRoot: Settings.WorkspaceRoot);
         Layout = GlassPresentationLayout.Resolve(Settings, Layout.Topology);
     }
 
