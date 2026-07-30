@@ -24,10 +24,15 @@ North star: Avalonia CIDE + WPF glass both **ProjectReference** `CascadeIDE.Glas
 - GlassCore ProjectReference `CascadeIDE.Contracts` (for `[IoBoundary]`).
 - Full `SettingsService` / `CascadeIdeSettings` / OutWit stay host.
 
+## Peel6b (done)
+
+- `UserSettingsTomlFileAccess` + `TextFileReadWrite` linked into GlassCore.
+- `IdeGlassSettings` user-toml read goes through `TextFileReadWrite` (safe I/O).
+
 ## Next peels
 
 1. Defer: `PrimitivesKit`, `UiLayoutSnapshot`, Avalonia Views/VMs.
-2. Optional next: `UserSettingsTomlFileAccess` / thin load-save without full CascadeIdeSettings graph.
+2. Optional next: presentation latch / workspace.toml loader helpers still without full CascadeIdeSettings.
 3. Keep host: `DataBusEventPolicyLoader`, `IGraphDataSource` / navigation JSON request, full `SettingsService`.
 
 Map: inventory `glass-core-settings-inventory-v0.md`; reuse note `glass-wpf-reuse-cide-settings-v0.md`.
