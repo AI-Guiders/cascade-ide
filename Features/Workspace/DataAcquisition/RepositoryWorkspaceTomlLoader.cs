@@ -1,6 +1,5 @@
 #nullable enable
 
-using System.IO;
 using CascadeIDE.Services;
 
 namespace CascadeIDE.Features.Workspace.DataAcquisition;
@@ -9,7 +8,7 @@ namespace CascadeIDE.Features.Workspace.DataAcquisition;
 public static class RepositoryWorkspaceTomlLoader
 {
     public static string GetWorkspaceTomlPath(string workspaceRoot) =>
-        Path.Combine(workspaceRoot.Trim(), ".cascade", "workspace.toml");
+        WorkspaceCascadePaths.GetWorkspaceTomlPath(workspaceRoot);
 
     public static RepositoryWorkspaceToml? TryLoad(string? workspaceRoot)
     {

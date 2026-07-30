@@ -121,6 +121,8 @@
     <!-- Peel6b: settings.toml raw I/O + generic text file DAL. -->
     <Compile Include="..\Features\Settings\DataAcquisition\TextFileReadWrite.cs" Link="Features\Settings\DataAcquisition\TextFileReadWrite.cs" />
     <Compile Include="..\Features\Settings\DataAcquisition\UserSettingsTomlFileAccess.cs" Link="Features\Settings\DataAcquisition\UserSettingsTomlFileAccess.cs" />
+    <!-- Peel6c: workspace.toml path + root discovery (typed overlay stays host). -->
+    <Compile Include="..\Features\Workspace\DataAcquisition\WorkspaceCascadePaths.cs" Link="Features\Workspace\DataAcquisition\WorkspaceCascadePaths.cs" />
   </ItemGroup>
 
   <ItemGroup>

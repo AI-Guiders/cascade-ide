@@ -1,5 +1,6 @@
 #nullable enable
 using CascadeIDE.Features.Settings.DataAcquisition;
+using CascadeIDE.Features.Workspace.DataAcquisition;
 using Tomlyn;
 using Tomlyn.Model;
 
@@ -34,19 +35,22 @@ public sealed class IdeGlassSettings
     {
         var userPath = string.IsNullOrWhiteSpace(settingsPath) ? DefaultSettingsPath : settingsPath;
         var root = string.IsNullOrWhiteSpace(workspaceRoot)
-            ? TryDiscoverWorkspaceRoot()
+            ? WorkspaceCascadePaths.TryDiscoverWorkspaceRoot()
             : workspaceRoot.Trim();
-        var workspacePath = root is null ? null : Path.Combine(root, ".cascade", "workspace.toml");
+        var workspacePath = root is null ? null : WorkspaceCascadePaths.GetWorkspaceTomlPath(root);
 
         var defaultsText = TryReadDefaultsToml(defaultsPath, out var resolvedDefaults);
         var merged = defaultsText ?? "";
 
-        if (workspacePath is not null && File.Exists(workspacePath))
+        if (workspacePath is not null)
         {
-            var workspaceText = File.ReadAllText(workspacePath);
-            merged = string.IsNullOrWhiteSpace(merged)
-                ? workspaceText
-                : GlassTomlMerge.MergeDocuments(merged, workspaceText);
+            var workspaceText = TextFileReadWrite.TryReadAllTextIfExists(workspacePath);
+            if (workspaceText is not null)
+            {
+                merged = string.IsNullOrWhiteSpace(merged)
+                    ? workspaceText
+                    : GlassTomlMerge.MergeDocuments(merged, workspaceText);
+            }
         }
 
         if (File.Exists(userPath))
@@ -177,28 +181,6 @@ public sealed class IdeGlassSettings
                 continue;
             using var reader = new StreamReader(stream);
             return reader.ReadToEnd();
-        }
-
-        return null;
-    }
-
-    static string? TryDiscoverWorkspaceRoot()
-    {
-        try
-        {
-            var dir = new DirectoryInfo(Environment.CurrentDirectory);
-            for (var i = 0; i < 10 && dir is not null; i++, dir = dir.Parent)
-            {
-                var cascade = Path.Combine(dir.FullName, ".cascade", "workspace.toml");
-                if (File.Exists(cascade))
-                    return dir.FullName;
-                if (Directory.Exists(Path.Combine(dir.FullName, ".git")))
-                    return dir.FullName;
-            }
-        }
-        catch
-        {
-            // ignore
         }
 
         return null;
