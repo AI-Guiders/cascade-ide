@@ -100,10 +100,11 @@ internal static class AttachmentAnchorPaths
         try
         {
             var latchPath = CdpHabitatPaths.GetLatchPath("focus-LATEST.json");
-            if (!File.Exists(latchPath))
+            var raw = CdpLatchIo.TryReadAllTextIfExists(latchPath);
+            if (raw is null)
                 return false;
 
-            using var doc = JsonDocument.Parse(File.ReadAllText(latchPath));
+            using var doc = JsonDocument.Parse(raw);
             if (!doc.RootElement.TryGetProperty("path", out var pathEl))
                 return false;
 
