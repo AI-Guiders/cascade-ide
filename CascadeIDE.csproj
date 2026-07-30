@@ -92,6 +92,20 @@
     <Compile Remove="Models\DisplayScreensSettings.cs" />
     <Compile Remove="Models\DisplayMountSettings.cs" />
     <Compile Remove="Models\DisplaySettings.cs" />
+    <!-- Peel3: DataBus + events; loader stays host-bound -->
+    <Compile Remove="Cockpit\DataBus\IDataBus.cs" />
+    <Compile Remove="Cockpit\DataBus\DataBusEventPolicy.cs" />
+    <Compile Remove="Cockpit\DataBus\InMemoryDataBus.cs" />
+    <Compile Remove="Cockpit\DataBus\Events\AgentEnvironmentEvents.cs" />
+    <Compile Remove="Cockpit\DataBus\Events\BuildStateChanged.cs" />
+    <Compile Remove="Cockpit\DataBus\Events\DebugStateChanged.cs" />
+    <Compile Remove="Cockpit\DataBus\Events\GitStateChanged.cs" />
+    <Compile Remove="Cockpit\DataBus\Events\HybridIndexStateChanged.cs" />
+    <Compile Remove="Cockpit\DataBus\Events\IdeHostStateChanged.cs" />
+    <Compile Remove="Cockpit\DataBus\Events\SolutionWarmupStateChanged.cs" />
+    <Compile Remove="Cockpit\DataBus\Events\StartupProjectPathChanged.cs" />
+    <Compile Remove="Cockpit\DataBus\Events\TestsStateChanged.cs" />
+    <Compile Remove="Services\DebugSessionSnapshot.cs" />
     <Compile Remove="CasaField.Core.Bench\**\*.cs" />
     <!-- Внешний субмодуль/вендор: не компилировать в IDE (иначе sandbox с top-level Main перехватывает входную точку). -->
     <Compile Remove="externals\**\*.cs" />

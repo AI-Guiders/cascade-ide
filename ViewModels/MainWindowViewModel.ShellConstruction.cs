@@ -115,7 +115,7 @@ public partial class MainWindowViewModel
         _ideMcpHost = new MainWindowIdeMcpHost(this);
         _webAiPortalBridge = new WebAiPortalCommandBridge(IdeMcp);
 
-        _ideDataBus = new InMemoryDataBus(asynchronousDispatch: false);
+        _ideDataBus = new InMemoryDataBus(asynchronousDispatch: false, DataBusEventPolicyLoader.Load());
         _buildTestJobService = new DotNetBuildTest.Core.BuildTestJobService();
         _agentEnvironment = new Features.Agent.Environment.AgentEnvironmentService(
             _ideDataBus,

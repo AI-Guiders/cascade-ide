@@ -74,6 +74,20 @@
     <Compile Include="..\Models\DisplayScreensSettings.cs" Link="Models\DisplayScreensSettings.cs" />
     <Compile Include="..\Models\DisplayMountSettings.cs" Link="Models\DisplayMountSettings.cs" />
     <Compile Include="..\Models\DisplaySettings.cs" Link="Models\DisplaySettings.cs" />
+    <!-- Peel3: DataBus contract + events (policy loader stays in CascadeIDE host). -->
+    <Compile Include="..\Cockpit\DataBus\IDataBus.cs" Link="Cockpit\DataBus\IDataBus.cs" />
+    <Compile Include="..\Cockpit\DataBus\DataBusEventPolicy.cs" Link="Cockpit\DataBus\DataBusEventPolicy.cs" />
+    <Compile Include="..\Cockpit\DataBus\InMemoryDataBus.cs" Link="Cockpit\DataBus\InMemoryDataBus.cs" />
+    <Compile Include="..\Cockpit\DataBus\Events\AgentEnvironmentEvents.cs" Link="Cockpit\DataBus\Events\AgentEnvironmentEvents.cs" />
+    <Compile Include="..\Cockpit\DataBus\Events\BuildStateChanged.cs" Link="Cockpit\DataBus\Events\BuildStateChanged.cs" />
+    <Compile Include="..\Cockpit\DataBus\Events\DebugStateChanged.cs" Link="Cockpit\DataBus\Events\DebugStateChanged.cs" />
+    <Compile Include="..\Cockpit\DataBus\Events\GitStateChanged.cs" Link="Cockpit\DataBus\Events\GitStateChanged.cs" />
+    <Compile Include="..\Cockpit\DataBus\Events\HybridIndexStateChanged.cs" Link="Cockpit\DataBus\Events\HybridIndexStateChanged.cs" />
+    <Compile Include="..\Cockpit\DataBus\Events\IdeHostStateChanged.cs" Link="Cockpit\DataBus\Events\IdeHostStateChanged.cs" />
+    <Compile Include="..\Cockpit\DataBus\Events\SolutionWarmupStateChanged.cs" Link="Cockpit\DataBus\Events\SolutionWarmupStateChanged.cs" />
+    <Compile Include="..\Cockpit\DataBus\Events\StartupProjectPathChanged.cs" Link="Cockpit\DataBus\Events\StartupProjectPathChanged.cs" />
+    <Compile Include="..\Cockpit\DataBus\Events\TestsStateChanged.cs" Link="Cockpit\DataBus\Events\TestsStateChanged.cs" />
+    <Compile Include="..\Services\DebugSessionSnapshot.cs" Link="Services\DebugSessionSnapshot.cs" />
   </ItemGroup>
 
   <ItemGroup>

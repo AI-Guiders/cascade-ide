@@ -8,6 +8,9 @@ public readonly struct DataBusEventPolicy
 {
     private readonly IReadOnlyDictionary<string, bool>? _burstByTypeName;
 
+    /// <summary>Все события reliable (без burst DropOldest). Дефолт bus, если policy не передали.</summary>
+    public static DataBusEventPolicy AllReliable { get; } = new(new Dictionary<string, bool>());
+
     /// <param name="burstByTypeName">Ключ — <see cref="Type.Name"/> типа события; значение true = burst.</param>
     public DataBusEventPolicy(IReadOnlyDictionary<string, bool> burstByTypeName)
     {

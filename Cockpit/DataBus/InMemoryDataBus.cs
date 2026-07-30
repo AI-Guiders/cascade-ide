@@ -16,7 +16,7 @@ public sealed class InMemoryDataBus : IDataBus, IDisposable
     {
         _asynchronousDispatch = asynchronousDispatch;
         _dispatchCts = asynchronousDispatch ? new CancellationTokenSource() : null;
-        _eventPolicy = eventPolicy ?? DataBusEventPolicyLoader.Load();
+        _eventPolicy = eventPolicy ?? DataBusEventPolicy.AllReliable;
     }
 
     public void Publish<TEvent>(TEvent evt)
