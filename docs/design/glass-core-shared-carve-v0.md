@@ -22,7 +22,7 @@ North star: Avalonia CIDE + WPF glass both **ProjectReference** `CascadeIDE.Glas
 
 - `UserSettingsPaths` linked into GlassCore; `IdeGlassSettings.DefaultSettingsPath` delegates to it.
 - GlassCore ProjectReference `CascadeIDE.Contracts` (for `[IoBoundary]`).
-- Full `SettingsService` / `CascadeIdeSettings` / OutWit stay host.
+- Peel14 moved full `SettingsService` / `CascadeIdeSettings` / OutWit into GlassCore.
 
 ## Peel6b (done)
 
@@ -71,9 +71,18 @@ North star: Avalonia CIDE + WPF glass both **ProjectReference** `CascadeIDE.Glas
 - Dual-compile audit: all 96 GlassCore `Compile Include ..\…` have matching host `Compile Remove`.
 - Guard: `GlassCoreLinkRemoveParityTests` fails if a linked source loses its Remove.
 
+## Peel14 (done)
+
+- Typed SSOT loader in GlassCore: `CascadeIdeSettings` + `SettingsService` / `SettingsDefaultsLoader` / Tomlyn serializers / validation + legacy defaults.
+- Host hook: `SettingsService.AfterSettingsMutated` (Avalonia wires `IntercomSendTrace`); no chat host in Core.
+- Defaults via `SettingsDefaultsPaths` (GlassCore embedded), not host-only `BundledAppContent`.
+- WPF `GlassSession` → `SettingsService.Load()` + `GlassPresentationLayout.Resolve(CascadeIdeSettings)`; thin `IdeGlassSettings` remains for optional peel callers.
+- `CodeNavigationMapConditionBranchPresetsLoader` softens workspace.toml slice (no UiChrome DTO pull).
+
 ## Next peels
 
 1. Defer: `PrimitivesKit`, `UiLayoutSnapshot`, Avalonia Views/VMs.
-2. Keep host: `DataBusEventPolicyLoader`, `IGraphDataSource` / navigation JSON request, full `SettingsService` + typed workspace overlay (`CascadeIdeSettings` : OutWit `ModelBase`).
+2. Keep host: `DataBusEventPolicyLoader`, `IGraphDataSource` / navigation JSON request, full typed workspace overlay (`UiModeCatalog` / `RepositoryWorkspaceToml`).
+3. Optional: retire thin `IdeGlassSettings` once no callers remain.
 
 Map: inventory `glass-core-settings-inventory-v0.md`; reuse note `glass-wpf-reuse-cide-settings-v0.md`.
