@@ -3,6 +3,7 @@ using Avalonia;
 using Avalonia.Controls.Documents;
 using Avalonia.Media;
 using CascadeIDE.Cockpit.Graph.Layout;
+using CascadeIDE.Primitives;
 
 namespace CascadeIDE.Views.SkiaKit.Graph;
 
@@ -174,7 +175,7 @@ public static partial class SkiaGraphSceneDrawing
         var start = new Point(edge.From.X + ux * fromRadius, edge.From.Y + uy * fromRadius);
         var end = edge.ToRadius is { } tr
             ? new Point(edge.To.X - ux * tr, edge.To.Y - uy * tr)
-            : edge.To;
+            : edge.To.ToAv();
         var t = 0.38;
         var anchor = new Point(start.X + (end.X - start.X) * t, start.Y + (end.Y - start.Y) * t);
         var px = -uy;
@@ -207,9 +208,9 @@ public static partial class SkiaGraphSceneDrawing
     private static void DrawCubicEdge(
         DrawingContext context,
         Pen pen,
-        Point fromCenter,
+        Point2D fromCenter,
         double fromRadius,
-        Point to,
+        Point2D to,
         double? toRadius,
         double lateralBendMultiplier = 1.0)
     {
@@ -223,7 +224,7 @@ public static partial class SkiaGraphSceneDrawing
         var start = new Point(fromCenter.X + ux * fromRadius, fromCenter.Y + uy * fromRadius);
         Point end = toRadius is { } tr
             ? new Point(to.X - ux * tr, to.Y - uy * tr)
-            : to;
+            : to.ToAv();
 
         var ex = end.X - start.X;
         var ey = end.Y - start.Y;

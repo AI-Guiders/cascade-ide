@@ -97,7 +97,7 @@ public sealed class TraceFlowSurfaceCompositorTests
         Kind = anchor ? "anchor" : "call_step",
         FullPath = @"D:\w\A.cs",
         Label = id,
-        Center = new Point(0, 0),
+        Center = new CascadeIDE.Primitives.Point2D(0, 0),
         Radius = 10,
         IsAnchor = anchor,
         Shape = CodeNavigationMapNodeShape.Circle
@@ -107,8 +107,8 @@ public sealed class TraceFlowSurfaceCompositorTests
     {
         FromNodeId = from,
         ToNodeId = to,
-        From = new Point(0, 0),
-        To = new Point(1, 1),
+        From = new CascadeIDE.Primitives.Point2D(0, 0),
+        To = new CascadeIDE.Primitives.Point2D(1, 1),
         ToRadius = 10,
         Kind = kind,
         RelatedKind = kind

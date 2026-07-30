@@ -34,7 +34,7 @@ public sealed class MonacoEditorM9MapperTests
                     Kind = "step",
                     Label = "DoWork",
                     IsAnchor = false,
-                    Center = new Avalonia.Point(10, 10),
+                    Center = new CascadeIDE.Primitives.Point2D(10, 10),
                     Radius = 6,
                     LineStart = 42,
                     LegendIndex = 3,

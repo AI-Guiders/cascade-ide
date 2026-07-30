@@ -201,7 +201,7 @@ public static partial class SkiaGraphSceneDrawing
         var cx = x0 + iconR + 1;
         context.DrawEllipse(theme.ExitFill, theme.NodeStrokePen, new Point(cx, cy), iconR, iconR);
         var arrowLen = Math.Max(4.5, Math.Min(iconR * 1.35, captionSize * 0.55));
-        DrawNorthEastExitArrowShaftCentered(context, theme.GlyphBrush, new Point(cx, cy), arrowLen, 1.2);
+        DrawNorthEastExitArrowShaftCentered(context, theme.GlyphBrush, new CascadeIDE.Primitives.Point2D(cx, cy), arrowLen, 1.2);
 
         var cap = new FormattedText(
             "return",

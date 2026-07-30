@@ -1,5 +1,5 @@
 #nullable enable
-using Avalonia;
+using CascadeIDE.Primitives;
 using CascadeIDE.Models;
 
 namespace CascadeIDE.Cockpit.Graph.Layout;
@@ -47,9 +47,9 @@ public sealed class GraphRelatedFileHierarchyLayoutEngine : IGraphLayoutEngine
         rowStep = Math.Min(rowStep, minReadableStep);
 
         var layouts = new List<GraphLayoutNode>();
-        var idToCenter = new Dictionary<string, Point>(StringComparer.OrdinalIgnoreCase);
+        var idToCenter = new Dictionary<string, Point2D>(StringComparer.OrdinalIgnoreCase);
         var idToRadius = new Dictionary<string, double>(StringComparer.OrdinalIgnoreCase);
-        Point? anchorCenter = null;
+        Point2D? anchorCenter = null;
 
         var nRows = Math.Max(1, satellites.Count + 1);
         var totalSpan = rowStep * (nRows - 1);
@@ -61,7 +61,7 @@ public sealed class GraphRelatedFileHierarchyLayoutEngine : IGraphLayoutEngine
 
         if (anchor is not null)
         {
-            var ac = new Point(cx, anchorY);
+            var ac = new Point2D(cx, anchorY);
             anchorCenter = ac;
             idToCenter[anchor.Id] = ac;
             idToRadius[anchor.Id] = anchorR;
@@ -78,7 +78,7 @@ public sealed class GraphRelatedFileHierarchyLayoutEngine : IGraphLayoutEngine
             var y = _anchorAtTop
                 ? childStartY + row * rowStep
                 : childStartY - row * rowStep;
-            var p = new Point(x, y);
+            var p = new Point2D(x, y);
             idToCenter[sat.Id] = p;
             idToRadius[sat.Id] = satR;
             layouts.Add(MakeNode(sat, p, satR, isAnchor: false));
@@ -100,7 +100,7 @@ public sealed class GraphRelatedFileHierarchyLayoutEngine : IGraphLayoutEngine
         };
     }
 
-    private static GraphLayoutNode MakeNode(GraphNode n, Point center, double radius, bool isAnchor) =>
+    private static GraphLayoutNode MakeNode(GraphNode n, Point2D center, double radius, bool isAnchor) =>
         new()
         {
             Id = n.Id,
@@ -118,9 +118,9 @@ public sealed class GraphRelatedFileHierarchyLayoutEngine : IGraphLayoutEngine
     private static List<GraphLayoutEdge> BuildEdges(
         GraphDocument doc,
         GraphNode? anchor,
-        Point? anchorCenter,
+        Point2D? anchorCenter,
         List<GraphLayoutNode> layouts,
-        Dictionary<string, Point> idToCenter,
+        Dictionary<string, Point2D> idToCenter,
         Dictionary<string, double> idToRadius,
         double defaultSatR)
     {

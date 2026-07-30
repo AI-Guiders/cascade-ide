@@ -28,7 +28,7 @@ public sealed class CodeNavigationMapWorkspaceInstrumentBlockCompositorTests
             Kind = "anchor",
             FullPath = "x",
             Label = "a",
-            Center = new Point(50, 50),
+            Center = new CascadeIDE.Primitives.Point2D(50, 50),
             Radius = 10,
             IsAnchor = true
         };
@@ -124,7 +124,7 @@ public sealed class CodeNavigationMapWorkspaceInstrumentBlockCompositorTests
             Kind = "call_step",
             FullPath = "p",
             Label = id,
-            Center = new Point(x, y),
+            Center = new CascadeIDE.Primitives.Point2D(x, y),
             Radius = 8,
             IsAnchor = false
         };

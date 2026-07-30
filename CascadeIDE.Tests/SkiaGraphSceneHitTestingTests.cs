@@ -21,7 +21,7 @@ public sealed class SkiaGraphSceneHitTestingTests
                     Kind = "call_step",
                     FullPath = "a.cs",
                     Label = "A",
-                    Center = new Point(50, 50),
+                    Center = new CascadeIDE.Primitives.Point2D(50, 50),
                     Radius = 20,
                     IsAnchor = false
                 },
@@ -31,7 +31,7 @@ public sealed class SkiaGraphSceneHitTestingTests
                     Kind = "call_step",
                     FullPath = "b.cs",
                     Label = "B",
-                    Center = new Point(52, 52),
+                    Center = new CascadeIDE.Primitives.Point2D(52, 52),
                     Radius = 20,
                     IsAnchor = false
                 }

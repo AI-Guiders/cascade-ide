@@ -1,5 +1,5 @@
 #nullable enable
-using Avalonia;
+using CascadeIDE.Primitives;
 
 namespace CascadeIDE.Cockpit.Graph.Layout;
 
@@ -77,7 +77,7 @@ public sealed class GraphLayoutNode
     public required string Kind { get; init; }
     public required string FullPath { get; init; }
     public required string Label { get; init; }
-    public required Point Center { get; init; }
+    public required Point2D Center { get; init; }
     public required double Radius { get; init; }
     public required bool IsAnchor { get; init; }
     public GraphNodeShape Shape { get; init; } = GraphNodeShape.Circle;
@@ -93,8 +93,8 @@ public sealed class GraphLayoutEdge
 {
     public required string FromNodeId { get; init; }
     public required string ToNodeId { get; init; }
-    public required Point From { get; init; }
-    public required Point To { get; init; }
+    public required Point2D From { get; init; }
+    public required Point2D To { get; init; }
     public required double ToRadius { get; init; }
     public string? Kind { get; init; }
     public string? RelationKind { get; init; }

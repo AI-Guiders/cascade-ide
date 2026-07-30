@@ -2,22 +2,21 @@
 
 North star: Avalonia CIDE + WPF glass both **ProjectReference** `CascadeIDE.GlassCore`. UI = projector only.
 
-## Peel1–3 (done)
+## Peel1–4 (done)
 
-- Settings merge + presentation builders + `CockpitPresentationLayoutPolicy`.
-- Cds/HostSurface/Shell compositors + Display* POCOs.
-- DataBus contract/events + `DebugSessionSnapshot` (loader stays host).
+- Settings + presentation + Cds/HostSurface/DataBus + Graph domain model.
 
-## Peel4 (this slice)
+## Peel5 (this slice)
 
-- Graph domain model: `GraphDocument` / nodes / edges / kind / JSON / blueprint.
-- Deferred: `IGraphDataSource` + `GraphNavigationJsonRequest` (CodeNavigation settings), layout engines (`Avalonia.Point`), PrimitivesKit, `UiLayoutSnapshot`.
+- `CascadeIDE.Primitives.Point2D` in GlassCore.
+- Graph layout scene/engines + binding VM layouts use `Point2D` (no Avalonia).
+- Skia paint boundary: `GraphPointAvalonia.ToAv()`.
+- Layout engines still compile in CascadeIDE host (Models deps); link into GlassCore next.
 
 ## Next peels
 
-1. Abstract `Avalonia.Point` → shared geometry; then move layout engines.
-2. Optional: graph source request DTOs without full `CodeNavigationSettings`.
-3. Defer: `PrimitivesKit`, `UiLayoutSnapshot`, Avalonia Views/VMs.
-4. Optional: grow peel toward full `SettingsService` without OutWit in GlassCore.
+1. Link Avalonia-free Graph `Layout/` (+ needed Models) into GlassCore.
+2. Defer: `PrimitivesKit`, `UiLayoutSnapshot`, Avalonia Views/VMs.
+3. Optional: grow peel toward full `SettingsService` without OutWit in GlassCore.
 
 Map: inventory `glass-core-settings-inventory-v0.md`; reuse note `glass-wpf-reuse-cide-settings-v0.md`.

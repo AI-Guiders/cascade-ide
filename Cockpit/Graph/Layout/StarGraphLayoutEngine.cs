@@ -1,5 +1,5 @@
 #nullable enable
-using Avalonia;
+using CascadeIDE.Primitives;
 using CascadeIDE.Models;
 
 namespace CascadeIDE.Cockpit.Graph.Layout;
@@ -38,13 +38,13 @@ public sealed class StarGraphLayoutEngine : IGraphLayoutEngine
         const int singleRingMaxSatellites = 8;
 
         var layouts = new List<GraphLayoutNode>();
-        Point? anchorCenter = null;
-        var idToCenter = new Dictionary<string, Point>(StringComparer.OrdinalIgnoreCase);
+        Point2D? anchorCenter = null;
+        var idToCenter = new Dictionary<string, Point2D>(StringComparer.OrdinalIgnoreCase);
         var idToRadius = new Dictionary<string, double>(StringComparer.OrdinalIgnoreCase);
 
         if (anchor is not null)
         {
-            var ac = new Point(cx, cy);
+            var ac = new Point2D(cx, cy);
             anchorCenter = ac;
             idToCenter[anchor.Id] = ac;
             idToRadius[anchor.Id] = anchorR;
@@ -82,7 +82,7 @@ public sealed class StarGraphLayoutEngine : IGraphLayoutEngine
 
             var px = cx + orbit * Math.Cos(angle);
             var py = cy + orbit * Math.Sin(angle);
-            var p = new Point(px, py);
+            var p = new Point2D(px, py);
             idToCenter[sat.Id] = p;
             idToRadius[sat.Id] = satR;
             layouts.Add(MakeNode(sat, p, satR, isAnchor: false));
@@ -133,7 +133,7 @@ public sealed class StarGraphLayoutEngine : IGraphLayoutEngine
         };
     }
 
-    private static GraphLayoutNode MakeNode(GraphNode n, Point center, double radius, bool isAnchor) =>
+    private static GraphLayoutNode MakeNode(GraphNode n, Point2D center, double radius, bool isAnchor) =>
         new()
         {
             Id = n.Id,

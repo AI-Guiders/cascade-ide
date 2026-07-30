@@ -1,6 +1,7 @@
 using Avalonia;
 using Avalonia.Media;
 using CascadeIDE.Cockpit.Graph.Layout;
+using CascadeIDE.Primitives;
 
 namespace CascadeIDE.Views.SkiaKit.Graph;
 
@@ -39,7 +40,7 @@ public static partial class SkiaGraphSceneDrawing
     /// <paramref name="shaftCenter"/> — визуально «по центру кружка», без смещения 0.12·R.
     /// </summary>
     internal static void DrawNorthEastExitArrowShaftCentered(
-        DrawingContext context, IBrush stroke, Point shaftCenter, double size, double thickness = 1.35)
+        DrawingContext context, IBrush stroke, Point2D shaftCenter, double size, double thickness = 1.35)
     {
         if (size < 2)
             return;
@@ -76,14 +77,14 @@ public static partial class SkiaGraphSceneDrawing
         return Math.Sqrt(dx * dx + dy * dy) <= n.Radius + tolerance;
     }
 
-    private static bool HitConditionBranchOutline(Point center, double r, Point p, double tolerance)
+    private static bool HitConditionBranchOutline(Point2D center, double r, Point p, double tolerance)
     {
         var dx = Math.Abs(p.X - center.X);
         var dy = Math.Abs(p.Y - center.Y);
         return dx + dy <= r + tolerance;
     }
 
-    private static bool HitRectangleOutline(Point center, double r, Point p, double tolerance)
+    private static bool HitRectangleOutline(Point2D center, double r, Point p, double tolerance)
     {
         // Keep constants in sync with rectangle sizing in SkiaGraphSceneDrawing.Nodes.
         // Hit-test should be generous enough even when cards grow to fit text.

@@ -1,5 +1,5 @@
 #nullable enable
-using Avalonia;
+using CascadeIDE.Primitives;
 using CascadeIDE.Cockpit.Graph.Layout;
 using CascadeIDE.Models;
 
@@ -106,7 +106,7 @@ public sealed class CodeNavigationMapGraphNodeLayout
     public required string Kind { get; init; }
     public required string FullPath { get; init; }
     public required string Label { get; init; }
-    public required Point Center { get; init; }
+    public required Point2D Center { get; init; }
     public required double Radius { get; init; }
     public required bool IsAnchor { get; init; }
     public CodeNavigationMapNodeShape Shape { get; init; } = CodeNavigationMapNodeShape.Circle;
@@ -123,8 +123,8 @@ public sealed class CodeNavigationMapGraphEdgeLayout
 {
     public required string FromNodeId { get; init; }
     public required string ToNodeId { get; init; }
-    public required Point From { get; init; }
-    public required Point To { get; init; }
+    public required Point2D From { get; init; }
+    public required Point2D To { get; init; }
     public required double ToRadius { get; init; }
     public string? Kind { get; init; }
     public string? RelatedKind { get; init; }

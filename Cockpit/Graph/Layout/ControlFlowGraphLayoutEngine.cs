@@ -1,5 +1,5 @@
 #nullable enable
-using Avalonia;
+using CascadeIDE.Primitives;
 using CascadeIDE.Cockpit.Graph;
 using CascadeIDE.Models;
 
@@ -175,7 +175,7 @@ public sealed class ControlFlowGraphLayoutEngine : IGraphLayoutEngine
         var minCross = bandCrossStart + sidePadding + nodeR;
         var maxCross = Math.Max(minCross, bandCrossStart + bandCrossSize - sidePadding - nodeR);
 
-        var idToCenter = new Dictionary<string, Point>(StringComparer.OrdinalIgnoreCase);
+        var idToCenter = new Dictionary<string, Point2D>(StringComparer.OrdinalIgnoreCase);
         var idToRadius = new Dictionary<string, double>(StringComparer.OrdinalIgnoreCase);
         var nodeLayouts = new List<GraphLayoutNode>(doc.Nodes.Count);
 
@@ -200,8 +200,8 @@ public sealed class ControlFlowGraphLayoutEngine : IGraphLayoutEngine
                     : minCross + (maxCross - minCross) * i / (count - 1);
                 var radius = string.Equals(id, anchor.Id, StringComparison.OrdinalIgnoreCase) ? anchorR : nodeR;
                 var pt = horizontal
-                    ? new Point(mainPos, crossPos)
-                    : new Point(crossPos, mainPos);
+                    ? new Point2D(mainPos, crossPos)
+                    : new Point2D(crossPos, mainPos);
                 idToCenter[id] = pt;
                 idToRadius[id] = radius;
                 var isAnchor = string.Equals(n.Id, anchor.Id, StringComparison.OrdinalIgnoreCase);

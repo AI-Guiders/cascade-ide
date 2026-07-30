@@ -64,7 +64,7 @@ public sealed class EditorControlFlowLanePolicyTests
                     Kind = "anchor",
                     Label = "A.cs",
                     IsAnchor = true,
-                    Center = new Point(40, 40),
+                    Center = new CascadeIDE.Primitives.Point2D(40, 40),
                     Radius = 8
                 }
             ],

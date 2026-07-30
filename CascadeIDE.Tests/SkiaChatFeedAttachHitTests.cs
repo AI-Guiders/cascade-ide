@@ -42,7 +42,7 @@ public sealed class SkiaChatFeedAttachHitTests
             new Avalonia.Rect(12, 20, 200, 24),
             new SkiaChatHit(0, null, ResetDetailMode: false, RevealAttachment: new AttachmentAnchor { File = "a.cs" }));
 
-        var index = registry.FindIndex(new Avalonia.Point(20, 28));
+        var index = registry.FindIndex(new CascadeIDE.Primitives.Point2D(20, 28));
 
         Assert.Equal(1, index);
         Assert.True(registry.TryGetHit(index, out var hit));
@@ -63,7 +63,7 @@ public sealed class SkiaChatFeedAttachHitTests
             new SkiaChatHit(0, null, ResetDetailMode: false, RevealAttachment: new AttachmentAnchor { File = "a.cs" }));
 
         var controlY = chromeTop - scrollOffset + 200f;
-        var controlPoint = new Avalonia.Point(20, controlY + 5);
+        var controlPoint = new CascadeIDE.Primitives.Point2D(20, controlY + 5);
         Assert.Equal(0, registry.FindIndex(controlPoint));
         Assert.True(registry.TryGetHit(0, out var hit));
         Assert.NotNull(hit.RevealAttachment);
@@ -144,8 +144,8 @@ public sealed class SkiaChatFeedAttachHitTests
 
         Assert.Equal(1, registry.Count);
         var linkBaseline = feed.FirstLineBaselineY(segment.Top, metrics.TitleHeight);
-        Assert.Equal(0, registry.FindIndex(new Avalonia.Point(50, linkBaseline)));
-        Assert.Equal(-1, registry.FindIndex(new Avalonia.Point(12, segment.Top)));
+        Assert.Equal(0, registry.FindIndex(new CascadeIDE.Primitives.Point2D(50, linkBaseline)));
+        Assert.Equal(-1, registry.FindIndex(new CascadeIDE.Primitives.Point2D(12, segment.Top)));
         Assert.True(registry.TryGetHit(0, out var hit));
         Assert.Equal(3, hit.MessageIndex);
         Assert.Equal("Run", hit.RevealAttachment?.MemberKey);
@@ -162,7 +162,7 @@ public sealed class SkiaChatFeedAttachHitTests
             new Avalonia.Rect(20, 20, 80, 24),
             new SkiaChatHit(null, null, ResetDetailMode: false, PointerAction: SkiaChatPointerAction.OverviewToggle));
 
-        Assert.Equal(1, registry.FindIndex(new Avalonia.Point(40, 30)));
+        Assert.Equal(1, registry.FindIndex(new CascadeIDE.Primitives.Point2D(40, 30)));
     }
 
     [Fact]
@@ -173,8 +173,8 @@ public sealed class SkiaChatFeedAttachHitTests
             new Avalonia.Rect(0, 500, 800, 120),
             new SkiaChatHit(null, null, ResetDetailMode: false, PointerAction: SkiaChatPointerAction.ComposerFocus));
 
-        Assert.True(registry.ContainsPointerAction(new Avalonia.Point(100, 550), SkiaChatPointerAction.ComposerFocus));
-        Assert.False(registry.ContainsPointerAction(new Avalonia.Point(100, 200), SkiaChatPointerAction.ComposerFocus));
+        Assert.True(registry.ContainsPointerAction(new CascadeIDE.Primitives.Point2D(100, 550), SkiaChatPointerAction.ComposerFocus));
+        Assert.False(registry.ContainsPointerAction(new CascadeIDE.Primitives.Point2D(100, 200), SkiaChatPointerAction.ComposerFocus));
     }
 
     [Fact]

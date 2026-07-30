@@ -2,6 +2,7 @@ using System.Globalization;
 using Avalonia;
 using Avalonia.Media;
 using CascadeIDE.Cockpit.Graph.Layout;
+using CascadeIDE.Primitives;
 
 namespace CascadeIDE.Views.SkiaKit.Graph;
 
@@ -19,9 +20,9 @@ public static partial class SkiaGraphSceneDrawing
                 DrawRectangleNode(context, theme, n, highlighted);
             else
             {
-                context.DrawEllipse(ResolveNodeFill(theme, n), theme.NodeStrokePen, n.Center, n.Radius, n.Radius);
+                context.DrawEllipse(ResolveNodeFill(theme, n), theme.NodeStrokePen, n.Center.ToAv(), n.Radius, n.Radius);
                 if (highlighted)
-                    context.DrawEllipse(null, theme.HighlightedNodePen, n.Center, n.Radius + 3, n.Radius + 3);
+                    context.DrawEllipse(null, theme.HighlightedNodePen, n.Center.ToAv(), n.Radius + 3, n.Radius + 3);
             }
 
             if (n.Shape != GraphNodeShape.Rectangle)
