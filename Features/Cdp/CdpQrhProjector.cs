@@ -64,17 +64,9 @@ internal sealed class CdpQrhProjector : IDisposable
         if (_disposed)
             return;
 
-        string raw;
-        try
-        {
-            if (!File.Exists(LatchPath))
-                return;
-            raw = File.ReadAllText(LatchPath);
-        }
-        catch
-        {
+        var raw = CdpLatchIo.TryReadAllTextIfExists(LatchPath);
+        if (raw is null)
             return;
-        }
 
         QrhLatchDoc? doc;
         try

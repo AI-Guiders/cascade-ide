@@ -69,13 +69,12 @@ internal sealed class CdpCrmProjector : IDisposable
         CrmLatchDoc? doc;
         try
         {
-            if (!File.Exists(LatchPath))
+            var raw = CdpLatchIo.TryReadAllTextIfExists(LatchPath);
+            if (raw is null)
             {
                 _vm.ApplyCrmChromeHint(null);
                 return;
             }
-
-            var raw = File.ReadAllText(LatchPath);
             doc = JsonSerializer.Deserialize<CrmLatchDoc>(raw, ReadOpts);
         }
         catch

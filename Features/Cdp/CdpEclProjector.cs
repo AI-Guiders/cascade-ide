@@ -65,17 +65,9 @@ internal sealed class CdpEclProjector : IDisposable
         if (_disposed)
             return;
 
-        string raw;
-        try
-        {
-            if (!File.Exists(LatchPath))
-                return;
-            raw = File.ReadAllText(LatchPath);
-        }
-        catch
-        {
+        var raw = CdpLatchIo.TryReadAllTextIfExists(LatchPath);
+        if (raw is null)
             return;
-        }
 
         EclLatchDoc? doc;
         try

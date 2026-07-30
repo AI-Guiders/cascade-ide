@@ -69,13 +69,12 @@ internal sealed class CdpArchProjector : IDisposable
         ArchLatchDoc? doc;
         try
         {
-            if (!File.Exists(LatchPath))
+            var raw = CdpLatchIo.TryReadAllTextIfExists(LatchPath);
+            if (raw is null)
             {
                 _vm.ApplyArchChromeHint(null);
                 return;
             }
-
-            var raw = File.ReadAllText(LatchPath);
             doc = JsonSerializer.Deserialize<ArchLatchDoc>(raw, ReadOpts);
         }
         catch

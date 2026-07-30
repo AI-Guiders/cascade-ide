@@ -69,13 +69,12 @@ internal sealed class CdpLearnProjector : IDisposable
         LearnLatchDoc? doc;
         try
         {
-            if (!File.Exists(LatchPath))
+            var raw = CdpLatchIo.TryReadAllTextIfExists(LatchPath);
+            if (raw is null)
             {
                 _vm.ApplyLearnChromeHint(null);
                 return;
             }
-
-            var raw = File.ReadAllText(LatchPath);
             doc = JsonSerializer.Deserialize<LearnLatchDoc>(raw, ReadOpts);
         }
         catch

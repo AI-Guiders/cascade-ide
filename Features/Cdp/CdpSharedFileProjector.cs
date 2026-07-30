@@ -67,13 +67,12 @@ internal sealed class CdpSharedFileProjector : IDisposable
         SharedFileDoc? doc;
         try
         {
-            if (!File.Exists(LatchPath))
+            var raw = CdpLatchIo.TryReadAllTextIfExists(LatchPath);
+            if (raw is null)
             {
                 _documents.ApplySharedFileChrome(path: null, shared: false);
                 return;
             }
-
-            var raw = File.ReadAllText(LatchPath);
             doc = JsonSerializer.Deserialize<SharedFileDoc>(raw, ReadOpts);
         }
         catch

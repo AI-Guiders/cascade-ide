@@ -69,13 +69,12 @@ internal sealed class CdpOnboardProjector : IDisposable
         OnboardLatchDoc? doc;
         try
         {
-            if (!File.Exists(LatchPath))
+            var raw = CdpLatchIo.TryReadAllTextIfExists(LatchPath);
+            if (raw is null)
             {
                 _vm.ApplyOnboardChromeHint(null);
                 return;
             }
-
-            var raw = File.ReadAllText(LatchPath);
             doc = JsonSerializer.Deserialize<OnboardLatchDoc>(raw, ReadOpts);
         }
         catch

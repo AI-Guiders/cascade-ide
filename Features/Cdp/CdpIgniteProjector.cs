@@ -69,13 +69,12 @@ internal sealed class CdpIgniteProjector : IDisposable
         IgniteLatchDoc? doc;
         try
         {
-            if (!File.Exists(LatchPath))
+            var raw = CdpLatchIo.TryReadAllTextIfExists(LatchPath);
+            if (raw is null)
             {
                 _vm.ApplyIgniteChromeHint(null);
                 return;
             }
-
-            var raw = File.ReadAllText(LatchPath);
             doc = JsonSerializer.Deserialize<IgniteLatchDoc>(raw, ReadOpts);
         }
         catch

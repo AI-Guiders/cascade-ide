@@ -69,13 +69,12 @@ internal sealed class CdpMcpProjector : IDisposable
         McpLatchDoc? doc;
         try
         {
-            if (!File.Exists(LatchPath))
+            var raw = CdpLatchIo.TryReadAllTextIfExists(LatchPath);
+            if (raw is null)
             {
                 _vm.ApplyMcpChromeHint(null);
                 return;
             }
-
-            var raw = File.ReadAllText(LatchPath);
             doc = JsonSerializer.Deserialize<McpLatchDoc>(raw, ReadOpts);
         }
         catch

@@ -69,13 +69,12 @@ internal sealed class CdpReportProjector : IDisposable
         ReportLatchDoc? doc;
         try
         {
-            if (!File.Exists(LatchPath))
+            var raw = CdpLatchIo.TryReadAllTextIfExists(LatchPath);
+            if (raw is null)
             {
                 _vm.ApplyReportChromeHint(null);
                 return;
             }
-
-            var raw = File.ReadAllText(LatchPath);
             doc = JsonSerializer.Deserialize<ReportLatchDoc>(raw, ReadOpts);
         }
         catch

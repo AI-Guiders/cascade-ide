@@ -69,13 +69,12 @@ internal sealed class CdpWebcamProjector : IDisposable
         WebcamLatchDoc? doc;
         try
         {
-            if (!File.Exists(LatchPath))
+            var raw = CdpLatchIo.TryReadAllTextIfExists(LatchPath);
+            if (raw is null)
             {
                 _vm.ApplyWebcamChromeHint(null);
                 return;
             }
-
-            var raw = File.ReadAllText(LatchPath);
             doc = JsonSerializer.Deserialize<WebcamLatchDoc>(raw, ReadOpts);
         }
         catch

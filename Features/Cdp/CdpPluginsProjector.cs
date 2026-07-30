@@ -69,13 +69,12 @@ internal sealed class CdpPluginsProjector : IDisposable
         PluginsLatchDoc? doc;
         try
         {
-            if (!File.Exists(LatchPath))
+            var raw = CdpLatchIo.TryReadAllTextIfExists(LatchPath);
+            if (raw is null)
             {
                 _vm.ApplyPluginsChromeHint(null);
                 return;
             }
-
-            var raw = File.ReadAllText(LatchPath);
             doc = JsonSerializer.Deserialize<PluginsLatchDoc>(raw, ReadOpts);
         }
         catch

@@ -56,18 +56,9 @@ internal sealed class CdpLandProjector : IDisposable
         if (_disposed)
             return;
 
-        string raw;
-        try
-        {
-            if (!File.Exists(LatchPath))
-                return;
-            // Writers use temp+move; settle already ran off-UI in CdpLatchFs.PostApply.
-            raw = File.ReadAllText(LatchPath);
-        }
-        catch
-        {
+        var raw = CdpLatchIo.TryReadAllTextIfExists(LatchPath);
+        if (raw is null)
             return;
-        }
 
         LandLatchDoc? doc;
         try
