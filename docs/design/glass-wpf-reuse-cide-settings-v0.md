@@ -16,19 +16,19 @@ Inventory: [glass-core-settings-inventory-v0.md](glass-core-settings-inventory-v
 
 ## Peel0 shipped
 
-- `CascadeIDE.GlassCore` — Tomlyn peel (`IdeGlassSettings`) + `GlassPresentationLayout`
+- `CascadeIDE.GlassCore` — presentation layout + (later peels) typed `SettingsService`/`CascadeIdeSettings`
 - Glass host loads settings on start; presentation latch re-applies topology columns
 - `primary_work_surface` switches Forward Intercom ↔ Editor placeholder
 
 ## Peel1 shipped
 
-- Merge: defaults → `.cascade/workspace.toml` → user `settings.toml`
+- Merge path evolved to shared typed loader (peel14); thin Tomlyn peel retired (peel15)
 - CascadeIDE ProjectReference GlassCore (presentation + CDS policy single compile)
 - Carve plan: [glass-core-shared-carve-v0.md](glass-core-shared-carve-v0.md)
 
 ## Next
 
-1. Grow toward full settings path without OutWit in GlassCore (`CascadeIdeSettings` : `ModelBase` stays host until peeled).
+1. Typed workspace overlay (`UiModeCatalog` / `RepositoryWorkspaceToml`) still host — peel when Glass needs repo overlay parity without Avalonia chrome.
 2. WPF Intercom reply / Monaco / MFD organs; drop Avalonia UI hacks as parity grows.
 
-Cds/HostSurface/DataBus already in GlassCore (carve peels 2–3). Latch paths/IO peels 8–11; single-compile guard peel13.
+Cds/HostSurface/DataBus already in GlassCore (carve peels 2–3). Latch paths/IO peels 8–11; single-compile guard peel13; typed SSOT peel14–15.
