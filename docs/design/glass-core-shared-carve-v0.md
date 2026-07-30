@@ -50,10 +50,14 @@ North star: Avalonia CIDE + WPF glass both **ProjectReference** `CascadeIDE.Glas
 - `CdpLatchIo` — toolkit-agnostic settle (`PostSettled` / `PostSettledIfExists`) + `TryReadAllTextIfExists`.
 - Host `CdpLatchFs.PostApply` = settle then Avalonia UI marshal; WPF `LatchHub` uses `PostSettledIfExists`.
 
+## Peel10 (done)
+
+- Remaining CDP projectors: `File.Exists` + `File.ReadAllText(LatchPath)` → `CdpLatchIo.TryReadAllTextIfExists` (missing → null; chrome callers still Apply*(null)).
+- Presentation already on peel9; SharedFile / CRM / Webcam / DiskSync / Land + Alert-style try/catch patterns covered.
+
 ## Next peels
 
 1. Defer: `PrimitivesKit`, `UiLayoutSnapshot`, Avalonia Views/VMs.
-2. Optional next: migrate remaining projectors' `File.ReadAllText` → `CdpLatchIo.TryReadAllTextIfExists`.
-3. Keep host: `DataBusEventPolicyLoader`, `IGraphDataSource` / navigation JSON request, full `SettingsService` + typed workspace overlay.
+2. Keep host: `DataBusEventPolicyLoader`, `IGraphDataSource` / navigation JSON request, full `SettingsService` + typed workspace overlay.
 
 Map: inventory `glass-core-settings-inventory-v0.md`; reuse note `glass-wpf-reuse-cide-settings-v0.md`.
