@@ -118,6 +118,9 @@
     <Compile Include="..\Cockpit\Graph\Layout\ControlFlowGraphLayoutEngine.cs" Link="Cockpit\Graph\Layout\ControlFlowGraphLayoutEngine.cs" />
     <!-- Peel6: shared LocalAppData settings paths (SettingsService still host). -->
     <Compile Include="..\Features\Settings\DataAcquisition\UserSettingsPaths.cs" Link="Features\Settings\DataAcquisition\UserSettingsPaths.cs" />
+    <!-- Peel6b: settings.toml raw I/O + generic text file DAL. -->
+    <Compile Include="..\Features\Settings\DataAcquisition\TextFileReadWrite.cs" Link="Features\Settings\DataAcquisition\TextFileReadWrite.cs" />
+    <Compile Include="..\Features\Settings\DataAcquisition\UserSettingsTomlFileAccess.cs" Link="Features\Settings\DataAcquisition\UserSettingsTomlFileAccess.cs" />
   </ItemGroup>
 
   <ItemGroup>

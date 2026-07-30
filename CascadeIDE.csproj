@@ -135,6 +135,9 @@
     <Compile Remove="Cockpit\Graph\Layout\ControlFlowGraphLayoutEngine.cs" />
     <!-- Peel6: UserSettingsPaths lives in GlassCore -->
     <Compile Remove="Features\Settings\DataAcquisition\UserSettingsPaths.cs" />
+    <!-- Peel6b: settings.toml I/O DAL -->
+    <Compile Remove="Features\Settings\DataAcquisition\TextFileReadWrite.cs" />
+    <Compile Remove="Features\Settings\DataAcquisition\UserSettingsTomlFileAccess.cs" />
     <Compile Remove="CasaField.Core.Bench\**\*.cs" />
     <!-- Внешний субмодуль/вендор: не компилировать в IDE (иначе sandbox с top-level Main перехватывает входную точку). -->
     <Compile Remove="externals\**\*.cs" />

@@ -51,10 +51,13 @@ public sealed class IdeGlassSettings
 
         if (File.Exists(userPath))
         {
-            var userText = File.ReadAllText(userPath);
-            merged = string.IsNullOrWhiteSpace(merged)
-                ? userText
-                : GlassTomlMerge.MergeDocuments(merged, userText);
+            var userText = TextFileReadWrite.TryReadAllTextIfExists(userPath);
+            if (userText is not null)
+            {
+                merged = string.IsNullOrWhiteSpace(merged)
+                    ? userText
+                    : GlassTomlMerge.MergeDocuments(merged, userText);
+            }
         }
 
         if (string.IsNullOrWhiteSpace(merged))
