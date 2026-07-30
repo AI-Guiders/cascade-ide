@@ -21,13 +21,13 @@ internal sealed class GlassSession
         WorkspaceRoot = string.IsNullOrWhiteSpace(workspaceRoot)
             ? WorkspaceCascadePaths.TryDiscoverWorkspaceRoot()
             : workspaceRoot.Trim();
-        Settings = SettingsService.Load();
+        Settings = SettingsService.Load(WorkspaceRoot);
         Layout = GlassPresentationLayout.Resolve(Settings);
     }
 
     public void ReloadSettings()
     {
-        Settings = SettingsService.Load();
+        Settings = SettingsService.Load(WorkspaceRoot);
         Layout = GlassPresentationLayout.Resolve(Settings, Layout.Topology);
     }
 

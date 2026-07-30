@@ -1,4 +1,5 @@
 using CascadeIDE.Features.Settings.DataAcquisition;
+using CascadeIDE.Features.Workspace.DataAcquisition;
 using CascadeIDE.Models;
 
 namespace CascadeIDE.Services;
@@ -23,20 +24,26 @@ public static class SettingsService
 
     public static string GetSettingsPath() => UserSettingsPaths.GetSettingsFilePath();
 
-    public static CascadeIdeSettings Load()
+    /// <summary>
+    /// Load typed SSOT: defaults → optional <c>.cascade/workspace.toml</c> under
+    /// <paramref name="workspaceRoot"/> → user <c>settings.toml</c>.
+    /// Null root skips repo overlay (tests / early boot).
+    /// </summary>
+    public static CascadeIdeSettings Load(string? workspaceRoot = null)
     {
+        var workspaceToml = TryReadWorkspaceToml(workspaceRoot);
         UserSettingsTomlFileAccess.TryRead(out var toml, out var mtime);
         if (toml is null)
         {
             _settingsFileMtimeUtcAtLastLoad = mtime;
             AfterSettingsMutated?.Invoke();
-            return ValidateAndReturn(SettingsDefaultsLoader.DeserializeEffective(null));
+            return ValidateAndReturn(SettingsDefaultsLoader.DeserializeEffective(null, workspaceToml));
         }
 
         try
         {
             var normalized = NormalizeFriendlySectionAliases(toml);
-            var settings = SettingsDefaultsLoader.DeserializeEffective(normalized);
+            var settings = SettingsDefaultsLoader.DeserializeEffective(normalized, workspaceToml);
             _settingsFileMtimeUtcAtLastLoad = mtime;
             AfterSettingsMutated?.Invoke();
             return ValidateAndReturn(settings);
@@ -45,7 +52,7 @@ public static class SettingsService
         {
             _settingsFileMtimeUtcAtLastLoad = mtime;
             AfterSettingsMutated?.Invoke();
-            return ValidateAndReturn(SettingsDefaultsLoader.DeserializeEffective(null));
+            return ValidateAndReturn(SettingsDefaultsLoader.DeserializeEffective(null, workspaceToml));
         }
     }
 
@@ -98,6 +105,22 @@ public static class SettingsService
             Forward = s.Grammar.Forward,
             Mfd = s.Grammar.Mfd,
         };
+    }
+
+    static string? TryReadWorkspaceToml(string? workspaceRoot)
+    {
+        if (string.IsNullOrWhiteSpace(workspaceRoot))
+            return null;
+
+        try
+        {
+            var path = WorkspaceCascadePaths.GetWorkspaceTomlPath(workspaceRoot);
+            return TextFileReadWrite.TryReadAllTextIfExists(path);
+        }
+        catch
+        {
+            return null;
+        }
     }
 
     private static CascadeIdeSettings ValidateAndReturn(CascadeIdeSettings settings)

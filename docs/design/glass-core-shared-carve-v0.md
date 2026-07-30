@@ -84,9 +84,14 @@ North star: Avalonia CIDE + WPF glass both **ProjectReference** `CascadeIDE.Glas
 - Retired thin `IdeGlassSettings` + `GlassTomlMerge` + `PresentationGrammarSlice` (no remaining callers after peel14).
 - `GlassPresentationLayout.Resolve` only takes `CascadeIdeSettings`.
 
+## Peel16 (done)
+
+- Typed merge restored: defaults → `.cascade/workspace.toml` → user `settings.toml` in `SettingsDefaultsLoader` / `SettingsService.Load(workspaceRoot)`.
+- WPF `GlassSession` + Avalonia cold start discover scm root and pass it (same layers; chrome runtime via `UiModeCatalog` still host).
+
 ## Next peels
 
 1. Defer: `PrimitivesKit`, `UiLayoutSnapshot`, Avalonia Views/VMs.
-2. Keep host: `DataBusEventPolicyLoader`, `IGraphDataSource` / navigation JSON request, full typed workspace overlay (`UiModeCatalog` / `RepositoryWorkspaceToml`).
+2. Keep host: `DataBusEventPolicyLoader`, `IGraphDataSource` / navigation JSON request; full UiMode chrome applicator (widths/routing runtime) until WPF needs those projectors.
 
 Map: inventory `glass-core-settings-inventory-v0.md`; reuse note `glass-wpf-reuse-cide-settings-v0.md`.

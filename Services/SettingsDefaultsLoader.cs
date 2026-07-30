@@ -6,7 +6,8 @@ namespace CascadeIDE.Services;
 
 /// <summary>
 /// Заводские настройки: <c>Settings/defaults-settings.toml</c> (диск под exe → embedded в GlassCore).
-/// Пользовательский <c>%LocalAppData%\CascadeIDE\settings.toml</c> merge поверх (см. <see cref="DeserializeEffective"/>).
+/// Merge: defaults → optional <c>.cascade/workspace.toml</c> → user <c>settings.toml</c>
+/// (inventory glass-core-settings; ADR 0021 §2.1 / 0028).
 /// </summary>
 public static class SettingsDefaultsLoader
 {
@@ -37,13 +38,20 @@ public static class SettingsDefaultsLoader
     /// <summary>Эффективные настройки без пользовательского файла (embedded defaults).</summary>
     public static CascadeIdeSettings CreateDefault() => DeserializeEffective(null);
 
-    /// <summary>Merge заводских дефолтов с пользовательским TOML (пусто/null — только дефолты).</summary>
-    public static CascadeIdeSettings DeserializeEffective(string? userTomlNormalized)
+    /// <summary>
+    /// Merge: factory defaults ← optional repo <paramref name="workspaceTomlNormalized"/> ← optional user.
+    /// Unknown workspace sections (adr/features/…) are ignored by typed deserialize.
+    /// </summary>
+    public static CascadeIdeSettings DeserializeEffective(
+        string? userTomlNormalized,
+        string? workspaceTomlNormalized = null)
     {
-        var defaults = GetEmbeddedDefaultsToml();
-        var merged = string.IsNullOrWhiteSpace(userTomlNormalized)
-            ? defaults
-            : TomlTableMerge.MergeTomlDocuments(defaults, userTomlNormalized);
+        var merged = GetEmbeddedDefaultsToml();
+        if (!string.IsNullOrWhiteSpace(workspaceTomlNormalized))
+            merged = TomlTableMerge.MergeTomlDocuments(merged, workspaceTomlNormalized);
+        if (!string.IsNullOrWhiteSpace(userTomlNormalized))
+            merged = TomlTableMerge.MergeTomlDocuments(merged, userTomlNormalized);
+
         return CascadeTomlSerializer.Deserialize<CascadeIdeSettings>(merged)
             ?? throw new InvalidOperationException("Merged settings TOML did not deserialize to CascadeIdeSettings.");
     }

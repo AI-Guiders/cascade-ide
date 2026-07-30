@@ -43,7 +43,8 @@ public partial class MainWindowViewModel : ViewModelBase, IAutonomousAgentSessio
 
     private readonly Services.IOllamaService _ollama = new Services.OllamaService();
     private readonly Services.AiProviderManager _aiProviderManager;
-    private readonly CascadeIdeSettings _settings = Services.SettingsService.Load();
+    private readonly CascadeIdeSettings _settings = Services.SettingsService.Load(
+        Features.Workspace.DataAcquisition.WorkspaceCascadePaths.TryDiscoverWorkspaceRoot());
     internal CascadeIdeSettings GetCascadeSettingsForExecutor() => _settings;
     private AiKeys _aiKeys = Services.AiKeysStorage.Load();
     private CascadeIdeSettings? _lastSavedSettings;
