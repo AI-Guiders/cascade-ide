@@ -6,8 +6,8 @@ Separate process · latch IPC · Avalonia on hold for Windows primary.
 ## Stack (peel0)
 
 - **AvalonDock** — P | F | M layout
-- **AvalonEdit** — Forward = Intercom long-form
-- **LatchHub** — `%LocalAppData%/cdp-mcp/*-LATEST.json` (intercom + presentation)
+- **AvalonEdit** — Forward = Intercom long-form (**body** painted; not raw latch JSON)
+- **LatchHub + LatchPaint** — `%LocalAppData%/cdp-mcp/*-LATEST.json` → human glass
 
 North star: full-parity with Cascade IDE glass; Monaco/WebView2, MFD pages, Semantic Map — later peels.
 

@@ -31,26 +31,37 @@
                        Background="#252526"
                        Foreground="#E0E0E0"
                        BorderThickness="0"
-                       Padding="8"
-                       Text="Plan seat — latch / TM pulse later.&#x0a;&#x0a;GlassCockpit.Windows peel0." />
+                       Padding="10"
+                       FontFamily="Segoe UI"
+                       FontSize="13"
+                       Text="Plan seat — waiting presentation latch…" />
             </avalonDock:LayoutAnchorable>
           </avalonDock:LayoutAnchorablePane>
 
           <avalonDock:LayoutDocumentPane>
             <avalonDock:LayoutDocument Title="F · Intercom" CanClose="False">
-              <DockPanel>
-                <TextBlock DockPanel.Dock="Top"
-                           Margin="8,6"
-                           FontWeight="SemiBold"
-                           Text="Forward = Intercom (long-form)" />
+              <DockPanel Margin="0">
+                <Border DockPanel.Dock="Top"
+                        Background="#2D2D30"
+                        Padding="10,8"
+                        BorderBrush="#3F3F46"
+                        BorderThickness="0,0,0,1">
+                  <TextBlock x:Name="IntercomHeader"
+                             FontFamily="Segoe UI"
+                             FontSize="13"
+                             FontWeight="SemiBold"
+                             TextWrapping="Wrap"
+                             Text="Forward = Intercom" />
+                </Border>
                 <avalonEdit:TextEditor x:Name="IntercomEditor"
-                                       FontFamily="Consolas"
-                                       FontSize="14"
+                                       FontFamily="Segoe UI"
+                                       FontSize="15"
                                        ShowLineNumbers="False"
                                        WordWrap="True"
                                        Background="#1E1E1E"
                                        Foreground="#E0E0E0"
-                       IsReadOnly="True" />
+                                       Padding="4"
+                                       IsReadOnly="True" />
               </DockPanel>
             </avalonDock:LayoutDocument>
           </avalonDock:LayoutDocumentPane>
@@ -61,8 +72,10 @@
                        Background="#252526"
                        Foreground="#E0E0E0"
                        BorderThickness="0"
-                       Padding="4">
-                <ListBoxItem Content="SolutionExplorer" IsSelected="True" />
+                       Padding="4"
+                       FontFamily="Segoe UI"
+                       FontSize="13">
+                <ListBoxItem Content="SolutionExplorer" />
                 <ListBoxItem Content="Terminal" />
                 <ListBoxItem Content="Build" />
                 <ListBoxItem Content="Problems" />

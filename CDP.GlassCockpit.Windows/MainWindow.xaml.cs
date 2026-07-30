@@ -1,6 +1,7 @@
 #nullable enable
 using System.IO;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Threading;
 
 namespace CDP.GlassCockpit.Windows;
@@ -12,19 +13,17 @@ public partial class MainWindow : Window
     public MainWindow()
     {
         InitializeComponent();
-        // Peel0: plain text; Markdown highlighter not always shipped in AvalonEdit defs.
         IntercomEditor.Options.EnableHyperlinks = false;
+        IntercomHeader.Text = "Forward = Intercom — waiting latch…";
         IntercomEditor.Text =
-            "# Intercom\n\n" +
             "Long-form Forward seat.\n" +
-            "Watching %LocalAppData%/cdp-mcp/intercom-LATEST.json\n\n" +
-            "(peel0 — wire paint only; composer/send later)\n";
+            "Messages paint from intercom-LATEST (body only — not raw JSON).\n";
 
         _latches = new LatchHub();
         _latches.IntercomChanged += OnIntercomChanged;
         _latches.PresentationChanged += OnPresentationChanged;
         _latches.Start();
-        StatusText.Text = $"glass · spike0 · watching {_latches.StateRoot}";
+        StatusText.Text = $"glass · watching {_latches.StateRoot}";
         Closed += (_, _) => _latches.Dispose();
     }
 
@@ -34,9 +33,11 @@ public partial class MainWindow : Window
         {
             try
             {
-                var body = File.ReadAllText(path);
-                IntercomEditor.Text = body;
-                StatusText.Text = $"glass · intercom latch · {DateTime.Now:HH:mm:ss}";
+                var raw = File.ReadAllText(path);
+                var view = LatchPaint.PaintIntercom(raw);
+                IntercomHeader.Text = view.Header;
+                IntercomEditor.Text = view.Body;
+                StatusText.Text = $"glass · {view.StatusLine} · {DateTime.Now:HH:mm:ss}";
             }
             catch (Exception ex)
             {
@@ -51,14 +52,32 @@ public partial class MainWindow : Window
         {
             try
             {
-                var body = File.ReadAllText(path);
-                PlanBox.Text = "presentation-LATEST\n\n" + body;
-                StatusText.Text = $"glass · presentation latch · {DateTime.Now:HH:mm:ss}";
+                var raw = File.ReadAllText(path);
+                var view = LatchPaint.PaintPresentation(raw);
+                PlanBox.Text = view.PlanText;
+                SelectMfdPage(view.MfdPage);
+                StatusText.Text = $"glass · {view.StatusLine} · {DateTime.Now:HH:mm:ss}";
             }
             catch (Exception ex)
             {
                 StatusText.Text = $"glass · presentation read fail · {ex.Message}";
             }
         }, DispatcherPriority.Background);
+    }
+
+    void SelectMfdPage(string? page)
+    {
+        if (string.IsNullOrWhiteSpace(page))
+            return;
+
+        foreach (var item in MfdPages.Items)
+        {
+            if (item is ListBoxItem lbi &&
+                string.Equals(lbi.Content?.ToString(), page, StringComparison.OrdinalIgnoreCase))
+            {
+                MfdPages.SelectedItem = lbi;
+                return;
+            }
+        }
     }
 }
