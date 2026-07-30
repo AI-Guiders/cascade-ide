@@ -78,13 +78,7 @@ public sealed class CodeNavigationMapSettings
         return v is "graph" or "both" or "list" ? v : "list";
     }
 
-    public static string NormalizeDepth(string? value)
-    {
-        var v = (value ?? "").Trim();
-        if (string.Equals(v, CodeNavigationMapLevelKind.ControlFlow, StringComparison.OrdinalIgnoreCase))
-            return CodeNavigationMapLevelKind.ControlFlow;
-        return CodeNavigationMapLevelKind.File;
-    }
+    public static string NormalizeDepth(string? value) => CodeNavigationMapLevelKind.Normalize(value);
 
     /// <summary>Соответствует <see cref="DetailLevel"/> и вызову композитора карты намерений.</summary>
     public CodeNavigationMapDetailLevel NormalizedDetailLevel => NormalizeDetailLevel(DetailLevel);

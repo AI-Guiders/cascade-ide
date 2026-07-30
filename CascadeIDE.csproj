@@ -113,6 +113,26 @@
     <Compile Remove="Cockpit\Graph\GraphDocument.cs" />
     <Compile Remove="Cockpit\Graph\GraphDocumentJson.cs" />
     <Compile Remove="Cockpit\Graph\GraphDocumentBlueprint.cs" />
+    <!-- Peel5b: Graph Layout + map kind/detail Models -->
+    <Compile Remove="Models\CodeNavigationMapDetailLevel.cs" />
+    <Compile Remove="Models\CodeNavigationMapRelatedGraphLayoutKind.cs" />
+    <Compile Remove="Models\CodeNavigationMapLevelKind.cs" />
+    <Compile Remove="Models\CodeNavigationMapControlFlowMainAxisKind.cs" />
+    <Compile Remove="Cockpit\Graph\Layout\GraphNodeShape.cs" />
+    <Compile Remove="Cockpit\Graph\Layout\GraphLegendBlockPlacement.cs" />
+    <Compile Remove="Cockpit\Graph\Layout\GraphLayoutPresentation.cs" />
+    <Compile Remove="Cockpit\Graph\Layout\GraphControlFlowMainAxis.cs" />
+    <Compile Remove="Cockpit\Graph\Layout\GraphLayoutEngineOptions.cs" />
+    <Compile Remove="Cockpit\Graph\Layout\GraphRenderInvariants.cs" />
+    <Compile Remove="Cockpit\Graph\Layout\GraphViewportMetrics.cs" />
+    <Compile Remove="Cockpit\Graph\Layout\GraphLayoutScene.cs" />
+    <Compile Remove="Cockpit\Graph\Layout\GraphFileLayoutMetrics.cs" />
+    <Compile Remove="Cockpit\Graph\Layout\GraphControlFlowLayoutMetrics.cs" />
+    <Compile Remove="Cockpit\Graph\Layout\IGraphLayoutEngine.cs" />
+    <Compile Remove="Cockpit\Graph\Layout\GraphLayoutPresentationResolver.cs" />
+    <Compile Remove="Cockpit\Graph\Layout\StarGraphLayoutEngine.cs" />
+    <Compile Remove="Cockpit\Graph\Layout\GraphRelatedFileHierarchyLayoutEngine.cs" />
+    <Compile Remove="Cockpit\Graph\Layout\ControlFlowGraphLayoutEngine.cs" />
     <Compile Remove="CasaField.Core.Bench\**\*.cs" />
     <!-- Внешний субмодуль/вендор: не компилировать в IDE (иначе sandbox с top-level Main перехватывает входную точку). -->
     <Compile Remove="externals\**\*.cs" />

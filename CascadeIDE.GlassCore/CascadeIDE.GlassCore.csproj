@@ -95,6 +95,26 @@
     <Compile Include="..\Cockpit\Graph\GraphDocument.cs" Link="Cockpit\Graph\GraphDocument.cs" />
     <Compile Include="..\Cockpit\Graph\GraphDocumentJson.cs" Link="Cockpit\Graph\GraphDocumentJson.cs" />
     <Compile Include="..\Cockpit\Graph\GraphDocumentBlueprint.cs" Link="Cockpit\Graph\GraphDocumentBlueprint.cs" />
+    <!-- Peel5b: Graph Layout engines (Avalonia-free after Point2D) + map kind/detail Models. -->
+    <Compile Include="..\Models\CodeNavigationMapDetailLevel.cs" Link="Models\CodeNavigationMapDetailLevel.cs" />
+    <Compile Include="..\Models\CodeNavigationMapRelatedGraphLayoutKind.cs" Link="Models\CodeNavigationMapRelatedGraphLayoutKind.cs" />
+    <Compile Include="..\Models\CodeNavigationMapLevelKind.cs" Link="Models\CodeNavigationMapLevelKind.cs" />
+    <Compile Include="..\Models\CodeNavigationMapControlFlowMainAxisKind.cs" Link="Models\CodeNavigationMapControlFlowMainAxisKind.cs" />
+    <Compile Include="..\Cockpit\Graph\Layout\GraphNodeShape.cs" Link="Cockpit\Graph\Layout\GraphNodeShape.cs" />
+    <Compile Include="..\Cockpit\Graph\Layout\GraphLegendBlockPlacement.cs" Link="Cockpit\Graph\Layout\GraphLegendBlockPlacement.cs" />
+    <Compile Include="..\Cockpit\Graph\Layout\GraphLayoutPresentation.cs" Link="Cockpit\Graph\Layout\GraphLayoutPresentation.cs" />
+    <Compile Include="..\Cockpit\Graph\Layout\GraphControlFlowMainAxis.cs" Link="Cockpit\Graph\Layout\GraphControlFlowMainAxis.cs" />
+    <Compile Include="..\Cockpit\Graph\Layout\GraphLayoutEngineOptions.cs" Link="Cockpit\Graph\Layout\GraphLayoutEngineOptions.cs" />
+    <Compile Include="..\Cockpit\Graph\Layout\GraphRenderInvariants.cs" Link="Cockpit\Graph\Layout\GraphRenderInvariants.cs" />
+    <Compile Include="..\Cockpit\Graph\Layout\GraphViewportMetrics.cs" Link="Cockpit\Graph\Layout\GraphViewportMetrics.cs" />
+    <Compile Include="..\Cockpit\Graph\Layout\GraphLayoutScene.cs" Link="Cockpit\Graph\Layout\GraphLayoutScene.cs" />
+    <Compile Include="..\Cockpit\Graph\Layout\GraphFileLayoutMetrics.cs" Link="Cockpit\Graph\Layout\GraphFileLayoutMetrics.cs" />
+    <Compile Include="..\Cockpit\Graph\Layout\GraphControlFlowLayoutMetrics.cs" Link="Cockpit\Graph\Layout\GraphControlFlowLayoutMetrics.cs" />
+    <Compile Include="..\Cockpit\Graph\Layout\IGraphLayoutEngine.cs" Link="Cockpit\Graph\Layout\IGraphLayoutEngine.cs" />
+    <Compile Include="..\Cockpit\Graph\Layout\GraphLayoutPresentationResolver.cs" Link="Cockpit\Graph\Layout\GraphLayoutPresentationResolver.cs" />
+    <Compile Include="..\Cockpit\Graph\Layout\StarGraphLayoutEngine.cs" Link="Cockpit\Graph\Layout\StarGraphLayoutEngine.cs" />
+    <Compile Include="..\Cockpit\Graph\Layout\GraphRelatedFileHierarchyLayoutEngine.cs" Link="Cockpit\Graph\Layout\GraphRelatedFileHierarchyLayoutEngine.cs" />
+    <Compile Include="..\Cockpit\Graph\Layout\ControlFlowGraphLayoutEngine.cs" Link="Cockpit\Graph\Layout\ControlFlowGraphLayoutEngine.cs" />
   </ItemGroup>
 
   <ItemGroup>
