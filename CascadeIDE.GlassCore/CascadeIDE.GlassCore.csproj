@@ -1,0 +1,38 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>CascadeIDE</RootNamespace>
+    <Description>Avalonia-free CIDE glass core: presentation topology + settings peel for WPF/Linux glass.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Eto.Parse" Version="1.6.0" />
+    <PackageReference Include="Tomlyn" Version="2.3.2" />
+  </ItemGroup>
+
+  <!-- Same presentation sources as CascadeIDE — toolkit-agnostic. Avalonia monitor probes stay in CascadeIDE. -->
+  <ItemGroup>
+    <Compile Include="..\Services\Presentation\PresentationAnchorKind.cs" Link="Presentation\PresentationAnchorKind.cs" />
+    <Compile Include="..\Services\Presentation\PresentationAnchorSlot.cs" Link="Presentation\PresentationAnchorSlot.cs" />
+    <Compile Include="..\Services\Presentation\PresentationGrammarTokens.cs" Link="Presentation\PresentationGrammarTokens.cs" />
+    <Compile Include="..\Services\Presentation\PresentationInnerEtoGrammar.cs" Link="Presentation\PresentationInnerEtoGrammar.cs" />
+    <Compile Include="..\Services\Presentation\PresentationLayoutAnalyzer.cs" Link="Presentation\PresentationLayoutAnalyzer.cs" />
+    <Compile Include="..\Services\Presentation\PresentationMainGridColumnDefinitions.cs" Link="Presentation\PresentationMainGridColumnDefinitions.cs" />
+    <Compile Include="..\Services\Presentation\PresentationMainGridLayoutFrame.cs" Link="Presentation\PresentationMainGridLayoutFrame.cs" />
+    <Compile Include="..\Services\Presentation\PresentationMainGridLayoutFrameBuilder.cs" Link="Presentation\PresentationMainGridLayoutFrameBuilder.cs" />
+    <Compile Include="..\Services\Presentation\PresentationParseResult.cs" Link="Presentation\PresentationParseResult.cs" />
+    <Compile Include="..\Services\Presentation\PresentationParser.cs" Link="Presentation\PresentationParser.cs" />
+    <Compile Include="..\Services\Presentation\PresentationTopologyResolver.cs" Link="Presentation\PresentationTopologyResolver.cs" />
+    <Compile Include="..\Services\Presentation\PresentationZoneBound.cs" Link="Presentation\PresentationZoneBound.cs" />
+    <Compile Include="..\Services\Presentation\PresentationZoneWeights.cs" Link="Presentation\PresentationZoneWeights.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove="CascadeIDE_GlassCore.cs" />
+    <Compile Remove="Class1.cs" />
+  </ItemGroup>
+
+</Project>
