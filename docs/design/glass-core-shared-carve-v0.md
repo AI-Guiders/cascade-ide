@@ -40,10 +40,15 @@ North star: Avalonia CIDE + WPF glass both **ProjectReference** `CascadeIDE.Glas
 - `IdeGlassSettings` delegates; `SettingsDefaultsLoader.BundledRelativePath` aliases the shared constant.
 - Host still owns `BundledAppContent` + typed `CascadeIdeSettings` merge.
 
+## Peel8 (done)
+
+- `CdpHabitatPaths` — `%LocalAppData%/cdp-mcp` state root + latch file helpers (`presentation-LATEST`, `intercom-LATEST`, `GetLatchPath`).
+- Avalonia CDP projectors + WPF `LatchHub` share StateRoot; watchers/JSON apply stay host.
+
 ## Next peels
 
 1. Defer: `PrimitivesKit`, `UiLayoutSnapshot`, Avalonia Views/VMs.
-2. Optional next: presentation latch path helpers (`presentation-LATEST.json` state root) shared thin.
+2. Optional next: thin shared latch debounce/read helpers (still no Avalonia in GlassCore).
 3. Keep host: `DataBusEventPolicyLoader`, `IGraphDataSource` / navigation JSON request, full `SettingsService` + typed workspace overlay.
 
 Map: inventory `glass-core-settings-inventory-v0.md`; reuse note `glass-wpf-reuse-cide-settings-v0.md`.
