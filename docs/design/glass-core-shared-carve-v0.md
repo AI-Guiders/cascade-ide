@@ -66,6 +66,11 @@ North star: Avalonia CIDE + WPF glass both **ProjectReference** `CascadeIDE.Glas
 - `CanonicalFilePath` linked into GlassCore; host Remove.
 - `IdeGlassSettings` user.toml read via `TextFileReadWrite` only (no `File.Exists` gate).
 
+## Peel13 (done)
+
+- Dual-compile audit: all 96 GlassCore `Compile Include ..\…` have matching host `Compile Remove`.
+- Guard: `GlassCoreLinkRemoveParityTests` fails if a linked source loses its Remove.
+
 ## Next peels
 
 1. Defer: `PrimitivesKit`, `UiLayoutSnapshot`, Avalonia Views/VMs.

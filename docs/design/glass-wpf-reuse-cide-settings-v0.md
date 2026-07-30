@@ -28,6 +28,7 @@ Inventory: [glass-core-settings-inventory-v0.md](glass-core-settings-inventory-v
 
 ## Next
 
-1. Peel Cockpit Cds/HostSurface/DataBus into GlassCore
-2. Grow toward full settings path without OutWit in GlassCore
-3. WPF Intercom reply / Monaco / MFD organs; drop Avalonia UI hacks as parity grows
+1. Grow toward full settings path without OutWit in GlassCore (`CascadeIdeSettings` : `ModelBase` stays host until peeled).
+2. WPF Intercom reply / Monaco / MFD organs; drop Avalonia UI hacks as parity grows.
+
+Cds/HostSurface/DataBus already in GlassCore (carve peels 2–3). Latch paths/IO peels 8–11; single-compile guard peel13.
