@@ -1,10 +1,11 @@
+using System.Reflection;
 using CascadeIDE.Features.Settings.DataAcquisition;
 using CascadeIDE.Models;
 
 namespace CascadeIDE.Services;
 
 /// <summary>
-/// Заводские настройки: <c>Settings/defaults-settings.toml</c> (диск под exe → embedded).
+/// Заводские настройки: <c>Settings/defaults-settings.toml</c> (диск под exe → embedded в GlassCore).
 /// Пользовательский <c>%LocalAppData%\CascadeIDE\settings.toml</c> merge поверх (см. <see cref="DeserializeEffective"/>).
 /// </summary>
 public static class SettingsDefaultsLoader
@@ -12,16 +13,24 @@ public static class SettingsDefaultsLoader
     /// <summary>Относительный путь от <see cref="AppContext.BaseDirectory"/> (опциональный override поверх встроенного бандла).</summary>
     public const string BundledRelativePath = SettingsDefaultsPaths.BundledRelativePath;
 
+    /// <summary>Assembly with embedded defaults (GlassCore). Hosts may override for tests.</summary>
+    public static Assembly? EmbeddedDefaultsAssembly { get; set; }
+
     /// <summary>
     /// Текст шипнутого <c>defaults-settings.toml</c>: сначала файл под <see cref="AppContext.BaseDirectory"/>,
-    /// иначе <see cref="BundledAppContent"/> (EmbeddedResource).
+    /// иначе embedded resource в <see cref="EmbeddedDefaultsAssembly"/> / GlassCore.
     /// </summary>
     /// <exception cref="InvalidOperationException">Нет ни файла рядом с процессом, ни встроенного ресурса.</exception>
     public static string GetEmbeddedDefaultsToml()
     {
-        if (!BundledAppContent.TryReadDiskThenEmbedded(BundledRelativePath, out var text) || string.IsNullOrWhiteSpace(text))
+        var asm = EmbeddedDefaultsAssembly ?? typeof(SettingsDefaultsPaths).Assembly;
+        var text = SettingsDefaultsPaths.TryReadToml(explicitPath: null, embeddedAssembly: asm, out _);
+        if (string.IsNullOrWhiteSpace(text))
+        {
             throw new InvalidOperationException(
-                $"Missing bundled {BundledRelativePath} (disk under AppContext.BaseDirectory or embedded resource in CascadeIDE assembly).");
+                $"Missing bundled {BundledRelativePath} (disk under AppContext.BaseDirectory or embedded resource in {asm.GetName().Name}).");
+        }
+
         return text;
     }
 

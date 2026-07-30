@@ -4,7 +4,7 @@ using Tomlyn.Model;
 namespace CascadeIDE.Services;
 
 /// <summary>Глубокий merge TOML-документов: <paramref name="overlay"/> перекрывает <paramref name="baseToml"/> по ключам таблиц.</summary>
-internal static class TomlTableMerge
+public static class TomlTableMerge
 {
     public static string MergeTomlDocuments(string baseToml, string overlayToml)
     {

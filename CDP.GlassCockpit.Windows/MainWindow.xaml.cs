@@ -43,7 +43,7 @@ public partial class MainWindow : Window
         WpfMainGridColumns.Apply(MainGrid, _session.Layout.ColumnDefinitions);
         TopologyBadge.Text = _session.Layout.Topology;
         ChromeHint.Text =
-            $"settings.toml · {_session.Settings.PrimaryWorkSurface} · tier={_session.Settings.Tier}" +
+            $"settings.toml · {_session.Settings.Workspace.PrimaryWorkSurface} · tier={_session.Settings.Display.Presentation.Tier}" +
             (_session.Layout.ParseOk ? "" : $" · parse fail: {_session.Layout.ParseError}");
     }
 

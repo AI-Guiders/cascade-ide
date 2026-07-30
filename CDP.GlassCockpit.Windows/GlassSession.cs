@@ -1,26 +1,33 @@
 #nullable enable
+using CascadeIDE.Features.Settings.DataAcquisition;
+using CascadeIDE.Features.Workspace.DataAcquisition;
 using CascadeIDE.GlassCore.Presentation;
-using CascadeIDE.GlassCore.Settings;
+using CascadeIDE.Models;
+using CascadeIDE.Services;
 
 namespace CDP.GlassCockpit.Windows;
 
-/// <summary>Shared CIDE settings + live topology for the WPF glass host.</summary>
+/// <summary>Shared CIDE settings + live topology for the WPF glass host (typed SSOT via GlassCore).</summary>
 internal sealed class GlassSession
 {
-    public IdeGlassSettings Settings { get; private set; }
+    public CascadeIdeSettings Settings { get; private set; }
+    public string SettingsPath { get; private set; }
+    public string? WorkspaceRoot { get; private set; }
     public GlassPresentationLayout.Snapshot Layout { get; private set; }
 
     public GlassSession(string? workspaceRoot = null)
     {
-        Settings = IdeGlassSettings.Load(workspaceRoot: workspaceRoot);
+        SettingsPath = UserSettingsPaths.GetSettingsFilePath();
+        WorkspaceRoot = string.IsNullOrWhiteSpace(workspaceRoot)
+            ? WorkspaceCascadePaths.TryDiscoverWorkspaceRoot()
+            : workspaceRoot.Trim();
+        Settings = SettingsService.Load();
         Layout = GlassPresentationLayout.Resolve(Settings);
     }
 
     public void ReloadSettings()
     {
-        Settings = IdeGlassSettings.Load(
-            settingsPath: Settings.SettingsPath,
-            workspaceRoot: Settings.WorkspaceRoot);
+        Settings = SettingsService.Load();
         Layout = GlassPresentationLayout.Resolve(Settings, Layout.Topology);
     }
 
@@ -35,5 +42,5 @@ internal sealed class GlassSession
     }
 
     public bool IsIntercomForward =>
-        !string.Equals(Settings.PrimaryWorkSurface, "editor", StringComparison.OrdinalIgnoreCase);
+        !string.Equals(Settings.Workspace.PrimaryWorkSurface, "editor", StringComparison.OrdinalIgnoreCase);
 }

@@ -1,6 +1,10 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
+  
+  <ItemGroup>
+    <InternalsVisibleTo Include="CascadeIDE.Tests" />
+  </ItemGroup>
+<PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
@@ -12,6 +16,7 @@
   <ItemGroup>
     <PackageReference Include="Eto.Parse" Version="1.6.0" />
     <PackageReference Include="Tomlyn" Version="2.3.2" />
+    <PackageReference Include="OutWit.Common" Version="1.3.2" />
     <ProjectReference Include="..\CascadeIDE.Contracts\CascadeIDE.Contracts.csproj" />
   </ItemGroup>
 
@@ -129,6 +134,54 @@
     <Compile Include="..\Features\Cdp\CdpHabitatPaths.cs" Link="Features\Cdp\CdpHabitatPaths.cs" />
     <!-- Peel9: latch settle + safe text read (Avalonia PostApply stays host CdpLatchFs). -->
     <Compile Include="..\Features\Cdp\CdpLatchIo.cs" Link="Features\Cdp\CdpLatchIo.cs" />
+    <!-- Peel14: typed CascadeIdeSettings + SettingsService (Avalonia-free SSOT loader). -->
+    <Compile Include="..\Services\SettingsEnvResolver.cs" Link="Services\SettingsEnvResolver.cs" />
+    <Compile Include="..\Services\CodeNavigationMapConditionBranchPresetsLoader.cs" Link="Services\CodeNavigationMapConditionBranchPresetsLoader.cs" />
+    <Compile Include="..\Cockpit\Composition\HostSurface\InstrumentStatusStripRouting.cs" Link="Cockpit\Composition\HostSurface\InstrumentStatusStripRouting.cs" />
+    <Compile Include="..\Models\IntercomFeedMetricsModes.cs" Link="Models\IntercomFeedMetricsModes.cs" />
+    <Compile Include="..\Models\TciValidationIconModes.cs" Link="Models\TciValidationIconModes.cs" />
+    <Compile Include="..\Models\CodeNavigationMapConditionBranchProvenance.cs" Link="Models\CodeNavigationMapConditionBranchProvenance.cs" />
+    <Compile Include="..\Models\CodeNavigationMapConditionBranchToml.cs" Link="Models\CodeNavigationMapConditionBranchToml.cs" />
+    <Compile Include="..\Models\CodeNavigationMapConditionBranchLabels.cs" Link="Models\CodeNavigationMapConditionBranchLabels.cs" />
+    <Compile Include="..\Models\CodeNavigationMapConditionBranchPresetEntry.cs" Link="Models\CodeNavigationMapConditionBranchPresetEntry.cs" />
+    <Compile Include="..\Models\CodeNavigationPresetEntry.cs" Link="Models\CodeNavigationPresetEntry.cs" />
+    <Compile Include="..\Models\IntercomWorkspaceHintEntry.cs" Link="Models\IntercomWorkspaceHintEntry.cs" />
+    <Compile Include="..\Models\CodeNavigationMapControlFlowGrainKind.cs" Link="Models\CodeNavigationMapControlFlowGrainKind.cs" />
+    <Compile Include="..\Models\AgentDevServiceContractSettings.cs" Link="Models\AgentDevServiceContractSettings.cs" />
+    <Compile Include="..\Models\AgentEnvironmentSettings.cs" Link="Models\AgentEnvironmentSettings.cs" />
+    <Compile Include="..\Models\AgentHarnessSettings.cs" Link="Models\AgentHarnessSettings.cs" />
+    <Compile Include="..\Models\AgentNotesSettings.cs" Link="Models\AgentNotesSettings.cs" />
+    <Compile Include="..\Models\AgentSettings.cs" Link="Models\AgentSettings.cs" />
+    <Compile Include="..\Models\AiSettings.cs" Link="Models\AiSettings.cs" />
+    <Compile Include="..\Models\CascadeIdeSettings.ComparisonAndClone.cs" Link="Models\CascadeIdeSettings.ComparisonAndClone.cs" />
+    <Compile Include="..\Models\CascadeIdeSettings.cs" Link="Models\CascadeIdeSettings.cs" />
+    <Compile Include="..\Models\CodeNavigationMapSettings.cs" Link="Models\CodeNavigationMapSettings.cs" />
+    <Compile Include="..\Models\CodeNavigationSettings.cs" Link="Models\CodeNavigationSettings.cs" />
+    <Compile Include="..\Models\CommandPaletteSettings.cs" Link="Models\CommandPaletteSettings.cs" />
+    <Compile Include="..\Models\EditorDebugHintsSettings.cs" Link="Models\EditorDebugHintsSettings.cs" />
+    <Compile Include="..\Models\EditorForwardHostKind.cs" Link="Models\EditorForwardHostKind.cs" />
+    <Compile Include="..\Models\EditorInlineHintsSettings.cs" Link="Models\EditorInlineHintsSettings.cs" />
+    <Compile Include="..\Models\EditorSettings.cs" Link="Models\EditorSettings.cs" />
+    <Compile Include="..\Models\FileRelationsAndControlFlowIntentGraphSettings.cs" Link="Models\FileRelationsAndControlFlowIntentGraphSettings.cs" />
+    <Compile Include="..\Models\FontsSettings.cs" Link="Models\FontsSettings.cs" />
+    <Compile Include="..\Models\HybridIndexSettings.cs" Link="Models\HybridIndexSettings.cs" />
+    <Compile Include="..\Models\IntercomSettings.cs" Link="Models\IntercomSettings.cs" />
+    <Compile Include="..\Models\IntercomTransportSettings.cs" Link="Models\IntercomTransportSettings.cs" />
+    <Compile Include="..\Models\LanguagesSettings.cs" Link="Models\LanguagesSettings.cs" />
+    <Compile Include="..\Models\LoggingSettings.cs" Link="Models\LoggingSettings.cs" />
+    <Compile Include="..\Models\MarkdownDiagramSettings.cs" Link="Models\MarkdownDiagramSettings.cs" />
+    <Compile Include="..\Models\MarkdownSettings.cs" Link="Models\MarkdownSettings.cs" />
+    <Compile Include="..\Models\McpSettings.cs" Link="Models\McpSettings.cs" />
+    <Compile Include="..\Models\PrimaryWorkSurfaceKind.cs" Link="Models\PrimaryWorkSurfaceKind.cs" />
+    <Compile Include="..\Models\SolutionExplorerSettings.cs" Link="Models\SolutionExplorerSettings.cs" />
+    <Compile Include="..\Models\SolutionWarmupSettings.cs" Link="Models\SolutionWarmupSettings.cs" />
+    <Compile Include="..\Models\WorkspaceSettings.cs" Link="Models\WorkspaceSettings.cs" />
+    <Compile Include="..\Services\CascadeTomlSerializer.cs" Link="Services\CascadeTomlSerializer.cs" />
+    <Compile Include="..\Services\SettingsDefaultsLoader.cs" Link="Services\SettingsDefaultsLoader.cs" />
+    <Compile Include="..\Services\SettingsLegacyStringDefaults.cs" Link="Services\SettingsLegacyStringDefaults.cs" />
+    <Compile Include="..\Services\SettingsService.cs" Link="Services\SettingsService.cs" />
+    <Compile Include="..\Services\SettingsValidationSpecifications.cs" Link="Services\SettingsValidationSpecifications.cs" />
+    <Compile Include="..\Services\TomlTableMerge.cs" Link="Services\TomlTableMerge.cs" />
     <!-- Peel12: canonical path normalize/compare (breakpoints, DAP, focus latch). -->
     <Compile Include="..\Services\CanonicalFilePath.cs" Link="Services\CanonicalFilePath.cs" />
   </ItemGroup>

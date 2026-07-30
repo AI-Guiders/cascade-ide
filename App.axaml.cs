@@ -1,8 +1,10 @@
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
+using CascadeIDE.Features.Chat;
 using CascadeIDE.Features.UiChrome;
 using CascadeIDE.Lang;
+using CascadeIDE.Services;
 using CascadeIDE.ViewModels;
 using CascadeIDE.Views;
 using ModelContextProtocol.Server;
@@ -104,6 +106,7 @@ public partial class App : Application
 
     public override void OnFrameworkInitializationCompleted()
     {
+        SettingsService.AfterSettingsMutated = IntercomSendTrace.InvalidateSettingsCache;
         UiCulture.ApplyFromSettingsOrSystem();
         UiModeCatalog.Initialize();
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)

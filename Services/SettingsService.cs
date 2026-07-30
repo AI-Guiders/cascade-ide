@@ -1,10 +1,13 @@
-using CascadeIDE.Features.Chat;
+using CascadeIDE.Features.Settings.DataAcquisition;
 using CascadeIDE.Models;
 
 namespace CascadeIDE.Services;
 
 public static class SettingsService
 {
+    /// <summary>Host hook (e.g. IntercomSendTrace) — optional; GlassCore stays free of chat host.</summary>
+    public static Action? AfterSettingsMutated { get; set; }
+
     private static readonly ISettingsValidationSpecification[] ValidationSpecifications =
     [
         new DisplaySettingsValidationSpecification()
@@ -26,7 +29,7 @@ public static class SettingsService
         if (toml is null)
         {
             _settingsFileMtimeUtcAtLastLoad = mtime;
-            IntercomSendTrace.InvalidateSettingsCache();
+            AfterSettingsMutated?.Invoke();
             return ValidateAndReturn(SettingsDefaultsLoader.DeserializeEffective(null));
         }
 
@@ -35,13 +38,13 @@ public static class SettingsService
             var normalized = NormalizeFriendlySectionAliases(toml);
             var settings = SettingsDefaultsLoader.DeserializeEffective(normalized);
             _settingsFileMtimeUtcAtLastLoad = mtime;
-            IntercomSendTrace.InvalidateSettingsCache();
+            AfterSettingsMutated?.Invoke();
             return ValidateAndReturn(settings);
         }
         catch
         {
             _settingsFileMtimeUtcAtLastLoad = mtime;
-            IntercomSendTrace.InvalidateSettingsCache();
+            AfterSettingsMutated?.Invoke();
             return ValidateAndReturn(SettingsDefaultsLoader.DeserializeEffective(null));
         }
     }
@@ -73,7 +76,7 @@ public static class SettingsService
             var toml = CascadeTomlSerializer.Serialize(settings);
             UserSettingsTomlFileAccess.WriteAllText(toml, out var writtenMtime);
             _settingsFileMtimeUtcAtLastLoad = writtenMtime;
-            IntercomSendTrace.InvalidateSettingsCache();
+            AfterSettingsMutated?.Invoke();
         }
         catch
         {
@@ -82,7 +85,7 @@ public static class SettingsService
     }
 
     /// <summary>Перезаписать <c>[display.screens]</c> в <paramref name="target"/> из <paramref name="disk"/> (клон полей).</summary>
-    internal static void ApplyPresentationFromDisk(CascadeIdeSettings target, CascadeIdeSettings disk)
+    public static void ApplyPresentationFromDisk(CascadeIdeSettings target, CascadeIdeSettings disk)
     {
         var s = disk.Display.Screens;
         target.Display.Screens.Topology = s.Topology;

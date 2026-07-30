@@ -3,12 +3,12 @@ using CascadeIDE.Models;
 
 namespace CascadeIDE.Services;
 
-internal interface ISettingsValidationSpecification
+public interface ISettingsValidationSpecification
 {
     IEnumerable<string> Validate(CascadeIdeSettings settings);
 }
 
-internal sealed class DisplaySettingsValidationSpecification : ISettingsValidationSpecification
+public sealed class DisplaySettingsValidationSpecification : ISettingsValidationSpecification
 {
     public IEnumerable<string> Validate(CascadeIdeSettings settings)
     {

@@ -1,6 +1,7 @@
 #nullable enable
-using CascadeIDE.Features.UiChrome;
+using CascadeIDE.Features.Settings.DataAcquisition;
 using CascadeIDE.Models;
+using System.Reflection;
 
 namespace CascadeIDE.Services;
 
@@ -14,22 +15,31 @@ public static class CodeNavigationMapConditionBranchPresetsLoader
 {
     public const string BundledRelativePath = "CodeNavigation/condition-branch-label-presets.toml";
 
+    /// <summary>Assembly with embedded presets (host or GlassCore). Default: this type's assembly.</summary>
+    public static Assembly? EmbeddedPresetsAssembly { get; set; }
+
     private sealed class BundledRoot
+    {
+        public CodeNavigationMapSettings? CodeNavigationMap { get; set; }
+    }
+
+    /// <summary>Minimal workspace.toml slice — avoids pulling UiChrome workspace chrome DTOs into GlassCore.</summary>
+    private sealed class WorkspaceConditionBranchRoot
     {
         public CodeNavigationMapSettings? CodeNavigationMap { get; set; }
     }
 
     public static string GetEmbeddedBundledToml()
     {
-        if (!BundledAppContent.TryReadDiskThenEmbedded(BundledRelativePath, out var text) || string.IsNullOrWhiteSpace(text))
+        if (!TryReadBundled(out var text) || string.IsNullOrWhiteSpace(text))
             throw new InvalidOperationException(
-                $"Missing bundled {BundledRelativePath} (disk under AppContext.BaseDirectory or embedded resource in CascadeIDE assembly).");
+                $"Missing bundled {BundledRelativePath} (disk under AppContext.BaseDirectory or embedded resource).");
         return text;
     }
 
     public static IReadOnlyList<CodeNavigationMapConditionBranchPresetEntry> LoadBundledEntriesOrFallback()
     {
-        if (!BundledAppContent.TryReadDiskThenEmbedded(BundledRelativePath, out var raw))
+        if (!TryReadBundled(out var raw) || string.IsNullOrWhiteSpace(raw))
             return [];
         try
         {
@@ -67,11 +77,11 @@ public static class CodeNavigationMapConditionBranchPresetsLoader
         try
         {
             var path = Path.Combine(dir, ".cascade", "workspace.toml");
-            if (!File.Exists(path))
+            var text = TextFileReadWrite.TryReadAllTextIfExists(path);
+            if (text is null)
                 return [];
 
-            var text = File.ReadAllText(path);
-            var ui = CascadeTomlSerializer.Deserialize<Features.Workspace.RepositoryWorkspaceToml>(text);
+            var ui = CascadeTomlSerializer.Deserialize<WorkspaceConditionBranchRoot>(text);
             if (ui?.CodeNavigationMap?.ConditionBranch?.Presets is not { Count: > 0 } presets)
                 return [];
 
@@ -111,28 +121,63 @@ public static class CodeNavigationMapConditionBranchPresetsLoader
         IReadOnlyList<CodeNavigationMapConditionBranchPresetEntry> user) =>
         MergeLayers(bundled, user);
 
+    static bool TryReadBundled([System.Diagnostics.CodeAnalysis.NotNullWhen(true)] out string? text)
+    {
+        text = null;
+        var disk = Path.Combine(
+            AppContext.BaseDirectory,
+            BundledRelativePath.Replace('/', Path.DirectorySeparatorChar));
+        var diskText = TextFileReadWrite.TryReadAllTextIfExists(disk);
+        if (diskText is not null)
+        {
+            text = diskText;
+            return true;
+        }
+
+        var asm = EmbeddedPresetsAssembly ?? typeof(CodeNavigationMapConditionBranchPresetsLoader).Assembly;
+        foreach (var name in asm.GetManifestResourceNames())
+        {
+            if (!name.EndsWith("condition-branch-label-presets.toml", StringComparison.OrdinalIgnoreCase)
+                && !name.Contains("condition-branch-label-presets.toml", StringComparison.OrdinalIgnoreCase))
+                continue;
+
+            using var stream = asm.GetManifestResourceStream(name);
+            if (stream is null)
+                continue;
+            using var reader = new StreamReader(stream);
+            text = reader.ReadToEnd();
+            return !string.IsNullOrWhiteSpace(text);
+        }
+
+        return false;
+    }
+
     private static string? NormalizeRepositoryRoot(string? solutionPath)
     {
         if (string.IsNullOrWhiteSpace(solutionPath))
             return null;
         try
         {
-            var p = CanonicalFilePath.Normalize(solutionPath.Trim());
+            var p = Path.GetFullPath(solutionPath.Trim());
             if (File.Exists(p))
                 return Path.GetDirectoryName(p);
-            return Directory.Exists(p) ? p : null;
+            if (Directory.Exists(p))
+                return p;
         }
         catch
         {
-            return null;
+            // ignore
         }
+
+        return null;
     }
 
-    private static CodeNavigationMapConditionBranchPresetEntry CloneEntry(CodeNavigationMapConditionBranchPresetEntry e) =>
+    private static CodeNavigationMapConditionBranchPresetEntry CloneEntry(
+        CodeNavigationMapConditionBranchPresetEntry e) =>
         new()
         {
             Id = e.Id,
             Positive = e.Positive,
-            Negative = e.Negative
+            Negative = e.Negative,
         };
 }

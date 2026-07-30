@@ -4,7 +4,7 @@ using Tomlyn;
 namespace CascadeIDE.Services;
 
 /// <summary>Паритет с Tomlyn 1.x <c>Toml.ToModel</c>: ключи в TOML в snake_case, свойства моделей в PascalCase.</summary>
-internal static class CascadeTomlSerializer
+public static class CascadeTomlSerializer
 {
     public static readonly TomlSerializerOptions Options = new()
     {
