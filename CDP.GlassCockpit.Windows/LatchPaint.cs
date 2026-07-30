@@ -4,16 +4,19 @@ using System.Text.Json;
 
 namespace CDP.GlassCockpit.Windows;
 
-/// <summary>Turn latch JSON into human glass — not dump-the-wire.</summary>
+/// <summary>Latch JSON → human glass fields (never dump wire into seats).</summary>
 internal static class LatchPaint
 {
     public sealed record IntercomView(
         string Header,
         string Body,
+        string RoleLabel,
+        string WhenLabel,
         string StatusLine);
 
     public sealed record PresentationView(
-        string PlanText,
+        string Headline,
+        string Detail,
         string? MfdPage,
         string StatusLine);
 
@@ -31,15 +34,17 @@ internal static class LatchPaint
             var acked = root.TryGetProperty("acked", out var a) && a.ValueKind is JsonValueKind.True;
             var body = Prop(root, "body") ?? "(empty)";
 
-            var header =
-                $"@{from.ToUpperInvariant()} → @{to.ToUpperInvariant()}  ·  {origin}" +
-                (string.IsNullOrEmpty(id) ? "" : $"  ·  {id}") +
-                (string.IsNullOrEmpty(stamped) ? "" : $"  ·  {stamped}") +
-                (acked ? "  ·  acked" : "  ·  unread");
+            var whenLabel = TryLocalTime(stamped) ?? DateTime.Now.ToString("HH:mm");
+            var role = $"@{from.ToUpperInvariant()} → @{to.ToUpperInvariant()} · {origin}";
+            var header = acked ? $"{role} · acked" : $"{role} · unread";
+            if (!string.IsNullOrEmpty(id))
+                header += $" · {id}";
 
             return new IntercomView(
                 header,
                 body.Replace("\r\n", "\n"),
+                role,
+                whenLabel,
                 $"intercom · {from}→{to} · {(acked ? "acked" : "unread")}");
         }
         catch (Exception ex)
@@ -47,6 +52,8 @@ internal static class LatchPaint
             return new IntercomView(
                 "Intercom (parse fail)",
                 json,
+                "system",
+                DateTime.Now.ToString("HH:mm"),
                 $"intercom · parse fail · {ex.Message}");
         }
     }
@@ -57,32 +64,38 @@ internal static class LatchPaint
         {
             using var doc = JsonDocument.Parse(json);
             var root = doc.RootElement;
-            var topology = Prop(root, "topology") ?? "—";
-            var tier = Prop(root, "tier") ?? "—";
+            var topology = Prop(root, "topology");
+            var tier = Prop(root, "tier");
             var mfd = Prop(root, "mfd_page");
             var origin = Prop(root, "origin") ?? "—";
-            var stamped = Prop(root, "stamped_utc") ?? "—";
 
-            var sb = new StringBuilder();
-            sb.AppendLine("Plan / presentation");
-            sb.AppendLine();
-            sb.AppendLine($"Topology   {topology}");
-            sb.AppendLine($"Tier       {tier}");
-            sb.AppendLine($"MFD page   {mfd ?? "—"}");
-            sb.AppendLine($"Origin     {origin}");
-            sb.AppendLine($"Stamped    {stamped}");
-            sb.AppendLine();
-            sb.AppendLine("(P seat — TM / SA later peels)");
+            var headline = string.Join(" · ", new[]
+            {
+                string.IsNullOrWhiteSpace(topology) ? null : topology,
+                string.IsNullOrWhiteSpace(tier) ? null : tier
+            }.Where(s => s is not null)!);
+
+            if (string.IsNullOrWhiteSpace(headline))
+                headline = "Cabin presentation";
+
+            var detail = new StringBuilder();
+            if (!string.IsNullOrWhiteSpace(mfd))
+                detail.AppendLine($"MFD focus: {mfd}");
+            detail.AppendLine($"Origin: {origin}");
+            detail.AppendLine();
+            detail.Append("PFD instruments / TM later.");
 
             return new PresentationView(
-                sb.ToString(),
+                headline,
+                detail.ToString().TrimEnd(),
                 mfd,
-                $"presentation · {tier} · {topology}");
+                $"presentation · {tier ?? "—"} · {mfd ?? "—"}");
         }
         catch (Exception ex)
         {
             return new PresentationView(
-                "presentation-LATEST\n\n" + json,
+                "Presentation",
+                ex.Message,
                 null,
                 $"presentation · parse fail · {ex.Message}");
         }
@@ -92,4 +105,11 @@ internal static class LatchPaint
         root.TryGetProperty(name, out var el) && el.ValueKind == JsonValueKind.String
             ? el.GetString()
             : null;
+
+    static string? TryLocalTime(string stampedUtc)
+    {
+        if (DateTimeOffset.TryParse(stampedUtc, out var dto))
+            return dto.ToLocalTime().ToString("HH:mm");
+        return null;
+    }
 }
