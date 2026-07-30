@@ -60,9 +60,15 @@ North star: Avalonia CIDE + WPF glass both **ProjectReference** `CascadeIDE.Glas
 - `AttachmentAnchorPaths` focus-LATEST read → `CdpLatchIo.TryReadAllTextIfExists` (last `File.ReadAllText` on latch paths outside settle helpers).
 - WPF `LatchHub.TryFireExisting` keeps `File.Exists` (existence gate only; no content read).
 
+## Peel12 (done)
+
+- Host `Compile Remove` for peel7–9 sources (`SettingsDefaultsPaths`, `CdpHabitatPaths`, `CdpLatchIo`) — single compile via GlassCore (was dual-compile).
+- `CanonicalFilePath` linked into GlassCore; host Remove.
+- `IdeGlassSettings` user.toml read via `TextFileReadWrite` only (no `File.Exists` gate).
+
 ## Next peels
 
 1. Defer: `PrimitivesKit`, `UiLayoutSnapshot`, Avalonia Views/VMs.
-2. Keep host: `DataBusEventPolicyLoader`, `IGraphDataSource` / navigation JSON request, full `SettingsService` + typed workspace overlay.
+2. Keep host: `DataBusEventPolicyLoader`, `IGraphDataSource` / navigation JSON request, full `SettingsService` + typed workspace overlay (`CascadeIdeSettings` : OutWit `ModelBase`).
 
 Map: inventory `glass-core-settings-inventory-v0.md`; reuse note `glass-wpf-reuse-cide-settings-v0.md`.
