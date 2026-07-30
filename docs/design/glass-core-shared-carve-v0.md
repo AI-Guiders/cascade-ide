@@ -55,6 +55,11 @@ North star: Avalonia CIDE + WPF glass both **ProjectReference** `CascadeIDE.Glas
 - Remaining CDP projectors: `File.Exists` + `File.ReadAllText(LatchPath)` → `CdpLatchIo.TryReadAllTextIfExists` (missing → null; chrome callers still Apply*(null)).
 - Presentation already on peel9; SharedFile / CRM / Webcam / DiskSync / Land + Alert-style try/catch patterns covered.
 
+## Peel11 (done)
+
+- `AttachmentAnchorPaths` focus-LATEST read → `CdpLatchIo.TryReadAllTextIfExists` (last `File.ReadAllText` on latch paths outside settle helpers).
+- WPF `LatchHub.TryFireExisting` keeps `File.Exists` (existence gate only; no content read).
+
 ## Next peels
 
 1. Defer: `PrimitivesKit`, `UiLayoutSnapshot`, Avalonia Views/VMs.
