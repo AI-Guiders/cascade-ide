@@ -88,6 +88,13 @@
     <Compile Include="..\Cockpit\DataBus\Events\StartupProjectPathChanged.cs" Link="Cockpit\DataBus\Events\StartupProjectPathChanged.cs" />
     <Compile Include="..\Cockpit\DataBus\Events\TestsStateChanged.cs" Link="Cockpit\DataBus\Events\TestsStateChanged.cs" />
     <Compile Include="..\Services\DebugSessionSnapshot.cs" Link="Services\DebugSessionSnapshot.cs" />
+    <!-- Peel4: Graph domain model (layout engines stay host until Point is abstracted). -->
+    <Compile Include="..\Cockpit\Graph\GraphKind.cs" Link="Cockpit\Graph\GraphKind.cs" />
+    <Compile Include="..\Cockpit\Graph\GraphNode.cs" Link="Cockpit\Graph\GraphNode.cs" />
+    <Compile Include="..\Cockpit\Graph\GraphEdge.cs" Link="Cockpit\Graph\GraphEdge.cs" />
+    <Compile Include="..\Cockpit\Graph\GraphDocument.cs" Link="Cockpit\Graph\GraphDocument.cs" />
+    <Compile Include="..\Cockpit\Graph\GraphDocumentJson.cs" Link="Cockpit\Graph\GraphDocumentJson.cs" />
+    <Compile Include="..\Cockpit\Graph\GraphDocumentBlueprint.cs" Link="Cockpit\Graph\GraphDocumentBlueprint.cs" />
   </ItemGroup>
 
   <ItemGroup>

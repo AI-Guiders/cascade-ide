@@ -106,6 +106,13 @@
     <Compile Remove="Cockpit\DataBus\Events\StartupProjectPathChanged.cs" />
     <Compile Remove="Cockpit\DataBus\Events\TestsStateChanged.cs" />
     <Compile Remove="Services\DebugSessionSnapshot.cs" />
+    <!-- Peel4: Graph domain model -->
+    <Compile Remove="Cockpit\Graph\GraphKind.cs" />
+    <Compile Remove="Cockpit\Graph\GraphNode.cs" />
+    <Compile Remove="Cockpit\Graph\GraphEdge.cs" />
+    <Compile Remove="Cockpit\Graph\GraphDocument.cs" />
+    <Compile Remove="Cockpit\Graph\GraphDocumentJson.cs" />
+    <Compile Remove="Cockpit\Graph\GraphDocumentBlueprint.cs" />
     <Compile Remove="CasaField.Core.Bench\**\*.cs" />
     <!-- Внешний субмодуль/вендор: не компилировать в IDE (иначе sandbox с top-level Main перехватывает входную точку). -->
     <Compile Remove="externals\**\*.cs" />
