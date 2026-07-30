@@ -45,10 +45,15 @@ North star: Avalonia CIDE + WPF glass both **ProjectReference** `CascadeIDE.Glas
 - `CdpHabitatPaths` — `%LocalAppData%/cdp-mcp` state root + latch file helpers (`presentation-LATEST`, `intercom-LATEST`, `GetLatchPath`).
 - Avalonia CDP projectors + WPF `LatchHub` share StateRoot; watchers/JSON apply stay host.
 
+## Peel9 (done)
+
+- `CdpLatchIo` — toolkit-agnostic settle (`PostSettled` / `PostSettledIfExists`) + `TryReadAllTextIfExists`.
+- Host `CdpLatchFs.PostApply` = settle then Avalonia UI marshal; WPF `LatchHub` uses `PostSettledIfExists`.
+
 ## Next peels
 
 1. Defer: `PrimitivesKit`, `UiLayoutSnapshot`, Avalonia Views/VMs.
-2. Optional next: thin shared latch debounce/read helpers (still no Avalonia in GlassCore).
+2. Optional next: migrate remaining projectors' `File.ReadAllText` → `CdpLatchIo.TryReadAllTextIfExists`.
 3. Keep host: `DataBusEventPolicyLoader`, `IGraphDataSource` / navigation JSON request, full `SettingsService` + typed workspace overlay.
 
 Map: inventory `glass-core-settings-inventory-v0.md`; reuse note `glass-wpf-reuse-cide-settings-v0.md`.
