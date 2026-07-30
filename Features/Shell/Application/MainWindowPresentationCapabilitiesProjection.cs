@@ -40,7 +40,8 @@ public static class MainWindowPresentationCapabilitiesProjection
         bool showAgentPluginsChromeHint = false,
         bool showAgentRefactorChromeHint = false,
         bool showAgentReviewChromeHint = false,
-        bool showAgentLearnChromeHint = false) =>
+        bool showAgentLearnChromeHint = false,
+        bool showAgentDomainChromeHint = false) =>
         showIdeHealthStrip
         || showEicasAlertsBar
         || showAgentCabinChromeHint
@@ -59,7 +60,8 @@ public static class MainWindowPresentationCapabilitiesProjection
         || showAgentPluginsChromeHint
         || showAgentRefactorChromeHint
         || showAgentReviewChromeHint
-        || showAgentLearnChromeHint;
+        || showAgentLearnChromeHint
+        || showAgentDomainChromeHint;
 
     public static bool ShowWorkspaceBottomChrome(
         bool showIdeHealthStrip,

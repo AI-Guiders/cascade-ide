@@ -40,6 +40,7 @@ public static class AgentChromeHintDensityPolicy
         "arch" => 14,
         "mcp" => 15,
         "learn" => 16,
+        "domain" => 17,
         _ => 50
     };
 
