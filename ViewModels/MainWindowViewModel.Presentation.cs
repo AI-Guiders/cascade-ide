@@ -10,8 +10,8 @@ using CascadeIDE.Models;
 
 namespace CascadeIDE.ViewModels;
 
-/// <summary>Вычисляемые свойства разметки, Workspace Health и видимости панелей (режимы UI).
-/// Skia mount → <c>Presentation.Skia</c>; IDE Health/EICAS → <c>Presentation.IdeHealth</c>.</summary>
+/// <summary>Вычисляемые свойства разметки и видимости панелей (режимы UI).
+/// Skia → <c>Presentation.Skia</c>; IDE Health → <c>Presentation.IdeHealth</c>; badges → <c>Presentation.Badges</c>.</summary>
 public partial class MainWindowViewModel
 {
     /// <summary>Семейство текущего UI-режима (одна ось вместо булевых Is*Mode).</summary>
@@ -89,8 +89,6 @@ public partial class MainWindowViewModel
     public bool AgentOperationsPanel => Capabilities.AgentOperationsPanel;
     public bool AgentTrace => Capabilities.AgentTrace;
     public bool AutonomousAgentTelemetry => Capabilities.AutonomousAgentTelemetry;
-    /// <summary>Карточка уровня безопасности: в Power — safety.observe/confirm/autonomous; в Focus/Balanced — компактные кнопки (разметка в ChatPanelView).</summary>
-    public bool ShowSafetyControls => true;
     public bool ShowTelemetryHiddenHint => UiModeGateSpecifications.ShowTelemetryHiddenHint.IsSatisfiedBy(
         new UiModeGateContext(UiModeFamily, AutonomousAgentTelemetry, IsTerminalVisible, HasDebugSession));
 
@@ -113,48 +111,7 @@ public partial class MainWindowViewModel
     /// <summary>Пункт меню для док-панели инструментирования (можно отключить и в Focus).</summary>
     public bool ShowInstrumentationLayoutMenu => true;
 
-    public bool IsSafetyObserve =>
-        MainWindowPresentationCapabilitiesProjection.IsSafetyLevel(SafetyLevel, AgentSafetyLevel.Observe);
-    public bool IsSafetyConfirm =>
-        MainWindowPresentationCapabilitiesProjection.IsSafetyLevel(SafetyLevel, AgentSafetyLevel.Confirm);
-    public bool IsSafetyAutonomous =>
-        MainWindowPresentationCapabilitiesProjection.IsSafetyLevel(SafetyLevel, AgentSafetyLevel.Autonomous);
-
-    /// <summary>Подпись режима безопасности (как на мокапе Power).</summary>
-    public string SafetyLevelDescription =>
-        MainWindowPresentationSurfaceProjection.SafetyLevelDescription(SafetyLevel);
-
-    public double SafetyObserveOpacity =>
-        MainWindowPresentationSurfaceProjection.SafetyBadgeOpacity(IsSafetyObserve);
-    public double SafetyConfirmOpacity =>
-        MainWindowPresentationSurfaceProjection.SafetyBadgeOpacity(IsSafetyConfirm);
-    public double SafetyAutonomousOpacity =>
-        MainWindowPresentationSurfaceProjection.SafetyBadgeOpacity(IsSafetyAutonomous);
-
     public bool HasFocusPlanItems => FocusPlanItems.Count > 0;
-
-    public bool IsRiskSummaryVisible =>
-        MainWindowPresentationSurfaceProjection.IsAgentSummaryVisibleComparedToPlaceholder(
-            RiskSummary,
-            MainWindowPresentationSurfaceProjection.DefaultRiskSummaryPlaceholder);
-
-    public bool IsResultSummaryVisible =>
-        MainWindowPresentationSurfaceProjection.IsAgentSummaryVisibleComparedToPlaceholder(
-            ResultSummary,
-            MainWindowPresentationSurfaceProjection.DefaultResultSummaryPlaceholder);
-
-    public bool IsRiskCardVisible =>
-        MainWindowPresentationCapabilitiesProjection.IsRiskCardVisible(Capabilities, IsRiskSummaryVisible);
-
-    public bool IsResultCardVisible =>
-        MainWindowPresentationCapabilitiesProjection.IsResultCardVisible(Capabilities, IsResultSummaryVisible);
-    public bool IsLocBadgeVisible => LocBadge > 0;
-
-    /// <summary>Строка бейджа LOC: число непустых строк и ось Low/Medium/High (пороги из <c>[loc_limits]</c>).</summary>
-    public string LocBadgeSummary =>
-        MainWindowPresentationCapabilitiesProjection.LocBadgeSummary(LocBadge, LocTierLabel);
-    public bool IsImpactedTestsBadgeVisible => ImpactedTestsBadge > 0;
-    public bool IsActiveTaskProgressVisible => ActiveTaskProgress > 0;
 
     public string ChatPanelToggleButtonText =>
         MainWindowPresentationSurfaceProjection.MfdRegionToggleCaption(IsMfdRegionExpanded);
