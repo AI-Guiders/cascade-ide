@@ -1,4 +1,5 @@
 #nullable enable
+using CascadeIDE.Features.Shell.Application;
 using CascadeIDE.Features.UiChrome;
 using CommunityToolkit.Mvvm.Input;
 
@@ -33,6 +34,30 @@ public partial class MainWindowViewModel
     public bool ShowAgentDomainChromeHint => !string.IsNullOrWhiteSpace(AgentDomainChromeHint);
     public bool ShowAgentSaDeskChromeHint => !string.IsNullOrWhiteSpace(AgentSaDeskChromeHint);
 
+    /// <summary>Область разметки над нижним доком: Workspace Health и/или полоса EICAS (<see cref="Views.WorkspaceChromeBandView"/>).</summary>
+    public bool ShowWorkspaceChromeBand =>
+        MainWindowPresentationCapabilitiesProjection.ShowWorkspaceChromeBand(
+            ShowIdeHealthStrip,
+            ShowEicasAlertsBar,
+            ShowAgentCabinChromeHint,
+            ShowAgentPressureChromeHint,
+            ShowAgentIgniteChromeHint,
+            ShowAgentScopeChromeHint,
+            ShowAgentSysChromeHint,
+            ShowAgentOnboardChromeHint,
+            ShowAgentArchChromeHint,
+            ShowAgentMcpChromeHint,
+            ShowAgentPlanChromeHint,
+            ShowAgentReportChromeHint,
+            ShowAgentCrmChromeHint,
+            ShowAgentWebcamChromeHint,
+            ShowAgentToolchainChromeHint,
+            ShowAgentPluginsChromeHint,
+            ShowAgentRefactorChromeHint,
+            ShowAgentReviewChromeHint,
+            ShowAgentLearnChromeHint,
+            ShowAgentDomainChromeHint,
+            ShowAgentSaDeskChromeHint);
 
     AgentChromeHintDensityPolicy.Result BuildChromeHintDensity()
     {

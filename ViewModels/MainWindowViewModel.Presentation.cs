@@ -165,31 +165,6 @@ public partial class MainWindowViewModel
     public bool ShowEicasAlertsBar =>
         MainWindowPresentationCapabilitiesProjection.ShowEicasAlertsBar(Capabilities, EicasMessages.Count);
 
-    /// <summary>Область разметки над нижним доком: Workspace Health и/или полоса EICAS (<see cref="Views.WorkspaceChromeBandView"/>).</summary>
-    public bool ShowWorkspaceChromeBand =>
-        MainWindowPresentationCapabilitiesProjection.ShowWorkspaceChromeBand(
-            ShowIdeHealthStrip,
-            ShowEicasAlertsBar,
-            ShowAgentCabinChromeHint,
-            ShowAgentPressureChromeHint,
-            ShowAgentIgniteChromeHint,
-            ShowAgentScopeChromeHint,
-            ShowAgentSysChromeHint,
-            ShowAgentOnboardChromeHint,
-            ShowAgentArchChromeHint,
-            ShowAgentMcpChromeHint,
-            ShowAgentPlanChromeHint,
-            ShowAgentReportChromeHint,
-            ShowAgentCrmChromeHint,
-            ShowAgentWebcamChromeHint,
-            ShowAgentToolchainChromeHint,
-            ShowAgentPluginsChromeHint,
-            ShowAgentRefactorChromeHint,
-            ShowAgentReviewChromeHint,
-            ShowAgentLearnChromeHint,
-            ShowAgentDomainChromeHint,
-            ShowAgentSaDeskChromeHint);
-
     /// <summary>Зона под чатом в MFD: полоса EICAS / IDE Health и/или док (терминал, сборка, Problems, Git, инструменты).</summary>
     public bool ShowWorkspaceBottomChrome =>
         MainWindowPresentationCapabilitiesProjection.ShowWorkspaceBottomChrome(
