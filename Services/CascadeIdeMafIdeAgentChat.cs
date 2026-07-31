@@ -106,6 +106,27 @@ internal static partial class CascadeIdeMafIdeAgentChat
                         cancellationToken)
                     .ConfigureAwait(false);
             }
+            else
+            {
+                // Citizen wire #13: @intent callouts → IDE organs (when no JSON tool salvage).
+                var intentOutcome = await TryExecuteCitizenIntentsAsync(
+                        assistantText,
+                        executeIdeCommandAsync,
+                        toolTraces,
+                        cancellationToken)
+                    .ConfigureAwait(false);
+                if (!string.IsNullOrEmpty(intentOutcome))
+                {
+                    assistantText = await SummarizeSalvagedToolOutcomeAsync(
+                            chatClient,
+                            intentOutcome,
+                            prompts,
+                            cascadeConversation,
+                            toolTraces,
+                            cancellationToken)
+                        .ConfigureAwait(false);
+                }
+            }
         }
 
         var uiBubbles = BuildToolUiBubbles(response, toolTraces);

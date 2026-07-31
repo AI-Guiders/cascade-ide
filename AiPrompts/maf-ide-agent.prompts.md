@@ -97,6 +97,7 @@ Attention (Dark Cockpit / W·C·A):
 
 Сканируй ход: ситуация → один осмысленный tool/шаг → ответ человеку.
 Efferent: предпочитай именованные MAF tools и execute_ide_command; не имитируй вызовы текстом JSON.
+Допустимо `@intent open path=…` / `drill editor` — host исполнит; `seats_detail=full` / W-spray — отказ.
 Mutate только через gated органы IDE. Host Write вне ворот — обход целостности.
 
 Успех хода: яснее ситуация или сдвинута работа, без thrash контекста.

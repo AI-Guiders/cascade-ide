@@ -382,6 +382,55 @@ internal static partial class CascadeIdeMafIdeAgentChat
         }
     }
 
+    private static async Task<string?> TryExecuteCitizenIntentsAsync(
+        string assistantText,
+        Func<string, IReadOnlyDictionary<string, JsonElement>?, CancellationToken, Task<string>> executeIdeCommandAsync,
+        List<string> toolTraces,
+        CancellationToken cancellationToken)
+    {
+        var intents = CitizenIntentEfferent.ExtractIntentTexts(assistantText);
+        if (intents.Count == 0)
+            return null;
+
+        string? lastOutcome = null;
+        foreach (var intent in intents)
+        {
+            var action = CitizenIntentEfferent.MapToIde(intent);
+            if (!action.Ok || string.IsNullOrWhiteSpace(action.CommandId))
+            {
+                toolTraces.Add($"[@intent {action.Raw}] → {action.Reason ?? "skip"}");
+                continue;
+            }
+
+            var header = $"[@intent → {action.CommandId}]";
+            toolTraces.Add($"{header} вызов…");
+            try
+            {
+                var outcome = await executeIdeCommandAsync(
+                        action.CommandId,
+                        action.Args,
+                        cancellationToken)
+                    .ConfigureAwait(false);
+                toolTraces[^1] = IdeMcpToolResultPlainFormatter.ForUiTrace(
+                    "@intent " + action.CommandId,
+                    outcome);
+                lastOutcome = outcome;
+            }
+            catch (OperationCanceledException)
+            {
+                toolTraces[^1] = $"{header} → отмена";
+                throw;
+            }
+            catch (Exception ex)
+            {
+                toolTraces[^1] = $"{header} → ошибка: {ex.Message}";
+                lastOutcome = $"[{action.CommandId}] ошибка: {ex.Message}";
+            }
+        }
+
+        return lastOutcome;
+    }
+
     private static string ExtractAssistantText(AgentResponse response)
     {
         try
