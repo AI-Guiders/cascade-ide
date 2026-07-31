@@ -17,6 +17,8 @@ Avalonia façade: `Features/UiChrome/AgentChromeHintDensityPolicy.cs`.
 | `MainWindowViewModel.ShellConstruction.HealthPresentation.cs` | Health/EICAS/presentation factory + post-construct wire |
 | `MainWindowViewModel.ShellConstruction.GlassPatch.cs` | Live topology/tier/instruments glass patch → settings.toml |
 | `MainWindowViewModel.ShellConstruction.Diagnose.cs` | Diagnose-files / warmup path helpers for agent environment |
+| `MainWindowViewModel.PfdBackgroundStatus.cs` | PFD/Forward status strip props + warmup/HCI refresh (~152 LOC) |
+| `MainWindowViewModel.PfdBackgroundStatus.VerifyEpoch.cs` | Verify Epoch apply, agent cancel/retry, ticker, hide timers |
 | `MainWindowViewModel.Presentation.cs` | Host surface layout, editor groups (~73 LOC; under gate — peels already extracted) |
 | `MainWindowViewModel.Presentation.Capabilities.cs` | UiMode Capabilities + instrumentation dock flags (~27 LOC; under gate) |
 | `MainWindowViewModel.Presentation.Skia.cs` | Zone-geometry overlay + instrument mount styles (~42 LOC; under gate) |
