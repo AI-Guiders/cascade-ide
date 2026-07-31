@@ -1,39 +1,28 @@
 using Avalonia.Threading;
-using CascadeIDE.Cockpit.Channels.Eicas;
-using CascadeIDE.Cockpit.Channels.EnvironmentReadiness;
-using CascadeIDE.Cockpit.Composition.EnvironmentReadiness;
-using CascadeIDE.Cockpit.Composition.HostSurface;
-using CascadeIDE.Cockpit.Composition.WorkspaceHealth;
-using CascadeIDE.Cockpit.ComputingUnits.IdeHealth;
 using CascadeIDE.Cockpit.DataBus;
 using CascadeIDE.Features.AutonomousAgent;
 using CascadeIDE.Features.Build;
-using CascadeIDE.Features.Chat;
 using CascadeIDE.Features.Debug;
 using CascadeIDE.Features.Documents;
 using CascadeIDE.Features.Editor;
 using CascadeIDE.Features.Shell;
-using CascadeIDE.Features.Git;
 using CascadeIDE.Features.HybridIndex.Application;
 using CascadeIDE.Features.IdeMcp.Application;
-using CascadeIDE.Features.Workspace;
-using CascadeIDE.Features.Instrumentation;
-using CascadeIDE.Features.Markdown;
 using CascadeIDE.Features.Os.DataAcquisition;
 using CascadeIDE.Features.WebAiPortal.Application;
 using CascadeIDE.Features.Shell.Application;
-using CascadeIDE.Features.Terminal;
 using CascadeIDE.Features.UiChrome;
+using CascadeIDE.Features.Workspace;
 using CascadeIDE.Features.Workspace.Application;
 using CascadeIDE.Models;
 using CascadeIDE.Services;
-using CascadeIDE.Services.Presentation;
-using CascadeIDE.Views;
 
 namespace CascadeIDE.ViewModels;
 
 /// <summary>
-/// Конструктор и композиция shell: дочерние VM, шина, DAP/HCI, топология presentation (ADR 0017).
+/// Конструктор и композиция shell: дочерние VM, шина, DAP/HCI (ADR 0017).
+/// Panels → <c>ShellConstruction.Panels</c>; health/presentation → <c>ShellConstruction.HealthPresentation</c>;
+/// glass patch → <c>ShellConstruction.GlassPatch</c>; diagnose → <c>ShellConstruction.Diagnose</c>.
 /// </summary>
 public partial class MainWindowViewModel
 {
@@ -128,80 +117,18 @@ public partial class MainWindowViewModel
             () => Workspace.SolutionPath,
             GetDiagnoseFilesWarmupCsFilePaths);
 
-        BuildOutputPanel = new BuildOutputPanelViewModel();
-        TerminalPanel = new TerminalPanelViewModel(() => Workspace.SolutionPath);
-        GitPanel = new GitPanelViewModel(_gitRunner, GetWorkspacePath, IdeMcp, LoadSolution, RefreshGitSummaryAsync, osShell: _osShell);
-        ChatPanel = new ChatPanelViewModel(
-            _aiProviderManager,
-            () => ActiveAiProvider,
-            () => SelectedOllamaModel,
-            () => ChatMcpOnly,
-            () => ShowThinkingInHistory,
-            () => UseMinimizedContext,
-            () => CurrentFilePath,
-            () => EditorText,
-            GetWorkspacePath,
-            () => CursorAcpAgentPath,
-            () => Services.McpExternalServersJsonResolver.ResolveEffectiveJson(_settings),
-            () => ResolveAcpAutoInjectIdeMcp(),
-            () => string.IsNullOrWhiteSpace(CursorAcpModelId) ? null : CursorAcpModelId.Trim(),
-            id => CursorAcpModelId = id ?? "",
-            appendAcpTerminal: text => UiScheduler.Default.Post(() => TerminalPanel.AppendOutput(text)),
-            showAcpTerminal: () => UiScheduler.Default.Post(() =>
-            {
-                if (ShowTerminalPanelCommand.CanExecute(null))
-                    ShowTerminalPanelCommand.Execute(null);
-            }),
-            executeIdeCommandForMafAgent: (commandId, args, ct) => IdeMcp.ExecuteCommandAsync(commandId, args, ct),
-            revealIntercomAttachmentInIde: (anchor, select, ct) =>
-                RevealIntercomAttachmentInIdeAsync(anchor, select, ct),
-            getLocalOllamaEndpoint: () => new Uri(Services.OllamaService.DefaultBaseUriString),
-            getEffectiveOllamaModelId: () => EffectiveOllamaModelId,
-            tryCreateCloudMafIChatClient: TryCreateCloudMafIChatClientForChatPanel,
-            getChatMinimizedContextBlock: BuildChatMinimizedContextBlockCore,
-            getSendMessageKey: () => SendMessageKey,
-            getComposerNewLineKey: () => ComposerNewLineKey,
-            getSolutionPath: () => Workspace.SolutionPath,
-            getSolutionRoots: () => Workspace.SolutionRoots,
-            getEditorSelectionStart: () => EditorSelectionStart,
-            getEditorSelectionLength: () => EditorSelectionLength,
-            getEditorCaretOffset: () => NavigationMap.EditorCaretOffset,
-            revealAgentRangeInEditor: (path, startLine, endLine) =>
-            {
-                var dock = EditorActiveDockResolver.TryGetDockDocumentView(this, path);
-                return dock?.RevealAgentRangeAsync(startLine, endLine, persistent: true) ?? Task.CompletedTask;
-            },
-            clearAgentRevealInEditor: path =>
-                EditorActiveDockResolver.TryGetDockDocumentView(this, path)?.ClearAgentReveal(),
-            agentEnvironment: _agentEnvironment,
-            getSolutionPathForAgent: () => Workspace.SolutionPath);
-        ChatPanel.SetIntercomFontsSettings(_settings.Fonts.Intercom);
-        ChatPanel.ApplyIntercomPresentationSettings(_settings.Intercom);
-        ChatPanel.ShowMarkdownPreview = (title, content) => RequestShowMarkdownPreviewWindow?.Invoke(title, content);
-        CockpitCommandLineOverlay = new CockpitCommandLineOverlayViewModel(
-            ChatPanel,
-            () => PrimaryWorkSurface,
-            () => CommandPaletteHost);
-        ChatPanel.SetCascadeSettingsAccessor(() => _settings);
-        ChatPanel.SetFmOpenAiCredentialsAccessor(ResolveFmOpenAiCredentialsForCatalog);
-        ChatPanel.SetIntercomTransportCoordinator(_intercomTransport);
-        ChatPanel.SetIntercomAdminRunner((handlerId, argsTail, ct) =>
-            RunIntercomAdminSlashAsync(handlerId, argsTail, ct));
-        InstrumentationPanel = new InstrumentationPanelViewModel();
-        InstrumentationPanel.PropertyChanged += OnInstrumentationPanelPropertyChanged;
-        HypothesesPanel = new HypothesesPanelViewModel(GetWorkspacePath);
-
-        ProblemsPanel = new ProblemsPanelViewModel(NavigateToProblemFromList, AttachSelectedProblemToIntercom);
-        _workspaceDiagnostics = new Services.WorkspaceDiagnosticsCoordinator(_csharpLanguageService, ProblemsPanel);
-        _workspaceDiagnostics.Attach(this);
-        _workspaceDiagnostics.DiagnosticsChanged += OnWorkspaceDiagnosticsChangedForHud;
-        WireIntercomAttachAffordances();
-        MarkdownPreviewTool = new MarkdownPreviewToolViewModel();
-        MarkdownPreviewTool.AttachToEditor(this);
-        StartMagicLinkListener();
-
-        new UiChromeCapabilitiesModule().Register(_capabilities);
-        new MarkdownCapabilitiesModule().Register(_capabilities);
+        var panels = CreateShellPanels();
+        BuildOutputPanel = panels.BuildOutput;
+        TerminalPanel = panels.Terminal;
+        GitPanel = panels.Git;
+        ChatPanel = panels.Chat;
+        CockpitCommandLineOverlay = panels.CockpitCommandLine;
+        InstrumentationPanel = panels.Instrumentation;
+        HypothesesPanel = panels.Hypotheses;
+        ProblemsPanel = panels.Problems;
+        _workspaceDiagnostics = panels.WorkspaceDiagnostics;
+        MarkdownPreviewTool = panels.MarkdownPreview;
+        WireShellPanelsAfterConstruct();
 
         var csharpLsp = _settings.Languages.CSharp.ResolveForRuntime();
         _csharpLspProvider = csharpLsp.Mode;
@@ -227,184 +154,19 @@ public partial class MainWindowViewModel
         _mcpBuildTest = new Services.McpDotnetBuildTestService(_dotnetRunner);
         _mcpAgentNotes = new Services.McpAgentNotesService(() => _settings);
 
-        _workspaceHealth = new IdeHealthSnapshotUnit(_ideDataBus);
-        SeedIdeHealthDataBus();
-        Chrome.AfterGitWorkspaceHealthSummaryApplied = PublishGitToIdeDataBusAndRebuildIdeHealth;
-        _workspaceHealthSurfaceCompositor = new IdeHealthSurfaceCompositor();
-
-        _eicasFeed = new LatchEicasFeed();
-        _eicasFeed.MessagesChanged += (_, _) => RebuildEicas();
-        _environmentReadinessChannel = new EnvironmentReadinessChannel();
-        _environmentReadinessSurfaceCompositor = new EnvironmentReadinessSurfaceCompositor();
-
-        Workspace.PropertyChanged += (_, e) => OnWorkspacePropertyChanged(e.PropertyName);
-        RebuildIdeHealth();
-        RebuildEicas();
-
-        var pg = _settings.GetEffectivePresentationGrammar();
-        var grammar = PresentationGrammarTokens.FromSettings(
-            pg.Brackets,
-            pg.BetweenScreens,
-            pg.BetweenZones,
-            pg.Pfd,
-            pg.Forward,
-            pg.Mfd);
-        _presentationParse = PresentationParser.Parse(_settings.GetEffectivePresentationLine(), grammar);
-        var topologyFlags = PresentationTopologyResolver.ResolveFlags(_presentationParse);
-        _presentationDedicatedMfdSecondScreen = topologyFlags.DedicatedMfdSecondScreen;
-        _presentationTripleOneAnchorPerZone = topologyFlags.TripleOneAnchorPerZone;
-        _presentationMfdHostTopology = topologyFlags.MfdHostTopology;
-        _presentationPmForwardTwoScreen = topologyFlags.PmForwardTwoScreen;
-        _presentationPmHostTopology = topologyFlags.PmHostTopology;
-        _instrumentMountPolicyResolver = new SettingsBackedInstrumentMountPolicyResolver();
-
-        SyncMfdShellPageForPrimaryWorkSurface();
-        InitializePresentationTier();
-        NotifyDockedInstrumentSlotBindings();
-        EnsureAgentEnvironmentWiring();
-    }
-
-    /// <summary>
-    /// Live apply operator presentation topology (agent desk wire / settings).
-    /// Persists <c>display.screens.topology</c>, reparses layout flags, notifies MainGrid.
-    /// Host TopLevel open/close may need a follow-up if screen count changes.
-    /// </summary>
-    public bool ApplyPresentationTopology(string topology) =>
-        ApplyPresentationGlassPatch(topology: topology);
-
-    /// <summary>
-    /// Live apply operator glass patch from agent desk latch (topology / tier / instruments / mfd page).
-    /// Persists user <c>settings.toml</c> display fields; does not mutate repo <c>workspace.toml</c>.
-    /// </summary>
-    public bool ApplyPresentationGlassPatch(
-        string? topology = null,
-        string? tier = null,
-        IReadOnlyDictionary<string, string>? instruments = null,
-        string? mfdPage = null)
-    {
-        var dirty = false;
-
-        if (!string.IsNullOrWhiteSpace(topology))
-        {
-            var next = topology.Trim();
-            if (!string.Equals(_settings.Display.Screens.Topology?.Trim(), next, StringComparison.Ordinal))
-            {
-                _settings.Display.Screens.Topology = next;
-                dirty = true;
-            }
-        }
-
-        if (!string.IsNullOrWhiteSpace(tier))
-        {
-            var nextTier = tier.Trim().ToLowerInvariant();
-            if (!string.Equals(_settings.Display.Presentation.Tier?.Trim(), nextTier, StringComparison.OrdinalIgnoreCase))
-            {
-                _settings.Display.Presentation.Tier = nextTier;
-                dirty = true;
-            }
-        }
-
-        if (instruments is { Count: > 0 })
-        {
-            _settings.Display.Instruments ??= new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-            foreach (var (k, v) in instruments)
-            {
-                if (string.IsNullOrWhiteSpace(k) || string.IsNullOrWhiteSpace(v))
-                    continue;
-                var key = k.Trim();
-                var val = v.Trim();
-                if (_settings.Display.Instruments.TryGetValue(key, out var cur)
-                    && string.Equals(cur, val, StringComparison.OrdinalIgnoreCase))
-                    continue;
-                _settings.Display.Instruments[key] = val;
-                dirty = true;
-            }
-        }
-
-        if (dirty)
-            SettingsService.Save(_settings);
-
-        ReparsePresentationFromSettings();
-        NotifyPresentationLayoutChanged();
-
-        if (!string.IsNullOrWhiteSpace(mfdPage)
-            && Enum.TryParse<MfdShellPage>(mfdPage.Trim(), ignoreCase: true, out var page))
-        {
-            TryNavigateToMfdShellPage(page);
-        }
-
-        return !string.IsNullOrWhiteSpace(topology)
-            ? _presentationParse.IsSuccess
-            : true;
-    }
-
-    void ReparsePresentationFromSettings()
-    {
-        var pg = _settings.GetEffectivePresentationGrammar();
-        var grammar = PresentationGrammarTokens.FromSettings(
-            pg.Brackets,
-            pg.BetweenScreens,
-            pg.BetweenZones,
-            pg.Pfd,
-            pg.Forward,
-            pg.Mfd);
-        _presentationParse = PresentationParser.Parse(_settings.GetEffectivePresentationLine(), grammar);
-        var topologyFlags = PresentationTopologyResolver.ResolveFlags(_presentationParse);
-        _presentationDedicatedMfdSecondScreen = topologyFlags.DedicatedMfdSecondScreen;
-        _presentationTripleOneAnchorPerZone = topologyFlags.TripleOneAnchorPerZone;
-        _presentationMfdHostTopology = topologyFlags.MfdHostTopology;
-        _presentationPmForwardTwoScreen = topologyFlags.PmForwardTwoScreen;
-        _presentationPmHostTopology = topologyFlags.PmHostTopology;
-        InitializePresentationTier();
-    }
-
-    void NotifyPresentationLayoutChanged()
-    {
-        OnPropertyChanged(nameof(EffectivePresentationLine));
-        OnPropertyChanged(nameof(PresentationParse));
-        OnPropertyChanged(nameof(MainGridColumnDefinitions));
-        OnPropertyChanged(nameof(MainGridLayoutFrame));
-        OnPropertyChanged(nameof(PresentationRequestsMainWindowMaximized));
-        OnPropertyChanged(nameof(PresentationRequestsDedicatedMfdSecondScreen));
-        OnPropertyChanged(nameof(PresentationRequestsTriplePfdForwardMfd));
-        OnPropertyChanged(nameof(PresentationRequestsPfdHostWindow));
-        OnPropertyChanged(nameof(PresentationRequestsMfdHostWindow));
-        OnPropertyChanged(nameof(PresentationRequestsPmSplitHostWindow));
-        OnPropertyChanged(nameof(PresentationRequestsPmSplitMainWindowScreenPlacement));
-        OnPropertyChanged(nameof(MfdHostPresentationScreenIndex));
-        OnPropertyChanged(nameof(PfdHostPresentationScreenIndex));
-        OnPropertyChanged(nameof(PmSplitHostPresentationScreenIndex));
-        OnPropertyChanged(nameof(PmSplitHostColumnDefinitions));
-        OnPropertyChanged(nameof(MainWindowPresentationScreenIndex));
-        NotifyDockedInstrumentSlotBindings();
-    }
-
-    private IReadOnlyList<(string Path, string Content)> GetOpenCsDocumentsForDiagnoseFiles()
-    {
-        var list = new List<(string Path, string Content)>();
-        foreach (var doc in Documents.OpenDocuments)
-        {
-            if (!doc.FilePath.EndsWith(".cs", StringComparison.OrdinalIgnoreCase))
-                continue;
-            list.Add((doc.FilePath, doc.Content ?? ""));
-        }
-
-        return list;
-    }
-
-    private IReadOnlyList<string> GetDiagnoseFilesWarmupCsFilePaths()
-    {
-        var warmup = _settings.SolutionWarmup;
-        return Features.Agent.Environment.AgentDiagnoseFilesWarmupPathCollector.Collect(
-            warmup.Enabled,
-            warmup.WarmActiveFileOnSolutionOpen,
-            warmup.WarmOpenDocuments,
-            warmup.WarmRecentCsFiles,
-            warmup.MaxOpenDocumentFiles,
-            () => Documents.OpenDocuments
-                .Select(d => d.FilePath)
-                .Where(p => !string.IsNullOrWhiteSpace(p))
-                .ToList(),
-            () => CurrentFilePath);
+        var health = CreateHealthAndPresentation();
+        _workspaceHealth = health.WorkspaceHealth;
+        _workspaceHealthSurfaceCompositor = health.WorkspaceHealthSurface;
+        _eicasFeed = health.EicasFeed;
+        _environmentReadinessChannel = health.EnvironmentReadiness;
+        _environmentReadinessSurfaceCompositor = health.EnvironmentReadinessSurface;
+        _presentationParse = health.PresentationParse;
+        _presentationDedicatedMfdSecondScreen = health.DedicatedMfdSecondScreen;
+        _presentationTripleOneAnchorPerZone = health.TripleOneAnchorPerZone;
+        _presentationMfdHostTopology = health.MfdHostTopology;
+        _presentationPmForwardTwoScreen = health.PmForwardTwoScreen;
+        _presentationPmHostTopology = health.PmHostTopology;
+        _instrumentMountPolicyResolver = health.InstrumentMountPolicy;
+        WireHealthAndPresentationAfterConstruct();
     }
 }

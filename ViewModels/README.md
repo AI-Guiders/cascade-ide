@@ -12,6 +12,11 @@ Avalonia façade: `Features/UiChrome/AgentChromeHintDensityPolicy.cs`.
 | --- | --- |
 | `MainWindowViewModel.CabinOrganChrome.cs` | `Agent*ChromeHint` ObservableProperty fields + `NotifyPropertyChangedFor` (Show*, WorkspaceBand, density props) |
 | `MainWindowViewModel.SoftOrganChrome.cs` | Show* flags, `ShowWorkspaceChromeBand`, `Apply*ChromeHint` + normalize helper, VisibleLines/Overflow/Toggle, seat candidate table |
+| `MainWindowViewModel.ShellConstruction.cs` | Ctor shell: children VM, settings bootstrap, IdeMcp/bus/agent, LSP/DAP |
+| `MainWindowViewModel.ShellConstruction.Panels.cs` | Panel factory + post-construct wire (Chat/Git/Build/…) |
+| `MainWindowViewModel.ShellConstruction.HealthPresentation.cs` | Health/EICAS/presentation factory + post-construct wire |
+| `MainWindowViewModel.ShellConstruction.GlassPatch.cs` | Live topology/tier/instruments glass patch → settings.toml |
+| `MainWindowViewModel.ShellConstruction.Diagnose.cs` | Diagnose-files / warmup path helpers for agent environment |
 | `MainWindowViewModel.Presentation.cs` | Host surface layout, editor groups (~73 LOC; under gate — peels already extracted) |
 | `MainWindowViewModel.Presentation.Capabilities.cs` | UiMode Capabilities + instrumentation dock flags (~27 LOC; under gate) |
 | `MainWindowViewModel.Presentation.Skia.cs` | Zone-geometry overlay + instrument mount styles (~42 LOC; under gate) |
