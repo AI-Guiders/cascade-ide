@@ -1,6 +1,7 @@
 #nullable enable
 using System.IO;
 using CascadeIDE.Features.Cdp;
+using CascadeIDE.SoftOrgan;
 
 namespace CDP.GlassCockpit.Windows;
 
@@ -10,13 +11,6 @@ namespace CDP.GlassCockpit.Windows;
 /// </summary>
 internal sealed class LatchHub : IDisposable
 {
-    static readonly HashSet<string> SoftOrganIds = new(StringComparer.OrdinalIgnoreCase)
-    {
-        "pressure", "ignite", "plan", "cabin", "scope", "review", "refactor", "plugins",
-        "toolchain", "crm", "report", "webcam", "sys", "onboard", "arch", "mcp", "learn", "domain",
-        "sa-desk"
-    };
-
     FileSystemWatcher? _watcher;
 
     public string StateRoot { get; } = CdpHabitatPaths.StateRoot;
@@ -50,7 +44,7 @@ internal sealed class LatchHub : IDisposable
         TryFireExisting(CdpHabitatPaths.PresentationLatchFileName, PresentationChanged);
         TryFireExisting("alert-LATEST.json", AlertChanged);
         TryFireExisting("qrh-LATEST.json", QrhChanged);
-        foreach (var id in SoftOrganIds)
+        foreach (var id in SoftOrganLatchCatalog.Ids)
             TryFireSoftOrgan(id + "-LATEST.json");
     }
 
@@ -68,7 +62,7 @@ internal sealed class LatchHub : IDisposable
             CdpLatchIo.PostSettledIfExists(CdpHabitatPaths.GetLatchPath(name), p => AlertChanged?.Invoke(p));
         else if (name.Equals("qrh-LATEST.json", StringComparison.OrdinalIgnoreCase))
             CdpLatchIo.PostSettledIfExists(CdpHabitatPaths.GetLatchPath(name), p => QrhChanged?.Invoke(p));
-        else if (TryParseSoftOrganFileName(name, out var organId))
+        else if (SoftOrganLatchCatalog.TryParseFileName(name, out var organId))
             CdpLatchIo.PostSettledIfExists(CdpHabitatPaths.GetLatchPath(name), _ => ApplySoftOrganFromDisk(organId, name));
     }
 
@@ -81,7 +75,7 @@ internal sealed class LatchHub : IDisposable
 
     void TryFireSoftOrgan(string fileName)
     {
-        if (!TryParseSoftOrganFileName(fileName, out var organId))
+        if (!SoftOrganLatchCatalog.TryParseFileName(fileName, out var organId))
             return;
         if (!File.Exists(CdpHabitatPaths.GetLatchPath(fileName)))
             return;
@@ -93,16 +87,6 @@ internal sealed class LatchHub : IDisposable
         var path = CdpHabitatPaths.GetLatchPath(fileName);
         var hint = LatchPaint.TryReadChromeHint(path);
         SoftOrganChanged?.Invoke(organId, hint);
-    }
-
-    static bool TryParseSoftOrganFileName(string fileName, out string organId)
-    {
-        organId = "";
-        const string suffix = "-LATEST.json";
-        if (!fileName.EndsWith(suffix, StringComparison.OrdinalIgnoreCase))
-            return false;
-        organId = fileName[..^suffix.Length];
-        return SoftOrganIds.Contains(organId);
     }
 
     public void Dispose()

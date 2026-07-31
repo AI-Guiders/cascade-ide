@@ -26,11 +26,12 @@ Separate process · latch IPC · Avalonia on hold for Windows primary.
 | `MainWindow.LayoutSurface.cs` | session layout, host sync, Forward `primary_work_surface` (ADR 0120) |
 | `MainWindow.EditorSurface.cs` | AvalonEdit mount, dogfood open, pick/save, Ctrl+O/S |
 | `MainWindow.IntercomFeed.cs` | Virtual History feed, topics, new-msg cue, send |
-| `MainWindow.SoftOrganBand.cs` | SoftOrgan latch → band paint / overflow toggle |
+| `MainWindow.SoftOrganBand.cs` | SoftOrgan latch → band paint / overflow toggle (~50 LOC; under gate — no peel) |
 | `MainWindow.LatchEicas.cs` | presentation / alert / qrh latch → Plan + EICAS |
 | `MainWindow.MfdBody.cs` | MFD page select + stub body text |
 
 Shared SoftOrgan density: `CascadeIDE.GlassCore/SoftOrgan/SoftOrganChromeDensityPolicy.cs` (Avalonia façade forwards).
+Latch id catalog (Glass `*-LATEST.json` stems): `SoftOrganLatchCatalog` — consumed by `LatchHub`.
 Avalonia SoftOrgan/CabinOrgan ViewModel map: `ViewModels/README.md`.
 
 ## Run
