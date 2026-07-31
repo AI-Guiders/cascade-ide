@@ -348,5 +348,42 @@
         </DockPanel>
       </Border>
     </Border>
+
+    <Border x:Name="ChordOverlay"
+            Visibility="Collapsed"
+            Background="#AA000000"
+            Panel.ZIndex="101">
+      <Border Width="480" MaxHeight="380"
+              VerticalAlignment="Center" HorizontalAlignment="Center"
+              Background="#152018" BorderBrush="#5A9A6A" BorderThickness="1"
+              Padding="12" CornerRadius="4">
+        <DockPanel>
+          <TextBlock DockPanel.Dock="Top" Text="CascadeChord · melody" FontWeight="SemiBold" Margin="0,0,0,8"/>
+          <TextBlock DockPanel.Dock="Bottom"
+                     Text="Ctrl+K · type alias (of/sf/h/…) · Enter · Esc · timeout 8s"
+                     Foreground="#9BD4B0" FontSize="11" Margin="0,8,0,0"/>
+          <TextBox x:Name="ChordQuery"
+                   DockPanel.Dock="Top"
+                   Margin="0,0,0,8"
+                   Background="#222" Foreground="#EEE" BorderBrush="#3F3F46"
+                   Padding="8" FontFamily="Consolas" FontSize="14"/>
+          <ListBox x:Name="ChordList"
+                   Background="Transparent" BorderThickness="0" Foreground="#EEE"
+                   FontFamily="Segoe UI" FontSize="12">
+            <ListBox.ItemTemplate>
+              <DataTemplate>
+                <StackPanel Margin="2,3" Orientation="Horizontal">
+                  <TextBlock Text="{Binding Alias}" FontFamily="Consolas" FontWeight="SemiBold" Width="36"/>
+                  <StackPanel>
+                    <TextBlock Text="{Binding Title}" FontWeight="SemiBold"/>
+                    <TextBlock Text="{Binding Help}" Foreground="#9BD4B0" FontSize="11" TextWrapping="Wrap"/>
+                  </StackPanel>
+                </StackPanel>
+              </DataTemplate>
+            </ListBox.ItemTemplate>
+          </ListBox>
+        </DockPanel>
+      </Border>
+    </Border>
   </Grid>
 </Window>

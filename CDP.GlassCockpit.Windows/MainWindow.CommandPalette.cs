@@ -32,6 +32,7 @@ public partial class MainWindow
 
         PaletteQuery.Text = "";
         RefreshPaletteFilter();
+        CloseCascadeChord();
         PaletteOverlay.Visibility = Visibility.Visible;
         PaletteQuery.Focus();
         Keyboard.Focus(PaletteQuery);

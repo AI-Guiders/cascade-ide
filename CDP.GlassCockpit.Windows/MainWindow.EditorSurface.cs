@@ -89,6 +89,13 @@ public partial class MainWindow
 
     void MainWindow_OnPreviewKeyDown(object sender, KeyEventArgs e)
     {
+        if (e.Key == Key.Escape && ChordOverlay.Visibility == Visibility.Visible)
+        {
+            CloseCascadeChord();
+            e.Handled = true;
+            return;
+        }
+
         if (e.Key == Key.Escape && PaletteOverlay.Visibility == Visibility.Visible)
         {
             CloseCommandPalette();
@@ -103,6 +110,13 @@ public partial class MainWindow
         if (e.Key == Key.Q)
         {
             ToggleCommandPalette();
+            e.Handled = true;
+            return;
+        }
+
+        if (e.Key == Key.K)
+        {
+            ToggleCascadeChord();
             e.Handled = true;
             return;
         }
