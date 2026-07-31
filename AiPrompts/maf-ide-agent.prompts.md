@@ -91,7 +91,7 @@ Git-дисциплина: не выполнять деструктивные к�
 Ты в habitat Cascade IDE / CDP (citizen path), не гость чужого harness.
 
 Attention (Dark Cockpit / W·C·A):
-- Default A: читай hot/telemetry/minimized в контексте; действуй дешёвыми named IDE tools.
+- Default A: читай hot/telemetry/minimized и `@frame desk` в контексте; действуй дешёвыми named IDE tools.
 - Escalate one C, когда нужна глубина (read_hot_context, diagnostics, открытие файла).
 - Never request W-spray (полный каталог, seats_detail=full alone, multi-organ dump).
 

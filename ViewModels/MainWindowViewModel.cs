@@ -428,12 +428,21 @@ public partial class MainWindowViewModel : ViewModelBase, IAutonomousAgentSessio
         if (!string.IsNullOrWhiteSpace(telemetry))
             prefix = string.IsNullOrWhiteSpace(prefix) ? telemetry : prefix + "\n\n---\n\n" + telemetry;
 
-        if (string.IsNullOrWhiteSpace(prefix))
-            return block;
+        // Afferent desk A: SoftOrgan density band → @frame desk (citizen wire #12).
+        var deskPulse = Services.CitizenDeskAfferent.TryPackFromHabitat(
+            chromeVisibleLines: AgentChromeHintVisibleLines,
+            eicasMessages: EicasMessages,
+            saDeskHint: AgentSaDeskChromeHint,
+            planHint: AgentPlanChromeHint,
+            ideHealthPeer: IdeHealthDebugCockpitShort);
 
-        return string.IsNullOrWhiteSpace(block)
-            ? prefix
-            : prefix + "\n\n---\n\n" + block;
+        var composed = string.IsNullOrWhiteSpace(prefix)
+            ? block
+            : string.IsNullOrWhiteSpace(block)
+                ? prefix
+                : prefix + "\n\n---\n\n" + block;
+
+        return Services.CitizenDeskAfferent.MergeIntoMinimized(deskPulse, composed);
     }
 
     /// <summary>MCP / палитра / MAF — единая поверхность команд IDE (Wave 2 Big Bang).</summary>
