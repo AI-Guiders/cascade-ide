@@ -15,11 +15,13 @@ public partial class MainWindow : Window
     readonly SoftOrganChromeAggregator _softOrgans = new();
     readonly EicasBandAggregator _eicas = new();
     readonly ObservableCollection<ChatBubble> _feed = new();
+    readonly GlassHostWindows _hosts;
 
     public MainWindow()
     {
         InitializeComponent();
         MessageFeed.ItemsSource = _feed;
+        _hosts = new GlassHostWindows(this);
 
         _session = new GlassSession();
         ApplyLayoutFromSession();
@@ -27,7 +29,7 @@ public partial class MainWindow : Window
 
         _feed.Add(new ChatBubble(
             "system",
-            "MVP: AvalonEdit (top) + Intercom (bottom). CIDE settings Forward=intercom (fallback).",
+            "MVP: AvalonEdit (top) + Intercom (bottom). Multi-window hosts for ()()() / (P)(F)(M).",
             DateTime.Now.ToString("HH:mm")));
 
         TryOpenDogfoodFile();
@@ -42,7 +44,12 @@ public partial class MainWindow : Window
 
         StatusText.Text =
             $"glass · {_session.Layout.Topology} · cols={_session.Layout.ColumnDefinitions} · {_latches.StateRoot}";
-        Closed += (_, _) => _latches.Dispose();
+        Loaded += (_, _) => SyncHostWindows();
+        Closed += (_, _) =>
+        {
+            _hosts.Dispose();
+            _latches.Dispose();
+        };
         UpdateMfdBody();
         RefreshEicasHealth();
     }
@@ -54,7 +61,10 @@ public partial class MainWindow : Window
         ChromeHint.Text =
             $"settings.toml · {_session.Settings.Workspace.PrimaryWorkSurface} · tier={_session.Settings.Display.Presentation.Tier}" +
             (_session.Layout.ParseOk ? "" : $" · parse fail: {_session.Layout.ParseError}");
+        SyncHostWindows();
     }
+
+    void SyncHostWindows() => _hosts.Sync(_session.Layout.Flags);
 
     void ApplyPrimaryWorkSurface()
     {
@@ -135,6 +145,7 @@ public partial class MainWindow : Window
                 var layout = _session.ApplyTopology(view.Topology);
                 WpfMainGridColumns.Apply(MainGrid, layout.ColumnDefinitions);
                 TopologyBadge.Text = layout.Topology;
+                SyncHostWindows();
 
                 SelectMfdPage(view.MfdPage);
                 RefreshEicasHealth();
