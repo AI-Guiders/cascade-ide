@@ -23,7 +23,8 @@ Hub `ChatPanelViewModel.cs` still over quality gate — peel coherent concerns i
 | `ChatPanelViewModel.IntercomCorrespondence.Mcp.cs` | MCP JSON messages-for-code / message-relate |
 | `ChatPanelViewModel.ComposerAutocomplete.cs` | Popup facade, caret refresh, slash/bracket routing, commit/move |
 | `ChatPanelViewModel.ComposerAutocomplete.Bracket.cs` | Bracket suggestions, debounce, move/commit/dismiss |
+| `ChatPanelViewModel.Surface.cs` | Collections, observable surface props, send gate, message-change refresh |
 
 Existing concern partials (Intercom*, Session, Threading, Composer*, …) stay as mapped by filename.
 
-Fat siblings next: invent after build (hub / IntercomCorrespondence.Mcp / other).
+Hub `ChatPanelViewModel.cs` ≈194 (fields+ctor). Fat siblings next: invent after build if any remain over ~200.
