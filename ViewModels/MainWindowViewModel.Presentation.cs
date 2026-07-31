@@ -1,8 +1,5 @@
 using CascadeIDE.Cockpit;
 using CascadeIDE.Cockpit.Cds;
-using CascadeIDE.Cockpit.Channels.WorkspaceHealth;
-using CascadeIDE.Cockpit.ComputingUnits;
-using CascadeIDE.Cockpit.ComputingUnits.IdeHealth;
 using CascadeIDE.Cockpit.Composition;
 using CascadeIDE.Cockpit.Composition.HostSurface;
 using CascadeIDE.Cockpit.Composition.Shell;
@@ -13,7 +10,8 @@ using CascadeIDE.Models;
 
 namespace CascadeIDE.ViewModels;
 
-/// <summary>Вычисляемые свойства разметки, Workspace Health и видимости панелей (режимы UI).</summary>
+/// <summary>Вычисляемые свойства разметки, Workspace Health и видимости панелей (режимы UI).
+/// Skia mount → <c>Presentation.Skia</c>; IDE Health/EICAS → <c>Presentation.IdeHealth</c>.</summary>
 public partial class MainWindowViewModel
 {
     /// <summary>Семейство текущего UI-режима (одна ось вместо булевых Is*Mode).</summary>
@@ -79,47 +77,6 @@ public partial class MainWindowViewModel
             ? IsCompactRightChromeColumnVisible
             : ShellSurfaceComposition.MfdColumnVisibleInMainGrid;
 
-    /// <summary>Включён debug-overlay контуров зон (ручная валидация геометрии W2).</summary>
-    public bool ShowSkiaZoneGeometryOverlay => _settings.Display.Skia.ZoneGeometryOverlay;
-
-    public bool IsSkiaZoneGeometryOverlayPfdVisible =>
-        MainWindowPresentationCapabilitiesProjection.IsSkiaZoneGeometryOverlayPfdVisible(
-            ShowSkiaZoneGeometryOverlay,
-            IsPfdColumnVisible);
-
-    public bool IsSkiaZoneGeometryOverlayForwardVisible =>
-        MainWindowPresentationCapabilitiesProjection.IsSkiaZoneGeometryOverlayForwardVisible(
-            ShowSkiaZoneGeometryOverlay);
-
-    public bool IsSkiaZoneGeometryOverlayMfdVisible =>
-        MainWindowPresentationCapabilitiesProjection.IsSkiaZoneGeometryOverlayMfdVisible(
-            ShowSkiaZoneGeometryOverlay,
-            IsMfdColumnVisible);
-
-    /// <summary>Wave 3: включить отрисовку инструмента в Skia mount-слое зон P/F/M.</summary>
-    public bool UseSkiaInstrumentMount => _settings.Display.Skia.InstrumentMount;
-
-    /// <summary>Декларативный mount-style mount-инструмента (идёт из <c>[display.mount]</c>).</summary>
-    public string InstrumentMountStyle =>
-        MainWindowPresentationSurfaceProjection.InstrumentMountDisplayStyle(_settings.Display);
-
-    /// <summary>Резолв style для mount в слоте PFD с учётом registry-правил.</summary>
-    public string PfdInstrumentMountStyle =>
-        MainWindowPresentationSurfaceProjection.ResolveInstrumentMountStyleForSlot(
-            _instrumentMountPolicyResolver,
-            _settings.Display,
-            ActiveAttentionLayoutSurface,
-            "pfd",
-            CockpitStandardInstrumentIds.IdeHealthStatusV1);
-
-    /// <summary>Резолв style для mount в слоте MFD с учётом registry-правил.</summary>
-    public string MfdInstrumentMountStyle =>
-        MainWindowPresentationSurfaceProjection.ResolveInstrumentMountStyleForSlot(
-            _instrumentMountPolicyResolver,
-            _settings.Display,
-            ActiveAttentionLayoutSurface,
-            "mfd",
-            CockpitStandardInstrumentIds.IdeHealthStatusV1);
     /// <summary>Полоса активной задачи / Task Cockpit — из <c>UiModes/&lt;id&gt;.toml</c> (<c>active_task_strip</c>); по умолчанию скрыто для семьи Debug.</summary>
     public bool ShowTaskBar => UiModeCatalog.GetShowTaskBar(NormalizeUiMode(UiMode));
 
@@ -136,41 +93,6 @@ public partial class MainWindowViewModel
     public bool ShowSafetyControls => true;
     public bool ShowTelemetryHiddenHint => UiModeGateSpecifications.ShowTelemetryHiddenHint.IsSatisfiedBy(
         new UiModeGateContext(UiModeFamily, AutonomousAgentTelemetry, IsTerminalVisible, HasDebugSession));
-
-    /// <summary>
-    /// Дублирующая карточка IDE Health на вкладке «Терминал» в Power. Пока видна полоса <see cref="WorkspaceHealthStripView"/> под редактором —
-    /// false, чтобы DockPanel не отдавал высоту дублю и не схлопывал область вывода консоли.
-    /// </summary>
-    public bool IdeHealthOnTerminalTab =>
-        MainWindowPresentationCapabilitiesProjection.IdeHealthOnTerminalTab(Capabilities, ShowIdeHealthStrip);
-
-    /// <summary>Куда вести полосу IDE Health: нижняя полоса или страница зоны — из capabilities (<c>ide_health_surface</c>).</summary>
-    public IdeHealthUiSurface IdeHealthStripSurface => Capabilities.IdeHealthSurface;
-
-    /// <summary>Форма представления канала IDE Health на оси <see cref="ContentRepresentation"/> (ADR 0063).</summary>
-    public ContentRepresentation IdeHealthContentRepresentation => Capabilities.IdeHealthContentRepresentation;
-
-    /// <summary>Полоска build/tests/debug/git — при <c>ide_health_strip</c> и <c>bottom_strip</c>; рисуется в <see cref="Views.WorkspaceChromeBandView"/> внутри MFD.</summary>
-    public bool ShowIdeHealthStrip =>
-        MainWindowPresentationCapabilitiesProjection.ShowIdeHealthStrip(Capabilities);
-
-    /// <summary>IDE Health на странице оболочки Mfd (вместо нижней полосы) — при <c>ide_health_strip</c> и <c>ide_health_surface = dedicated_page</c> (v1 — колонка зоны Mfd).</summary>
-    public bool ShowIdeHealthMfdPage =>
-        MainWindowPresentationCapabilitiesProjection.ShowIdeHealthMfdPage(Capabilities);
-
-    /// <summary>
-    /// Полоса оповещений EICAS v1 (над полосой Workspace Health). Видно при <c>eicas_alerts_bar</c> и непустом списке (Dark Cockpit).
-    /// Отдельный контур от build/tests/debug/git (ADR 0021 §5; словарь §1.1).
-    /// </summary>
-    public bool ShowEicasAlertsBar =>
-        MainWindowPresentationCapabilitiesProjection.ShowEicasAlertsBar(Capabilities, EicasMessages.Count);
-
-    /// <summary>Зона под чатом в MFD: полоса EICAS / IDE Health и/или док (терминал, сборка, Problems, Git, инструменты).</summary>
-    public bool ShowWorkspaceBottomChrome =>
-        MainWindowPresentationCapabilitiesProjection.ShowWorkspaceBottomChrome(
-            ShowIdeHealthStrip,
-            ShowEicasAlertsBar,
-            IsMfdContourContentVisible);
 
     /// <summary>Чат в одной строке с PFD/Forward; MFD не пересекает нижнюю строку MainGrid.</summary>
     public int ChatPanelMainGridRowSpan => 1;
@@ -234,43 +156,6 @@ public partial class MainWindowViewModel
     public bool IsImpactedTestsBadgeVisible => ImpactedTestsBadge > 0;
     public bool IsActiveTaskProgressVisible => ActiveTaskProgress > 0;
 
-    /// <summary>Строки из канала IDE Health (один снимок на <see cref="MainWindowViewModel.RebuildIdeHealth"/>, без повторного <c>Build()</c> в геттерах).</summary>
-    public string IdeHealthBuildText =>
-        IdeHealthStripPresentationProjection.SolutionBuildLineText(_lastIdeHealthInputSnapshot);
-
-    /// <summary>Короткий статус для «кольца» сборки в Power cockpit.</summary>
-    public string IdeHealthBuildCockpitShort =>
-        IdeHealthStripPresentationProjection.SolutionBuildCockpitShort(_lastIdeHealthInputSnapshot);
-
-    public string IdeHealthTestsText =>
-        IdeHealthStripPresentationProjection.SolutionTestsLineText(_lastIdeHealthInputSnapshot);
-
-    /// <summary>Компактная строка тестов для полосы Power.</summary>
-    public string IdeHealthTestsCockpitShort =>
-        IdeHealthStripPresentationProjection.SolutionTestsCockpitShort(_lastIdeHealthInputSnapshot);
-
-    /// <summary>Есть активная DAP-сессия (режим отладки, как в VS).</summary>
-    public bool HasDebugSession => _dapDebug.HasActiveSession;
-
-    /// <summary>Выполнение остановлено — доступны шаги и просмотр стека.</summary>
-    public bool IsDebugExecutionPaused =>
-        MainWindowPresentationDapProjection.IsDebugExecutionPaused(
-            _dapDebug.HasActiveSession,
-            _dapDebug.IsExecutionStopped);
-
-    /// <summary>Процесс запущен под отладчиком, выполнение идёт.</summary>
-    public bool IsDebugExecutionRunning =>
-        MainWindowPresentationDapProjection.IsDebugExecutionRunning(
-            _dapDebug.HasActiveSession,
-            _dapDebug.IsExecutionStopped);
-
-    public string IdeHealthDebugText =>
-        IdeHealthStripPresentationProjection.SolutionDebugLineText(_lastIdeHealthInputSnapshot);
-
-    /// <summary>Короткий статус отладки для Power.</summary>
-    public string IdeHealthDebugCockpitShort =>
-        IdeHealthStripPresentationProjection.SolutionDebugCockpitShort(_lastIdeHealthInputSnapshot);
-
     public string ChatPanelToggleButtonText =>
         MainWindowPresentationSurfaceProjection.MfdRegionToggleCaption(IsMfdRegionExpanded);
 
@@ -302,48 +187,4 @@ public partial class MainWindowViewModel
     public bool IsMfdRegionVisible => IsChatPanelColumnVisible;
 
     public string MfdRegionToggleButtonText => ChatPanelToggleButtonText;
-
-    /// <summary>Снимок для Skia mount — тот же тик, что <see cref="IdeHealthBuildCockpitShort"/>; обновляется в <see cref="MainWindowViewModel.RebuildIdeHealth"/>.</summary>
-    public IdeHealthStatusMountPayload IdeHealthMountPayload =>
-        _lastIdeHealthMountPayload ?? new IdeHealthStatusMountPayload("", "", "", SafetyLevel);
-
-    public bool IsPfdIdeHealthMountVisible =>
-        MainWindowPresentationSurfaceProjection.IsIdeHealthSkiaMountVisibleInDockedColumn(
-            UseSkiaInstrumentMount,
-            IsPfdColumnVisible);
-
-    public bool IsMfdIdeHealthMountVisible =>
-        MainWindowPresentationSurfaceProjection.IsIdeHealthSkiaMountVisibleInDockedColumn(
-            UseSkiaInstrumentMount,
-            IsMfdColumnVisible);
-
-    public bool IsMfdHostWindowIdeHealthMountVisible =>
-        MainWindowPresentationSurfaceProjection.IsIdeHealthSkiaMountVisibleForHostWindow(
-            UseSkiaInstrumentMount,
-            IsMfdHostWindowShellOpen);
-
-    public bool IsPfdHostWindowIdeHealthMountVisible =>
-        MainWindowPresentationSurfaceProjection.IsIdeHealthSkiaMountVisibleForHostWindow(
-            UseSkiaInstrumentMount,
-            IsPfdHostWindowShellOpen);
-
-    public IdeHealthStatusMountContext? PfdIdeHealthMountContext =>
-        MainWindowPresentationSurfaceProjection.ResolvePfdIdeHealthMountContext(
-            UseSkiaInstrumentMount,
-            IsPfdHostWindowShellOpen,
-            IsPfdColumnVisible,
-            _instrumentMountPolicyResolver,
-            _settings.Display,
-            MainWindowPresentationSurfaceProjection.MountPolicySurfaceId(ActiveAttentionLayoutSurface),
-            IdeHealthMountPayload);
-
-    public IdeHealthStatusMountContext? MfdIdeHealthMountContext =>
-        MainWindowPresentationSurfaceProjection.ResolveMfdIdeHealthMountContext(
-            UseSkiaInstrumentMount,
-            IsMfdHostWindowShellOpen,
-            IsMfdColumnVisible,
-            _instrumentMountPolicyResolver,
-            _settings.Display,
-            MainWindowPresentationSurfaceProjection.MountPolicySurfaceId(ActiveAttentionLayoutSurface),
-            IdeHealthMountPayload);
 }
