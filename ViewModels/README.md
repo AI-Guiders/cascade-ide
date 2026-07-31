@@ -22,6 +22,8 @@ Avalonia façade: `Features/UiChrome/AgentChromeHintDensityPolicy.cs`.
 | `MainWindowViewModel.SettingsReactive.cs` | Markdown/MCP/AI mode/keys/chat chord reactions |
 | `MainWindowViewModel.SettingsReactive.HybridIndex.cs` | Workspace splitters + Hybrid Index (HCI) reactions |
 | `MainWindowViewModel.SettingsReactive.Intercom.cs` | Intercom transport field reactions |
+| `MainWindowViewModel.ShellSession.cs` | ShellChrome proxies + property-changed relay (~119 LOC) |
+| `MainWindowViewModel.ShellSession.Handlers.cs` | HandleShell* UI mode / panels / MFD page |
 | `MainWindowViewModel.Presentation.cs` | Host surface layout, editor groups (~73 LOC; under gate — peels already extracted) |
 | `MainWindowViewModel.Presentation.Capabilities.cs` | UiMode Capabilities + instrumentation dock flags (~27 LOC; under gate) |
 | `MainWindowViewModel.Presentation.Skia.cs` | Zone-geometry overlay + instrument mount styles (~42 LOC; under gate) |
