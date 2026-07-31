@@ -39,26 +39,36 @@ public partial class MainWindowViewModel
 
     IEnumerable<AgentChromeHintDensityPolicy.Hint> CollectChromeHintCandidates()
     {
-        if (AgentChromeHintDensityPolicy.From("pressure", AgentPressureChromeHint) is { } p) yield return p;
-        if (AgentChromeHintDensityPolicy.From("ignite", AgentIgniteChromeHint) is { } i) yield return i;
-        if (AgentChromeHintDensityPolicy.From("plan", AgentPlanChromeHint) is { } pl) yield return pl;
-        if (AgentChromeHintDensityPolicy.From("cabin", AgentCabinChromeHint) is { } c) yield return c;
-        if (AgentChromeHintDensityPolicy.From("scope", AgentScopeChromeHint) is { } s) yield return s;
-        if (AgentChromeHintDensityPolicy.From("review", AgentReviewChromeHint) is { } r) yield return r;
-        if (AgentChromeHintDensityPolicy.From("refactor", AgentRefactorChromeHint) is { } rf) yield return rf;
-        if (AgentChromeHintDensityPolicy.From("plugins", AgentPluginsChromeHint) is { } pg) yield return pg;
-        if (AgentChromeHintDensityPolicy.From("toolchain", AgentToolchainChromeHint) is { } t) yield return t;
-        if (AgentChromeHintDensityPolicy.From("crm", AgentCrmChromeHint) is { } crm) yield return crm;
-        if (AgentChromeHintDensityPolicy.From("report", AgentReportChromeHint) is { } rp) yield return rp;
-        if (AgentChromeHintDensityPolicy.From("webcam", AgentWebcamChromeHint) is { } w) yield return w;
-        if (AgentChromeHintDensityPolicy.From("sys", AgentSysChromeHint) is { } sy) yield return sy;
-        if (AgentChromeHintDensityPolicy.From("onboard", AgentOnboardChromeHint) is { } o) yield return o;
-        if (AgentChromeHintDensityPolicy.From("arch", AgentArchChromeHint) is { } a) yield return a;
-        if (AgentChromeHintDensityPolicy.From("mcp", AgentMcpChromeHint) is { } m) yield return m;
-        if (AgentChromeHintDensityPolicy.From("learn", AgentLearnChromeHint) is { } l) yield return l;
-        if (AgentChromeHintDensityPolicy.From("domain", AgentDomainChromeHint) is { } d) yield return d;
-        if (AgentChromeHintDensityPolicy.From("sa_desk", AgentSaDeskChromeHint) is { } sa) yield return sa;
+        (string Id, string? Text)[] seats =
+        [
+            ("pressure", AgentPressureChromeHint),
+            ("ignite", AgentIgniteChromeHint),
+            ("plan", AgentPlanChromeHint),
+            ("cabin", AgentCabinChromeHint),
+            ("scope", AgentScopeChromeHint),
+            ("review", AgentReviewChromeHint),
+            ("refactor", AgentRefactorChromeHint),
+            ("plugins", AgentPluginsChromeHint),
+            ("toolchain", AgentToolchainChromeHint),
+            ("crm", AgentCrmChromeHint),
+            ("report", AgentReportChromeHint),
+            ("webcam", AgentWebcamChromeHint),
+            ("sys", AgentSysChromeHint),
+            ("onboard", AgentOnboardChromeHint),
+            ("arch", AgentArchChromeHint),
+            ("mcp", AgentMcpChromeHint),
+            ("learn", AgentLearnChromeHint),
+            ("domain", AgentDomainChromeHint),
+            ("sa_desk", AgentSaDeskChromeHint),
+        ];
+
+        foreach (var (id, text) in seats)
+        {
+            if (AgentChromeHintDensityPolicy.From(id, text) is { } h)
+                yield return h;
+        }
     }
+
 
     void RaiseChromeHintDensity()
     {
