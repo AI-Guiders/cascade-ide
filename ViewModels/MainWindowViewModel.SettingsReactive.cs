@@ -1,11 +1,11 @@
 using CascadeIDE.Features.Settings.Application;
 using CascadeIDE.Features.Shell.Application;
-using CascadeIDE.Features.HybridIndex.Application;
 using CascadeIDE.Models;
 
 namespace CascadeIDE.ViewModels;
 
-/// <summary>Реакции на изменение полей настроек и ключей API: диск, автономный агент, панели.</summary>
+/// <summary>Settings reactions: Markdown/MCP/AI mode/keys/chat chords.
+/// HCI → <c>SettingsReactive.HybridIndex</c>; Intercom transport → <c>SettingsReactive.Intercom</c>.</summary>
 public partial class MainWindowViewModel
 {
     partial void OnMarkdownKrokiEnabledChanged(bool value)
@@ -110,156 +110,5 @@ public partial class MainWindowViewModel
     {
         _appData.Put("ComposerNewLineKey", value);
         NormalizeChatEnterChordPair();
-    }
-
-    partial void OnWorkspaceSplittersLockedChanged(bool value)
-    {
-        _settings.Workspace.SplittersLocked = value;
-        if (_lastSavedSettings is not null)
-            SaveSettingsIfChanged();
-    }
-
-    partial void OnHciIntegrationEnabledChanged(bool value)
-    {
-        _settings.HybridIndex.Enabled = value;
-        ApplyHybridCodebaseIndexOrchestrationForCurrentSolution(pokeWhenAutoReindex: false);
-        SaveSettingsIfChanged();
-    }
-
-    partial void OnHciIndexDirChanged(string value)
-    {
-        var normalized = ShellSettingsPresentationProjection.NormalizeHybridIndexDir(value);
-        if (ShellSettingsPresentationProjection.ShouldRewriteWithNormalizedValue(value, normalized))
-        {
-            HciIndexDir = normalized;
-            return;
-        }
-
-        ShellSettingsReactiveSideEffects.ApplyHybridIndexDirPersisted(
-            normalized,
-            _settings,
-            _hybridIndex,
-            () => ApplyHybridCodebaseIndexOrchestrationForCurrentSolution(pokeWhenAutoReindex: false),
-            SaveSettingsIfChanged,
-            RaiseHybridIndexPresentationProperties);
-    }
-
-    partial void OnHciDebounceMsChanged(int value)
-    {
-        var v = Math.Clamp(value, 0, 60_000);
-        if (v != value)
-        {
-            HciDebounceMs = v;
-            return;
-        }
-
-        _settings.HybridIndex.DebounceMs = v;
-        ApplyHybridCodebaseIndexOrchestrationForCurrentSolution(pokeWhenAutoReindex: false);
-        SaveSettingsIfChanged();
-    }
-
-    partial void OnHciAutoReindexOnSolutionOpenChanged(bool value)
-    {
-        _settings.HybridIndex.AutoReindexOnSolutionOpen = value;
-        SaveSettingsIfChanged();
-    }
-
-    partial void OnHciWatchFilesChanged(bool value)
-    {
-        _settings.HybridIndex.WatchFiles = value;
-        ApplyHybridCodebaseIndexOrchestrationForCurrentSolution(pokeWhenAutoReindex: false);
-        SaveSettingsIfChanged();
-    }
-
-    partial void OnHciScopeModeChanged(string value)
-    {
-        var n = ShellSettingsPresentationProjection.NormalizeHybridIndexScopeMode(value);
-        if (ShellSettingsPresentationProjection.ShouldRewriteWithNormalizedValue(value, n))
-        {
-            HciScopeMode = n;
-            return;
-        }
-
-        ShellSettingsReactiveSideEffects.ApplyHybridIndexScopeModePersisted(
-            n,
-            _settings,
-            () => ApplyHybridCodebaseIndexOrchestrationForCurrentSolution(pokeWhenAutoReindex: false),
-            SaveSettingsIfChanged,
-            RaiseHybridIndexPresentationProperties);
-    }
-
-    partial void OnHciPauseWhenMcpStdioHostChanged(bool value)
-    {
-        _settings.HybridIndex.PauseWhenMcpStdioHost = value;
-        ApplyHybridCodebaseIndexOrchestrationForCurrentSolution(pokeWhenAutoReindex: false);
-        SaveSettingsIfChanged();
-    }
-
-    partial void OnIntercomTransportEnabledChanged(bool value)
-    {
-        _settings.Intercom.Transport.Enabled = value;
-        SaveSettingsIfChanged();
-        _ = ChatPanel.StartIntercomTransportAsync();
-    }
-
-    partial void OnIntercomTransportBaseUrlChanged(string value)
-    {
-        _settings.Intercom.Transport.BaseUrl = value?.Trim() ?? "";
-        SaveSettingsIfChanged();
-    }
-
-    partial void OnIntercomTransportLocalServerPathChanged(string value)
-    {
-        _settings.Intercom.Transport.LocalServerPath = value?.Trim() ?? "";
-        SaveSettingsIfChanged();
-    }
-
-    partial void OnIntercomTransportTeamIdChanged(string value)
-    {
-        _settings.Intercom.Transport.TeamId = value?.Trim() ?? "";
-        SaveSettingsIfChanged();
-    }
-
-    partial void OnIntercomTransportDefaultTopicIdChanged(string value)
-    {
-        _settings.Intercom.Transport.DefaultTopicId = value?.Trim() ?? "";
-        SaveSettingsIfChanged();
-    }
-
-    partial void OnIntercomTransportOAuthProviderChanged(string value)
-    {
-        _settings.Intercom.Transport.OAuthProvider = string.IsNullOrWhiteSpace(value) ? "github" : value.Trim();
-        SaveSettingsIfChanged();
-    }
-
-    partial void OnIntercomTransportDevTeamTokenChanged(string value)
-    {
-        _settings.Intercom.Transport.DevTeamToken = value?.Trim() ?? "";
-        SaveSettingsIfChanged();
-    }
-
-    partial void OnIntercomTransportSseReconnectBackoffMsChanged(int value)
-    {
-        var v = Math.Clamp(value, 500, 60_000);
-        if (v != value)
-        {
-            IntercomTransportSseReconnectBackoffMs = v;
-            return;
-        }
-
-        _settings.Intercom.Transport.SseReconnectBackoffMs = v;
-        SaveSettingsIfChanged();
-    }
-
-    partial void OnIntercomTransportAutoConnectOnSendChanged(bool value)
-    {
-        _settings.Intercom.Transport.AutoConnectOnSend = value;
-        SaveSettingsIfChanged();
-    }
-
-    partial void OnIntercomTransportSyncAgentChannelMessagesChanged(bool value)
-    {
-        _settings.Intercom.Transport.SyncAgentChannelMessages = value;
-        SaveSettingsIfChanged();
     }
 }
