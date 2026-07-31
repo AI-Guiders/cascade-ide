@@ -31,6 +31,7 @@ Separate process · latch IPC · Avalonia on hold for Windows primary.
 | `MainWindow.MfdBody.cs` | MFD page select + stub body text |
 
 Shared SoftOrgan density: `CascadeIDE.GlassCore/SoftOrgan/SoftOrganChromeDensityPolicy.cs` (Avalonia façade forwards).
+Avalonia SoftOrgan/CabinOrgan ViewModel map: `ViewModels/README.md`.
 
 ## Run
 
