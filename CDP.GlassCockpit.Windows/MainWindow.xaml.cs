@@ -30,7 +30,7 @@ public partial class MainWindow : Window
 
         _feed.Add(new ChatBubble(
             "system",
-            "MVP: AvalonEdit (top) + Intercom (bottom). Multi-window hosts for ()()() / (P)(F)(M).",
+            "MVP: Forward respects primary_work_surface. Intercom→editor on M; dark AvalonEdit theme.",
             DateTime.Now.ToString("HH:mm")));
 
         TryOpenDogfoodFile();
@@ -78,10 +78,62 @@ public partial class MainWindow : Window
 
     void ApplyPrimaryWorkSurface()
     {
-        // MVP dogfood: both always on Forward. CIDE keeps primary_work_surface=intercom in shared settings.toml.
-        IntercomSurface.Visibility = Visibility.Visible;
-        EditorSurface.Visibility = Visibility.Visible;
-        ForwardTitle.Text = "F · Editor + Intercom";
+        if (_session.IsIntercomForward)
+        {
+            // ADR 0120: Intercom owns Forward; docs open on M · Editor.
+            ForwardTitle.Text = "F · Intercom";
+            ForwardEditorRow.Height = new GridLength(0);
+            ForwardSplitRow.Height = new GridLength(0);
+            ForwardIntercomRow.Height = new GridLength(1, GridUnitType.Star);
+            ForwardEditorHost.Visibility = Visibility.Collapsed;
+            ForwardSplit.Visibility = Visibility.Collapsed;
+            IntercomSurface.Visibility = Visibility.Visible;
+            MountEditor(MfdEditorHost);
+            SelectMfdPage("Editor");
+        }
+        else
+        {
+            ForwardTitle.Text = "F · Editor";
+            ForwardEditorRow.Height = new GridLength(1, GridUnitType.Star);
+            ForwardSplitRow.Height = new GridLength(0);
+            ForwardIntercomRow.Height = new GridLength(0);
+            ForwardEditorHost.Visibility = Visibility.Visible;
+            ForwardSplit.Visibility = Visibility.Collapsed;
+            IntercomSurface.Visibility = Visibility.Collapsed;
+            MountEditor(ForwardEditorHost);
+            RefreshMfdEditorVisibility();
+        }
+    }
+
+    void MountEditor(ContentControl host)
+    {
+        if (ReferenceEquals(EditorChrome.Parent, host))
+            return;
+
+        switch (EditorChrome.Parent)
+        {
+            case ContentControl cc:
+                cc.Content = null;
+                break;
+            case Panel panel:
+                panel.Children.Remove(EditorChrome);
+                break;
+        }
+
+        host.Content = EditorChrome;
+        RefreshMfdEditorVisibility();
+    }
+
+    void RefreshMfdEditorVisibility()
+    {
+        if (MfdEditorHost is null || MfdBody is null)
+            return;
+
+        var editorOnM = ReferenceEquals(EditorChrome.Parent, MfdEditorHost);
+        var page = (MfdPages?.SelectedItem as ListBoxItem)?.Content?.ToString();
+        var show = editorOnM && string.Equals(page, "Editor", StringComparison.OrdinalIgnoreCase);
+        MfdEditorHost.Visibility = show ? Visibility.Visible : Visibility.Collapsed;
+        MfdBody.Visibility = show ? Visibility.Collapsed : Visibility.Visible;
     }
 
     void TryOpenDogfoodFile()
@@ -109,8 +161,16 @@ public partial class MainWindow : Window
         CodeEditor.SyntaxHighlighting =
             HighlightingManager.Instance.GetDefinitionByExtension(Path.GetExtension(path))
             ?? HighlightingManager.Instance.GetDefinition("C#");
-        CodeEditor.Options.EnableHyperlinks = false;
+        GlassAvalonEditTheme.ApplyDarkReadable(CodeEditor);
         EditorPathLabel.Text = path;
+
+        if (_session.IsIntercomForward)
+        {
+            MountEditor(MfdEditorHost);
+            SelectMfdPage("Editor");
+        }
+
+        RefreshMfdEditorVisibility();
     }
 
     void OnIntercomChanged(string path)
@@ -260,16 +320,28 @@ public partial class MainWindow : Window
 
     void UpdateMfdBody()
     {
+        RefreshMfdEditorVisibility();
+
         if (MfdBody is null)
             return;
 
         var page = (MfdPages?.SelectedItem as ListBoxItem)?.Content?.ToString() ?? "?";
+        if (string.Equals(page, "Editor", StringComparison.OrdinalIgnoreCase)
+            && ReferenceEquals(EditorChrome.Parent, MfdEditorHost))
+        {
+            MfdBody.Text = "";
+            RefreshEicasHealth();
+            return;
+        }
+
         MfdBody.Text = page switch
         {
             "Terminal" => "Terminal page host.\n\nConPTY / shell organ wires in later peels.\nNow: page chrome only (like CIDE MfdShell).",
             "SolutionExplorer" => "Solution Explorer host.\n\nTree of CascadeIDE.sln / open workspace — later.",
             "SemanticMap" => "Semantic Map host.\n\nGraph surface later (not adjacency dump).",
-            "Editor" => "Editor page (when Forward=Intercom, docs live here — CIDE pattern).",
+            "Editor" => _session.IsIntercomForward
+                ? "Editor page — AvalonEdit mounts here when Forward=intercom (ADR 0120)."
+                : "Editor is on Forward (primary_work_surface=editor).",
             "Chat" => "Chat/Intercom also on M when needed; primary Intercom is Forward.",
             _ => $"{page} page host.\n\nInstrument content peels later."
         };

@@ -91,33 +91,35 @@
             </DockPanel>
           </Border>
 
-          <!-- MVP: AvalonEdit (code) + Intercom always — CIDE may keep Forward=intercom in settings.toml -->
-          <Grid>
+          <!-- ADR 0120: editor XOR intercom on Forward; when Forward=intercom, editor mounts on M -->
+          <Grid x:Name="ForwardBody">
             <Grid.RowDefinitions>
-              <RowDefinition Height="2*"/>
-              <RowDefinition Height="4"/>
-              <RowDefinition Height="*" MinHeight="180"/>
+              <RowDefinition x:Name="ForwardEditorRow" Height="2*"/>
+              <RowDefinition x:Name="ForwardSplitRow" Height="4"/>
+              <RowDefinition x:Name="ForwardIntercomRow" Height="*" MinHeight="180"/>
             </Grid.RowDefinitions>
 
-            <Border x:Name="EditorSurface" Grid.Row="0" Background="#121212">
-              <DockPanel>
-                <Border DockPanel.Dock="Top" Background="#1A1A1A" Padding="10,4" BorderBrush="#2A2A2A" BorderThickness="0,0,0,1">
-                  <TextBlock x:Name="EditorPathLabel" Text="(no file)" FontSize="11" Foreground="#9BB6D4"
-                             FontFamily="Consolas" TextTrimming="CharacterEllipsis"/>
-                </Border>
-                <avalonEdit:TextEditor x:Name="CodeEditor"
-                                       FontFamily="Consolas"
-                                       FontSize="13"
-                                       Background="#1E1E1E"
-                                       Foreground="#D4D4D4"
-                                       LineNumbersForeground="#858585"
-                                       ShowLineNumbers="True"
-                                       WordWrap="False"
-                                       IsReadOnly="True"/>
-              </DockPanel>
-            </Border>
+            <ContentControl x:Name="ForwardEditorHost" Grid.Row="0">
+              <Border x:Name="EditorChrome" Background="#121212">
+                <DockPanel>
+                  <Border DockPanel.Dock="Top" Background="#1A1A1A" Padding="10,4" BorderBrush="#2A2A2A" BorderThickness="0,0,0,1">
+                    <TextBlock x:Name="EditorPathLabel" Text="(no file)" FontSize="11" Foreground="#9BB6D4"
+                               FontFamily="Consolas" TextTrimming="CharacterEllipsis"/>
+                  </Border>
+                  <avalonEdit:TextEditor x:Name="CodeEditor"
+                                         FontFamily="Consolas"
+                                         FontSize="13"
+                                         Background="#1E1E1E"
+                                         Foreground="#D4D4D4"
+                                         LineNumbersForeground="#858585"
+                                         ShowLineNumbers="True"
+                                         WordWrap="False"
+                                         IsReadOnly="True"/>
+                </DockPanel>
+              </Border>
+            </ContentControl>
 
-            <GridSplitter Grid.Row="1" Height="4" HorizontalAlignment="Stretch" Background="#222"/>
+            <GridSplitter x:Name="ForwardSplit" Grid.Row="1" Height="4" HorizontalAlignment="Stretch" Background="#222"/>
 
             <DockPanel x:Name="IntercomSurface" Grid.Row="2">
               <Border DockPanel.Dock="Bottom" Background="#1A1A1A" BorderBrush="#2A2A2A" BorderThickness="0,1,0,0" Padding="10">
@@ -195,10 +197,11 @@
             <ListBoxItem Content="Chat"/>
             <ListBoxItem Content="Editor"/>
           </ListBox>
-          <Border Background="#121212" Padding="12">
+          <Grid>
             <TextBlock x:Name="MfdBody" TextWrapping="Wrap" FontSize="13" Foreground="#CCCCCC"
-                       Text="Select an MFD page."/>
-          </Border>
+                       Margin="12" Text="Select an MFD page."/>
+            <ContentControl x:Name="MfdEditorHost" Visibility="Collapsed"/>
+          </Grid>
         </DockPanel>
       </Border>
     </Grid>
