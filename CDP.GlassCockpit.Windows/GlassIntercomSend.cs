@@ -61,6 +61,7 @@ internal static partial class GlassIntercomSend
             var tmp = path + "." + Guid.NewGuid().ToString("N")[..8] + ".tmp";
             File.WriteAllText(tmp, json);
             File.Move(tmp, path, overwrite: true);
+            GlassIntercomJournal.Append(id, "pm", "pf", body, "human", doc.StampedUtc);
             return new Sent(id, body, "@PM → @PF · human");
         }
         catch

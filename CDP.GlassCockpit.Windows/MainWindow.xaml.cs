@@ -35,8 +35,9 @@ public partial class MainWindow : Window
 
         _feed.Add(new ChatBubble(
             "system",
-            "MVP: Forward respects primary_work_surface. Intercom→editor on M; dark AvalonEdit theme.",
+            "MVP: Forward respects primary_work_surface. Intercom→editor on M; dark AvalonEdit theme. Virtual History reloads journal on start.",
             DateTime.Now.ToString("HH:mm")));
+        LoadIntercomHistory();
 
         TryOpenDogfoodFile();
 
@@ -62,6 +63,27 @@ public partial class MainWindow : Window
         };
         UpdateMfdBody();
         RefreshEicasHealth();
+    }
+
+
+    void LoadIntercomHistory()
+    {
+        try
+        {
+            foreach (var e in GlassIntercomJournal.LoadTail(40))
+            {
+                if (e.Id.Length > 0)
+                    _seenIntercomIds.Add(e.Id);
+                _feed.Add(new ChatBubble(e.RoleLabel, e.Body, e.WhenLabel));
+            }
+
+            while (_feed.Count > 41) // tip + 40
+                _feed.RemoveAt(1);
+        }
+        catch
+        {
+            /* best-effort */
+        }
     }
 
     void ApplyLayoutFromSession()
@@ -139,6 +161,29 @@ public partial class MainWindow : Window
         var show = editorOnM && string.Equals(page, "Editor", StringComparison.OrdinalIgnoreCase);
         MfdEditorHost.Visibility = show ? Visibility.Visible : Visibility.Collapsed;
         MfdBody.Visibility = show ? Visibility.Collapsed : Visibility.Visible;
+    }
+
+
+    static void TryJournalFromView(LatchPaint.IntercomView view)
+    {
+        if (view.MessageId is not { Length: > 0 } id)
+            return;
+        // RoleLabel looks like "@PM → @PF · human"
+        var role = view.RoleLabel;
+        var from = "?";
+        var to = "?";
+        var origin = "?";
+        var parts = role.Split('·', 2, StringSplitOptions.TrimEntries);
+        if (parts.Length == 2)
+            origin = parts[1];
+        var arrow = parts[0].Split('→', 2, StringSplitOptions.TrimEntries);
+        if (arrow.Length == 2)
+        {
+            from = arrow[0].Trim().TrimStart('@').ToLowerInvariant();
+            to = arrow[1].Trim().TrimStart('@').ToLowerInvariant();
+        }
+
+        GlassIntercomJournal.Append(id, from, to, view.Body, origin, DateTimeOffset.Now);
     }
 
     void TryOpenDogfoodFile()
@@ -255,6 +300,7 @@ public partial class MainWindow : Window
                     return;
                 }
 
+                TryJournalFromView(view);
                 _feed.Add(new ChatBubble(
                     view.RoleLabel,
                     view.Body,
