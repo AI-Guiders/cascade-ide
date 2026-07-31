@@ -97,6 +97,9 @@ public partial class App : Application
     /// <summary>Agent domain ownership → quiet chrome (domain-LATEST.json).</summary>
     static Features.Cdp.CdpDomainProjector? DomainProjector { get; set; }
 
+    /// <summary>SoftOrgan sa_desk (cdp_sa) → quiet chrome (sa-desk-LATEST.json); not EICAS.</summary>
+    static Features.Cdp.CdpSaDeskProjector? SaDeskProjector { get; set; }
+
     /// <summary><c>cide://</c> из argv при cold start (ADR 0157).</summary>
     public static string? PendingMagicLinkUri { get; set; }
 
@@ -144,6 +147,7 @@ public partial class App : Application
             ReviewProjector = Features.Cdp.CdpReviewProjector.Start(vm);
             LearnProjector = Features.Cdp.CdpLearnProjector.Start(vm);
             DomainProjector = Features.Cdp.CdpDomainProjector.Start(vm);
+            SaDeskProjector = Features.Cdp.CdpSaDeskProjector.Start(vm);
             if (RunMcpStdio)
                 _ = RunMcpServerAsync(vm);
             if (!string.IsNullOrWhiteSpace(PendingMagicLinkUri))

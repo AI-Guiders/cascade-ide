@@ -97,6 +97,11 @@ public partial class MainWindowViewModel
     [NotifyPropertyChangedFor(nameof(ShowWorkspaceChromeBand))]
     private string? _agentDomainChromeHint;
 
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ShowAgentSaDeskChromeHint))]
+    [NotifyPropertyChangedFor(nameof(ShowWorkspaceChromeBand))]
+    private string? _agentSaDeskChromeHint;
+
     public bool ShowAgentCabinChromeHint => !string.IsNullOrWhiteSpace(AgentCabinChromeHint);
     public bool ShowAgentPressureChromeHint => !string.IsNullOrWhiteSpace(AgentPressureChromeHint);
     public bool ShowAgentIgniteChromeHint => !string.IsNullOrWhiteSpace(AgentIgniteChromeHint);
@@ -115,6 +120,7 @@ public partial class MainWindowViewModel
     public bool ShowAgentReviewChromeHint => !string.IsNullOrWhiteSpace(AgentReviewChromeHint);
     public bool ShowAgentLearnChromeHint => !string.IsNullOrWhiteSpace(AgentLearnChromeHint);
     public bool ShowAgentDomainChromeHint => !string.IsNullOrWhiteSpace(AgentDomainChromeHint);
+    public bool ShowAgentSaDeskChromeHint => !string.IsNullOrWhiteSpace(AgentSaDeskChromeHint);
 
     public IReadOnlyList<string> AgentChromeHintVisibleLines => BuildChromeHintDensity().VisibleLines;
     public string? AgentChromeHintOverflow => BuildChromeHintDensity().OverflowLine;
@@ -143,6 +149,7 @@ public partial class MainWindowViewModel
         if (AgentChromeHintDensityPolicy.From("mcp", AgentMcpChromeHint) is { } m) yield return m;
         if (AgentChromeHintDensityPolicy.From("learn", AgentLearnChromeHint) is { } l) yield return l;
         if (AgentChromeHintDensityPolicy.From("domain", AgentDomainChromeHint) is { } d) yield return d;
+        if (AgentChromeHintDensityPolicy.From("sa_desk", AgentSaDeskChromeHint) is { } sa) yield return sa;
     }
 
     void RaiseChromeHintDensity()
@@ -170,6 +177,7 @@ public partial class MainWindowViewModel
     partial void OnAgentReviewChromeHintChanged(string? value) => RaiseChromeHintDensity();
     partial void OnAgentLearnChromeHintChanged(string? value) => RaiseChromeHintDensity();
     partial void OnAgentDomainChromeHintChanged(string? value) => RaiseChromeHintDensity();
+    partial void OnAgentSaDeskChromeHintChanged(string? value) => RaiseChromeHintDensity();
 
     public void ApplyCabinOrganChromeHint(string? hint)
     {
@@ -295,5 +303,12 @@ public partial class MainWindowViewModel
         var next = string.IsNullOrWhiteSpace(hint) ? null : hint.Trim();
         if (string.Equals(AgentDomainChromeHint, next, StringComparison.Ordinal)) return;
         AgentDomainChromeHint = next;
+    }
+
+    public void ApplySaDeskChromeHint(string? hint)
+    {
+        var next = string.IsNullOrWhiteSpace(hint) ? null : hint.Trim();
+        if (string.Equals(AgentSaDeskChromeHint, next, StringComparison.Ordinal)) return;
+        AgentSaDeskChromeHint = next;
     }
 }
