@@ -5,7 +5,6 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Threading;
-using CascadeIDE.SoftOrgan;
 using ICSharpCode.AvalonEdit.Highlighting;
 using Microsoft.Win32;
 
@@ -15,7 +14,6 @@ public partial class MainWindow : Window
 {
     readonly LatchHub _latches;
     readonly GlassSession _session;
-    readonly SoftOrganChromeAggregator _softOrgans = new();
     readonly EicasBandAggregator _eicas = new();
     readonly ObservableCollection<ChatBubble> _feed = new();
     readonly ObservableCollection<TopicCard> _topics = new();
@@ -471,42 +469,6 @@ public partial class MainWindow : Window
                 StatusText.Text = $"glass · presentation fail · {ex.Message}";
             }
         }, DispatcherPriority.Background);
-    }
-
-    void OnSoftOrganChanged(string organId, string? chromeHint)
-    {
-        Dispatcher.BeginInvoke(() =>
-        {
-            _softOrgans.Apply(organId, chromeHint);
-            PaintSoftOrganBand();
-        }, DispatcherPriority.Background);
-    }
-
-    void SoftOrganOverflow_OnClick(object sender, MouseButtonEventArgs e)
-    {
-        _softOrgans.ToggleExpanded();
-        PaintSoftOrganBand();
-        e.Handled = true;
-    }
-
-    void PaintSoftOrganBand()
-    {
-        var band = _softOrgans.Snapshot();
-        if (!band.HasContent)
-        {
-            SoftOrganHintLines.ItemsSource = null;
-            SoftOrganOverflow.Text = "";
-            SoftOrganOverflow.Visibility = Visibility.Collapsed;
-            SoftOrganBand.Visibility = Visibility.Collapsed;
-            return;
-        }
-
-        SoftOrganHintLines.ItemsSource = band.VisibleLines;
-        SoftOrganOverflow.Text = band.OverflowLine ?? "";
-        SoftOrganOverflow.Visibility = band.HasOverflow
-            ? Visibility.Visible
-            : Visibility.Collapsed;
-        SoftOrganBand.Visibility = Visibility.Visible;
     }
 
     void OnAlertChanged(string path)
