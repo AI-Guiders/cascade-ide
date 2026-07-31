@@ -123,136 +123,67 @@ public partial class MainWindowViewModel
 
 
 
-    public void ApplyCabinOrganChromeHint(string? hint)
-    {
-        var next = string.IsNullOrWhiteSpace(hint) ? null : hint.Trim();
-        if (string.Equals(AgentCabinChromeHint, next, StringComparison.Ordinal)) return;
-        AgentCabinChromeHint = next;
-    }
+    public void ApplyCabinOrganChromeHint(string? hint) =>
+        ApplyChromeHint(AgentCabinChromeHint, hint, v => AgentCabinChromeHint = v);
 
-    public void ApplyPressureChromeHint(string? hint)
-    {
-        var next = string.IsNullOrWhiteSpace(hint) ? null : hint.Trim();
-        if (string.Equals(AgentPressureChromeHint, next, StringComparison.Ordinal)) return;
-        AgentPressureChromeHint = next;
-    }
+    public void ApplyPressureChromeHint(string? hint) =>
+        ApplyChromeHint(AgentPressureChromeHint, hint, v => AgentPressureChromeHint = v);
 
-    public void ApplyIgniteChromeHint(string? hint)
-    {
-        var next = string.IsNullOrWhiteSpace(hint) ? null : hint.Trim();
-        if (string.Equals(AgentIgniteChromeHint, next, StringComparison.Ordinal)) return;
-        AgentIgniteChromeHint = next;
-    }
+    public void ApplyIgniteChromeHint(string? hint) =>
+        ApplyChromeHint(AgentIgniteChromeHint, hint, v => AgentIgniteChromeHint = v);
 
-    public void ApplyScopeChromeHint(string? hint)
-    {
-        var next = string.IsNullOrWhiteSpace(hint) ? null : hint.Trim();
-        if (string.Equals(AgentScopeChromeHint, next, StringComparison.Ordinal)) return;
-        AgentScopeChromeHint = next;
-    }
+    public void ApplyScopeChromeHint(string? hint) =>
+        ApplyChromeHint(AgentScopeChromeHint, hint, v => AgentScopeChromeHint = v);
 
-    public void ApplySysChromeHint(string? hint)
-    {
-        var next = string.IsNullOrWhiteSpace(hint) ? null : hint.Trim();
-        if (string.Equals(AgentSysChromeHint, next, StringComparison.Ordinal)) return;
-        AgentSysChromeHint = next;
-    }
+    public void ApplySysChromeHint(string? hint) =>
+        ApplyChromeHint(AgentSysChromeHint, hint, v => AgentSysChromeHint = v);
 
-    public void ApplyOnboardChromeHint(string? hint)
-    {
-        var next = string.IsNullOrWhiteSpace(hint) ? null : hint.Trim();
-        if (string.Equals(AgentOnboardChromeHint, next, StringComparison.Ordinal)) return;
-        AgentOnboardChromeHint = next;
-    }
+    public void ApplyOnboardChromeHint(string? hint) =>
+        ApplyChromeHint(AgentOnboardChromeHint, hint, v => AgentOnboardChromeHint = v);
 
-    public void ApplyArchChromeHint(string? hint)
-    {
-        var next = string.IsNullOrWhiteSpace(hint) ? null : hint.Trim();
-        if (string.Equals(AgentArchChromeHint, next, StringComparison.Ordinal)) return;
-        AgentArchChromeHint = next;
-    }
+    public void ApplyArchChromeHint(string? hint) =>
+        ApplyChromeHint(AgentArchChromeHint, hint, v => AgentArchChromeHint = v);
 
-    public void ApplyMcpChromeHint(string? hint)
-    {
-        var next = string.IsNullOrWhiteSpace(hint) ? null : hint.Trim();
-        if (string.Equals(AgentMcpChromeHint, next, StringComparison.Ordinal)) return;
-        AgentMcpChromeHint = next;
-    }
+    public void ApplyMcpChromeHint(string? hint) =>
+        ApplyChromeHint(AgentMcpChromeHint, hint, v => AgentMcpChromeHint = v);
 
-    public void ApplyPlanChromeHint(string? hint)
-    {
-        var next = string.IsNullOrWhiteSpace(hint) ? null : hint.Trim();
-        if (string.Equals(AgentPlanChromeHint, next, StringComparison.Ordinal)) return;
-        AgentPlanChromeHint = next;
-    }
+    public void ApplyPlanChromeHint(string? hint) =>
+        ApplyChromeHint(AgentPlanChromeHint, hint, v => AgentPlanChromeHint = v);
 
-    public void ApplyReportChromeHint(string? hint)
-    {
-        var next = string.IsNullOrWhiteSpace(hint) ? null : hint.Trim();
-        if (string.Equals(AgentReportChromeHint, next, StringComparison.Ordinal)) return;
-        AgentReportChromeHint = next;
-    }
+    public void ApplyReportChromeHint(string? hint) =>
+        ApplyChromeHint(AgentReportChromeHint, hint, v => AgentReportChromeHint = v);
 
-    public void ApplyCrmChromeHint(string? hint)
-    {
-        var next = string.IsNullOrWhiteSpace(hint) ? null : hint.Trim();
-        if (string.Equals(AgentCrmChromeHint, next, StringComparison.Ordinal)) return;
-        AgentCrmChromeHint = next;
-    }
+    public void ApplyCrmChromeHint(string? hint) =>
+        ApplyChromeHint(AgentCrmChromeHint, hint, v => AgentCrmChromeHint = v);
 
-    public void ApplyWebcamChromeHint(string? hint)
-    {
-        var next = string.IsNullOrWhiteSpace(hint) ? null : hint.Trim();
-        if (string.Equals(AgentWebcamChromeHint, next, StringComparison.Ordinal)) return;
-        AgentWebcamChromeHint = next;
-    }
+    public void ApplyWebcamChromeHint(string? hint) =>
+        ApplyChromeHint(AgentWebcamChromeHint, hint, v => AgentWebcamChromeHint = v);
 
-    public void ApplyToolchainChromeHint(string? hint)
-    {
-        var next = string.IsNullOrWhiteSpace(hint) ? null : hint.Trim();
-        if (string.Equals(AgentToolchainChromeHint, next, StringComparison.Ordinal)) return;
-        AgentToolchainChromeHint = next;
-    }
+    public void ApplyToolchainChromeHint(string? hint) =>
+        ApplyChromeHint(AgentToolchainChromeHint, hint, v => AgentToolchainChromeHint = v);
 
-    public void ApplyPluginsChromeHint(string? hint)
-    {
-        var next = string.IsNullOrWhiteSpace(hint) ? null : hint.Trim();
-        if (string.Equals(AgentPluginsChromeHint, next, StringComparison.Ordinal)) return;
-        AgentPluginsChromeHint = next;
-    }
+    public void ApplyPluginsChromeHint(string? hint) =>
+        ApplyChromeHint(AgentPluginsChromeHint, hint, v => AgentPluginsChromeHint = v);
 
-    public void ApplyRefactorChromeHint(string? hint)
-    {
-        var next = string.IsNullOrWhiteSpace(hint) ? null : hint.Trim();
-        if (string.Equals(AgentRefactorChromeHint, next, StringComparison.Ordinal)) return;
-        AgentRefactorChromeHint = next;
-    }
+    public void ApplyRefactorChromeHint(string? hint) =>
+        ApplyChromeHint(AgentRefactorChromeHint, hint, v => AgentRefactorChromeHint = v);
 
-    public void ApplyReviewChromeHint(string? hint)
-    {
-        var next = string.IsNullOrWhiteSpace(hint) ? null : hint.Trim();
-        if (string.Equals(AgentReviewChromeHint, next, StringComparison.Ordinal)) return;
-        AgentReviewChromeHint = next;
-    }
+    public void ApplyReviewChromeHint(string? hint) =>
+        ApplyChromeHint(AgentReviewChromeHint, hint, v => AgentReviewChromeHint = v);
 
-    public void ApplyLearnChromeHint(string? hint)
-    {
-        var next = string.IsNullOrWhiteSpace(hint) ? null : hint.Trim();
-        if (string.Equals(AgentLearnChromeHint, next, StringComparison.Ordinal)) return;
-        AgentLearnChromeHint = next;
-    }
+    public void ApplyLearnChromeHint(string? hint) =>
+        ApplyChromeHint(AgentLearnChromeHint, hint, v => AgentLearnChromeHint = v);
 
-    public void ApplyDomainChromeHint(string? hint)
-    {
-        var next = string.IsNullOrWhiteSpace(hint) ? null : hint.Trim();
-        if (string.Equals(AgentDomainChromeHint, next, StringComparison.Ordinal)) return;
-        AgentDomainChromeHint = next;
-    }
+    public void ApplyDomainChromeHint(string? hint) =>
+        ApplyChromeHint(AgentDomainChromeHint, hint, v => AgentDomainChromeHint = v);
 
-    public void ApplySaDeskChromeHint(string? hint)
+    public void ApplySaDeskChromeHint(string? hint) =>
+        ApplyChromeHint(AgentSaDeskChromeHint, hint, v => AgentSaDeskChromeHint = v);
+
+    static void ApplyChromeHint(string? current, string? hint, Action<string?> set)
     {
         var next = string.IsNullOrWhiteSpace(hint) ? null : hint.Trim();
-        if (string.Equals(AgentSaDeskChromeHint, next, StringComparison.Ordinal)) return;
-        AgentSaDeskChromeHint = next;
+        if (string.Equals(current, next, StringComparison.Ordinal)) return;
+        set(next);
     }
 }
