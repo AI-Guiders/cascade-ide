@@ -5,6 +5,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Threading;
 using ICSharpCode.AvalonEdit.Highlighting;
+using Microsoft.Win32;
 
 namespace CDP.GlassCockpit.Windows;
 
@@ -172,6 +173,26 @@ public partial class MainWindow : Window
         }
 
         RefreshMfdEditorVisibility();
+    }
+
+    void OpenFileBtn_OnClick(object sender, RoutedEventArgs e)
+    {
+        var dlg = new OpenFileDialog
+        {
+            Title = "Open in Glass editor",
+            Filter = "Code|*.cs;*.xaml;*.csproj;*.json;*.md;*.toml;*.txt|All|*.*",
+            CheckFileExists = true,
+            Multiselect = false,
+        };
+
+        var current = EditorPathLabel.Text;
+        if (!string.IsNullOrWhiteSpace(current) && File.Exists(current))
+            dlg.InitialDirectory = Path.GetDirectoryName(current);
+        else if (!string.IsNullOrWhiteSpace(_session.WorkspaceRoot) && Directory.Exists(_session.WorkspaceRoot))
+            dlg.InitialDirectory = _session.WorkspaceRoot;
+
+        if (dlg.ShowDialog(this) == true)
+            OpenCodeFile(dlg.FileName);
     }
 
     void OnIntercomChanged(string path)

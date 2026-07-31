@@ -103,8 +103,12 @@
               <Border x:Name="EditorChrome" Background="#121212">
                 <DockPanel>
                   <Border DockPanel.Dock="Top" Background="#1A1A1A" Padding="10,4" BorderBrush="#2A2A2A" BorderThickness="0,0,0,1">
-                    <TextBlock x:Name="EditorPathLabel" Text="(no file)" FontSize="11" Foreground="#9BB6D4"
-                               FontFamily="Consolas" TextTrimming="CharacterEllipsis"/>
+                    <DockPanel>
+                      <Button x:Name="OpenFileBtn" DockPanel.Dock="Right" Content="Open…" Style="{StaticResource ChromeBtn}"
+                              Click="OpenFileBtn_OnClick" ToolTip="Open a file in AvalonEdit" Margin="8,0,0,0"/>
+                      <TextBlock x:Name="EditorPathLabel" Text="(no file)" FontSize="11" Foreground="#9BB6D4"
+                                 FontFamily="Consolas" TextTrimming="CharacterEllipsis" VerticalAlignment="Center"/>
+                    </DockPanel>
                   </Border>
                   <avalonEdit:TextEditor x:Name="CodeEditor"
                                          FontFamily="Consolas"
