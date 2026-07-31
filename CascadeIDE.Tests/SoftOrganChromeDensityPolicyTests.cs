@@ -73,6 +73,20 @@ public sealed class SoftOrganChromeDensityPolicyTests
 
     /// <summary>Keep in sync with CollectChromeHintCandidates seats in SoftOrganChrome.</summary>
     [Fact]
+    public void Density_From_canonicalizes_legacy_sa_desk_id()
+    {
+        var h = SoftOrganChromeDensityPolicy.From("sa_desk", "hint");
+        Assert.NotNull(h);
+        Assert.Equal(SoftOrganLatchCatalog.SaDesk, h.Value.Id);
+        Assert.Equal(21, h.Value.Priority);
+
+        var facade = AgentChromeHintDensityPolicy.From("SA_DESK", "hint");
+        Assert.NotNull(facade);
+        Assert.Equal(SoftOrganLatchCatalog.SaDesk, facade.Value.Id);
+        Assert.Equal(21, facade.Value.Priority);
+    }
+
+    [Fact]
     public void Avalonia_seat_ids_are_catalog_members()
     {
         string[] avaloniaSeats =

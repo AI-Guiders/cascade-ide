@@ -24,34 +24,38 @@ public static class SoftOrganChromeDensityPolicy
 
     /// <summary>
     /// Priority: continuity/focus first, SoftOrgan attention next, cold maps last.
-    /// Lower number = higher priority. Union of Avalonia + Glass organ ids.
+    /// Lower number = higher priority. Ids pass through <see cref="SoftOrganLatchCatalog.Canonicalize"/>.
     /// </summary>
-    public static int PriorityFor(string id) => id switch
+    public static int PriorityFor(string id)
     {
-        "pressure" => 0,
-        "ignite" => 1,
-        "plan" => 2,
-        "cabin" => 3,
-        "scope" => 4,
-        "alert" or "eicas" or "sa" => 5,
-        "qrh" => 6,
-        "ecl" or "chk" => 7,
-        "review" => 8,
-        "refactor" => 9,
-        "plugins" => 10,
-        "toolchain" => 11,
-        "crm" => 12,
-        "report" => 13,
-        "webcam" => 14,
-        "sys" => 15,
-        "onboard" => 16,
-        "arch" => 17,
-        "mcp" => 18,
-        "learn" => 19,
-        "domain" => 20,
-        "sa_desk" or "sa-desk" => 21,
-        _ => 50
-    };
+        id = SoftOrganLatchCatalog.Canonicalize(id);
+        return id switch
+        {
+            "pressure" => 0,
+            "ignite" => 1,
+            "plan" => 2,
+            "cabin" => 3,
+            "scope" => 4,
+            "alert" or "eicas" or "sa" => 5,
+            "qrh" => 6,
+            "ecl" or "chk" => 7,
+            "review" => 8,
+            "refactor" => 9,
+            "plugins" => 10,
+            "toolchain" => 11,
+            "crm" => 12,
+            "report" => 13,
+            "webcam" => 14,
+            "sys" => 15,
+            "onboard" => 16,
+            "arch" => 17,
+            "mcp" => 18,
+            "learn" => 19,
+            "domain" => 20,
+            SoftOrganLatchCatalog.SaDesk => 21,
+            _ => 50
+        };
+    }
 
     public static Result Collapse(
         IEnumerable<Hint> hints,
@@ -96,6 +100,9 @@ public static class SoftOrganChromeDensityPolicy
     public static Hint? From(string id, string? text)
     {
         if (string.IsNullOrWhiteSpace(text))
+            return null;
+        id = SoftOrganLatchCatalog.Canonicalize(id);
+        if (id.Length == 0)
             return null;
         return new Hint(id, text.Trim(), PriorityFor(id));
     }
