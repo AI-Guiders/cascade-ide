@@ -14,7 +14,7 @@ Separate process · latch IPC · Avalonia on hold for Windows primary.
 
 - **GlassCore** — presentation parser/topology + settings peel
 - **WPF MainGrid** — `WpfMainGridColumns` (no Avalonia ColumnDefinitions.Parse)
-- **LatchHub + LatchPaint** — latch → human glass (not raw JSON dump); SoftOrgan chrome_hint in `LatchPaint.SoftOrgan`, EICAS in `LatchPaint.Eicas`
+- **LatchHub + LatchPaint** — latch → human glass (not raw JSON dump); `LatchHub` (~100 LOC; under gate — no peel) watches `*-LATEST.json`; SoftOrgan chrome_hint in `LatchPaint.SoftOrgan`, EICAS in `LatchPaint.Eicas`
 - **SoftOrgan chrome band** — `*-LATEST.json` chrome_hint → top-N VisibleLines + Overflow chip (click expand/collapse; GlassCore density; `MainWindow.SoftOrganBand` paint; includes `sa-desk`)
 
 ## MainWindow partials (0-sync)
