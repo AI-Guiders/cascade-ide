@@ -25,7 +25,8 @@ Separate process · latch IPC · Avalonia on hold for Windows primary.
 | --- | --- |
 | `MainWindow.LayoutSurface.cs` | session layout, host sync, Forward `primary_work_surface` (ADR 0120) |
 | `MainWindow.EditorSurface.cs` | AvalonEdit mount, dogfood open, pick/save, Ctrl+O/S |
-| `MainWindow.IntercomFeed.cs` | Virtual History feed, topics, new-msg cue, send |
+| `MainWindow.IntercomFeed.cs` | latch watch, journal append, composer send (~114 LOC) |
+| `MainWindow.IntercomFeed.Rebuild.cs` | feed rebuild, topics, scroll pin, new-msg cue (~123 LOC) |
 | `MainWindow.SoftOrganBand.cs` | SoftOrgan latch → band paint / overflow toggle (~50 LOC; under gate — no peel) |
 | `MainWindow.LatchEicas.cs` | presentation / alert / qrh latch → Plan + EICAS (~93 LOC; under gate — no peel); uses `EicasBandAggregator` (~42 LOC; under gate — no peel) |
 | `MainWindow.MfdBody.cs` | MFD page select + stub body text |
