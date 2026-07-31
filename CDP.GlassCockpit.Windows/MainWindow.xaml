@@ -18,6 +18,24 @@
       <Setter Property="FontFamily" Value="Segoe UI"/>
       <Setter Property="FontSize" Value="12"/>
     </Style>
+    <Style x:Key="TopicCardBtn" TargetType="Button" BasedOn="{StaticResource ChromeBtn}">
+      <Style.Triggers>
+        <DataTrigger Binding="{Binding IsSelected}" Value="True">
+          <Setter Property="Background" Value="#2A3A55"/>
+          <Setter Property="BorderBrush" Value="#7EB6FF"/>
+          <Setter Property="Foreground" Value="#E8F0FF"/>
+        </DataTrigger>
+      </Style.Triggers>
+    </Style>
+    <Style x:Key="TopicAllBtnStyle" TargetType="Button" BasedOn="{StaticResource ChromeBtn}">
+      <Style.Triggers>
+        <Trigger Property="Tag" Value="selected">
+          <Setter Property="Background" Value="#2A3A55"/>
+          <Setter Property="BorderBrush" Value="#7EB6FF"/>
+          <Setter Property="Foreground" Value="#E8F0FF"/>
+        </Trigger>
+      </Style.Triggers>
+    </Style>
   </Window.Resources>
 
   <DockPanel>
@@ -154,8 +172,8 @@
               <Border DockPanel.Dock="Top" Background="#151820" BorderBrush="#2A2A2A" BorderThickness="0,0,0,1" Padding="8,6">
                 <DockPanel>
                   <TextBlock DockPanel.Dock="Left" Text="Topics" FontSize="11" Foreground="#888" VerticalAlignment="Center" Margin="0,0,8,0"/>
-                  <Button x:Name="TopicAllBtn" DockPanel.Dock="Left" Content="All" Style="{StaticResource ChromeBtn}"
-                          Click="TopicAllBtn_OnClick" ToolTip="Show full Virtual History feed" Margin="0,0,6,0"/>
+                  <Button x:Name="TopicAllBtn" DockPanel.Dock="Left" Content="All" Style="{StaticResource TopicAllBtnStyle}"
+                          Click="TopicAllBtn_OnClick" ToolTip="Show full Virtual History feed" Margin="0,0,6,0" Tag="selected"/>
                   <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled">
                     <ItemsControl x:Name="TopicCards">
                       <ItemsControl.ItemsPanel>
@@ -165,7 +183,7 @@
                       </ItemsControl.ItemsPanel>
                       <ItemsControl.ItemTemplate>
                         <DataTemplate>
-                          <Button Content="{Binding Title}" Style="{StaticResource ChromeBtn}"
+                          <Button Content="{Binding Title}" Style="{StaticResource TopicCardBtn}"
                                   Margin="0,0,6,0" MaxWidth="280"
                                   ToolTip="{Binding Title}"
                                   Tag="{Binding Id}"

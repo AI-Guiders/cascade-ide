@@ -17,12 +17,13 @@ public partial class MainWindow : Window
     readonly SoftOrganChromeAggregator _softOrgans = new();
     readonly EicasBandAggregator _eicas = new();
     readonly ObservableCollection<ChatBubble> _feed = new();
-    readonly ObservableCollection<GlassIntercomTopics.Topic> _topics = new();
+    readonly ObservableCollection<TopicCard> _topics = new();
     readonly GlassHostWindows _hosts;
     readonly HashSet<string> _seenIntercomIds = new(StringComparer.OrdinalIgnoreCase);
     bool _hostsReady;
     string? _editorPath;
     string? _selectedTopicId;
+    string[] _selectedTopicEntryIds = [];
 
     public MainWindow()
     {
@@ -86,9 +87,24 @@ public partial class MainWindow : Window
                 _seenIntercomIds.Add(e.Id);
         }
 
+        var clustered = GlassIntercomTopics.Cluster(entries);
+        _selectedTopicId = CascadeIDE.Intercom.GlassIntercomTopicSelection.Survive(
+            _selectedTopicId, clustered, _selectedTopicEntryIds);
+
         _topics.Clear();
-        foreach (var t in GlassIntercomTopics.Cluster(entries))
-            _topics.Add(t);
+        foreach (var t in clustered)
+        {
+            var selected = _selectedTopicId is { Length: > 0 } sid
+                && string.Equals(t.Id, sid, StringComparison.OrdinalIgnoreCase);
+            if (selected)
+                _selectedTopicEntryIds = t.EntryIds.ToArray();
+            _topics.Add(new TopicCard(t.Id, t.Title, selected, t.EntryIds));
+        }
+
+        if (_selectedTopicId is null)
+            _selectedTopicEntryIds = [];
+
+        SyncTopicAllChrome();
 
         _feed.Clear();
         _feed.Add(new ChatBubble(
@@ -99,7 +115,7 @@ public partial class MainWindow : Window
         IEnumerable<GlassIntercomJournal.Entry> shown = entries;
         if (_selectedTopicId is { Length: > 0 } topicId)
         {
-            var topic = _topics.FirstOrDefault(t =>
+            var topic = clustered.FirstOrDefault(t =>
                 string.Equals(t.Id, topicId, StringComparison.OrdinalIgnoreCase));
             if (topic is not null)
             {
@@ -115,9 +131,15 @@ public partial class MainWindow : Window
             _feed.RemoveAt(1);
     }
 
+    void SyncTopicAllChrome()
+    {
+        TopicAllBtn.Tag = _selectedTopicId is null ? "selected" : "";
+    }
+
     void TopicAllBtn_OnClick(object sender, RoutedEventArgs e)
     {
         _selectedTopicId = null;
+        _selectedTopicEntryIds = [];
         RebuildIntercomFeedFromJournal();
         FeedScroll.ScrollToEnd();
     }
@@ -127,6 +149,9 @@ public partial class MainWindow : Window
         if (sender is not Button { Tag: string id } || id.Length == 0)
             return;
         _selectedTopicId = id;
+        var card = _topics.FirstOrDefault(t =>
+            string.Equals(t.Id, id, StringComparison.OrdinalIgnoreCase));
+        _selectedTopicEntryIds = card?.EntryIds.ToArray() ?? [id];
         RebuildIntercomFeedFromJournal();
         FeedScroll.ScrollToEnd();
     }
@@ -554,6 +579,12 @@ public partial class MainWindow : Window
         FeedScroll.ScrollToEnd();
         StatusText.Text = $"glass · intercom · sent {sent.Id} · @PM→@PF · {DateTime.Now:HH:mm:ss}";
     }
+
+    public sealed record TopicCard(
+        string Id,
+        string Title,
+        bool IsSelected,
+        IReadOnlyList<string> EntryIds);
 
     public sealed record ChatBubble(string Role, string Body, string When);
 }
