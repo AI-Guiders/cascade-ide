@@ -21,7 +21,9 @@ Hub `ChatPanelViewModel.cs` still over quality gate — peel coherent concerns i
 | `ChatPanelViewModel.IntercomAttach.Reveal.cs` | Reveal attachment from feed into IDE |
 | `ChatPanelViewModel.IntercomCorrespondence.cs` | Slash find/relate message↔code + in-memory explicit relates |
 | `ChatPanelViewModel.IntercomCorrespondence.Mcp.cs` | MCP JSON messages-for-code / message-relate |
+| `ChatPanelViewModel.ComposerAutocomplete.cs` | Popup facade, caret refresh, slash/bracket routing, commit/move |
+| `ChatPanelViewModel.ComposerAutocomplete.Bracket.cs` | Bracket suggestions, debounce, move/commit/dismiss |
 
 Existing concern partials (Intercom*, Session, Threading, Composer*, …) stay as mapped by filename.
 
-Fat siblings next: ComposerAutocomplete (~255).
+Fat siblings next: invent after build (hub / IntercomCorrespondence.Mcp / other).
