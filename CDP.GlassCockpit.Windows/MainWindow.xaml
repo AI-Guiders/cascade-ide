@@ -57,8 +57,19 @@
         <Border Grid.Column="2" Background="#1E2A3A" BorderBrush="#2F4A6A" BorderThickness="1" CornerRadius="4" Padding="10,5">
           <StackPanel>
             <TextBlock x:Name="ChromeHint" Text="settings.toml · loading…" Foreground="#9BB6D4" FontSize="12"/>
-            <TextBlock x:Name="SoftOrganHint" Text="" Foreground="#C9B896" FontSize="11" Margin="0,2,0,0"
-                       Visibility="Collapsed" TextWrapping="Wrap"/>
+            <!-- SoftOrgan density: top-N lines + overflow (Avalonia WorkspaceChromeBand parity). -->
+            <StackPanel x:Name="SoftOrganBand" Margin="0,2,0,0" Visibility="Collapsed">
+              <ItemsControl x:Name="SoftOrganHintLines">
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate>
+                    <TextBlock Text="{Binding}" Foreground="#C9B896" FontSize="11" Opacity="0.85"
+                               TextWrapping="Wrap"/>
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+              <TextBlock x:Name="SoftOrganOverflow" Text="" Foreground="#C9B896" FontSize="11"
+                         Opacity="0.55" Margin="0,2,0,0" Visibility="Collapsed"/>
+            </StackPanel>
           </StackPanel>
         </Border>
         <TextBlock Grid.Column="3" VerticalAlignment="Center" Margin="12,0,0,0"

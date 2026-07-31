@@ -5,6 +5,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Threading;
+using CascadeIDE.SoftOrgan;
 using ICSharpCode.AvalonEdit.Highlighting;
 using Microsoft.Win32;
 
@@ -477,16 +478,22 @@ public partial class MainWindow : Window
         Dispatcher.BeginInvoke(() =>
         {
             _softOrgans.Apply(organId, chromeHint);
-            var band = _softOrgans.BandLine;
-            if (string.IsNullOrWhiteSpace(band))
+            var band = _softOrgans.Snapshot();
+            if (!band.HasContent)
             {
-                SoftOrganHint.Text = "";
-                SoftOrganHint.Visibility = Visibility.Collapsed;
+                SoftOrganHintLines.ItemsSource = null;
+                SoftOrganOverflow.Text = "";
+                SoftOrganOverflow.Visibility = Visibility.Collapsed;
+                SoftOrganBand.Visibility = Visibility.Collapsed;
             }
             else
             {
-                SoftOrganHint.Text = band;
-                SoftOrganHint.Visibility = Visibility.Visible;
+                SoftOrganHintLines.ItemsSource = band.VisibleLines;
+                SoftOrganOverflow.Text = band.OverflowLine ?? "";
+                SoftOrganOverflow.Visibility = band.HasOverflow
+                    ? Visibility.Visible
+                    : Visibility.Collapsed;
+                SoftOrganBand.Visibility = Visibility.Visible;
             }
         }, DispatcherPriority.Background);
     }
