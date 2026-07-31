@@ -1,6 +1,6 @@
 # Политика лицензий (разработчики CascadeIDE)
 
-Исходный код продукта в этом репозитории — **[MIT](../LICENSE)**. Коммерческое предложение и публичные контакты — **[COMMERCIAL-NOTICE.md](COMMERCIAL-NOTICE.md)**.
+Исходный код продукта в этом репозитории — **[Hippocratic License 2.1](../LICENSE)** (Ethical Source). Коммерческое предложение и публичные контакты — **[COMMERCIAL-NOTICE.md](COMMERCIAL-NOTICE.md)**. Явная политика для читателя README — корневой [`README.md`](../README.md) (раздел «Этическая политика»).
 
 Нормативный документ: **[ADR 0101 — лицензирование и коммерциализация](adr/0101-licensing-and-commercialization-strategy.md)**.
 

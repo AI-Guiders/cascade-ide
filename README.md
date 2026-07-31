@@ -4,9 +4,19 @@
 
 **Документация (сайт):** **[ai-guiders.github.io/cascade-ide](https://ai-guiders.github.io/cascade-ide/)** — MkDocs, русский по умолчанию, переключатель **RU / EN** в шапке. Для международной аудитории: **[Concept overview (EN)](https://ai-guiders.github.io/cascade-ide/en/concept-overview/)**.
 
-**Лицензия кода:** [MIT](LICENSE)
+**Лицензия кода:** [Hippocratic License 2.1](LICENSE) (Ethical Source / SPDX `Hippocratic-2.1`)
 
-Использование исходников и сборок **внутри условий MIT** (сохранение уведомлений, лицензии и т.д.) — как обычно для open-source. Если тебе нужно **коммерческое** применение (продукт на основе IDE, встраивание в закрытый контур, поддержка, кастомизация под бизнес) — **свяжись с нами**: контакты и рамки в **[docs/COMMERCIAL-NOTICE.md](docs/COMMERCIAL-NOTICE.md)**. Планируемая модель: **MIT + commercial** (открытый код + отдельная коммерческая линейка/услуги); подробнее о границах — **[docs/licensing-vision.md](docs/licensing-vision.md)**.
+### Этическая политика (орган Cascade IDE)
+
+Этот репозиторий — **Ethical Source**, не «чистый» OSI MIT.
+
+- **Можно:** форкать, читать, собирать, аудитить, развивать IDE и связанный пульт.
+- **Нельзя:** использовать этот код для насилия, репрессий, нарушения прав человека и иных применений, которые запрещает текст лицензии (Human Rights Principles / Human Rights Laws).
+- Полный юридический текст — только в [`LICENSE`](LICENSE). Краткое резюме выше не заменяет его.
+- Сторонние зависимости остаются под **своими** лицензиями — [`docs/THIRD-PARTY-NOTICES.md`](docs/THIRD-PARTY-NOTICES.md).
+- Коммерческие услуги (поддержка, кастомизация, закрытый контур) — отдельно: [`docs/COMMERCIAL-NOTICE.md`](docs/COMMERCIAL-NOTICE.md). Планируемая модель: **Ethical Source + commercial**; границы — [`docs/licensing-vision.md`](docs/licensing-vision.md).
+
+Sibling harness **cdp-mcp** на той же лицензии: https://github.com/AI-Guiders/cdp-mcp
 
 ---
 

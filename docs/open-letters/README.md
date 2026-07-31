@@ -2,12 +2,12 @@
 
 **Canon lives in CDP** — not here.
 
-Canonical letters (full text, MIT):
+Canonical letters (full text, Hippocratic-2.1 / Ethical Source):
 [`cdp-mcp/docs/open-letters/`](https://github.com/AI-Guiders/cdp-mcp/tree/main/docs/open-letters)
 
 This Cascade IDE folder is an **attribution pointer** only: the House that proves
 the letter is the harness (`cdp-mcp`), Glass, latch, wake, and tooth — shipped
-under the same MIT spirit as [LICENSE](../../LICENSE).
+under the same Ethical Source license as [LICENSE](../../LICENSE).
 
 | Letter | Canon (CDP) | Local stub |
 |--------|-------------|------------|
