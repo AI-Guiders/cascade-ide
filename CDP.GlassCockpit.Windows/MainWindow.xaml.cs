@@ -70,7 +70,7 @@ public partial class MainWindow : Window
     {
         try
         {
-            RebuildIntercomFeedFromJournal();
+            RebuildIntercomFeedFromJournal(stickEnd: true);
         }
         catch
         {
@@ -78,8 +78,14 @@ public partial class MainWindow : Window
         }
     }
 
-    void RebuildIntercomFeedFromJournal()
+    void RebuildIntercomFeedFromJournal(bool stickEnd = false)
     {
+        var wasPinned = CascadeIDE.Intercom.GlassIntercomFeedScroll.IsPinnedToEnd(
+            FeedScroll.VerticalOffset,
+            FeedScroll.ExtentHeight,
+            FeedScroll.ViewportHeight);
+        var priorOffset = FeedScroll.VerticalOffset;
+
         var entries = GlassIntercomJournal.LoadTail(80);
         foreach (var e in entries)
         {
@@ -129,6 +135,22 @@ public partial class MainWindow : Window
 
         while (_feed.Count > 81)
             _feed.RemoveAt(1);
+
+        ApplyFeedScrollAfterRebuild(stickEnd, wasPinned, priorOffset);
+    }
+
+    void ApplyFeedScrollAfterRebuild(bool stickEnd, bool wasPinned, double priorOffset)
+    {
+        var target = CascadeIDE.Intercom.GlassIntercomFeedScroll.ResolveOffsetAfterRebuild(
+            stickEnd, wasPinned, priorOffset);
+        // Layout after ItemsControl mutate — apply on next pass.
+        Dispatcher.BeginInvoke(() =>
+        {
+            if (double.IsPositiveInfinity(target))
+                FeedScroll.ScrollToEnd();
+            else
+                FeedScroll.ScrollToVerticalOffset(target);
+        }, DispatcherPriority.Loaded);
     }
 
     void SyncTopicAllChrome()
@@ -140,8 +162,7 @@ public partial class MainWindow : Window
     {
         _selectedTopicId = null;
         _selectedTopicEntryIds = [];
-        RebuildIntercomFeedFromJournal();
-        FeedScroll.ScrollToEnd();
+        RebuildIntercomFeedFromJournal(stickEnd: true);
     }
 
     void TopicCard_OnClick(object sender, RoutedEventArgs e)
@@ -152,8 +173,7 @@ public partial class MainWindow : Window
         var card = _topics.FirstOrDefault(t =>
             string.Equals(t.Id, id, StringComparison.OrdinalIgnoreCase));
         _selectedTopicEntryIds = card?.EntryIds.ToArray() ?? [id];
-        RebuildIntercomFeedFromJournal();
-        FeedScroll.ScrollToEnd();
+        RebuildIntercomFeedFromJournal(stickEnd: true);
     }
 
     void ApplyLayoutFromSession()
@@ -371,8 +391,7 @@ public partial class MainWindow : Window
                 }
 
                 TryJournalFromView(view);
-                RebuildIntercomFeedFromJournal();
-                FeedScroll.ScrollToEnd();
+                RebuildIntercomFeedFromJournal(); // preserve scroll unless pinned to end
                 StatusText.Text = $"glass · {view.StatusLine} · {DateTime.Now:HH:mm:ss}";
             }
             catch (Exception ex)
@@ -573,10 +592,9 @@ public partial class MainWindow : Window
         }
 
         _seenIntercomIds.Add(sent.Id);
-        RebuildIntercomFeedFromJournal();
+        RebuildIntercomFeedFromJournal(stickEnd: true);
 
         ComposerBox.Clear();
-        FeedScroll.ScrollToEnd();
         StatusText.Text = $"glass · intercom · sent {sent.Id} · @PM→@PF · {DateTime.Now:HH:mm:ss}";
     }
 
