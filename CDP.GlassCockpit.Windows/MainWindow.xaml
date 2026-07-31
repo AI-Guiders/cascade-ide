@@ -160,26 +160,51 @@
 
             <DockPanel x:Name="IntercomSurface" Grid.Row="2">
               <Border DockPanel.Dock="Bottom" Background="#1A1A1A" BorderBrush="#2A2A2A" BorderThickness="0,1,0,0" Padding="10">
-                <DockPanel>
-                  <Button x:Name="SendBtn" DockPanel.Dock="Right" Content="Send" Style="{StaticResource ChromeBtn}"
-                          Click="SendBtn_OnClick" ToolTip="Send to @PF (Enter / Ctrl+Enter; Shift+Enter = newline)"/>
-                  <TextBox x:Name="ComposerBox"
-                           AcceptsReturn="True"
-                           TextWrapping="Wrap"
-                           MinHeight="40" MaxHeight="120"
-                           VerticalScrollBarVisibility="Auto"
-                           Background="#222"
-                           Foreground="#EEE"
-                           BorderBrush="#3F3F46"
-                           BorderThickness="1"
-                           Padding="8"
-                           FontFamily="Segoe UI"
-                           FontSize="13"
-                           Margin="0,0,8,0"
-                           Text="Message @PF…"
-                           PreviewKeyDown="ComposerBox_OnPreviewKeyDown"
-                           GotKeyboardFocus="ComposerBox_OnGotKeyboardFocus"/>
-                </DockPanel>
+                <Grid>
+                  <Popup x:Name="SlashPopup"
+                         Placement="Top"
+                         PlacementTarget="{Binding ElementName=ComposerBox}"
+                         StaysOpen="False"
+                         AllowsTransparency="True">
+                    <Border Background="#1E2430" BorderBrush="#3F3F46" BorderThickness="1" Padding="4" MaxHeight="220" MinWidth="280">
+                      <ListBox x:Name="SlashList"
+                               Background="Transparent"
+                               BorderThickness="0"
+                               Foreground="#EEE"
+                               FontFamily="Consolas"
+                               FontSize="12">
+                        <ListBox.ItemTemplate>
+                          <DataTemplate>
+                            <StackPanel Margin="2,2">
+                              <TextBlock Text="{Binding Title}" FontWeight="SemiBold"/>
+                              <TextBlock Text="{Binding Help}" Foreground="#9BB6D4" FontSize="11" TextWrapping="Wrap"/>
+                            </StackPanel>
+                          </DataTemplate>
+                        </ListBox.ItemTemplate>
+                      </ListBox>
+                    </Border>
+                  </Popup>
+                  <DockPanel>
+                    <Button x:Name="SendBtn" DockPanel.Dock="Right" Content="Send" Style="{StaticResource ChromeBtn}"
+                            Click="SendBtn_OnClick" ToolTip="Send to @PF (Enter / Ctrl+Enter; Shift+Enter = newline; / = slash)"/>
+                    <TextBox x:Name="ComposerBox"
+                             AcceptsReturn="True"
+                             TextWrapping="Wrap"
+                             MinHeight="40" MaxHeight="120"
+                             VerticalScrollBarVisibility="Auto"
+                             Background="#222"
+                             Foreground="#EEE"
+                             BorderBrush="#3F3F46"
+                             BorderThickness="1"
+                             Padding="8"
+                             FontFamily="Segoe UI"
+                             FontSize="13"
+                             Margin="0,0,8,0"
+                             Text="Message @PF…"
+                             PreviewKeyDown="ComposerBox_OnPreviewKeyDown"
+                             GotKeyboardFocus="ComposerBox_OnGotKeyboardFocus"/>
+                  </DockPanel>
+                </Grid>
               </Border>
 
               <Border DockPanel.Dock="Top" Background="#151820" BorderBrush="#2A2A2A" BorderThickness="0,0,0,1" Padding="8,6">

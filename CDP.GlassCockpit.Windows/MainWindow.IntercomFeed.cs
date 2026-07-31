@@ -89,14 +89,23 @@ public partial class MainWindow
 
     void ComposerBox_OnPreviewKeyDown(object sender, KeyEventArgs e)
     {
+        if (TryHandleSlashComposerKeys(e))
+            return;
+
         if (e.Key != Key.Enter)
             return;
 
-        // Shift+Enter = newline; Enter / Ctrl+Enter = send
+        // Shift+Enter = newline; Enter / Ctrl+Enter = send (or slash run)
         if (Keyboard.Modifiers.HasFlag(ModifierKeys.Shift))
             return;
 
         e.Handled = true;
+        if (SlashPopup.IsOpen && _slashSuggestions.Count > 0)
+        {
+            CommitSlashSuggestion(run: true);
+            return;
+        }
+
         TrySendComposer();
     }
 
@@ -109,6 +118,9 @@ public partial class MainWindow
     void TrySendComposer()
     {
         var raw = ComposerBox.Text;
+        if (TryRunGlassSlash(raw))
+            return;
+
         var sent = GlassIntercomSend.TrySend(raw);
         if (sent is null)
         {
@@ -120,6 +132,7 @@ public partial class MainWindow
         RebuildIntercomFeedFromJournal(stickEnd: true);
 
         ComposerBox.Clear();
+        HideSlashPopup();
         StatusText.Text = $"glass · intercom · sent {sent.Id} · @PM→@PF · {DateTime.Now:HH:mm:ss}";
     }
 
