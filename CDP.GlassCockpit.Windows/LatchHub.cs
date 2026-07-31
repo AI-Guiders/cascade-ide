@@ -13,7 +13,8 @@ internal sealed class LatchHub : IDisposable
     static readonly HashSet<string> SoftOrganIds = new(StringComparer.OrdinalIgnoreCase)
     {
         "pressure", "ignite", "plan", "cabin", "scope", "review", "refactor", "plugins",
-        "toolchain", "crm", "report", "webcam", "sys", "onboard", "arch", "mcp", "learn", "domain"
+        "toolchain", "crm", "report", "webcam", "sys", "onboard", "arch", "mcp", "learn", "domain",
+        "sa-desk"
     };
 
     FileSystemWatcher? _watcher;

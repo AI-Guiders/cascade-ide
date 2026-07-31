@@ -6,6 +6,13 @@ namespace CascadeIDE.Tests;
 
 public sealed class AgentChromeHintDensityPolicyTests
 {
+    [Theory]
+    [InlineData("sa_desk", 18)]
+    [InlineData("sa-desk", 18)]
+    [InlineData("domain", 17)]
+    public void PriorityFor_sa_desk_after_domain(string id, int expect) =>
+        Assert.Equal(expect, AgentChromeHintDensityPolicy.PriorityFor(id));
+
     [Fact]
     public void Collapse_empty_returns_empty()
     {

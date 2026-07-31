@@ -41,6 +41,7 @@ public static class AgentChromeHintDensityPolicy
         "mcp" => 15,
         "learn" => 16,
         "domain" => 17,
+        "sa_desk" or "sa-desk" => 18,
         _ => 50
     };
 

@@ -75,6 +75,7 @@ internal sealed class SoftOrganChromeAggregator
         "mcp" => 15,
         "learn" => 16,
         "domain" => 17,
+        "sa-desk" or "sa_desk" => 18,
         _ => 50
     };
 }
