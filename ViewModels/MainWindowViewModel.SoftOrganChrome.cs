@@ -122,6 +122,7 @@ public partial class MainWindowViewModel
         OnPropertyChanged(nameof(AgentChromeHintVisibleLines));
         OnPropertyChanged(nameof(AgentChromeHintOverflow));
         OnPropertyChanged(nameof(ShowAgentChromeHintOverflow));
+        OnPropertyChanged(nameof(ShowWorkspaceChromeBand));
     }
 
     public void ApplyCabinOrganChromeHint(string? hint) =>
@@ -181,10 +182,11 @@ public partial class MainWindowViewModel
     public void ApplySaDeskChromeHint(string? hint) =>
         ApplyChromeHint(AgentSaDeskChromeHint, hint, v => AgentSaDeskChromeHint = v);
 
-    static void ApplyChromeHint(string? current, string? hint, Action<string?> set)
+    void ApplyChromeHint(string? current, string? hint, Action<string?> set)
     {
         var next = string.IsNullOrWhiteSpace(hint) ? null : hint.Trim();
         if (string.Equals(current, next, StringComparison.Ordinal)) return;
         set(next);
+        RaiseChromeHintDensity();
     }
 }
