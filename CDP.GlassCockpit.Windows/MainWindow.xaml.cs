@@ -470,6 +470,11 @@ public partial class MainWindow : Window
                 return;
             }
         }
+
+        // 0-sync: CabinGlass may name a page before XAML list catches up — ensure selectable.
+        var created = new ListBoxItem { Content = page.Trim() };
+        MfdPages.Items.Add(created);
+        MfdPages.SelectedItem = created;
     }
 
     void MfdPages_OnSelectionChanged(object sender, SelectionChangedEventArgs e) => UpdateMfdBody();
@@ -495,11 +500,18 @@ public partial class MainWindow : Window
             "Terminal" => "Terminal page host.\n\nConPTY / shell organ wires in later peels.\nNow: page chrome only (like CIDE MfdShell).",
             "SolutionExplorer" => "Solution Explorer host.\n\nTree of CascadeIDE.sln / open workspace — later.",
             "SemanticMap" => "Semantic Map host.\n\nGraph surface later (not adjacency dump).",
+            "Tests" => "Tests page host.\n\ncdp_test / test_desk projection (CabinGlass catalog).",
+            "HybridIndex" => "Hybrid Index host.\n\ncodebase_index organ → glass MFD (stub peel).",
+            "RelatedFiles" => "Related Files host.\n\nfind_desk / related organ projection.",
+            "Correspondence" => "Correspondence host.\n\ncrs organ projection — later inbox chrome.",
+            "MarkdownPreview" => "Markdown Preview host.\n\nmd_preview / md_author projection.",
+            "WebAiPortal" => "Web / AI Portal host.\n\nbrowser organ projection.",
+            "AiChatSettings" => "AI Chat Settings host.\n\noptions / ignite projection (settings.toml SSOT).",
             "Editor" => _session.IsIntercomForward
                 ? "Editor page — AvalonEdit mounts here when Forward=intercom (ADR 0120)."
                 : "Editor is on Forward (primary_work_surface=editor).",
             "Chat" => "Chat/Intercom also on M when needed; primary Intercom is Forward.",
-            _ => $"{page} page host.\n\nInstrument content peels later."
+            _ => $"{page} page host.\n\nInstrument content peels later. (CabinGlass catalog may select this.)"
         };
         RefreshEicasHealth();
     }

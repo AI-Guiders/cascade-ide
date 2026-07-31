@@ -224,10 +224,17 @@
             <ListBoxItem Content="SolutionExplorer"/>
             <ListBoxItem Content="Terminal" IsSelected="True"/>
             <ListBoxItem Content="Build"/>
+            <ListBoxItem Content="Tests"/>
             <ListBoxItem Content="Problems"/>
             <ListBoxItem Content="Git"/>
             <ListBoxItem Content="DebugStack"/>
             <ListBoxItem Content="SemanticMap"/>
+            <ListBoxItem Content="HybridIndex"/>
+            <ListBoxItem Content="RelatedFiles"/>
+            <ListBoxItem Content="Correspondence"/>
+            <ListBoxItem Content="MarkdownPreview"/>
+            <ListBoxItem Content="WebAiPortal"/>
+            <ListBoxItem Content="AiChatSettings"/>
             <ListBoxItem Content="Chat"/>
             <ListBoxItem Content="Editor"/>
           </ListBox>
