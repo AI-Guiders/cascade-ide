@@ -89,8 +89,23 @@ public partial class MainWindow
 
     void MainWindow_OnPreviewKeyDown(object sender, KeyEventArgs e)
     {
+        if (e.Key == Key.Escape && PaletteOverlay.Visibility == Visibility.Visible)
+        {
+            CloseCommandPalette();
+            e.Handled = true;
+            return;
+        }
+
         if (Keyboard.Modifiers != ModifierKeys.Control)
             return;
+
+        // WPF reports Key.Q as Key.Q; Digits may differ — handle Oem-safe Q via KeyConverter path.
+        if (e.Key == Key.Q)
+        {
+            ToggleCommandPalette();
+            e.Handled = true;
+            return;
+        }
 
         if (e.Key == Key.S)
         {

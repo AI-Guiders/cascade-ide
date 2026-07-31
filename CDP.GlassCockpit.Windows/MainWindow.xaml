@@ -38,6 +38,7 @@
     </Style>
   </Window.Resources>
 
+  <Grid>
   <DockPanel>
     <!-- Top chrome (CIDE-like band) -->
     <Border DockPanel.Dock="Top" Background="#1A1A1A" BorderBrush="#2E2E2E" BorderThickness="0,0,0,1" Padding="10,8">
@@ -314,4 +315,38 @@
       </Border>
     </Grid>
   </DockPanel>
+
+    <Border x:Name="PaletteOverlay"
+            Visibility="Collapsed"
+            Background="#AA000000"
+            Panel.ZIndex="100">
+      <Border Width="520" MaxHeight="420"
+              VerticalAlignment="Center" HorizontalAlignment="Center"
+              Background="#1A2030" BorderBrush="#4A6A90" BorderThickness="1"
+              Padding="12" CornerRadius="4">
+        <DockPanel>
+          <TextBlock DockPanel.Dock="Top" Text="Command palette" FontWeight="SemiBold" Margin="0,0,0,8"/>
+          <TextBlock DockPanel.Dock="Bottom" Text="Ctrl+Q toggle · Esc close · Enter run"
+                     Foreground="#9BB6D4" FontSize="11" Margin="0,8,0,0"/>
+          <TextBox x:Name="PaletteQuery"
+                   DockPanel.Dock="Top"
+                   Margin="0,0,0,8"
+                   Background="#222" Foreground="#EEE" BorderBrush="#3F3F46"
+                   Padding="8" FontFamily="Segoe UI" FontSize="13"/>
+          <ListBox x:Name="PaletteList"
+                   Background="Transparent" BorderThickness="0" Foreground="#EEE"
+                   FontFamily="Segoe UI" FontSize="12">
+            <ListBox.ItemTemplate>
+              <DataTemplate>
+                <StackPanel Margin="2,3">
+                  <TextBlock Text="{Binding Title}" FontWeight="SemiBold"/>
+                  <TextBlock Text="{Binding Help}" Foreground="#9BB6D4" FontSize="11" TextWrapping="Wrap"/>
+                </StackPanel>
+              </DataTemplate>
+            </ListBox.ItemTemplate>
+          </ListBox>
+        </DockPanel>
+      </Border>
+    </Border>
+  </Grid>
 </Window>

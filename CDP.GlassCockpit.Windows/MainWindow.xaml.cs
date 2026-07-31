@@ -22,6 +22,7 @@ public partial class MainWindow : Window
 
         LoadIntercomHistory();
         InitIntercomSlash();
+        InitCommandPalette();
 
         TryOpenDogfoodFile();
 
