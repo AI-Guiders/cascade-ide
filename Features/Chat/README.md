@@ -13,7 +13,10 @@ Hub `ChatPanelViewModel.cs` still over quality gate — peel coherent concerns i
 | `ChatPanelViewModel.StreamingMaf.cs` | Streaming provider + MAF IDE agent send path |
 | `ChatPanelViewModel.McpAppend.cs` | External MCP `send_chat` append (bracket prepare + UI commit) |
 | `ChatPanelViewModel.ThinkingMessages.cs` | Thinking/tool bubble helpers (ACP shared) |
+| `ChatPanelViewModel.Sedm.cs` | SEDM scope strip, session-event cache, workline resolve |
+| `ChatPanelViewModel.Sedm.Mcp.cs` | Intent/decision MCP recording + cross-workline stale |
+| `ChatPanelViewModel.Sedm.Materialize.cs` | Context-card materialization + outbound agent-context prefixes |
 
-Existing concern partials (Intercom*, Session, Sedm, Threading, Composer*, …) stay as mapped by filename.
+Existing concern partials (Intercom*, Session, Threading, Composer*, …) stay as mapped by filename.
 
-Hub ~330 LOC after peels (under soft fail 800 / warn 400). Next: ctor/fields split or over-gate siblings (Sedm/IntercomAttach/ComposerAutocomplete).
+Hub ~333 LOC. Fat siblings next: IntercomAttach (~326) / ComposerAutocomplete (~255) / IntercomCorrespondence (~297).
