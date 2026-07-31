@@ -60,6 +60,29 @@ public sealed class CascadeIdeMafProjectAgentRulesTests
     }
 
     [Fact]
+    public void BuildInstructions_AppendsCitizenAttentionAlwaysOn()
+    {
+        var prompts = new MafIdeAgentPrompts.PromptPack(
+            AgentSystem: "CORE",
+            SalvageRecapSystem: "S",
+            SalvageUserMessageTemplate: "{{USER_QUERY}}\n{{TOOL_PAYLOAD}}",
+            OptionalSections: new Dictionary<string, string>
+            {
+                [CascadeIdeMafIdeAgentChat.CitizenAttentionPackKey] = "ATTENTION: Dark Cockpit A then one C",
+            });
+        var merged = CascadeIdeMafIdeAgentChat.BuildInstructions(
+            prompts,
+            cascadeConversation: [new ChatMessage("user", "hello")],
+            minimizedContextBlock: null,
+            projectAgentRulesMarkdown: null);
+        Assert.Contains("Citizen attention (habitat)", merged, StringComparison.Ordinal);
+        Assert.Contains("ATTENTION: Dark Cockpit A then one C", merged, StringComparison.Ordinal);
+        Assert.True(
+            merged.IndexOf("CORE", StringComparison.Ordinal) <
+            merged.IndexOf("Citizen attention", StringComparison.Ordinal));
+    }
+
+    [Fact]
     public void PromptPackRouter_SelectsPacks_ForClearDebugAndCSharpSignal()
     {
         var prompts = new MafIdeAgentPrompts.PromptPack(

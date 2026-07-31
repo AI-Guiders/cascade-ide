@@ -20,6 +20,9 @@ internal static partial class CascadeIdeMafIdeAgentChat
     internal const int SalvageOutcomeMaxCharsForSummary = 18_000;
     internal const int MafDynamicPromptPacksMaxChars = 2_200;
 
+    /// <summary>Always-on citizen attention section in <c>maf-ide-agent.prompts.md</c> (wire peel #11).</summary>
+    internal const string CitizenAttentionPackKey = "pack_citizen_attention";
+
     /// <summary>
     /// Макс. длина одного сообщения с ролью <c>tool</c> при сборке истории для MAF/Ollama (малый контекст — не забиваем окно длинными трассами UI).
     /// </summary>
@@ -118,6 +121,13 @@ internal static partial class CascadeIdeMafIdeAgentChat
     {
         var core = prompts.AgentSystem.Trim();
         var sb = new StringBuilder(core);
+
+        // Citizen wire peel #11: persona/attention into MAF host (not a second LLM loop).
+        if (prompts.TryGetOptionalSection(CitizenAttentionPackKey, out var citizenAttention))
+        {
+            sb.Append("\n\n---\n\n## Citizen attention (habitat)\n\n");
+            sb.Append(citizenAttention);
+        }
 
         var route = MafPromptPackRouter.Route(prompts, cascadeConversation, minimizedContextBlock, MafDynamicPromptPacksMaxChars);
         if (route.Selections.Count > 0)
@@ -267,8 +277,9 @@ internal static partial class CascadeIdeMafIdeAgentChat
     {
         var list = new List<MeAiChat>();
         var context = minimizedContextBlock?.Trim();
+        // Afferent desk/hot/file pulse already composed by caller into minimizedContextBlock.
         if (!string.IsNullOrEmpty(context))
-            list.Add(new MeAiChat(MeAiRole.User, "Контекст текущего файла (только диагностики и сигнатуры):\n\n" + context));
+            list.Add(new MeAiChat(MeAiRole.User, "Контекст IDE (hot / telemetry / minimized):\n\n" + context));
 
         foreach (var m in cascadeConversation)
         {
