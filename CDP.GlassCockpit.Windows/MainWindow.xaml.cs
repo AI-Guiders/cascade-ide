@@ -17,26 +17,25 @@ public partial class MainWindow : Window
     readonly SoftOrganChromeAggregator _softOrgans = new();
     readonly EicasBandAggregator _eicas = new();
     readonly ObservableCollection<ChatBubble> _feed = new();
+    readonly ObservableCollection<GlassIntercomTopics.Topic> _topics = new();
     readonly GlassHostWindows _hosts;
     readonly HashSet<string> _seenIntercomIds = new(StringComparer.OrdinalIgnoreCase);
     bool _hostsReady;
     string? _editorPath;
+    string? _selectedTopicId;
 
     public MainWindow()
     {
         InitializeComponent();
         PreviewKeyDown += MainWindow_OnPreviewKeyDown;
         MessageFeed.ItemsSource = _feed;
+        TopicCards.ItemsSource = _topics;
         _hosts = new GlassHostWindows(this);
 
         _session = new GlassSession();
         ApplyLayoutFromSession();
         ApplyPrimaryWorkSurface();
 
-        _feed.Add(new ChatBubble(
-            "system",
-            "MVP: Forward respects primary_work_surface. Intercom→editor on M; dark AvalonEdit theme. Virtual History reloads journal on start.",
-            DateTime.Now.ToString("HH:mm")));
         LoadIntercomHistory();
 
         TryOpenDogfoodFile();
@@ -70,20 +69,66 @@ public partial class MainWindow : Window
     {
         try
         {
-            foreach (var e in GlassIntercomJournal.LoadTail(40))
-            {
-                if (e.Id.Length > 0)
-                    _seenIntercomIds.Add(e.Id);
-                _feed.Add(new ChatBubble(e.RoleLabel, e.Body, e.WhenLabel));
-            }
-
-            while (_feed.Count > 41) // tip + 40
-                _feed.RemoveAt(1);
+            RebuildIntercomFeedFromJournal();
         }
         catch
         {
             /* best-effort */
         }
+    }
+
+    void RebuildIntercomFeedFromJournal()
+    {
+        var entries = GlassIntercomJournal.LoadTail(80);
+        foreach (var e in entries)
+        {
+            if (e.Id.Length > 0)
+                _seenIntercomIds.Add(e.Id);
+        }
+
+        _topics.Clear();
+        foreach (var t in GlassIntercomTopics.Cluster(entries))
+            _topics.Add(t);
+
+        _feed.Clear();
+        _feed.Add(new ChatBubble(
+            "system",
+            "MVP: Forward respects primary_work_surface. Intercom→editor on M; dark AvalonEdit theme. Virtual History + topic cards.",
+            DateTime.Now.ToString("HH:mm")));
+
+        IEnumerable<GlassIntercomJournal.Entry> shown = entries;
+        if (_selectedTopicId is { Length: > 0 } topicId)
+        {
+            var topic = _topics.FirstOrDefault(t =>
+                string.Equals(t.Id, topicId, StringComparison.OrdinalIgnoreCase));
+            if (topic is not null)
+            {
+                var allow = topic.EntryIds.ToHashSet(StringComparer.OrdinalIgnoreCase);
+                shown = entries.Where(e => allow.Contains(e.Id));
+            }
+        }
+
+        foreach (var e in shown)
+            _feed.Add(new ChatBubble(e.RoleLabel, e.Body, e.WhenLabel));
+
+        while (_feed.Count > 81)
+            _feed.RemoveAt(1);
+    }
+
+    void TopicAllBtn_OnClick(object sender, RoutedEventArgs e)
+    {
+        _selectedTopicId = null;
+        RebuildIntercomFeedFromJournal();
+        FeedScroll.ScrollToEnd();
+    }
+
+    void TopicCard_OnClick(object sender, RoutedEventArgs e)
+    {
+        if (sender is not Button { Tag: string id } || id.Length == 0)
+            return;
+        _selectedTopicId = id;
+        RebuildIntercomFeedFromJournal();
+        FeedScroll.ScrollToEnd();
     }
 
     void ApplyLayoutFromSession()
@@ -301,14 +346,7 @@ public partial class MainWindow : Window
                 }
 
                 TryJournalFromView(view);
-                _feed.Add(new ChatBubble(
-                    view.RoleLabel,
-                    view.Body,
-                    view.WhenLabel));
-
-                while (_feed.Count > 40)
-                    _feed.RemoveAt(0);
-
+                RebuildIntercomFeedFromJournal();
                 FeedScroll.ScrollToEnd();
                 StatusText.Text = $"glass · {view.StatusLine} · {DateTime.Now:HH:mm:ss}";
             }
@@ -498,12 +536,7 @@ public partial class MainWindow : Window
         }
 
         _seenIntercomIds.Add(sent.Id);
-        _feed.Add(new ChatBubble(
-            sent.RoleLabel,
-            sent.Body,
-            DateTime.Now.ToString("HH:mm")));
-        while (_feed.Count > 40)
-            _feed.RemoveAt(0);
+        RebuildIntercomFeedFromJournal();
 
         ComposerBox.Clear();
         FeedScroll.ScrollToEnd();

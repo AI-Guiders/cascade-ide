@@ -151,6 +151,32 @@
                 </DockPanel>
               </Border>
 
+              <Border DockPanel.Dock="Top" Background="#151820" BorderBrush="#2A2A2A" BorderThickness="0,0,0,1" Padding="8,6">
+                <DockPanel>
+                  <TextBlock DockPanel.Dock="Left" Text="Topics" FontSize="11" Foreground="#888" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                  <Button x:Name="TopicAllBtn" DockPanel.Dock="Left" Content="All" Style="{StaticResource ChromeBtn}"
+                          Click="TopicAllBtn_OnClick" ToolTip="Show full Virtual History feed" Margin="0,0,6,0"/>
+                  <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled">
+                    <ItemsControl x:Name="TopicCards">
+                      <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                          <StackPanel Orientation="Horizontal"/>
+                        </ItemsPanelTemplate>
+                      </ItemsControl.ItemsPanel>
+                      <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                          <Button Content="{Binding Title}" Style="{StaticResource ChromeBtn}"
+                                  Margin="0,0,6,0" MaxWidth="280"
+                                  ToolTip="{Binding Title}"
+                                  Tag="{Binding Id}"
+                                  Click="TopicCard_OnClick"/>
+                        </DataTemplate>
+                      </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                  </ScrollViewer>
+                </DockPanel>
+              </Border>
+
               <ScrollViewer x:Name="FeedScroll" VerticalScrollBarVisibility="Auto" Padding="10">
                 <ItemsControl x:Name="MessageFeed">
                   <ItemsControl.ItemTemplate>
