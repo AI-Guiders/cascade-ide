@@ -16,7 +16,10 @@ Hub `ChatPanelViewModel.cs` still over quality gate — peel coherent concerns i
 | `ChatPanelViewModel.Sedm.cs` | SEDM scope strip, session-event cache, workline resolve |
 | `ChatPanelViewModel.Sedm.Mcp.cs` | Intent/decision MCP recording + cross-workline stale |
 | `ChatPanelViewModel.Sedm.Materialize.cs` | Context-card materialization + outbound agent-context prefixes |
+| `ChatPanelViewModel.IntercomAttach.cs` | Pending drafts, slash handlers, composer insert, workspace resolve |
+| `ChatPanelViewModel.IntercomAttach.Affordance.cs` | Selection/scope/diagnostic/problem + drag-drop affordances |
+| `ChatPanelViewModel.IntercomAttach.Reveal.cs` | Reveal attachment from feed into IDE |
 
 Existing concern partials (Intercom*, Session, Threading, Composer*, …) stay as mapped by filename.
 
-Hub ~333 LOC. Fat siblings next: IntercomAttach (~326) / ComposerAutocomplete (~255) / IntercomCorrespondence (~297).
+Fat siblings next: ComposerAutocomplete (~255) / IntercomCorrespondence (~297).
