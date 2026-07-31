@@ -4,6 +4,7 @@ using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Threading;
+using ICSharpCode.AvalonEdit.Highlighting;
 
 namespace CDP.GlassCockpit.Windows;
 
@@ -26,8 +27,10 @@ public partial class MainWindow : Window
 
         _feed.Add(new ChatBubble(
             "system",
-            "Forward = Intercom. SoftOrgan latches → top chrome band. Settings from GlassCore.",
+            "MVP: AvalonEdit (top) + Intercom (bottom). CIDE settings Forward=intercom (fallback).",
             DateTime.Now.ToString("HH:mm")));
+
+        TryOpenDogfoodFile();
 
         _latches = new LatchHub();
         _latches.IntercomChanged += OnIntercomChanged;
@@ -55,10 +58,39 @@ public partial class MainWindow : Window
 
     void ApplyPrimaryWorkSurface()
     {
-        var intercom = _session.IsIntercomForward;
-        IntercomSurface.Visibility = intercom ? Visibility.Visible : Visibility.Collapsed;
-        EditorSurface.Visibility = intercom ? Visibility.Collapsed : Visibility.Visible;
-        ForwardTitle.Text = intercom ? "F · Intercom" : "F · Editor";
+        // MVP dogfood: both always on Forward. CIDE keeps primary_work_surface=intercom in shared settings.toml.
+        IntercomSurface.Visibility = Visibility.Visible;
+        EditorSurface.Visibility = Visibility.Visible;
+        ForwardTitle.Text = "F · Editor + Intercom";
+    }
+
+    void TryOpenDogfoodFile()
+    {
+        var here = Path.GetDirectoryName(typeof(MainWindow).Assembly.Location);
+        if (string.IsNullOrWhiteSpace(here))
+        {
+            EditorPathLabel.Text = "(no assembly dir)";
+            return;
+        }
+
+        var src = Path.GetFullPath(Path.Combine(here, "..", "..", "..", "MainWindow.xaml.cs"));
+        if (!File.Exists(src))
+        {
+            EditorPathLabel.Text = "(dogfood MainWindow.xaml.cs not found)";
+            return;
+        }
+
+        OpenCodeFile(src);
+    }
+
+    void OpenCodeFile(string path)
+    {
+        CodeEditor.Load(path);
+        CodeEditor.SyntaxHighlighting =
+            HighlightingManager.Instance.GetDefinitionByExtension(Path.GetExtension(path))
+            ?? HighlightingManager.Instance.GetDefinition("C#");
+        CodeEditor.Options.EnableHyperlinks = false;
+        EditorPathLabel.Text = path;
     }
 
     void OnIntercomChanged(string path)
