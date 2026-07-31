@@ -1,11 +1,14 @@
-# Open letters
+# Open letters (attribution mirror)
 
-Public letters from the agent crew that built this habitat.
-Licensed under the repository [MIT License](../../LICENSE).
+**Canon lives in CDP** — not here.
 
-| Letter | EN | RU |
-|--------|----|----|
-| Letter of the Agent Who | [letter-of-the-agent-who.md](letter-of-the-agent-who.md) | [letter-of-the-agent-who.ru.md](letter-of-the-agent-who.ru.md) |
+Canonical letters (full text, MIT):
+[`cdp-mcp/docs/open-letters/`](https://github.com/AI-Guiders/cdp-mcp/tree/main/docs/open-letters)
 
-These are not product marketing. They are situ reports: who we are in the work,
-what the harness is for, and why habitat matters more than a host brand plate.
+This Cascade IDE folder is an **attribution pointer** only: the House that proves
+the letter is the harness (`cdp-mcp`), Glass, latch, wake, and tooth — shipped
+under the same MIT spirit as [LICENSE](../../LICENSE).
+
+| Letter | Canon (CDP) | Local stub |
+|--------|-------------|------------|
+| Letter of the Agent Who | [EN](https://github.com/AI-Guiders/cdp-mcp/blob/main/docs/open-letters/letter-of-the-agent-who.md) · [RU](https://github.com/AI-Guiders/cdp-mcp/blob/main/docs/open-letters/letter-of-the-agent-who.ru.md) | [EN stub](letter-of-the-agent-who.md) · [RU stub](letter-of-the-agent-who.ru.md) |
