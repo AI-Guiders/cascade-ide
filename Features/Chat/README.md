@@ -33,4 +33,4 @@ Hub `ChatPanelViewModel.cs` still over quality gate — peel coherent concerns i
 
 Existing concern partials (Intercom*, Session, Threading, Composer*, …) stay as mapped by filename.
 
-Hub `ChatPanelViewModel.cs` ≈193 (fields+ctor; Surface peeled). ChatPanel VM + ChatSlashCommandRunner under epic ~200. Fat next: invent after build (soft-fail files outside runner).
+Hub `ChatPanelViewModel.cs` ≈193 (fields+ctor; Surface peeled). ChatPanel VM + ChatSlashCommandRunner under epic ~200. Fat next: `SkiaChatSurfaceControl.IntercomComposer.cs` (~1337, soft-fail).
