@@ -33,8 +33,9 @@ public sealed class SoftOrganChromeDensityPolicyTests
 
     [Theory]
     [InlineData("pressure-LATEST.json", "pressure")]
-    [InlineData("sa-desk-LATEST.json", "sa-desk")]
-    [InlineData("SA-DESK-LATEST.json", "SA-DESK")]
+    [InlineData("sa-desk-LATEST.json", SoftOrganLatchCatalog.SaDesk)]
+    [InlineData("sa_desk-LATEST.json", SoftOrganLatchCatalog.SaDesk)]
+    [InlineData("SA-DESK-LATEST.json", SoftOrganLatchCatalog.SaDesk)]
     public void LatchCatalog_parses_known_stems(string fileName, string expectedId)
     {
         Assert.True(SoftOrganLatchCatalog.TryParseFileName(fileName, out var id));
@@ -48,5 +49,45 @@ public sealed class SoftOrganChromeDensityPolicyTests
         Assert.False(SoftOrganLatchCatalog.TryParseFileName("unknown-LATEST.json", out _));
         Assert.False(SoftOrganLatchCatalog.TryParseFileName("pressure.json", out _));
         Assert.False(SoftOrganLatchCatalog.Contains("not-an-organ"));
+    }
+
+    [Fact]
+    public void LatchCatalog_Canonicalize_maps_legacy_sa_desk()
+    {
+        Assert.Equal(SoftOrganLatchCatalog.SaDesk, SoftOrganLatchCatalog.Canonicalize("sa_desk"));
+        Assert.Equal(SoftOrganLatchCatalog.SaDesk, SoftOrganLatchCatalog.Canonicalize("SA_DESK"));
+        Assert.Equal(SoftOrganLatchCatalog.SaDesk, SoftOrganLatchCatalog.Canonicalize("sa-desk"));
+        Assert.True(SoftOrganLatchCatalog.Contains("sa_desk"));
+    }
+
+    [Fact]
+    public void Aggregator_Apply_merges_sa_desk_alias_into_canonical()
+    {
+        var agg = new SoftOrganChromeAggregator();
+        agg.Apply("sa_desk", "from underscore");
+        agg.Apply(SoftOrganLatchCatalog.SaDesk, "from hyphen");
+        var band = agg.Snapshot();
+        Assert.Single(band.VisibleLines);
+        Assert.Equal("from hyphen", band.VisibleLines[0]);
+    }
+
+    /// <summary>Keep in sync with CollectChromeHintCandidates seats in SoftOrganChrome.</summary>
+    [Fact]
+    public void Avalonia_seat_ids_are_catalog_members()
+    {
+        string[] avaloniaSeats =
+        [
+            "pressure", "ignite", "plan", "cabin", "scope", "review", "refactor", "plugins",
+            "toolchain", "crm", "report", "webcam", "sys", "onboard", "arch", "mcp", "learn", "domain",
+            SoftOrganLatchCatalog.SaDesk,
+        ];
+
+        Assert.All(avaloniaSeats, id => Assert.True(SoftOrganLatchCatalog.Contains(id), id));
+        Assert.Equal(
+            SoftOrganLatchCatalog.Ids.Count,
+            avaloniaSeats.Length);
+        Assert.True(
+            SoftOrganLatchCatalog.Ids.ToHashSet(StringComparer.OrdinalIgnoreCase)
+                .SetEquals(avaloniaSeats));
     }
 }

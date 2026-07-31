@@ -1,6 +1,7 @@
 #nullable enable
 using CascadeIDE.Features.Shell.Application;
 using CascadeIDE.Features.UiChrome;
+using CascadeIDE.SoftOrgan;
 using CommunityToolkit.Mvvm.Input;
 
 namespace CascadeIDE.ViewModels;
@@ -105,7 +106,7 @@ public partial class MainWindowViewModel
             ("mcp", AgentMcpChromeHint),
             ("learn", AgentLearnChromeHint),
             ("domain", AgentDomainChromeHint),
-            ("sa_desk", AgentSaDeskChromeHint),
+            (SoftOrganLatchCatalog.SaDesk, AgentSaDeskChromeHint),
         ];
 
         foreach (var (id, text) in seats)

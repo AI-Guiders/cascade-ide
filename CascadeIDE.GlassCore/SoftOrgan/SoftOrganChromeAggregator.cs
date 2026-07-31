@@ -59,15 +59,16 @@ public sealed class SoftOrganChromeAggregator
 
     public void Apply(string organId, string? chromeHint)
     {
-        if (string.IsNullOrWhiteSpace(organId))
+        var id = SoftOrganLatchCatalog.Canonicalize(organId);
+        if (string.IsNullOrWhiteSpace(id))
             return;
 
         lock (_gate)
         {
             if (string.IsNullOrWhiteSpace(chromeHint))
-                _hints.Remove(organId);
+                _hints.Remove(id);
             else
-                _hints[organId] = chromeHint.Trim();
+                _hints[id] = chromeHint.Trim();
         }
     }
 

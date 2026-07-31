@@ -2,6 +2,7 @@
 
 Context-economy peels for quiet SoftOrgan chrome (parity with Glass `MainWindow.SoftOrganBand`).
 Density SSOT: `CascadeIDE.GlassCore/SoftOrgan/SoftOrganChromeDensityPolicy.cs`.
+Latch id catalog: `SoftOrganLatchCatalog` (Avalonia seat ids must match — use `SaDesk` / `sa-desk`, not `sa_desk`).
 Avalonia façade: `Features/UiChrome/AgentChromeHintDensityPolicy.cs`.
 
 ## SoftOrgan / CabinOrgan (0-sync)
