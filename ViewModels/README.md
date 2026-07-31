@@ -12,12 +12,12 @@ Avalonia façade: `Features/UiChrome/AgentChromeHintDensityPolicy.cs`.
 | --- | --- |
 | `MainWindowViewModel.CabinOrganChrome.cs` | `Agent*ChromeHint` ObservableProperty fields + `NotifyPropertyChangedFor` (Show*, WorkspaceBand, density props) |
 | `MainWindowViewModel.SoftOrganChrome.cs` | Show* flags, `ShowWorkspaceChromeBand`, `Apply*ChromeHint` + normalize helper, VisibleLines/Overflow/Toggle, seat candidate table |
-| `MainWindowViewModel.Presentation.cs` | Host surface layout, editor groups |
-| `MainWindowViewModel.Presentation.Capabilities.cs` | UiMode Capabilities + instrumentation dock flags |
-| `MainWindowViewModel.Presentation.Skia.cs` | Zone-geometry overlay + instrument mount styles |
-| `MainWindowViewModel.Presentation.IdeHealth.cs` | IDE Health strip/EICAS/bottom chrome, cockpit shorts, Skia mount contexts |
-| `MainWindowViewModel.Presentation.Badges.cs` | Safety level + risk/result/LOC/progress badges |
-| `MainWindowViewModel.Presentation.Regions.cs` | Region collapse, panel-hidden, MFD contour + MfdRegion aliases |
+| `MainWindowViewModel.Presentation.cs` | Host surface layout, editor groups (~73 LOC; under gate — peels already extracted) |
+| `MainWindowViewModel.Presentation.Capabilities.cs` | UiMode Capabilities + instrumentation dock flags (~27 LOC; under gate) |
+| `MainWindowViewModel.Presentation.Skia.cs` | Zone-geometry overlay + instrument mount styles (~42 LOC; under gate) |
+| `MainWindowViewModel.Presentation.IdeHealth.cs` | IDE Health strip/EICAS/bottom chrome, cockpit shorts, Skia mount contexts (~104 LOC; under gate) |
+| `MainWindowViewModel.Presentation.Badges.cs` | Safety level + risk/result/LOC/progress badges (~42 LOC; under gate) |
+| `MainWindowViewModel.Presentation.Regions.cs` | Region collapse, panel-hidden, MFD contour + MfdRegion aliases (~30 LOC; under gate) |
 
 Call sites keep public `Apply*ChromeHint` names. New chrome seats: add field (+ Notify attrs) in CabinOrgan, then one row in SoftOrgan seats table + Show/Apply one-liners.
 
