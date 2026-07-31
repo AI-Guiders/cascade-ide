@@ -16,8 +16,8 @@ public partial class MainWindow : Window
     readonly EicasBandAggregator _eicas = new();
     readonly ObservableCollection<ChatBubble> _feed = new();
     readonly GlassHostWindows _hosts;
+    readonly HashSet<string> _seenIntercomIds = new(StringComparer.OrdinalIgnoreCase);
     bool _hostsReady;
-    string? _lastSentIntercomId;
 
     public MainWindow()
     {
@@ -184,11 +184,9 @@ public partial class MainWindow : Window
                 var view = LatchPaint.PaintIntercom(raw);
                 IntercomSubtitle.Text = view.Header;
 
-                // Skip echo of our own Send (already painted locally).
-                if (_lastSentIntercomId is not null
-                    && view.Header.Contains(_lastSentIntercomId, StringComparison.OrdinalIgnoreCase))
+                // FileSystemWatcher often fires twice on atomic replace; also skip own Send echo.
+                if (view.MessageId is { Length: > 0 } id && !_seenIntercomIds.Add(id))
                 {
-                    _lastSentIntercomId = null;
                     StatusText.Text = $"glass · {view.StatusLine} · {DateTime.Now:HH:mm:ss}";
                     return;
                 }
@@ -389,7 +387,7 @@ public partial class MainWindow : Window
             return;
         }
 
-        _lastSentIntercomId = sent.Id;
+        _seenIntercomIds.Add(sent.Id);
         _feed.Add(new ChatBubble(
             sent.RoleLabel,
             sent.Body,

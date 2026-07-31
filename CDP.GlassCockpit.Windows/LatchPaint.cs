@@ -13,7 +13,8 @@ internal static class LatchPaint
         string Body,
         string RoleLabel,
         string WhenLabel,
-        string StatusLine);
+        string StatusLine,
+        string? MessageId);
 
     public sealed record PresentationView(
         string Headline,
@@ -32,7 +33,7 @@ internal static class LatchPaint
             var from = Prop(root, "from_seat") ?? "?";
             var to = Prop(root, "to_seat") ?? "?";
             var origin = Prop(root, "origin") ?? "?";
-            var id = Prop(root, "id") ?? "";
+            var id = Prop(root, "id");
             var stamped = Prop(root, "stamped_utc") ?? "";
             var acked = root.TryGetProperty("acked", out var a) && a.ValueKind is JsonValueKind.True;
             var body = Prop(root, "body") ?? "(empty)";
@@ -48,7 +49,8 @@ internal static class LatchPaint
                 body.Replace("\r\n", "\n"),
                 role,
                 whenLabel,
-                $"intercom · {from}→{to} · {(acked ? "acked" : "unread")}");
+                $"intercom · {from}→{to} · {(acked ? "acked" : "unread")}",
+                string.IsNullOrWhiteSpace(id) ? null : id);
         }
         catch (Exception ex)
         {
@@ -57,7 +59,8 @@ internal static class LatchPaint
                 json,
                 "system",
                 DateTime.Now.ToString("HH:mm"),
-                $"intercom · parse fail · {ex.Message}");
+                $"intercom · parse fail · {ex.Message}",
+                null);
         }
     }
 
