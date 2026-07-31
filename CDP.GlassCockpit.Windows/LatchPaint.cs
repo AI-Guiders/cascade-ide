@@ -1,12 +1,11 @@
 #nullable enable
 using System.Text;
 using System.Text.Json;
-using CascadeIDE.Features.Cdp;
 
 namespace CDP.GlassCockpit.Windows;
 
 /// <summary>Latch JSON → human glass fields (never dump wire into seats).</summary>
-internal static class LatchPaint
+internal static partial class LatchPaint
 {
     public sealed record IntercomView(
         string Header,
@@ -121,130 +120,5 @@ internal static class LatchPaint
         if (DateTimeOffset.TryParse(stampedUtc, out var dto))
             return dto.ToLocalTime().ToString("HH:mm");
         return null;
-    }
-
-    /// <summary>Read SoftOrgan latch chrome_hint (null if idle / missing / parse fail).</summary>
-    public sealed record EicasView(string StatusLine);
-
-    /// <summary>alert-LATEST.json → EICAS status line; null when clear/empty.</summary>
-    public static EicasView? PaintAlert(string json)
-    {
-        try
-        {
-            using var doc = JsonDocument.Parse(json);
-            var root = doc.RootElement;
-            var schema = Prop(root, "schema");
-            if (!string.Equals(schema, "cide_alert_latch/v1", StringComparison.OrdinalIgnoreCase))
-                return null;
-            var origin = Prop(root, "origin");
-            if (!string.Equals(origin, "agent", StringComparison.OrdinalIgnoreCase))
-                return null;
-
-            var level = (Prop(root, "level") ?? "clear").Trim().ToLowerInvariant();
-            if (level is "clear" or "")
-                return null;
-
-            var tag = level switch
-            {
-                "fail" => "WARN",
-                "warn" => "CAUT",
-                _ => "ADV"
-            };
-
-            var pulse = Prop(root, "pulse");
-            string? firstLine = null;
-            if (root.TryGetProperty("lines", out var linesEl) && linesEl.ValueKind == JsonValueKind.Array)
-            {
-                foreach (var el in linesEl.EnumerateArray())
-                {
-                    if (el.ValueKind != JsonValueKind.String)
-                        continue;
-                    var s = el.GetString();
-                    if (!string.IsNullOrWhiteSpace(s))
-                    {
-                        firstLine = s.Trim();
-                        break;
-                    }
-                }
-            }
-
-            var text = firstLine ?? pulse;
-            if (string.IsNullOrWhiteSpace(text))
-                return null;
-
-            return new EicasView($"EICAS · {tag} · {text.Trim()}");
-        }
-        catch
-        {
-            return null;
-        }
-    }
-
-    /// <summary>qrh-LATEST.json → advisory line; null when no hot_id.</summary>
-    public static EicasView? PaintQrh(string json)
-    {
-        try
-        {
-            using var doc = JsonDocument.Parse(json);
-            var root = doc.RootElement;
-            var schema = Prop(root, "schema");
-            if (!string.Equals(schema, "cide_qrh_latch/v1", StringComparison.OrdinalIgnoreCase))
-                return null;
-            var origin = Prop(root, "origin");
-            if (!string.Equals(origin, "agent", StringComparison.OrdinalIgnoreCase))
-                return null;
-
-            var hotId = Prop(root, "hot_id");
-            if (string.IsNullOrWhiteSpace(hotId))
-                return null;
-
-            var pulse = Prop(root, "pulse");
-            var hotTitle = Prop(root, "hot_title");
-            var head = !string.IsNullOrWhiteSpace(pulse)
-                ? pulse!.Trim()
-                : (!string.IsNullOrWhiteSpace(hotTitle) ? hotTitle!.Trim() : hotId!.Trim());
-
-            return new EicasView($"EICAS · ADV · {head}");
-        }
-        catch
-        {
-            return null;
-        }
-    }
-
-    public static string? TryReadChromeHint(string path)
-    {
-        try
-        {
-            var raw = CdpLatchIo.TryReadAllTextIfExists(path);
-            if (raw is null)
-                return null;
-            using var doc = JsonDocument.Parse(raw);
-            var root = doc.RootElement;
-            if (root.TryGetProperty("chrome_hint", out var hintEl)
-                && hintEl.ValueKind == JsonValueKind.String)
-            {
-                var hint = hintEl.GetString();
-                return string.IsNullOrWhiteSpace(hint) ? null : hint.Trim();
-            }
-
-            // Dark Cockpit: active=false or missing hint → silent
-            if (root.TryGetProperty("active", out var activeEl)
-                && activeEl.ValueKind is JsonValueKind.False)
-                return null;
-
-            if (root.TryGetProperty("pulse", out var pulseEl)
-                && pulseEl.ValueKind == JsonValueKind.String)
-            {
-                var pulse = pulseEl.GetString();
-                return string.IsNullOrWhiteSpace(pulse) ? null : pulse.Trim();
-            }
-
-            return null;
-        }
-        catch
-        {
-            return null;
-        }
     }
 }

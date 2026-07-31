@@ -14,7 +14,7 @@ Separate process · latch IPC · Avalonia on hold for Windows primary.
 
 - **GlassCore** — presentation parser/topology + settings peel
 - **WPF MainGrid** — `WpfMainGridColumns` (no Avalonia ColumnDefinitions.Parse)
-- **LatchHub + LatchPaint** — latch → human glass (not raw JSON dump)
+- **LatchHub + LatchPaint** — latch → human glass (not raw JSON dump); SoftOrgan chrome_hint in `LatchPaint.SoftOrgan`, EICAS in `LatchPaint.Eicas`
 - **SoftOrgan chrome band** — `*-LATEST.json` chrome_hint → top-N VisibleLines + Overflow chip (click expand/collapse; GlassCore density; `MainWindow.SoftOrganBand` paint; includes `sa-desk`)
 
 ## MainWindow partials (0-sync)
@@ -29,6 +29,14 @@ Separate process · latch IPC · Avalonia on hold for Windows primary.
 | `MainWindow.SoftOrganBand.cs` | SoftOrgan latch → band paint / overflow toggle (~50 LOC; under gate — no peel) |
 | `MainWindow.LatchEicas.cs` | presentation / alert / qrh latch → Plan + EICAS |
 | `MainWindow.MfdBody.cs` | MFD page select + stub body text |
+
+`LatchPaint` partials (static paint helpers):
+
+| Partial | Owns |
+| --- | --- |
+| `LatchPaint.cs` | Intercom + Presentation + shared `Prop` (~125 LOC) |
+| `LatchPaint.SoftOrgan.cs` | `TryReadChromeHint` for SoftOrgan band |
+| `LatchPaint.Eicas.cs` | alert/qrh → EICAS status lines |
 
 Shared SoftOrgan density: `CascadeIDE.GlassCore/SoftOrgan/SoftOrganChromeDensityPolicy.cs` (Avalonia façade forwards).
 Latch id catalog (Glass `*-LATEST.json` stems): `SoftOrganLatchCatalog` — consumed by `LatchHub`.
