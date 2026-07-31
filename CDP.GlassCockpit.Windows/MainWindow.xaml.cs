@@ -12,6 +12,7 @@ public partial class MainWindow : Window
     readonly LatchHub _latches;
     readonly GlassSession _session;
     readonly SoftOrganChromeAggregator _softOrgans = new();
+    readonly EicasBandAggregator _eicas = new();
     readonly ObservableCollection<ChatBubble> _feed = new();
 
     public MainWindow()
@@ -32,12 +33,15 @@ public partial class MainWindow : Window
         _latches.IntercomChanged += OnIntercomChanged;
         _latches.PresentationChanged += OnPresentationChanged;
         _latches.SoftOrganChanged += OnSoftOrganChanged;
+        _latches.AlertChanged += OnAlertChanged;
+        _latches.QrhChanged += OnQrhChanged;
         _latches.Start();
 
         StatusText.Text =
             $"glass · {_session.Layout.Topology} · cols={_session.Layout.ColumnDefinitions} · {_latches.StateRoot}";
         Closed += (_, _) => _latches.Dispose();
         UpdateMfdBody();
+        RefreshEicasHealth();
     }
 
     void ApplyLayoutFromSession()
@@ -101,7 +105,7 @@ public partial class MainWindow : Window
                 TopologyBadge.Text = layout.Topology;
 
                 SelectMfdPage(view.MfdPage);
-                MfdHealth.Text = $"EICAS · {view.StatusLine}";
+                RefreshEicasHealth();
                 StatusText.Text =
                     $"glass · {view.StatusLine} · cols={layout.ColumnDefinitions} · {DateTime.Now:HH:mm:ss}";
             }
@@ -129,6 +133,55 @@ public partial class MainWindow : Window
                 SoftOrganHint.Visibility = Visibility.Visible;
             }
         }, DispatcherPriority.Background);
+    }
+
+    void OnAlertChanged(string path)
+    {
+        Dispatcher.BeginInvoke(() =>
+        {
+            try
+            {
+                var raw = File.ReadAllText(path);
+                var view = LatchPaint.PaintAlert(raw);
+                _eicas.Apply("alert", view?.StatusLine);
+                RefreshEicasHealth();
+            }
+            catch (Exception ex)
+            {
+                StatusText.Text = $"glass · alert fail · {ex.Message}";
+            }
+        }, DispatcherPriority.Background);
+    }
+
+    void OnQrhChanged(string path)
+    {
+        Dispatcher.BeginInvoke(() =>
+        {
+            try
+            {
+                var raw = File.ReadAllText(path);
+                var view = LatchPaint.PaintQrh(raw);
+                _eicas.Apply("qrh", view?.StatusLine);
+                RefreshEicasHealth();
+            }
+            catch (Exception ex)
+            {
+                StatusText.Text = $"glass · qrh fail · {ex.Message}";
+            }
+        }, DispatcherPriority.Background);
+    }
+
+    void RefreshEicasHealth()
+    {
+        var line = _eicas.BandLine;
+        if (!string.IsNullOrWhiteSpace(line))
+        {
+            MfdHealth.Text = line;
+            return;
+        }
+
+        var page = (MfdPages.SelectedItem as ListBoxItem)?.Content?.ToString() ?? "?";
+        MfdHealth.Text = $"EICAS · idle · page={page}";
     }
 
     void SelectMfdPage(string? page)
@@ -161,7 +214,7 @@ public partial class MainWindow : Window
             "Chat" => "Chat/Intercom also on M when needed; primary Intercom is Forward.",
             _ => $"{page} page host.\n\nInstrument content peels later."
         };
-        MfdHealth.Text = $"EICAS · page={page}";
+        RefreshEicasHealth();
     }
 
     void SendBtn_OnClick(object sender, RoutedEventArgs e)
