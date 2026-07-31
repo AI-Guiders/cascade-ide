@@ -19,7 +19,9 @@ Hub `ChatPanelViewModel.cs` still over quality gate — peel coherent concerns i
 | `ChatPanelViewModel.IntercomAttach.cs` | Pending drafts, slash handlers, composer insert, workspace resolve |
 | `ChatPanelViewModel.IntercomAttach.Affordance.cs` | Selection/scope/diagnostic/problem + drag-drop affordances |
 | `ChatPanelViewModel.IntercomAttach.Reveal.cs` | Reveal attachment from feed into IDE |
+| `ChatPanelViewModel.IntercomCorrespondence.cs` | Slash find/relate message↔code + in-memory explicit relates |
+| `ChatPanelViewModel.IntercomCorrespondence.Mcp.cs` | MCP JSON messages-for-code / message-relate |
 
 Existing concern partials (Intercom*, Session, Threading, Composer*, …) stay as mapped by filename.
 
-Fat siblings next: ComposerAutocomplete (~255) / IntercomCorrespondence (~297).
+Fat siblings next: ComposerAutocomplete (~255).
