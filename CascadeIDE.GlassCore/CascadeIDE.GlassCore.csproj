@@ -154,6 +154,7 @@
     <Compile Include="..\Models\AgentSettings.cs" Link="Models\AgentSettings.cs" />
     <Compile Include="..\Models\AiSettings.cs" Link="Models\AiSettings.cs" />
     <Compile Include="..\Models\CascadeIdeSettings.ComparisonAndClone.cs" Link="Models\CascadeIdeSettings.ComparisonAndClone.cs" />
+    <Compile Include="..\Models\CascadeIdeSettings.Clone.cs" Link="Models\CascadeIdeSettings.Clone.cs" />
     <Compile Include="..\Models\CascadeIdeSettings.cs" Link="Models\CascadeIdeSettings.cs" />
     <Compile Include="..\Models\CodeNavigationMapSettings.cs" Link="Models\CodeNavigationMapSettings.cs" />
     <Compile Include="..\Models\CodeNavigationSettings.cs" Link="Models\CodeNavigationSettings.cs" />

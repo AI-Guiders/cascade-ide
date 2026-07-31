@@ -164,6 +164,7 @@
     <Compile Remove="Models\AgentSettings.cs" />
     <Compile Remove="Models\AiSettings.cs" />
     <Compile Remove="Models\CascadeIdeSettings.ComparisonAndClone.cs" />
+    <Compile Remove="Models\CascadeIdeSettings.Clone.cs" />
     <Compile Remove="Models\CascadeIdeSettings.cs" />
     <Compile Remove="Models\CodeNavigationMapSettings.cs" />
     <Compile Remove="Models\CodeNavigationSettings.cs" />
