@@ -57,10 +57,11 @@ public sealed class SoftOrganChromeAggregator
         }
     }
 
+    /// <summary>Store or clear chrome_hint for a catalog SoftOrgan id; unknown ids are ignored.</summary>
     public void Apply(string organId, string? chromeHint)
     {
         var id = SoftOrganLatchCatalog.Canonicalize(organId);
-        if (string.IsNullOrWhiteSpace(id))
+        if (!SoftOrganLatchCatalog.Contains(id))
             return;
 
         lock (_gate)

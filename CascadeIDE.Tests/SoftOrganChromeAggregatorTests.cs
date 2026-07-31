@@ -62,6 +62,23 @@ public sealed class SoftOrganChromeAggregatorTests
     }
 
     [Fact]
+    public void Apply_ignores_unknown_and_eicas_ids()
+    {
+        var a = new SoftOrganChromeAggregator();
+        a.Apply("not-an-organ", "noise");
+        a.Apply("alert", "eicas bleed");
+        a.Apply("qrh", "advisory bleed");
+        Assert.False(a.Snapshot().HasContent);
+
+        a.Apply("plan", "plan latch");
+        a.Apply("unknown", "still noise");
+        var band = a.Snapshot();
+        Assert.True(band.HasContent);
+        Assert.Single(band.VisibleLines);
+        Assert.Equal("plan latch", band.VisibleLines[0]);
+    }
+
+    [Fact]
     public void Priority_orders_pressure_before_learn()
     {
         Assert.True(SoftOrganChromeAggregator.PriorityFor("pressure") < SoftOrganChromeAggregator.PriorityFor("learn"));
