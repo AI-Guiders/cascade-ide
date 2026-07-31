@@ -1,9 +1,6 @@
 #nullable enable
 using System.Text.Json;
 using CascadeIDE.Features.Agent.Environment;
-using CascadeIDE.Features.Forge.Lens;
-using CascadeIDE.Services;
-using CascadeIDE.Features.Forge.Infrastructure;
 
 namespace CascadeIDE.Features.Chat;
 
@@ -112,232 +109,20 @@ public sealed partial class ChatSlashCommandRunner
 
         argsTail = resolvedArgTail;
         displayPath = descriptor.SlashPath;
-        if (descriptor.ExecutionKind == ChatSlashCommandExecutionKind.LocalHelp)
+
+        return descriptor.ExecutionKind switch
         {
-            var helpText = string.IsNullOrWhiteSpace(argsTail)
-                ? IntercomHelpGuide.FormatFull()
-                : string.Join(Environment.NewLine, ChatSlashCommandCatalog.ListHelpLines(argsTail));
-            return new ChatSlashCommandRunResult(
-                true,
-                true,
-                displayPath,
-                argsTail,
-                helpText);
-        }
-
-        if (descriptor.ExecutionKind == ChatSlashCommandExecutionKind.LocalReport)
-        {
-            var snapshot = _getChatSurfaceSnapshot?.Invoke() ?? ChatSurfaceSnapshot.Empty;
-            var report = ChatSlashSessionReports.TryFormat(descriptor.SlashPath, snapshot)
-                ?? "Отчёт недоступен.";
-            return new ChatSlashCommandRunResult(true, true, displayPath, argsTail, report);
-        }
-
-        if (descriptor.ExecutionKind == ChatSlashCommandExecutionKind.LocalIntercom)
-        {
-            if (_selectChatThread is null || _setChatOverviewMode is null)
-            {
-                return new ChatSlashCommandRunResult(
-                    true,
-                    false,
-                    displayPath,
-                    argsTail,
-                    "Intercom navigation недоступна.");
-            }
-
-            var snapshot = _getChatSurfaceSnapshot?.Invoke() ?? ChatSurfaceSnapshot.Empty;
-            var selectedId = _getSelectedChatThreadId?.Invoke() ?? Guid.Empty;
-            if (!ChatSlashIntercomActions.TryExecute(
-                    descriptor.SlashPath,
-                    argsTail,
-                    selectedId,
-                    _selectChatThread,
-                    _setChatOverviewMode,
-                    snapshot,
-                    out var intercom,
-                    _setTopicPicker,
-                    _createTopicWithTitle,
-                    _renameTopicWithTitle,
-                    _tryAttachSlash,
-                    _selectMessageByOrdinalRangeInDetailLane,
-                    _selectMessagesByOrdinalRangesInDetailLane,
-                    _clearMessageSelectionInDetailLane,
-                    _findMessagesForCodeRef,
-                    _relateMessageRangeToCodeRef,
-                    _listMessageAnchors,
-                    _peekAnchorById,
-                    _runIntercomAdmin))
-            {
-                return new ChatSlashCommandRunResult(
-                    true,
-                    false,
-                    displayPath,
-                    argsTail,
-                    "Действие недоступно.");
-            }
-
-            return new ChatSlashCommandRunResult(
-                true,
-                intercom.Success,
-                displayPath,
-                argsTail,
-                intercom.Message);
-        }
-
-        if (descriptor.ExecutionKind == ChatSlashCommandExecutionKind.LocalAgent)
-        {
-            if (_agentEnvironment is null || _getSolutionPathForAgent is null)
-            {
-                return new ChatSlashCommandRunResult(
-                    true,
-                    false,
-                    displayPath,
-                    argsTail,
-                    "Agent Execution Environment недоступен.");
-            }
-
-            var agent = await Task.Run(
-                () =>
-                {
-                    ChatSlashAgentActions.TryExecute(
-                        descriptor.SlashPath,
-                        argsTail,
-                        _agentEnvironment,
-                        _getSolutionPathForAgent,
-                        out var result);
-                    return result;
-                },
-                cancellationToken).ConfigureAwait(false);
-
-            return new ChatSlashCommandRunResult(
-                true,
-                agent.Success,
-                displayPath,
-                argsTail,
-                agent.Message);
-        }
-
-        if (descriptor.ExecutionKind == ChatSlashCommandExecutionKind.ForgeCommand)
-        {
-            if (string.Equals(descriptor.CommandId, "forge.artifact.goto", StringComparison.Ordinal))
-            {
-                if (_executeIdeCommand is null)
-                {
-                    return new ChatSlashCommandRunResult(
-                        true,
-                        false,
-                        displayPath,
-                        argsTail,
-                        "IDE command bridge недоступен для forge.artifact.goto.");
-                }
-
-                if (string.IsNullOrWhiteSpace(argsTail))
-                {
-                    return new ChatSlashCommandRunResult(
-                        true,
-                        false,
-                        displayPath,
-                        argsTail,
-                        "Bracket [FRG:…] required.");
-                }
-
-                var gotoArgs = new Dictionary<string, JsonElement>(StringComparer.Ordinal)
-                {
-                    ["bracket"] = JsonSerializer.SerializeToElement(argsTail.Trim()),
-                    ["select_code"] = JsonSerializer.SerializeToElement(true),
-                };
-                var gotoMessage = await _executeIdeCommand(
-                    IdeCommands.ForgeArtifactGoto,
-                    gotoArgs,
-                    cancellationToken).ConfigureAwait(false);
-                var gotoOk = !gotoMessage.StartsWith("Error", StringComparison.OrdinalIgnoreCase);
-                return new ChatSlashCommandRunResult(true, gotoOk, displayPath, argsTail, gotoMessage);
-            }
-
-            var ctx = ForgeLensWriteClient.TryResolveContext(
-                _getWorkspaceRoot?.Invoke(),
-                baseUrlArg: null,
-                repoArg: null);
-            if (ctx is null)
-            {
-                return new ChatSlashCommandRunResult(
-                    true,
-                    false,
-                    displayPath,
-                    argsTail,
-                    "Укажи [workspace.forge] (base_url + repo) или подключись через forge_lens.connect.");
-            }
-
-            var (ok, message) = await ForgeCommandExecuteClient.ExecuteAsync(
-                ctx.BaseUrl,
-                ctx.ApiToken,
-                descriptor.SlashPath,
-                argsTail,
-                ctx.Repo,
-                cancellationToken).ConfigureAwait(false);
-
-            return new ChatSlashCommandRunResult(true, ok, displayPath, argsTail, message);
-        }
-
-        var validationError = ValidateRequiredArgs(descriptor, argsTail);
-        if (validationError is not null)
-            return new ChatSlashCommandRunResult(true, false, displayPath, argsTail, validationError);
-
-        if (_executeIdeCommand is null)
-        {
-            return new ChatSlashCommandRunResult(
-                true,
-                false,
-                displayPath,
-                argsTail,
-                "IDE command bridge недоступен для слэш-команд.");
-        }
-
-        IReadOnlyDictionary<string, JsonElement>? args;
-        if (ChatSlashParametricArgsBuilder.IsParametricCatalogCommand(descriptor.CommandId))
-        {
-            if (_getEditorContext is null)
-            {
-                return new ChatSlashCommandRunResult(
-                    true,
-                    false,
-                    displayPath,
-                    argsTail,
-                    "Контекст редактора недоступен для параметрической слэш-команды.");
-            }
-
-            if (!ChatSlashParametricArgsBuilder.TryBuild(
-                    descriptor.CommandId,
-                    argsTail ?? "",
-                    _getEditorContext(),
-                    out args,
-                    out var parametricError))
-            {
-                return new ChatSlashCommandRunResult(true, false, displayPath, argsTail, parametricError);
-            }
-        }
-        else if (!TryBuildPathArgs(descriptor, argsTail, out args, out var pathError))
-        {
-            return new ChatSlashCommandRunResult(true, false, displayPath, argsTail, pathError);
-        }
-        else if (args is null)
-        {
-            args = BuildArgs(descriptor, argsTail);
-        }
-
-        try
-        {
-            var json = await _executeIdeCommand(descriptor.CommandId, args, cancellationToken).ConfigureAwait(false);
-            return new ChatSlashCommandRunResult(
-                true,
-                true,
-                displayPath,
-                argsTail,
-                FormatSuccessDetail(json));
-        }
-        catch (Exception ex)
-        {
-            return new ChatSlashCommandRunResult(true, false, displayPath, argsTail, ex.Message);
-        }
+            ChatSlashCommandExecutionKind.LocalHelp =>
+                RunLocalHelp(displayPath, argsTail),
+            ChatSlashCommandExecutionKind.LocalReport =>
+                RunLocalReport(descriptor, displayPath, argsTail),
+            ChatSlashCommandExecutionKind.LocalIntercom =>
+                RunLocalIntercom(descriptor, displayPath, argsTail),
+            ChatSlashCommandExecutionKind.LocalAgent =>
+                await RunLocalAgentAsync(descriptor, displayPath, argsTail, cancellationToken).ConfigureAwait(false),
+            ChatSlashCommandExecutionKind.ForgeCommand =>
+                await RunForgeAsync(descriptor, displayPath, argsTail, cancellationToken).ConfigureAwait(false),
+            _ => await RunIdeCommandAsync(descriptor, displayPath, argsTail, cancellationToken).ConfigureAwait(false),
+        };
     }
 }

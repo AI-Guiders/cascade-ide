@@ -27,7 +27,10 @@ Hub `ChatPanelViewModel.cs` still over quality gate — peel coherent concerns i
 | `ChatPanelViewModel.Surface.cs` | Collections, observable surface props, send gate, message-change refresh |
 | `ChatSlashCommandRunner.cs` | Slash runner hub (ctor + TryRunAsync dispatch) |
 | `ChatSlashCommandRunner.Args.cs` | Path/args build, validation, success detail formatting |
+| `ChatSlashCommandRunner.Local.cs` | Local help/report/intercom/agent execution |
+| `ChatSlashCommandRunner.Forge.cs` | Forge lens / artifact.goto execution |
+| `ChatSlashCommandRunner.Ide.cs` | IDE bridge command execution |
 
 Existing concern partials (Intercom*, Session, Threading, Composer*, …) stay as mapped by filename.
 
-Hub `ChatPanelViewModel.cs` ≈193 (fields+ctor; Surface peeled). ChatPanel VM partials under epic ~200. Fat next: peel `ChatSlashCommandRunner` TryRunAsync local/forge/ide branches (~344 hub).
+Hub `ChatPanelViewModel.cs` ≈193 (fields+ctor; Surface peeled). ChatPanel VM + ChatSlashCommandRunner under epic ~200. Fat next: invent after build (soft-fail files outside runner).
