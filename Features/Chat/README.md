@@ -25,7 +25,9 @@ Hub `ChatPanelViewModel.cs` still over quality gate — peel coherent concerns i
 | `ChatPanelViewModel.ComposerAutocomplete.cs` | Popup facade, caret refresh, slash/bracket routing, commit/move |
 | `ChatPanelViewModel.ComposerAutocomplete.Bracket.cs` | Bracket suggestions, debounce, move/commit/dismiss |
 | `ChatPanelViewModel.Surface.cs` | Collections, observable surface props, send gate, message-change refresh |
+| `ChatSlashCommandRunner.cs` | Slash runner hub (ctor + TryRunAsync dispatch) |
+| `ChatSlashCommandRunner.Args.cs` | Path/args build, validation, success detail formatting |
 
 Existing concern partials (Intercom*, Session, Threading, Composer*, …) stay as mapped by filename.
 
-Hub `ChatPanelViewModel.cs` ≈193 (fields+ctor; Surface peeled). ChatPanel VM partials under epic ~200. Fat next: `ChatSlashCommandRunner.cs` (~556).
+Hub `ChatPanelViewModel.cs` ≈193 (fields+ctor; Surface peeled). ChatPanel VM partials under epic ~200. Fat next: peel `ChatSlashCommandRunner` TryRunAsync local/forge/ide branches (~344 hub).
