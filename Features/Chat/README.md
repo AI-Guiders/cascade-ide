@@ -27,4 +27,4 @@ Hub `ChatPanelViewModel.cs` still over quality gate — peel coherent concerns i
 
 Existing concern partials (Intercom*, Session, Threading, Composer*, …) stay as mapped by filename.
 
-Hub `ChatPanelViewModel.cs` ≈194 (fields+ctor). Fat siblings next: invent after build if any remain over ~200.
+Hub `ChatPanelViewModel.cs` ≈193 (fields+ctor; Surface peeled). Fat siblings next: `IntercomCorrespondence.Mcp` (~217).
