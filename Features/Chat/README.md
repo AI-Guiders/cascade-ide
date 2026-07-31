@@ -33,4 +33,4 @@ Hub `ChatPanelViewModel.cs` still over quality gate — peel coherent concerns i
 
 Existing concern partials (Intercom*, Session, Threading, Composer*, …) stay as mapped by filename.
 
-Hub `ChatPanelViewModel.cs` ≈193 (fields+ctor; Surface peeled). ChatPanel VM + ChatSlashCommandRunner under epic ~200. IntercomComposer hub ≈632; SkiaChatSurfaceControl hub ≈512 (Scene peeled). DocumentsWorkspaceViewModel hub ≈601 (EditorSync peeled; soft-fail cleared). Fat next: `Services/IdeMcpToolCatalogFull.cs` (~962).
+Hub `ChatPanelViewModel.cs` ≈193 (fields+ctor; Surface peeled). ChatPanel VM + ChatSlashCommandRunner under epic ~200. IntercomComposer hub ≈632; SkiaChatSurfaceControl hub ≈512 (Scene peeled). DocumentsWorkspaceViewModel hub ≈601 (EditorSync peeled). IdeMcpToolCatalogFull hub ≈543 (FileEditor peeled; soft-fail cleared). Fat next: `Models/CascadeIdeSettings.ComparisonAndClone.cs` (~898).
