@@ -40,6 +40,7 @@ Separate process · latch IPC · Avalonia on hold for Windows primary.
 
 Shared SoftOrgan density: `CascadeIDE.GlassCore/SoftOrgan/SoftOrganChromeDensityPolicy.cs` (Avalonia façade forwards).
 Latch id catalog (Glass `*-LATEST.json` stems): `SoftOrganLatchCatalog` — consumed by `LatchHub`.
+SSOT triangle map: `CascadeIDE.GlassCore/SoftOrgan/README.md`.
 Avalonia SoftOrgan/CabinOrgan ViewModel map: `ViewModels/README.md`.
 
 ## Run
