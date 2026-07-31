@@ -1,12 +1,15 @@
 #nullable enable
 using CascadeIDE.Features.UiChrome;
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 
 namespace CascadeIDE.ViewModels;
 
 /// <summary>Dual-cockpit cabin packing + L1 pressure / AutoIgnition continuity chrome.</summary>
 public partial class MainWindowViewModel
 {
+    bool _agentChromeHintsExpanded;
+
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(ShowAgentCabinChromeHint))]
     [NotifyPropertyChangedFor(nameof(ShowWorkspaceChromeBand))]
@@ -126,8 +129,29 @@ public partial class MainWindowViewModel
     public string? AgentChromeHintOverflow => BuildChromeHintDensity().OverflowLine;
     public bool ShowAgentChromeHintOverflow => !string.IsNullOrWhiteSpace(AgentChromeHintOverflow);
 
-    AgentChromeHintDensityPolicy.Result BuildChromeHintDensity() =>
-        AgentChromeHintDensityPolicy.Collapse(CollectChromeHintCandidates());
+    AgentChromeHintDensityPolicy.Result BuildChromeHintDensity()
+    {
+        var r = AgentChromeHintDensityPolicy.Collapse(
+            CollectChromeHintCandidates(),
+            expanded: _agentChromeHintsExpanded);
+        // Drop expand latch when density no longer needs overflow.
+        if (!r.IsExpanded && _agentChromeHintsExpanded)
+            _agentChromeHintsExpanded = false;
+        return r;
+    }
+
+    [RelayCommand]
+    void ToggleAgentChromeHintOverflow()
+    {
+        var candidates = CollectChromeHintCandidates().Count();
+        var next = AgentChromeHintDensityPolicy.ToggleExpanded(
+            _agentChromeHintsExpanded,
+            candidates);
+        if (next == _agentChromeHintsExpanded)
+            return;
+        _agentChromeHintsExpanded = next;
+        RaiseChromeHintDensity();
+    }
 
     IEnumerable<AgentChromeHintDensityPolicy.Hint> CollectChromeHintCandidates()
     {

@@ -8,7 +8,7 @@
         <views:EicasAlertsBarView Grid.Row="0"
                                   IsVisible="{Binding ShowEicasAlertsBar}"/>
         <StackPanel Grid.Row="1">
-            <!-- SoftOrgan chrome density: top-N priority lines + overflow (latches stay latch-first). -->
+            <!-- SoftOrgan chrome density: top-N + overflow (click expand/collapse; Glass parity). -->
             <ItemsControl ItemsSource="{Binding AgentChromeHintVisibleLines}">
                 <ItemsControl.ItemTemplate>
                     <DataTemplate x:DataType="x:String">
@@ -19,11 +19,19 @@
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>
             </ItemsControl>
-            <TextBlock Margin="8,2"
-                       Opacity="0.55"
-                       FontSize="11"
-                       Text="{Binding AgentChromeHintOverflow}"
-                       IsVisible="{Binding ShowAgentChromeHintOverflow}"/>
+            <Button Margin="4,0,4,2"
+                    Padding="4,2"
+                    Background="Transparent"
+                    BorderThickness="0"
+                    Cursor="Hand"
+                    HorizontalAlignment="Left"
+                    ToolTip.Tip="Click to expand / collapse SoftOrgan latches"
+                    Command="{Binding ToggleAgentChromeHintOverflowCommand}"
+                    IsVisible="{Binding ShowAgentChromeHintOverflow}">
+                <TextBlock Opacity="0.55"
+                           FontSize="11"
+                           Text="{Binding AgentChromeHintOverflow}"/>
+            </Button>
         </StackPanel>
         <!-- Полоса Workspace Health: раньше выравнивалась по MainGrid; теперь зона — MFD, на всю ширину контейнера. -->
         <Grid Grid.Row="2" IsVisible="{Binding ShowIdeHealthStrip}">

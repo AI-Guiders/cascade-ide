@@ -65,4 +65,34 @@ public sealed class AgentChromeHintDensityPolicyTests
         Assert.Null(AgentChromeHintDensityPolicy.From("plan", "  "));
         Assert.Null(AgentChromeHintDensityPolicy.From("plan", null));
     }
+
+    [Fact]
+    public void Collapse_expanded_shows_all_and_collapse_label()
+    {
+        var hints = SeedOverCap();
+        var r = AgentChromeHintDensityPolicy.Collapse(hints, maxVisible: 3, expanded: true);
+        Assert.True(r.IsExpanded);
+        Assert.Equal(7, r.VisibleLines.Count);
+        Assert.Equal(0, r.HiddenCount);
+        Assert.Equal(AgentChromeHintDensityPolicy.CollapseLabel, r.OverflowLine);
+    }
+
+    [Fact]
+    public void ToggleExpanded_round_trips_when_over_cap()
+    {
+        Assert.True(AgentChromeHintDensityPolicy.ToggleExpanded(false, totalHintCount: 7));
+        Assert.False(AgentChromeHintDensityPolicy.ToggleExpanded(true, totalHintCount: 7));
+        Assert.False(AgentChromeHintDensityPolicy.ToggleExpanded(true, totalHintCount: 2));
+    }
+
+    static List<AgentChromeHintDensityPolicy.Hint> SeedOverCap() =>
+    [
+        AgentChromeHintDensityPolicy.From("learn", "learn · 14")!.Value,
+        AgentChromeHintDensityPolicy.From("arch", "arch · as_built")!.Value,
+        AgentChromeHintDensityPolicy.From("review", "review · ×25")!.Value,
+        AgentChromeHintDensityPolicy.From("plan", "plan · focus")!.Value,
+        AgentChromeHintDensityPolicy.From("pressure", "pressure · ARMED")!.Value,
+        AgentChromeHintDensityPolicy.From("ignite", "ignite · await")!.Value,
+        AgentChromeHintDensityPolicy.From("onboard", "onboard · map")!.Value,
+    ];
 }
