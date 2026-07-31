@@ -125,11 +125,11 @@
               <Border DockPanel.Dock="Bottom" Background="#1A1A1A" BorderBrush="#2A2A2A" BorderThickness="0,1,0,0" Padding="10">
                 <DockPanel>
                   <Button x:Name="SendBtn" DockPanel.Dock="Right" Content="Send" Style="{StaticResource ChromeBtn}"
-                          Click="SendBtn_OnClick" IsEnabled="False" ToolTip="Reply wire later"/>
+                          Click="SendBtn_OnClick" ToolTip="Send to @PF (Enter / Ctrl+Enter; Shift+Enter = newline)"/>
                   <TextBox x:Name="ComposerBox"
                            AcceptsReturn="True"
                            TextWrapping="Wrap"
-                           MinHeight="40" MaxHeight="80"
+                           MinHeight="40" MaxHeight="120"
                            VerticalScrollBarVisibility="Auto"
                            Background="#222"
                            Foreground="#EEE"
@@ -139,7 +139,9 @@
                            FontFamily="Segoe UI"
                            FontSize="13"
                            Margin="0,0,8,0"
-                           Text="Message @PM…"/>
+                           Text="Message @PF…"
+                           PreviewKeyDown="ComposerBox_OnPreviewKeyDown"
+                           GotKeyboardFocus="ComposerBox_OnGotKeyboardFocus"/>
                 </DockPanel>
               </Border>
 

@@ -17,6 +17,7 @@ public partial class MainWindow : Window
     readonly ObservableCollection<ChatBubble> _feed = new();
     readonly GlassHostWindows _hosts;
     bool _hostsReady;
+    string? _lastSentIntercomId;
 
     public MainWindow()
     {
@@ -183,6 +184,15 @@ public partial class MainWindow : Window
                 var view = LatchPaint.PaintIntercom(raw);
                 IntercomSubtitle.Text = view.Header;
 
+                // Skip echo of our own Send (already painted locally).
+                if (_lastSentIntercomId is not null
+                    && view.Header.Contains(_lastSentIntercomId, StringComparison.OrdinalIgnoreCase))
+                {
+                    _lastSentIntercomId = null;
+                    StatusText.Text = $"glass · {view.StatusLine} · {DateTime.Now:HH:mm:ss}";
+                    return;
+                }
+
                 _feed.Add(new ChatBubble(
                     view.RoleLabel,
                     view.Body,
@@ -348,9 +358,48 @@ public partial class MainWindow : Window
         RefreshEicasHealth();
     }
 
-    void SendBtn_OnClick(object sender, RoutedEventArgs e)
+    void SendBtn_OnClick(object sender, RoutedEventArgs e) => TrySendComposer();
+
+    void ComposerBox_OnPreviewKeyDown(object sender, System.Windows.Input.KeyEventArgs e)
     {
-        /* reply latch later */
+        if (e.Key != System.Windows.Input.Key.Enter)
+            return;
+
+        // Shift+Enter = newline; Enter / Ctrl+Enter = send
+        if (System.Windows.Input.Keyboard.Modifiers.HasFlag(System.Windows.Input.ModifierKeys.Shift))
+            return;
+
+        e.Handled = true;
+        TrySendComposer();
+    }
+
+    void ComposerBox_OnGotKeyboardFocus(object sender, System.Windows.Input.KeyboardFocusChangedEventArgs e)
+    {
+        if (ComposerBox.Text is "Message @PF…" or "Message @PM…")
+            ComposerBox.Clear();
+    }
+
+    void TrySendComposer()
+    {
+        var raw = ComposerBox.Text;
+        var sent = GlassIntercomSend.TrySend(raw);
+        if (sent is null)
+        {
+            StatusText.Text = "glass · intercom · empty — nothing sent";
+            return;
+        }
+
+        _lastSentIntercomId = sent.Id;
+        _feed.Add(new ChatBubble(
+            sent.RoleLabel,
+            sent.Body,
+            DateTime.Now.ToString("HH:mm")));
+        while (_feed.Count > 40)
+            _feed.RemoveAt(0);
+
+        ComposerBox.Clear();
+        FeedScroll.ScrollToEnd();
+        StatusText.Text = $"glass · intercom · sent {sent.Id} · @PM→@PF · {DateTime.Now:HH:mm:ss}";
     }
 
     public sealed record ChatBubble(string Role, string Body, string When);
