@@ -3,15 +3,14 @@ using CascadeIDE.Cockpit.Cds;
 using CascadeIDE.Cockpit.Composition;
 using CascadeIDE.Cockpit.Composition.HostSurface;
 using CascadeIDE.Cockpit.Composition.Shell;
-using CascadeIDE.Features.Agent.Environment;
 using CascadeIDE.Features.Shell.Application;
 using CascadeIDE.Features.UiChrome;
 using CascadeIDE.Models;
 
 namespace CascadeIDE.ViewModels;
 
-/// <summary>Вычисляемые свойства разметки и capabilities (режимы UI).
-/// Skia → <c>Presentation.Skia</c>; IdeHealth → <c>Presentation.IdeHealth</c>; badges → <c>Presentation.Badges</c>; regions → <c>Presentation.Regions</c>.</summary>
+/// <summary>Host surface layout (режимы UI).
+/// Capabilities → <c>Presentation.Capabilities</c>; Skia → <c>Presentation.Skia</c>; IdeHealth → <c>Presentation.IdeHealth</c>; badges → <c>Presentation.Badges</c>; regions → <c>Presentation.Regions</c>.</summary>
 public partial class MainWindowViewModel
 {
     /// <summary>Семейство текущего UI-режима (одна ось вместо булевых Is*Mode).</summary>
@@ -77,21 +76,6 @@ public partial class MainWindowViewModel
             ? IsCompactRightChromeColumnVisible
             : ShellSurfaceComposition.MfdColumnVisibleInMainGrid;
 
-    /// <summary>Полоса активной задачи / Task Cockpit — из <c>UiModes/&lt;id&gt;.toml</c> (<c>active_task_strip</c>); по умолчанию скрыто для семьи Debug.</summary>
-    public bool ShowTaskBar => UiModeCatalog.GetShowTaskBar(NormalizeUiMode(UiMode));
-
-    private UiModeCapabilities Capabilities =>
-        UiModeCatalog.GetCapabilities(NormalizeUiMode(UiMode));
-
-    public bool QuickActions => Capabilities.QuickActions;
-    public bool ShowAgentOperations => true;
-    /// <summary>В Focus справа показываем план и гейт, в Power — trace/safety; блок «операции» остаётся в Balanced.</summary>
-    public bool AgentOperationsPanel => Capabilities.AgentOperationsPanel;
-    public bool AgentTrace => Capabilities.AgentTrace;
-    public bool AutonomousAgentTelemetry => Capabilities.AutonomousAgentTelemetry;
-    public bool ShowTelemetryHiddenHint => UiModeGateSpecifications.ShowTelemetryHiddenHint.IsSatisfiedBy(
-        new UiModeGateContext(UiModeFamily, AutonomousAgentTelemetry, IsTerminalVisible, HasDebugSession));
-
     /// <summary>Чат в одной строке с PFD/Forward; MFD не пересекает нижнюю строку MainGrid.</summary>
     public int ChatPanelMainGridRowSpan => 1;
 
@@ -99,17 +83,6 @@ public partial class MainWindowViewModel
         MainWindowPresentationSurfaceProjection.TelemetryButtonCaption(IsTerminalVisible);
     public bool ShowEditorGroup2 => EditorGroupCount >= 2;
     public bool ShowEditorGroup3 => EditorGroupCount >= 3;
-
-    /// <summary>Нижние вкладки «События / Тесты / Гипотезы / Отладка» при включённом доке.</summary>
-    public bool InstrumentationTabs =>
-        MainWindowPresentationCapabilitiesProjection.InstrumentationTabs(IsInstrumentationDockVisible, Capabilities);
-
-    /// <summary>Вкладка «Гипотезы» — семья Debug и capabilities (ADR 0003, ADR 0010).</summary>
-    public bool HypothesesTab =>
-        MainWindowPresentationCapabilitiesProjection.HypothesesTab(IsInstrumentationDockVisible, Capabilities);
-
-    /// <summary>Пункт меню для док-панели инструментирования (можно отключить и в Focus).</summary>
-    public bool ShowInstrumentationLayoutMenu => true;
 
     public bool HasFocusPlanItems => FocusPlanItems.Count > 0;
 }
