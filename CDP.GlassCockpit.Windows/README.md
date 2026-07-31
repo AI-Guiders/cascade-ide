@@ -27,7 +27,7 @@ Separate process · latch IPC · Avalonia on hold for Windows primary.
 | `MainWindow.EditorSurface.cs` | AvalonEdit mount, dogfood open, pick/save, Ctrl+O/S |
 | `MainWindow.IntercomFeed.cs` | Virtual History feed, topics, new-msg cue, send |
 | `MainWindow.SoftOrganBand.cs` | SoftOrgan latch → band paint / overflow toggle (~50 LOC; under gate — no peel) |
-| `MainWindow.LatchEicas.cs` | presentation / alert / qrh latch → Plan + EICAS |
+| `MainWindow.LatchEicas.cs` | presentation / alert / qrh latch → Plan + EICAS (~93 LOC; under gate — no peel) |
 | `MainWindow.MfdBody.cs` | MFD page select + stub body text |
 
 `LatchPaint` partials (static paint helpers):
