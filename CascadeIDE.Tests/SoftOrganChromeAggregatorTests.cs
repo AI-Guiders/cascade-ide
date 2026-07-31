@@ -66,4 +66,47 @@ public sealed class SoftOrganChromeAggregatorTests
     {
         Assert.True(SoftOrganChromeAggregator.PriorityFor("pressure") < SoftOrganChromeAggregator.PriorityFor("learn"));
     }
+
+    [Fact]
+    public void Expand_then_collapse_round_trips()
+    {
+        var a = SeedOverflow();
+
+        Assert.True(a.ToggleExpanded());
+        var expanded = a.Snapshot();
+        Assert.True(expanded.IsExpanded);
+        Assert.Equal(7, expanded.VisibleLines.Count);
+        Assert.Equal(0, expanded.HiddenCount);
+        Assert.Equal(SoftOrganChromeAggregator.CollapseLabel, expanded.OverflowLine);
+
+        Assert.False(a.ToggleExpanded());
+        var collapsed = a.Snapshot();
+        Assert.False(collapsed.IsExpanded);
+        Assert.Equal(3, collapsed.VisibleLines.Count);
+        Assert.Equal(4, collapsed.HiddenCount);
+        Assert.Equal("+4 more · SoftOrgan latches", collapsed.OverflowLine);
+    }
+
+    [Fact]
+    public void Toggle_noop_when_no_overflow()
+    {
+        var a = new SoftOrganChromeAggregator();
+        a.Apply("plan", "only");
+        Assert.False(a.ToggleExpanded());
+        Assert.False(a.Snapshot().IsExpanded);
+        Assert.Null(a.Snapshot().OverflowLine);
+    }
+
+    static SoftOrganChromeAggregator SeedOverflow()
+    {
+        var a = new SoftOrganChromeAggregator();
+        a.Apply("pressure", "p");
+        a.Apply("ignite", "i");
+        a.Apply("plan", "pl");
+        a.Apply("crm", "c");
+        a.Apply("learn", "l");
+        a.Apply("webcam", "w");
+        a.Apply("toolchain", "t");
+        return a;
+    }
 }

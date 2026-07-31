@@ -6,15 +6,18 @@ namespace CascadeIDE.SoftOrgan;
 /// Collapse SoftOrgan chrome_hint latches for Glass top band.
 /// Latches stay latch-first; UI shows top-N by priority + overflow
 /// (Avalonia WorkspaceChromeBand parity — VisibleLines + OverflowLine).
+/// Overflow chip toggles expand/collapse for operator density peek.
 /// </summary>
 public sealed class SoftOrganChromeAggregator
 {
     public const int MaxVisible = 3;
+    public const string CollapseLabel = "− collapse · SoftOrgan";
 
     public readonly record struct Band(
         IReadOnlyList<string> VisibleLines,
         int HiddenCount,
-        string? OverflowLine)
+        string? OverflowLine,
+        bool IsExpanded)
     {
         public bool HasContent => VisibleLines.Count > 0;
         public bool HasOverflow => !string.IsNullOrWhiteSpace(OverflowLine);
@@ -22,28 +25,59 @@ public sealed class SoftOrganChromeAggregator
 
     readonly Dictionary<string, string> _hints = new(StringComparer.OrdinalIgnoreCase);
     readonly object _gate = new();
+    bool _expanded;
+
+    public bool IsExpanded
+    {
+        get { lock (_gate) return _expanded; }
+    }
+
+    /// <summary>Flip expand when overflow is actionable; returns new expanded state.</summary>
+    public bool ToggleExpanded()
+    {
+        lock (_gate)
+        {
+            if (OrderedHints().Count <= MaxVisible)
+            {
+                _expanded = false;
+                return false;
+            }
+
+            _expanded = !_expanded;
+            return _expanded;
+        }
+    }
+
+    public void Collapse()
+    {
+        lock (_gate)
+            _expanded = false;
+    }
 
     public Band Snapshot()
     {
         lock (_gate)
         {
-            var ordered = _hints
-                .Where(kv => !string.IsNullOrWhiteSpace(kv.Value))
-                .OrderBy(kv => PriorityFor(kv.Key))
-                .ThenBy(kv => kv.Key, StringComparer.Ordinal)
-                .Select(kv => kv.Value.Trim())
-                .Distinct(StringComparer.Ordinal)
-                .ToList();
+            var ordered = OrderedHints();
 
             if (ordered.Count == 0)
-                return new Band(Array.Empty<string>(), 0, null);
+            {
+                _expanded = false;
+                return new Band(Array.Empty<string>(), 0, null, false);
+            }
 
             if (ordered.Count <= MaxVisible)
-                return new Band(ordered, 0, null);
+            {
+                _expanded = false;
+                return new Band(ordered, 0, null, false);
+            }
+
+            var hidden = ordered.Count - MaxVisible;
+            if (_expanded)
+                return new Band(ordered, 0, CollapseLabel, true);
 
             var visible = ordered.Take(MaxVisible).ToArray();
-            var hidden = ordered.Count - MaxVisible;
-            return new Band(visible, hidden, $"+{hidden} more · SoftOrgan latches");
+            return new Band(visible, hidden, $"+{hidden} more · SoftOrgan latches", false);
         }
     }
 
@@ -59,6 +93,17 @@ public sealed class SoftOrganChromeAggregator
             else
                 _hints[organId] = chromeHint.Trim();
         }
+    }
+
+    List<string> OrderedHints()
+    {
+        return _hints
+            .Where(kv => !string.IsNullOrWhiteSpace(kv.Value))
+            .OrderBy(kv => PriorityFor(kv.Key))
+            .ThenBy(kv => kv.Key, StringComparer.Ordinal)
+            .Select(kv => kv.Value.Trim())
+            .Distinct(StringComparer.Ordinal)
+            .ToList();
     }
 
     /// <summary>Lower number = higher priority (Glass SoftOrgan table).</summary>

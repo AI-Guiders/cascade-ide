@@ -478,24 +478,35 @@ public partial class MainWindow : Window
         Dispatcher.BeginInvoke(() =>
         {
             _softOrgans.Apply(organId, chromeHint);
-            var band = _softOrgans.Snapshot();
-            if (!band.HasContent)
-            {
-                SoftOrganHintLines.ItemsSource = null;
-                SoftOrganOverflow.Text = "";
-                SoftOrganOverflow.Visibility = Visibility.Collapsed;
-                SoftOrganBand.Visibility = Visibility.Collapsed;
-            }
-            else
-            {
-                SoftOrganHintLines.ItemsSource = band.VisibleLines;
-                SoftOrganOverflow.Text = band.OverflowLine ?? "";
-                SoftOrganOverflow.Visibility = band.HasOverflow
-                    ? Visibility.Visible
-                    : Visibility.Collapsed;
-                SoftOrganBand.Visibility = Visibility.Visible;
-            }
+            PaintSoftOrganBand();
         }, DispatcherPriority.Background);
+    }
+
+    void SoftOrganOverflow_OnClick(object sender, MouseButtonEventArgs e)
+    {
+        _softOrgans.ToggleExpanded();
+        PaintSoftOrganBand();
+        e.Handled = true;
+    }
+
+    void PaintSoftOrganBand()
+    {
+        var band = _softOrgans.Snapshot();
+        if (!band.HasContent)
+        {
+            SoftOrganHintLines.ItemsSource = null;
+            SoftOrganOverflow.Text = "";
+            SoftOrganOverflow.Visibility = Visibility.Collapsed;
+            SoftOrganBand.Visibility = Visibility.Collapsed;
+            return;
+        }
+
+        SoftOrganHintLines.ItemsSource = band.VisibleLines;
+        SoftOrganOverflow.Text = band.OverflowLine ?? "";
+        SoftOrganOverflow.Visibility = band.HasOverflow
+            ? Visibility.Visible
+            : Visibility.Collapsed;
+        SoftOrganBand.Visibility = Visibility.Visible;
     }
 
     void OnAlertChanged(string path)

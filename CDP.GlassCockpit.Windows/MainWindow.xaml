@@ -68,7 +68,9 @@
                 </ItemsControl.ItemTemplate>
               </ItemsControl>
               <TextBlock x:Name="SoftOrganOverflow" Text="" Foreground="#C9B896" FontSize="11"
-                         Opacity="0.55" Margin="0,2,0,0" Visibility="Collapsed"/>
+                         Opacity="0.55" Margin="0,2,0,0" Visibility="Collapsed"
+                         Cursor="Hand" ToolTip="Click to expand / collapse SoftOrgan latches"
+                         MouseLeftButtonUp="SoftOrganOverflow_OnClick"/>
             </StackPanel>
           </StackPanel>
         </Border>
