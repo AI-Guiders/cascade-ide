@@ -17,6 +17,21 @@ Separate process · latch IPC · Avalonia on hold for Windows primary.
 - **LatchHub + LatchPaint** — latch → human glass (not raw JSON dump)
 - **SoftOrgan chrome band** — `*-LATEST.json` chrome_hint → top-N VisibleLines + Overflow chip (click expand/collapse; GlassCore density; `MainWindow.SoftOrganBand` paint; includes `sa-desk`)
 
+## MainWindow partials (0-sync)
+
+`MainWindow.xaml.cs` is a thin ctor shell. Surface peels:
+
+| Partial | Owns |
+| --- | --- |
+| `MainWindow.LayoutSurface.cs` | session layout, host sync, Forward `primary_work_surface` (ADR 0120) |
+| `MainWindow.EditorSurface.cs` | AvalonEdit mount, dogfood open, pick/save, Ctrl+O/S |
+| `MainWindow.IntercomFeed.cs` | Virtual History feed, topics, new-msg cue, send |
+| `MainWindow.SoftOrganBand.cs` | SoftOrgan latch → band paint / overflow toggle |
+| `MainWindow.LatchEicas.cs` | presentation / alert / qrh latch → Plan + EICAS |
+| `MainWindow.MfdBody.cs` | MFD page select + stub body text |
+
+Shared SoftOrgan density: `CascadeIDE.GlassCore/SoftOrgan/SoftOrganChromeDensityPolicy.cs` (Avalonia façade forwards).
+
 ## Run
 
 ```powershell
