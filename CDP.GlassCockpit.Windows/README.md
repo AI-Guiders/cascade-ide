@@ -44,6 +44,20 @@ Latch id catalog (Glass `*-LATEST.json` stems): `SoftOrganLatchCatalog` — cons
 SSOT triangle map: `CascadeIDE.GlassCore/SoftOrgan/README.md`.
 Avalonia SoftOrgan/CabinOrgan ViewModel map: `ViewModels/README.md`.
 
+## Dogfood look (operator checklist)
+
+Glass is a **projector** (latches → pixels), not the agent loop. With CDP live, check:
+
+1. **SoftOrgan band (top)** — chrome_hint lines from SoftOrgan latches (`*-LATEST.json`); density/collapse from GlassCore. Overflow chip: click expand/collapse.
+2. **sa-desk** — appears in SoftOrgan catalog (quiet-chrome); should participate in band ordering, not as EICAS id.
+3. **EICAS / Plan** — alert/qrh still via `LatchPaint.Eicas` + `MainWindow.LatchEicas` (not SoftOrgan catalog members).
+4. **Intercom feed** — journal/composer still live via Intercom latches.
+5. **Forward / editor** — AvalonEdit mount + layout sync (LayoutSurface / EditorSurface).
+6. **MFD stub** — page select still stub body (expected).
+7. **Crash note** — Cursor OOM / «Window terminated» on Avalonia CIDE ≠ Glass failure; Glass process name `CDP.GlassCockpit.Windows`.
+
+Point `[cockpit_host] exe` at this Glass exe if Start/Stop should launch WPF (not `publish/CascadeIDE.exe`).
+
 ## Run
 
 ```powershell
