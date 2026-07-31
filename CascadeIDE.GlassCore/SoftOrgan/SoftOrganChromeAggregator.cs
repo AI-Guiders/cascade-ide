@@ -3,15 +3,13 @@
 namespace CascadeIDE.SoftOrgan;
 
 /// <summary>
-/// Collapse SoftOrgan chrome_hint latches for Glass top band.
-/// Latches stay latch-first; UI shows top-N by priority + overflow
-/// (Avalonia WorkspaceChromeBand parity — VisibleLines + OverflowLine).
-/// Overflow chip toggles expand/collapse for operator density peek.
+/// SoftOrgan chrome_hint latch store for Glass top band.
+/// Density math lives in <see cref="SoftOrganChromeDensityPolicy"/> (shared with Avalonia).
 /// </summary>
 public sealed class SoftOrganChromeAggregator
 {
-    public const int MaxVisible = 3;
-    public const string CollapseLabel = "− collapse · SoftOrgan";
+    public const int MaxVisible = SoftOrganChromeDensityPolicy.DefaultMaxVisible;
+    public const string CollapseLabel = SoftOrganChromeDensityPolicy.CollapseLabel;
 
     public readonly record struct Band(
         IReadOnlyList<string> VisibleLines,
@@ -37,13 +35,7 @@ public sealed class SoftOrganChromeAggregator
     {
         lock (_gate)
         {
-            if (OrderedHints().Count <= MaxVisible)
-            {
-                _expanded = false;
-                return false;
-            }
-
-            _expanded = !_expanded;
+            _expanded = SoftOrganChromeDensityPolicy.ToggleExpanded(_expanded, HintCountUnlocked());
             return _expanded;
         }
     }
@@ -58,26 +50,10 @@ public sealed class SoftOrganChromeAggregator
     {
         lock (_gate)
         {
-            var ordered = OrderedHints();
-
-            if (ordered.Count == 0)
-            {
+            var r = SoftOrganChromeDensityPolicy.Collapse(HintCandidatesUnlocked(), expanded: _expanded);
+            if (!r.IsExpanded && _expanded)
                 _expanded = false;
-                return new Band(Array.Empty<string>(), 0, null, false);
-            }
-
-            if (ordered.Count <= MaxVisible)
-            {
-                _expanded = false;
-                return new Band(ordered, 0, null, false);
-            }
-
-            var hidden = ordered.Count - MaxVisible;
-            if (_expanded)
-                return new Band(ordered, 0, CollapseLabel, true);
-
-            var visible = ordered.Take(MaxVisible).ToArray();
-            return new Band(visible, hidden, $"+{hidden} more · SoftOrgan latches", false);
+            return new Band(r.VisibleLines, r.HiddenCount, r.OverflowLine, r.IsExpanded);
         }
     }
 
@@ -95,42 +71,18 @@ public sealed class SoftOrganChromeAggregator
         }
     }
 
-    List<string> OrderedHints()
+    int HintCountUnlocked() =>
+        HintCandidatesUnlocked().Count();
+
+    IEnumerable<SoftOrganChromeDensityPolicy.Hint> HintCandidatesUnlocked()
     {
-        return _hints
-            .Where(kv => !string.IsNullOrWhiteSpace(kv.Value))
-            .OrderBy(kv => PriorityFor(kv.Key))
-            .ThenBy(kv => kv.Key, StringComparer.Ordinal)
-            .Select(kv => kv.Value.Trim())
-            .Distinct(StringComparer.Ordinal)
-            .ToList();
+        foreach (var kv in _hints)
+        {
+            if (SoftOrganChromeDensityPolicy.From(kv.Key, kv.Value) is { } h)
+                yield return h;
+        }
     }
 
-    /// <summary>Lower number = higher priority (Glass SoftOrgan table).</summary>
-    public static int PriorityFor(string id) => id switch
-    {
-        "pressure" => 0,
-        "ignite" => 1,
-        "plan" => 2,
-        "cabin" => 3,
-        "scope" => 4,
-        "alert" or "eicas" or "sa" => 5,
-        "qrh" => 6,
-        "ecl" or "chk" => 7,
-        "review" => 8,
-        "refactor" => 9,
-        "plugins" => 10,
-        "toolchain" => 11,
-        "crm" => 12,
-        "report" => 13,
-        "webcam" => 14,
-        "sys" => 15,
-        "onboard" => 16,
-        "arch" => 17,
-        "mcp" => 18,
-        "learn" => 19,
-        "domain" => 20,
-        "sa-desk" or "sa_desk" => 21,
-        _ => 50
-    };
+    /// <summary>Lower number = higher priority (shared SoftOrgan table).</summary>
+    public static int PriorityFor(string id) => SoftOrganChromeDensityPolicy.PriorityFor(id);
 }
