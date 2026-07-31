@@ -24,6 +24,7 @@ public partial class MainWindow : Window
     string? _editorPath;
     string? _selectedTopicId;
     string[] _selectedTopicEntryIds = [];
+    int _pendingNewBelow;
 
     public MainWindow()
     {
@@ -141,6 +142,9 @@ public partial class MainWindow : Window
 
     void ApplyFeedScrollAfterRebuild(bool stickEnd, bool wasPinned, double priorOffset)
     {
+        if (stickEnd || wasPinned)
+            _pendingNewBelow = CascadeIDE.Intercom.GlassIntercomNewMessageCue.AfterPinnedOrStickEnd(_pendingNewBelow);
+
         var target = CascadeIDE.Intercom.GlassIntercomFeedScroll.ResolveOffsetAfterRebuild(
             stickEnd, wasPinned, priorOffset);
         // Layout after ItemsControl mutate — apply on next pass.
@@ -150,7 +154,41 @@ public partial class MainWindow : Window
                 FeedScroll.ScrollToEnd();
             else
                 FeedScroll.ScrollToVerticalOffset(target);
+            SyncNewMsgCue();
         }, DispatcherPriority.Loaded);
+    }
+
+    void SyncNewMsgCue()
+    {
+        var show = CascadeIDE.Intercom.GlassIntercomNewMessageCue.ShouldShow(_pendingNewBelow);
+        NewMsgCueBtn.Visibility = show ? Visibility.Visible : Visibility.Collapsed;
+        NewMsgCueBtn.Content = CascadeIDE.Intercom.GlassIntercomNewMessageCue.FormatLabel(_pendingNewBelow);
+    }
+
+    void NoteArrivalWhileReading(bool wasPinnedToEnd)
+    {
+        _pendingNewBelow = CascadeIDE.Intercom.GlassIntercomNewMessageCue.AfterArrival(
+            _pendingNewBelow, wasPinnedToEnd);
+        SyncNewMsgCue();
+    }
+
+    void FeedScroll_OnScrollChanged(object sender, ScrollChangedEventArgs e)
+    {
+        if (!CascadeIDE.Intercom.GlassIntercomFeedScroll.IsPinnedToEnd(
+                FeedScroll.VerticalOffset,
+                FeedScroll.ExtentHeight,
+                FeedScroll.ViewportHeight))
+            return;
+
+        _pendingNewBelow = CascadeIDE.Intercom.GlassIntercomNewMessageCue.AfterPinnedOrStickEnd(_pendingNewBelow);
+        SyncNewMsgCue();
+    }
+
+    void NewMsgCueBtn_OnClick(object sender, RoutedEventArgs e)
+    {
+        _pendingNewBelow = CascadeIDE.Intercom.GlassIntercomNewMessageCue.AfterPinnedOrStickEnd(_pendingNewBelow);
+        FeedScroll.ScrollToEnd();
+        SyncNewMsgCue();
     }
 
     void SyncTopicAllChrome()
@@ -391,7 +429,12 @@ public partial class MainWindow : Window
                 }
 
                 TryJournalFromView(view);
+                var wasPinned = CascadeIDE.Intercom.GlassIntercomFeedScroll.IsPinnedToEnd(
+                    FeedScroll.VerticalOffset,
+                    FeedScroll.ExtentHeight,
+                    FeedScroll.ViewportHeight);
                 RebuildIntercomFeedFromJournal(); // preserve scroll unless pinned to end
+                NoteArrivalWhileReading(wasPinned);
                 StatusText.Text = $"glass · {view.StatusLine} · {DateTime.Now:HH:mm:ss}";
             }
             catch (Exception ex)

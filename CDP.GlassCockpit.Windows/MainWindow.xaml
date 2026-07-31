@@ -195,25 +195,36 @@
                 </DockPanel>
               </Border>
 
-              <ScrollViewer x:Name="FeedScroll" VerticalScrollBarVisibility="Auto" Padding="10">
-                <ItemsControl x:Name="MessageFeed">
-                  <ItemsControl.ItemTemplate>
-                    <DataTemplate>
-                      <Border Margin="0,0,0,8" Padding="10,8" CornerRadius="6"
-                              Background="#1C2430" BorderBrush="#2F3F55" BorderThickness="1"
-                              HorizontalAlignment="Stretch">
-                        <StackPanel>
-                          <DockPanel Margin="0,0,0,4">
-                            <TextBlock Text="{Binding Role}" FontSize="11" FontWeight="SemiBold" Foreground="#7EB6FF"/>
-                            <TextBlock DockPanel.Dock="Right" Text="{Binding When}" FontSize="10" Foreground="#666" HorizontalAlignment="Right"/>
-                          </DockPanel>
-                          <TextBlock Text="{Binding Body}" FontSize="13" TextWrapping="Wrap" Foreground="#E8E8E8" LineHeight="18"/>
-                        </StackPanel>
-                      </Border>
-                    </DataTemplate>
-                  </ItemsControl.ItemTemplate>
-                </ItemsControl>
-              </ScrollViewer>
+              <Grid>
+                <ScrollViewer x:Name="FeedScroll" VerticalScrollBarVisibility="Auto" Padding="10"
+                              ScrollChanged="FeedScroll_OnScrollChanged">
+                  <ItemsControl x:Name="MessageFeed">
+                    <ItemsControl.ItemTemplate>
+                      <DataTemplate>
+                        <Border Margin="0,0,0,8" Padding="10,8" CornerRadius="6"
+                                Background="#1C2430" BorderBrush="#2F3F55" BorderThickness="1"
+                                HorizontalAlignment="Stretch">
+                          <StackPanel>
+                            <DockPanel Margin="0,0,0,4">
+                              <TextBlock Text="{Binding Role}" FontSize="11" FontWeight="SemiBold" Foreground="#7EB6FF"/>
+                              <TextBlock DockPanel.Dock="Right" Text="{Binding When}" FontSize="10" Foreground="#666" HorizontalAlignment="Right"/>
+                            </DockPanel>
+                            <TextBlock Text="{Binding Body}" FontSize="13" TextWrapping="Wrap" Foreground="#E8E8E8" LineHeight="18"/>
+                          </StackPanel>
+                        </Border>
+                      </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                  </ItemsControl>
+                </ScrollViewer>
+                <Button x:Name="NewMsgCueBtn"
+                        VerticalAlignment="Bottom" HorizontalAlignment="Center"
+                        Margin="0,0,0,12"
+                        Style="{StaticResource ChromeBtn}"
+                        Background="#2A3A55" BorderBrush="#7EB6FF" Foreground="#E8F0FF"
+                        Visibility="Collapsed"
+                        Click="NewMsgCueBtn_OnClick"
+                        ToolTip="Jump to latest messages"/>
+              </Grid>
             </DockPanel>
           </Grid>
         </DockPanel>
