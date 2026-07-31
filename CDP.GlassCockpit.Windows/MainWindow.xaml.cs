@@ -16,6 +16,7 @@ public partial class MainWindow : Window
     readonly EicasBandAggregator _eicas = new();
     readonly ObservableCollection<ChatBubble> _feed = new();
     readonly GlassHostWindows _hosts;
+    bool _hostsReady;
 
     public MainWindow()
     {
@@ -44,7 +45,11 @@ public partial class MainWindow : Window
 
         StatusText.Text =
             $"glass · {_session.Layout.Topology} · cols={_session.Layout.ColumnDefinitions} · {_latches.StateRoot}";
-        Loaded += (_, _) => SyncHostWindows();
+        Loaded += (_, _) =>
+        {
+            _hostsReady = true;
+            SyncHostWindows();
+        };
         Closed += (_, _) =>
         {
             _hosts.Dispose();
@@ -64,7 +69,12 @@ public partial class MainWindow : Window
         SyncHostWindows();
     }
 
-    void SyncHostWindows() => _hosts.Sync(_session.Layout.Flags);
+    void SyncHostWindows()
+    {
+        if (!_hostsReady)
+            return;
+        _hosts.Sync(_session.Layout.Flags);
+    }
 
     void ApplyPrimaryWorkSurface()
     {
@@ -216,6 +226,9 @@ public partial class MainWindow : Window
 
     void RefreshEicasHealth()
     {
+        if (MfdHealth is null)
+            return;
+
         var line = _eicas.BandLine;
         if (!string.IsNullOrWhiteSpace(line))
         {
@@ -223,13 +236,13 @@ public partial class MainWindow : Window
             return;
         }
 
-        var page = (MfdPages.SelectedItem as ListBoxItem)?.Content?.ToString() ?? "?";
+        var page = (MfdPages?.SelectedItem as ListBoxItem)?.Content?.ToString() ?? "?";
         MfdHealth.Text = $"EICAS · idle · page={page}";
     }
 
     void SelectMfdPage(string? page)
     {
-        if (string.IsNullOrWhiteSpace(page))
+        if (string.IsNullOrWhiteSpace(page) || MfdPages is null)
             return;
 
         foreach (var item in MfdPages.Items)
@@ -247,7 +260,10 @@ public partial class MainWindow : Window
 
     void UpdateMfdBody()
     {
-        var page = (MfdPages.SelectedItem as ListBoxItem)?.Content?.ToString() ?? "?";
+        if (MfdBody is null)
+            return;
+
+        var page = (MfdPages?.SelectedItem as ListBoxItem)?.Content?.ToString() ?? "?";
         MfdBody.Text = page switch
         {
             "Terminal" => "Terminal page host.\n\nConPTY / shell organ wires in later peels.\nNow: page chrome only (like CIDE MfdShell).",
