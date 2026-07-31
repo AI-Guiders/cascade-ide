@@ -104,8 +104,10 @@
                 <DockPanel>
                   <Border DockPanel.Dock="Top" Background="#1A1A1A" Padding="10,4" BorderBrush="#2A2A2A" BorderThickness="0,0,0,1">
                     <DockPanel>
+                      <Button x:Name="SaveFileBtn" DockPanel.Dock="Right" Content="Save" Style="{StaticResource ChromeBtn}"
+                              Click="SaveFileBtn_OnClick" ToolTip="Save (Ctrl+S)" Margin="8,0,0,0"/>
                       <Button x:Name="OpenFileBtn" DockPanel.Dock="Right" Content="Open…" Style="{StaticResource ChromeBtn}"
-                              Click="OpenFileBtn_OnClick" ToolTip="Open a file in AvalonEdit" Margin="8,0,0,0"/>
+                              Click="OpenFileBtn_OnClick" ToolTip="Open a file (Ctrl+O)" Margin="8,0,0,0"/>
                       <TextBlock x:Name="EditorPathLabel" Text="(no file)" FontSize="11" Foreground="#9BB6D4"
                                  FontFamily="Consolas" TextTrimming="CharacterEllipsis" VerticalAlignment="Center"/>
                     </DockPanel>
@@ -118,7 +120,7 @@
                                          LineNumbersForeground="#858585"
                                          ShowLineNumbers="True"
                                          WordWrap="False"
-                                         IsReadOnly="True"/>
+                                         IsReadOnly="False"/>
                 </DockPanel>
               </Border>
             </ContentControl>

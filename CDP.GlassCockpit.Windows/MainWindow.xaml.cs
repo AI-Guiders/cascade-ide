@@ -3,6 +3,7 @@ using System.Collections.ObjectModel;
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using System.Windows.Threading;
 using ICSharpCode.AvalonEdit.Highlighting;
 using Microsoft.Win32;
@@ -19,10 +20,12 @@ public partial class MainWindow : Window
     readonly GlassHostWindows _hosts;
     readonly HashSet<string> _seenIntercomIds = new(StringComparer.OrdinalIgnoreCase);
     bool _hostsReady;
+    string? _editorPath;
 
     public MainWindow()
     {
         InitializeComponent();
+        PreviewKeyDown += MainWindow_OnPreviewKeyDown;
         MessageFeed.ItemsSource = _feed;
         _hosts = new GlassHostWindows(this);
 
@@ -164,6 +167,7 @@ public partial class MainWindow : Window
             HighlightingManager.Instance.GetDefinitionByExtension(Path.GetExtension(path))
             ?? HighlightingManager.Instance.GetDefinition("C#");
         GlassAvalonEditTheme.ApplyDarkReadable(CodeEditor);
+        _editorPath = path;
         EditorPathLabel.Text = path;
 
         if (_session.IsIntercomForward)
@@ -175,7 +179,28 @@ public partial class MainWindow : Window
         RefreshMfdEditorVisibility();
     }
 
-    void OpenFileBtn_OnClick(object sender, RoutedEventArgs e)
+    void OpenFileBtn_OnClick(object sender, RoutedEventArgs e) => TryPickOpenFile();
+
+    void SaveFileBtn_OnClick(object sender, RoutedEventArgs e) => TrySaveEditor();
+
+    void MainWindow_OnPreviewKeyDown(object sender, KeyEventArgs e)
+    {
+        if (Keyboard.Modifiers != ModifierKeys.Control)
+            return;
+
+        if (e.Key == Key.S)
+        {
+            TrySaveEditor();
+            e.Handled = true;
+        }
+        else if (e.Key == Key.O)
+        {
+            TryPickOpenFile();
+            e.Handled = true;
+        }
+    }
+
+    void TryPickOpenFile()
     {
         var dlg = new OpenFileDialog
         {
@@ -185,14 +210,32 @@ public partial class MainWindow : Window
             Multiselect = false,
         };
 
-        var current = EditorPathLabel.Text;
-        if (!string.IsNullOrWhiteSpace(current) && File.Exists(current))
-            dlg.InitialDirectory = Path.GetDirectoryName(current);
+        if (!string.IsNullOrWhiteSpace(_editorPath) && File.Exists(_editorPath))
+            dlg.InitialDirectory = Path.GetDirectoryName(_editorPath);
         else if (!string.IsNullOrWhiteSpace(_session.WorkspaceRoot) && Directory.Exists(_session.WorkspaceRoot))
             dlg.InitialDirectory = _session.WorkspaceRoot;
 
         if (dlg.ShowDialog(this) == true)
             OpenCodeFile(dlg.FileName);
+    }
+
+    void TrySaveEditor()
+    {
+        if (string.IsNullOrWhiteSpace(_editorPath))
+        {
+            StatusText.Text = "glass · save skipped · no file open";
+            return;
+        }
+
+        try
+        {
+            CodeEditor.Save(_editorPath);
+            StatusText.Text = $"glass · saved · {Path.GetFileName(_editorPath)} · {DateTime.Now:HH:mm:ss}";
+        }
+        catch (Exception ex)
+        {
+            StatusText.Text = $"glass · save fail · {ex.Message}";
+        }
     }
 
     void OnIntercomChanged(string path)
