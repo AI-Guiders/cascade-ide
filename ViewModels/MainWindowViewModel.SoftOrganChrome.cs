@@ -77,23 +77,4 @@ public partial class MainWindowViewModel
         OnPropertyChanged(nameof(ShowAgentChromeHintOverflow));
     }
 
-    partial void OnAgentCabinChromeHintChanged(string? value) => RaiseChromeHintDensity();
-    partial void OnAgentPressureChromeHintChanged(string? value) => RaiseChromeHintDensity();
-    partial void OnAgentIgniteChromeHintChanged(string? value) => RaiseChromeHintDensity();
-    partial void OnAgentScopeChromeHintChanged(string? value) => RaiseChromeHintDensity();
-    partial void OnAgentSysChromeHintChanged(string? value) => RaiseChromeHintDensity();
-    partial void OnAgentOnboardChromeHintChanged(string? value) => RaiseChromeHintDensity();
-    partial void OnAgentArchChromeHintChanged(string? value) => RaiseChromeHintDensity();
-    partial void OnAgentMcpChromeHintChanged(string? value) => RaiseChromeHintDensity();
-    partial void OnAgentPlanChromeHintChanged(string? value) => RaiseChromeHintDensity();
-    partial void OnAgentReportChromeHintChanged(string? value) => RaiseChromeHintDensity();
-    partial void OnAgentCrmChromeHintChanged(string? value) => RaiseChromeHintDensity();
-    partial void OnAgentWebcamChromeHintChanged(string? value) => RaiseChromeHintDensity();
-    partial void OnAgentToolchainChromeHintChanged(string? value) => RaiseChromeHintDensity();
-    partial void OnAgentPluginsChromeHintChanged(string? value) => RaiseChromeHintDensity();
-    partial void OnAgentRefactorChromeHintChanged(string? value) => RaiseChromeHintDensity();
-    partial void OnAgentReviewChromeHintChanged(string? value) => RaiseChromeHintDensity();
-    partial void OnAgentLearnChromeHintChanged(string? value) => RaiseChromeHintDensity();
-    partial void OnAgentDomainChromeHintChanged(string? value) => RaiseChromeHintDensity();
-    partial void OnAgentSaDeskChromeHintChanged(string? value) => RaiseChromeHintDensity();
 }
