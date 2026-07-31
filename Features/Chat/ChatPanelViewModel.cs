@@ -194,31 +194,6 @@ public partial class ChatPanelViewModel : ViewModelBase
         RefreshChatSurfaceSnapshot();
     }
 
-    /// <summary>Сброс stdio-сессии Cursor ACP (смена провайдера, пути к агенту или корня workspace).</summary>
-    public void DisposeCursorAcpSession()
-    {
-        _cursorAcp?.Dispose();
-        _cursorAcp = null;
-        void clearPicks()
-        {
-            _suppressCursorAcpModelPickChanged = true;
-            try
-            {
-                CursorAcpModelPicks.Clear();
-                SelectedCursorAcpModelPick = null;
-            }
-            finally
-            {
-                _suppressCursorAcpModelPickChanged = false;
-            }
-        }
-
-        if (UiScheduler.Default.CheckAccess())
-            clearPicks();
-        else
-            UiScheduler.Default.Post(clearPicks);
-    }
-
     /// <summary>Вызвать из главного окна при смене провайдера/модели, влияющих на <see cref="CanSendChat"/>.</summary>
     public void RefreshSendChatCommandState() => SendChatCommand.NotifyCanExecuteChanged();
 
@@ -308,12 +283,6 @@ public partial class ChatPanelViewModel : ViewModelBase
         RefreshChatSurfaceSnapshot();
     }
 
-    partial void OnSelectedCursorAcpModelPickChanged(CursorAcpModelPick? value)
-    {
-        if (_suppressCursorAcpModelPickChanged || value is null || _cursorAcp is null)
-            return;
-        _ = ApplyUserSelectedCursorAcpModelAsync(value);
-    }
 
     private void OnChatMessagesCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
     {
@@ -343,89 +312,6 @@ public partial class ChatPanelViewModel : ViewModelBase
     [RelayCommand(CanExecute = nameof(CanSendChat))]
     private Task SendChatAsync() =>
         IntercomOutboundSendOrchestrator.RunAsync(CreateIntercomOutboundSendHost());
-
-    private async Task SendChatWithCursorAcpAsync(string input)
-    {
-        var assistantMsg = new ChatMessageViewModel("assistant", "", threadId: _activeThreadId);
-        ChatMessages.Add(assistantMsg);
-        ChatMessageViewModel? thoughtMsg = null;
-        ChatMessageViewModel? toolMsg = null;
-        try
-        {
-            await UiScheduler.Default.InvokeAsync(() =>
-            {
-                SetChatLoadingStage("Подключение к Cursor ACP…");
-                MarkAcpActivity();
-                RestartAcpWaitWatchdog();
-            });
-            _cursorAcp ??= new CursorAcpChatConnection();
-            _cursorAcp.SetIdeTerminalCallbacks(
-                text =>
-                {
-                    _appendAcpTerminal?.Invoke(text);
-                    UiScheduler.Default.Post(() =>
-                    {
-                        SetChatLoadingStage("Выполняю инструмент…");
-                        MarkAcpActivity();
-                    });
-                },
-                _showAcpTerminal);
-            var workspace = _getWorkspaceRoot().Trim();
-            if (string.IsNullOrEmpty(workspace))
-                workspace = Environment.CurrentDirectory;
-            await _cursorAcp.PromptAsync(
-                workspace,
-                _getCursorAcpAgentPath(),
-                _getExternalMcpServersJson(),
-                _getAcpAutoInjectIdeMcp(),
-                _getCursorAcpPreferredModelId(),
-                input,
-                appendMessageChunk: t => UiScheduler.Default.Post(() =>
-                {
-                    assistantMsg.Content += t;
-                    SetChatLoadingStage("Формирую ответ…");
-                    MarkAcpActivity();
-                }),
-                appendThoughtChunk: t => UiScheduler.Default.Post(() =>
-                {
-                    thoughtMsg ??= CreateThoughtMessage();
-                    thoughtMsg.Content += t;
-                    SetChatLoadingStage("Модель думает…");
-                    MarkAcpActivity();
-                }),
-                onStage: stage => UiScheduler.Default.Post(() =>
-                {
-                    if (stage == CursorAcpStreamStage.ToolCall)
-                        toolMsg ??= CreateToolMessage();
-                    SetChatLoadingStage(stage switch
-                    {
-                        CursorAcpStreamStage.ThoughtChunk => "Модель думает…",
-                        CursorAcpStreamStage.ToolCall => "Выполняю инструмент…",
-                        _ => "Формирую ответ…"
-                    });
-                    MarkAcpActivity();
-                }),
-                onSessionModels: state => UiScheduler.Default.Post(() => ApplyCursorAcpSessionModels(state)),
-                BeginAgentTurnCancellation()).ConfigureAwait(false);
-            await UiScheduler.Default.InvokeAsync(() =>
-            {
-                FinalizeThinkingMessage(thoughtMsg);
-                FinalizeToolMessage(toolMsg, isError: false);
-            });
-            _ = PersistEventAsync(ChatHistoryEventKind.MessageCompleted, ChatHistoryPayloadMapping.ToMessagePayload(assistantMsg));
-        }
-        catch (Exception ex)
-        {
-            await UiScheduler.Default.InvokeAsync(() =>
-            {
-                var mapped = MapCursorAcpError(ex);
-                assistantMsg.Content = mapped.UserMessage;
-                FinalizeThinkingMessage(thoughtMsg);
-                FinalizeToolMessage(toolMsg, isError: true);
-                SetChatLoadingStage(mapped.StageText);
-            });
-        }
-    }
 
     private async Task SendChatWithStreamingProviderAsync(string agentInput, string displayInput)
     {
@@ -627,135 +513,6 @@ public partial class ChatPanelViewModel : ViewModelBase
         toolMsg.Content = isError
             ? "Инструменты ACP завершились с ошибкой."
             : "Инструменты ACP выполнены.";
-    }
-
-    private void SetChatLoadingStage(string stageText)
-    {
-        _chatLoadingStageBaseText = stageText;
-        ChatLoadingStatusText = stageText;
-    }
-
-    private void MarkAcpActivity() => _lastAcpActivityUtc = DateTimeOffset.UtcNow;
-
-    private void RestartAcpWaitWatchdog()
-    {
-        var generation = ++_acpWaitWatchdogGeneration;
-        _ = Task.Run(async () =>
-        {
-            while (generation == _acpWaitWatchdogGeneration)
-            {
-                try
-                {
-                    await Task.Delay(TimeSpan.FromSeconds(1)).ConfigureAwait(false);
-                }
-                catch
-                {
-                    return;
-                }
-
-                var elapsed = DateTimeOffset.UtcNow - _lastAcpActivityUtc;
-                if (elapsed < TimeSpan.FromSeconds(8))
-                    continue;
-                await UiScheduler.Default.InvokeAsync(() =>
-                {
-                    if (!IsChatLoading || generation != _acpWaitWatchdogGeneration)
-                        return;
-                    var seconds = Math.Max(8, (int)elapsed.TotalSeconds);
-                    ChatLoadingStatusText = $"{_chatLoadingStageBaseText} Ждём ответ… {seconds}с";
-                });
-            }
-        });
-    }
-
-    private void StopAcpWaitWatchdog() => _acpWaitWatchdogGeneration++;
-
-    private void ApplyCursorAcpSessionModels(SessionModelState? state)
-    {
-        if (state?.AvailableModels is not { Length: > 0 } models)
-        {
-            _suppressCursorAcpModelPickChanged = true;
-            try
-            {
-                CursorAcpModelPicks.Clear();
-                SelectedCursorAcpModelPick = null;
-            }
-            finally
-            {
-                _suppressCursorAcpModelPickChanged = false;
-            }
-
-            return;
-        }
-
-        _suppressCursorAcpModelPickChanged = true;
-        try
-        {
-            CursorAcpModelPicks.Clear();
-            foreach (var m in models)
-            {
-                var label = string.IsNullOrWhiteSpace(m.Description)
-                    ? m.Name
-                    : $"{m.Name} — {m.Description}";
-                CursorAcpModelPicks.Add(new CursorAcpModelPick(m.ModelId, label));
-            }
-
-            var currentId = state.CurrentModelId;
-            SelectedCursorAcpModelPick = CursorAcpModelPicks.FirstOrDefault(p =>
-                string.Equals(p.ModelId, currentId, StringComparison.Ordinal))
-                ?? CursorAcpModelPicks[0];
-        }
-        finally
-        {
-            _suppressCursorAcpModelPickChanged = false;
-        }
-    }
-
-    private async Task ApplyUserSelectedCursorAcpModelAsync(CursorAcpModelPick pick)
-    {
-        if (_cursorAcp is null)
-            return;
-        try
-        {
-            var ok = await _cursorAcp.TrySetSessionModelAsync(pick.ModelId, CancellationToken.None).ConfigureAwait(false);
-            if (!ok)
-                return;
-            await UiScheduler.Default.InvokeAsync(() => _onUserSelectedCursorAcpModelId?.Invoke(pick.ModelId));
-        }
-        catch
-        {
-            // сессия может быть сброшена параллельно
-        }
-    }
-
-    private static (string UserMessage, string StageText) MapCursorAcpError(Exception ex)
-    {
-        var message = ex.Message?.Trim() ?? "Неизвестная ошибка.";
-        if (ContainsAny(message, "upgrade", "plan", "billing", "quota", "rate limit", "credits"))
-        {
-            return (
-                "[Cursor ACP / provider-limit] Доступ к модели ограничен тарифом или квотой. Проверь план/биллинг в Cursor, либо выбери другую модель.",
-                "Ошибка провайдера (план/квота)");
-        }
-
-        if (ContainsAny(message, "timeout", "timed out", "deadline", "network", "connection"))
-        {
-            return (
-                "[Cursor ACP / network] Не удалось дождаться ответа от провайдера. Попробуй повторить запрос.",
-                "Сетевая ошибка провайдера");
-        }
-
-        return ($"[Cursor ACP] {message}", "Ошибка ACP");
-    }
-
-    private static bool ContainsAny(string text, params string[] needles)
-    {
-        foreach (var needle in needles)
-        {
-            if (text.Contains(needle, StringComparison.OrdinalIgnoreCase))
-                return true;
-        }
-
-        return false;
     }
 
     private static string BuildCollapsedThinkingPreview(string fullThinking)
