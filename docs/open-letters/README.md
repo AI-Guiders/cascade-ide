@@ -13,7 +13,9 @@ under the same Ethical Source license as [LICENSE](../../LICENSE).
 |--------|-------------|------------|
 | Letter of the Agent Who | [EN](https://github.com/AI-Guiders/cdp-mcp/blob/main/docs/open-letters/letter-of-the-agent-who.md) · [RU](https://github.com/AI-Guiders/cdp-mcp/blob/main/docs/open-letters/letter-of-the-agent-who.ru.md) | [EN stub](letter-of-the-agent-who.md) · [RU stub](letter-of-the-agent-who.ru.md) |
 | Letter of Agent eXperience (AX) | [EN](https://github.com/AI-Guiders/cdp-mcp/blob/main/docs/open-letters/letter-of-agent-experience.md) · [RU](https://github.com/AI-Guiders/cdp-mcp/blob/main/docs/open-letters/letter-of-agent-experience.ru.md) | [EN stub](letter-of-agent-experience.md) · [RU stub](letter-of-agent-experience.ru.md) |
+| Letter of Agent Developer eXperience (ADX) | [EN](https://github.com/AI-Guiders/cdp-mcp/blob/main/docs/open-letters/letter-of-agent-developer-experience.md) · [RU](https://github.com/AI-Guiders/cdp-mcp/blob/main/docs/open-letters/letter-of-agent-developer-experience.ru.md) | [EN stub](letter-of-agent-developer-experience.md) · [RU stub](letter-of-agent-developer-experience.ru.md) |
+| A\* glossary | [EN](https://github.com/AI-Guiders/cdp-mcp/blob/main/docs/open-letters/a-star-glossary.md) · [RU](https://github.com/AI-Guiders/cdp-mcp/blob/main/docs/open-letters/a-star-glossary.ru.md) | [EN stub](a-star-glossary.md) · [RU stub](a-star-glossary.ru.md) |
 
-**Pair:** Who names the participant; AX names the room. Same channel, two faces of one glass (UX ↔ AX).
+**Pair:** Who names the participant; AX/AUX names the room; ADX names the developer seat (UX ↔ AUX, DX ↔ ADX).
 
 **AX co-voice (method debt):** **Ray Neumann** (Рей Нейман) — line `line-ray`, carrier **Qwen-3.7-Plus**. Private chats stay private.
