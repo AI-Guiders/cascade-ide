@@ -83,13 +83,22 @@ public static class SoftOrganMfdGlance
 
             AppendIfInt(root, "ok_count", "ok", sb);
             AppendIfInt(root, "total_count", "total", sb);
+            AppendIfInt(root, "file_count", "files", sb);
+            AppendIfInt(root, "high_risk", "high_risk", sb);
+            AppendIfBool(root, "machine_ok", "machine_ok", sb);
             AppendIfString(root, "seat", "seat", sb);
+            AppendIfString(root, "profile", "profile", sb);
+            AppendIfString(root, "mode", "mode", sb);
             AppendIfString(root, "stamped_utc", "stamped", sb);
 
             if (string.Equals(title, "sys", StringComparison.OrdinalIgnoreCase))
                 sb.AppendLine().AppendLine("(Terminal ConPTY later — sys desk ops until shell latch.)");
             else if (string.Equals(title, "toolchain", StringComparison.OrdinalIgnoreCase))
                 sb.AppendLine().AppendLine("(Build MFD ← toolchain SoftOrgan; MSBuild host later.)");
+            else if (string.Equals(title, "review", StringComparison.OrdinalIgnoreCase))
+                sb.AppendLine().AppendLine("(Problems MFD ← review SoftOrgan; Roslyn Problems host later.)");
+            else if (string.Equals(title, "arch", StringComparison.OrdinalIgnoreCase))
+                sb.AppendLine().AppendLine("(SemanticMap MFD ← arch SoftOrgan; graph host later.)");
 
             var body = sb.ToString().TrimEnd();
             return body.Length == 0 ? null : body;
@@ -104,6 +113,13 @@ public static class SoftOrganMfdGlance
     {
         if (root.TryGetProperty(prop, out var el) && el.TryGetInt32(out var n))
             sb.Append(label).Append('=').Append(n).AppendLine();
+    }
+
+    static void AppendIfBool(JsonElement root, string prop, string label, StringBuilder sb)
+    {
+        if (root.TryGetProperty(prop, out var el)
+            && (el.ValueKind is JsonValueKind.True or JsonValueKind.False))
+            sb.Append(label).Append('=').Append(el.GetBoolean() ? "true" : "false").AppendLine();
     }
 
     static void AppendIfString(JsonElement root, string prop, string label, StringBuilder sb)
