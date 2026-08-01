@@ -31,6 +31,7 @@ public partial class MainWindowViewModel
     public bool ShowAgentTestDeskChromeHint => !string.IsNullOrWhiteSpace(AgentTestDeskChromeHint);
     public bool ShowAgentDebugDeskChromeHint => !string.IsNullOrWhiteSpace(AgentDebugDeskChromeHint);
     public bool ShowAgentFilesDeskChromeHint => !string.IsNullOrWhiteSpace(AgentFilesDeskChromeHint);
+    public bool ShowAgentFindDeskChromeHint => !string.IsNullOrWhiteSpace(AgentFindDeskChromeHint);
     public bool ShowAgentPluginsChromeHint => !string.IsNullOrWhiteSpace(AgentPluginsChromeHint);
     public bool ShowAgentRefactorChromeHint => !string.IsNullOrWhiteSpace(AgentRefactorChromeHint);
     public bool ShowAgentReviewChromeHint => !string.IsNullOrWhiteSpace(AgentReviewChromeHint);
@@ -59,6 +60,7 @@ public partial class MainWindowViewModel
             ShowAgentTestDeskChromeHint,
             ShowAgentDebugDeskChromeHint,
             ShowAgentFilesDeskChromeHint,
+            ShowAgentFindDeskChromeHint,
             ShowAgentPluginsChromeHint,
             ShowAgentRefactorChromeHint,
             ShowAgentReviewChromeHint,
@@ -106,6 +108,7 @@ public partial class MainWindowViewModel
             ("test_desk", AgentTestDeskChromeHint),
             ("debug_desk", AgentDebugDeskChromeHint),
             ("files_desk", AgentFilesDeskChromeHint),
+            ("find_desk", AgentFindDeskChromeHint),
             ("crm", AgentCrmChromeHint),
             ("report", AgentReportChromeHint),
             ("webcam", AgentWebcamChromeHint),
@@ -181,6 +184,9 @@ public partial class MainWindowViewModel
 
     public void ApplyFilesDeskChromeHint(string? hint) =>
         ApplyChromeHint(AgentFilesDeskChromeHint, hint, v => AgentFilesDeskChromeHint = v);
+
+    public void ApplyFindDeskChromeHint(string? hint) =>
+        ApplyChromeHint(AgentFindDeskChromeHint, hint, v => AgentFindDeskChromeHint = v);
 
     public void ApplyPluginsChromeHint(string? hint) =>
         ApplyChromeHint(AgentPluginsChromeHint, hint, v => AgentPluginsChromeHint = v);
