@@ -97,6 +97,14 @@ public partial class MainWindow
             return;
         }
 
+        if (string.Equals(page, "HybridIndex", StringComparison.OrdinalIgnoreCase)
+            && GlassHybridIndexGlance.TryFormatFromWorkspaceRoot(_session.WorkspaceRoot) is { } hiGlance)
+        {
+            MfdBody.Text = hiGlance;
+            RefreshEicasHealth();
+            return;
+        }
+
         MfdBody.Text = page switch
         {
             "Terminal" => FormatMfdStub("Terminal", "Glass redirected TextBox", "Avalonia ConPTY SSOT · go=sys"),
@@ -110,7 +118,6 @@ public partial class MainWindow
             "Tests" => FormatMfdStub("Tests", "Glass redirected log TextBox", "Avalonia TestsMfdPageView SSOT · go=test_desk"),
             "DebugStack" => FormatMfdStub("DebugStack", "DebugStackMfdPageView · IdeDapDebugSession", "debug_desk latch · DAP Avalonia SSOT"),
             "Git" => FormatMfdStub("Git", "GitMfdPageView · GitPanel", "no SoftOrgan · Avalonia SSOT"),
-            "HybridIndex" => FormatMfdStub("HybridIndex", "HybridIndexMfdPageView", "no SoftOrgan · go=codebase_index_*"),
             "RelatedFiles" => FormatMfdStub("RelatedFiles", "RelatedFilesMfdPageView", "refactor latch when live"),
             "Correspondence" => FormatMfdStub("Correspondence", "CorrespondenceMfdPageView", "CRS · no SoftOrgan"),
             "MarkdownPreview" => FormatMfdStub("MarkdownPreview", "MarkdigMarkdownPreviewRenderer", "report latch when live"),
