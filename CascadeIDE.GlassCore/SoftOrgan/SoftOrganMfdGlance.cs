@@ -125,9 +125,17 @@ public static class SoftOrganMfdGlance
 
     static void AppendHostFootnote(string title, StringBuilder sb)
     {
+        if (title.Equals("sys", StringComparison.OrdinalIgnoreCase))
+        {
+            sb.AppendLine("┌ host ───────────────┐");
+            sb.AppendLine("│ ■ Glass redirected TextBox │");
+            sb.AppendLine("│ □ Avalonia ConPTY SSOT │");
+            sb.AppendLine("└─────────────────────┘");
+            return;
+        }
+
         var host = title.ToLowerInvariant() switch
         {
-            "sys" => "Avalonia TerminalMfdPageView · ConPTY",
             "toolchain" => "Avalonia BuildMfdPageView",
             "test_desk" => "Avalonia TestsMfdPageView",
             "debug_desk" => "Avalonia DebugStackMfdPageView",

@@ -119,9 +119,10 @@ public class SoftOrganMfdGlanceTests
         Assert.Contains("sys latch glance · active", body);
         Assert.Contains("ops · seat=cdp", body);
         Assert.Contains("seat=cdp", body);
-        Assert.Contains("TerminalMfdPageView", body);
-        Assert.Contains("ConPTY", body);
-        Assert.Contains("□ Glass peel", body);
+        Assert.Contains("Glass redirected TextBox", body);
+        Assert.Contains("Avalonia ConPTY", body);
+        Assert.Contains("■ Glass redirected TextBox", body);
+        Assert.Contains("□ Avalonia ConPTY", body);
     }
 
     [Fact]

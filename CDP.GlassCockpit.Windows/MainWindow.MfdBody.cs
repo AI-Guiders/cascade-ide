@@ -36,6 +36,7 @@ public partial class MainWindow
     {
         RefreshSolutionExplorerTree();
         RefreshMfdEditorVisibility();
+        RefreshMfdTerminalVisibility();
 
         if (MfdBody is null)
             return;
@@ -43,6 +44,13 @@ public partial class MainWindow
         var page = (MfdPages?.SelectedItem as ListBoxItem)?.Content?.ToString() ?? "?";
         if (string.Equals(page, "Editor", StringComparison.OrdinalIgnoreCase)
             && ReferenceEquals(EditorChrome.Parent, MfdEditorHost))
+        {
+            MfdBody.Text = "";
+            RefreshEicasHealth();
+            return;
+        }
+
+        if (IsTerminalHostActive())
         {
             MfdBody.Text = "";
             RefreshEicasHealth();
@@ -75,7 +83,7 @@ public partial class MainWindow
 
         MfdBody.Text = page switch
         {
-            "Terminal" => FormatMfdStub("Terminal", "TerminalMfdPageView · ConPTY", "sys latch · go=sys"),
+            "Terminal" => FormatMfdStub("Terminal", "Glass redirected TextBox", "Avalonia ConPTY SSOT · go=sys"),
             "Build" => FormatMfdStub("Build", "BuildMfdPageView", "toolchain latch"),
             "SolutionExplorer" => FormatMfdStub(
                 "SolutionExplorer",

@@ -49,6 +49,7 @@ public partial class MainWindow : Window
         {
             _composingDebounce?.Stop();
             _presenceStaleTimer?.Stop();
+            DisposeTerminalSession();
             _hosts.Dispose();
             _latches.Dispose();
         };

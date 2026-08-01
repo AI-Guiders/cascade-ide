@@ -48,7 +48,11 @@ public partial class MainWindow
         MfdEditorHost.Visibility = showEditor ? Visibility.Visible : Visibility.Collapsed;
         if (MfdSolutionExplorerTree is not null)
             MfdSolutionExplorerTree.Visibility = showSe ? Visibility.Visible : Visibility.Collapsed;
-        MfdBody.Visibility = (showEditor || showSe) ? Visibility.Collapsed : Visibility.Visible;
+
+        var showTerminal = MfdTerminalHost is not null
+            && string.Equals(page, "Terminal", StringComparison.OrdinalIgnoreCase);
+        // Terminal host visibility owned by RefreshMfdTerminalVisibility (called from UpdateMfdBody).
+        MfdBody.Visibility = (showEditor || showSe || showTerminal) ? Visibility.Collapsed : Visibility.Visible;
     }
 
     void TryOpenDogfoodFile()

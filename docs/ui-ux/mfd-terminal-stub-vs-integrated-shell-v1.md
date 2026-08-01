@@ -12,8 +12,9 @@
 ## Dual-HCI (Glass WPF)
 
 - **ConPTY SSOT** remains CIDE Avalonia (`TerminalMfdPageView` + `IntegratedShellLaunch`).
-- **Glass WPF** MFD Terminal is SoftOrgan `sys` latch glance / stub text — no AvaloniaTerminal host yet.
-- Dig reject (2026-08-01): do not fork ConPTY into Glass TextBlock; next real peel needs a Windows terminal control (or share redirected TextBox epic separately).
+- **Glass WPF** MFD Terminal: redirected Process + TextBox peel (`GlassRedirectedShell` / `MfdTerminalHost`) — interactive enough for ops; **not** ConPTY/AvaloniaTerminal.
+- Dig reject (2026-08-01): do not fork ConPTY into Glass TextBlock; ConPTY SSOT stays Avalonia.
+- Dig act (2026-08-01): Glass redirected TextBox thin peel shipped as dual-HCI instrument presence.
 
 ## Что ещё не заявлено
 
