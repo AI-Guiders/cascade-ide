@@ -53,7 +53,7 @@ Glass is a **projector** (latches → pixels), not the agent loop. With CDP live
 3. **EICAS / Plan** — alert/qrh still via `LatchPaint.Eicas` + `MainWindow.LatchEicas` (not SoftOrgan catalog members).
 4. **Intercom feed** — journal/composer still live via Intercom latches.
 5. **Forward / editor** — AvalonEdit mount + layout sync (LayoutSurface / EditorSurface).
-6. **MFD stub** — page select still stub body (expected).
+6. **MFD glance** — Build/Terminal (and a few peers) paint SoftOrgan latch pulse via `SoftOrganMfdGlance`; other pages still stub.
 7. **Crash note** — Cursor OOM / «Window terminated» on Avalonia CIDE ≠ Glass failure; Glass process name `CDP.GlassCockpit.Windows`.
 
 Point `[cockpit_host] exe` at this Glass exe if Start/Stop should launch WPF (not `publish/CascadeIDE.exe`).

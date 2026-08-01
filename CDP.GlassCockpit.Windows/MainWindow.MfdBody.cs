@@ -1,10 +1,11 @@
 #nullable enable
 
 using System.Windows.Controls;
+using CascadeIDE.SoftOrgan;
 
 namespace CDP.GlassCockpit.Windows;
 
-/// <summary>MFD page select + stub body text (CabinGlass catalog peels later).</summary>
+/// <summary>MFD page select + latch glance / stub body (CabinGlass + SoftOrganMfdGlance).</summary>
 public partial class MainWindow
 {
     void SelectMfdPage(string? page)
@@ -46,9 +47,18 @@ public partial class MainWindow
             return;
         }
 
+        if (SoftOrganMfdGlance.TryOrganIdForMfdPage(page) is { } organId
+            && SoftOrganMfdGlance.TryFormatFromOrganId(organId) is { } glance)
+        {
+            MfdBody.Text = glance;
+            RefreshEicasHealth();
+            return;
+        }
+
         MfdBody.Text = page switch
         {
-            "Terminal" => "Terminal page host.\n\nConPTY / shell organ wires in later peels.\nNow: page chrome only (like CIDE MfdShell).",
+            "Terminal" => "Terminal page host.\n\nConPTY / shell organ wires in later peels.\nNow: page chrome only (like CIDE MfdShell).\n\n(sys latch glance missing — go=sys when seat live.)",
+            "Build" => "Build page host.\n\ntoolchain SoftOrgan → Build (CabinGlass).\n\n(toolchain latch glance missing.)",
             "SolutionExplorer" => "Solution Explorer host.\n\nTree of CascadeIDE.sln / open workspace — later.",
             "SemanticMap" => "Semantic Map host.\n\nGraph surface later (not adjacency dump).",
             "Tests" => "Tests page host.\n\ncdp_test / test_desk projection (CabinGlass catalog).",
