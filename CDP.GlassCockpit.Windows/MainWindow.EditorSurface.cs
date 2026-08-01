@@ -78,7 +78,7 @@ public partial class MainWindow
         OpenCodeFile(src);
     }
 
-    void OpenCodeFile(string path)
+    void OpenCodeFile(string path, int? line = null)
     {
         CodeEditor.Load(path);
         CodeEditor.SyntaxHighlighting =
@@ -87,6 +87,15 @@ public partial class MainWindow
         GlassAvalonEditTheme.ApplyDarkReadable(CodeEditor);
         _editorPath = path;
         EditorPathLabel.Text = path;
+
+        if (line is > 0)
+        {
+            var target = Math.Min(line.Value, Math.Max(1, CodeEditor.Document.LineCount));
+            CodeEditor.ScrollToLine(target);
+            CodeEditor.TextArea.Caret.Line = target;
+            CodeEditor.TextArea.Caret.Column = 1;
+            CodeEditor.TextArea.Caret.BringCaretToView();
+        }
 
         if (_session.IsIntercomForward)
         {

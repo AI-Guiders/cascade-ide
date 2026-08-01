@@ -16,6 +16,7 @@ public static class CdpHabitatPaths
     /// <summary>Partner presence (idle|composing|busy) — not voice journal.</summary>
     public const string IntercomPresenceLatchFileName = "intercom-presence-LATEST.json";
     public const string SeatsLatchFileName = "seats-LATEST.json";
+    public const string LandLatchFileName = "land-LATEST.json";
 
     public static string StateRoot =>
         Path.Combine(
@@ -31,6 +32,8 @@ public static class CdpHabitatPaths
     public static string IntercomPresenceLatchPath => GetLatchPath(IntercomPresenceLatchFileName);
 
     public static string SeatsLatchPath => GetLatchPath(SeatsLatchFileName);
+
+    public static string LandLatchPath => GetLatchPath(LandLatchFileName);
 
     /// <summary>Ensure state root exists; returns <see cref="StateRoot"/>.</summary>
     public static string EnsureStateRoot()
