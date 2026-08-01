@@ -57,7 +57,7 @@ public partial class MainWindow
             "Correspondence" => "Correspondence host.\n\ncrs organ projection — later inbox chrome.",
             "MarkdownPreview" => "Markdown Preview host.\n\nmd_preview / md_author projection.",
             "WebAiPortal" => "Web / AI Portal host.\n\nbrowser organ projection.",
-            "AiChatSettings" => "AI Chat Settings host.\n\noptions / ignite projection (settings.toml SSOT).",
+            "AiChatSettings" => "AI Chat Settings host.\n\noptions / ignite / mcp SoftOrgan projection (settings.toml SSOT).",
             "Editor" => _session.IsIntercomForward
                 ? "Editor page — AvalonEdit mounts here when Forward=intercom (ADR 0120)."
                 : "Editor is on Forward (primary_work_surface=editor).",
