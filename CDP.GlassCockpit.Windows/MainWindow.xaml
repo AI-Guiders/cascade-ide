@@ -303,6 +303,10 @@
             <ListBoxItem Content="MarkdownPreview"/>
             <ListBoxItem Content="WebAiPortal"/>
             <ListBoxItem Content="AiChatSettings"/>
+            <ListBoxItem Content="WorkspaceHealth"/>
+            <ListBoxItem Content="EnvironmentReadiness"/>
+            <ListBoxItem Content="Events"/>
+            <ListBoxItem Content="Hypotheses"/>
             <ListBoxItem Content="Chat"/>
             <ListBoxItem Content="Editor"/>
           </ListBox>

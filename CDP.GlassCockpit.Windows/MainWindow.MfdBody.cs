@@ -58,6 +58,10 @@ public partial class MainWindow
             "MarkdownPreview" => "Markdown Preview host.\n\nmd_preview / md_author projection.",
             "WebAiPortal" => "Web / AI Portal host.\n\nbrowser organ projection.",
             "AiChatSettings" => "AI Chat Settings host.\n\noptions / ignite / mcp SoftOrgan projection (settings.toml SSOT).",
+            "WorkspaceHealth" => "Workspace Health host.\n\nCIDE MfdShellPage orphan — Glass stub (0-sync reverse).",
+            "EnvironmentReadiness" => "Environment Readiness host.\n\nCIDE MfdShellPage orphan — LSP/dotnet glance stub.",
+            "Events" => "Events host.\n\nCIDE MfdShellPage orphan — Glass stub (0-sync reverse).",
+            "Hypotheses" => "Hypotheses host.\n\nCIDE MfdShellPage orphan — Glass stub (0-sync reverse).",
             "Editor" => _session.IsIntercomForward
                 ? "Editor page — AvalonEdit mounts here when Forward=intercom (ADR 0120)."
                 : "Editor is on Forward (primary_work_surface=editor).",
