@@ -10,6 +10,8 @@ public class SoftOrganMfdGlanceTests
     [InlineData("Terminal", "sys")]
     [InlineData("Problems", "review")]
     [InlineData("SemanticMap", "arch")]
+    [InlineData("AiChatSettings", "mcp")]
+    [InlineData("MarkdownPreview", "report")]
     [InlineData("nope", null)]
     public void TryOrganIdForMfdPage_maps(string page, string? organ)
     {
@@ -101,5 +103,41 @@ public class SoftOrganMfdGlanceTests
         Assert.Contains("profile=cdp_desk", body);
         Assert.Contains("mode=as_built", body);
         Assert.Contains("SemanticMap MFD", body);
+    }
+
+    [Fact]
+    public void TryFormatFromJson_mcp_includes_mounted()
+    {
+        const string json = """
+            {
+              "schema": "cide_mcp_latch/v1",
+              "active": false,
+              "pulse": "mcp · idle",
+              "mounted": 0
+            }
+            """;
+
+        var body = SoftOrganMfdGlance.TryFormatFromJson("mcp", json);
+        Assert.NotNull(body);
+        Assert.Contains("mcp latch glance · idle", body);
+        Assert.Contains("mounted=0", body);
+        Assert.Contains("AiChatSettings MFD", body);
+    }
+
+    [Fact]
+    public void TryFormatFromJson_report_notes_md_host()
+    {
+        const string json = """
+            {
+              "schema": "cide_report_latch/v1",
+              "active": false,
+              "pulse": "report · idle"
+            }
+            """;
+
+        var body = SoftOrganMfdGlance.TryFormatFromJson("report", json);
+        Assert.NotNull(body);
+        Assert.Contains("report latch glance · idle", body);
+        Assert.Contains("MarkdownPreview MFD", body);
     }
 }

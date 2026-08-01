@@ -85,6 +85,7 @@ public static class SoftOrganMfdGlance
             AppendIfInt(root, "total_count", "total", sb);
             AppendIfInt(root, "file_count", "files", sb);
             AppendIfInt(root, "high_risk", "high_risk", sb);
+            AppendIfInt(root, "mounted", "mounted", sb);
             AppendIfBool(root, "machine_ok", "machine_ok", sb);
             AppendIfString(root, "seat", "seat", sb);
             AppendIfString(root, "profile", "profile", sb);
@@ -99,6 +100,10 @@ public static class SoftOrganMfdGlance
                 sb.AppendLine().AppendLine("(Problems MFD ← review SoftOrgan; Roslyn Problems host later.)");
             else if (string.Equals(title, "arch", StringComparison.OrdinalIgnoreCase))
                 sb.AppendLine().AppendLine("(SemanticMap MFD ← arch SoftOrgan; graph host later.)");
+            else if (string.Equals(title, "mcp", StringComparison.OrdinalIgnoreCase))
+                sb.AppendLine().AppendLine("(AiChatSettings MFD ← mcp SoftOrgan; mount panel later.)");
+            else if (string.Equals(title, "report", StringComparison.OrdinalIgnoreCase))
+                sb.AppendLine().AppendLine("(MarkdownPreview MFD ← report SoftOrgan; md host later.)");
 
             var body = sb.ToString().TrimEnd();
             return body.Length == 0 ? null : body;
