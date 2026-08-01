@@ -58,7 +58,7 @@ public partial class MainWindow
         MfdBody.Text = page switch
         {
             "Terminal" => "Terminal page host (Glass WPF).\n\nConPTY SSOT = CIDE Avalonia Views/TerminalMfdPageView + Features/Terminal (IntegratedShellLaunch).\nGlass stays SoftOrgan sys latch glance until a Windows terminal control peel.\n\n(sys latch glance missing — go=sys when seat live.)",
-            "Build" => "Build page host.\n\ntoolchain SoftOrgan → Build (CabinGlass).\n\n(toolchain latch glance missing.)",
+            "Build" => "Build page host (Glass WPF).\n\nMSBuild/output SSOT = CIDE Avalonia Views/BuildMfdPageView + Features/Build (BuildOutputPanelViewModel).\nGlass stays SoftOrgan toolchain latch glance until a WPF build-log host peel.\n\n(toolchain latch glance missing.)",
             "SolutionExplorer" => "Solution Explorer host.\n\nTree of CascadeIDE.sln / open workspace — later.",
             "SemanticMap" => "Semantic Map host.\n\nGraph surface later (not adjacency dump).",
             "Tests" => "Tests page host.\n\ncdp_test / test_desk projection (CabinGlass catalog).",

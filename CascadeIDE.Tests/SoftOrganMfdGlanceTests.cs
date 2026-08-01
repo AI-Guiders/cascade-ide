@@ -39,7 +39,8 @@ public class SoftOrganMfdGlanceTests
         Assert.Contains("toolchain · 5/5 ok", body);
         Assert.Contains("ok=5", body);
         Assert.Contains("total=5", body);
-        Assert.Contains("MSBuild host later", body);
+        Assert.Contains("CIDE Avalonia BuildMfdPageView", body);
+        Assert.Contains("Glass WPF host deferred", body);
     }
 
     [Fact]
