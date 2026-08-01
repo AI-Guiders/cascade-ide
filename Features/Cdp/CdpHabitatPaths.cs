@@ -13,6 +13,8 @@ public static class CdpHabitatPaths
     public const string FolderName = "cdp-mcp";
     public const string PresentationLatchFileName = "presentation-LATEST.json";
     public const string IntercomLatchFileName = "intercom-LATEST.json";
+    /// <summary>Partner presence (idle|composing|busy) — not voice journal.</summary>
+    public const string IntercomPresenceLatchFileName = "intercom-presence-LATEST.json";
 
     public static string StateRoot =>
         Path.Combine(
@@ -24,6 +26,8 @@ public static class CdpHabitatPaths
     public static string PresentationLatchPath => GetLatchPath(PresentationLatchFileName);
 
     public static string IntercomLatchPath => GetLatchPath(IntercomLatchFileName);
+
+    public static string IntercomPresenceLatchPath => GetLatchPath(IntercomPresenceLatchFileName);
 
     /// <summary>Ensure state root exists; returns <see cref="StateRoot"/>.</summary>
     public static string EnsureStateRoot()

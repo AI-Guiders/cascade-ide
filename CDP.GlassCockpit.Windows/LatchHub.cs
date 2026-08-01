@@ -16,6 +16,7 @@ internal sealed class LatchHub : IDisposable
     public string StateRoot { get; } = CdpHabitatPaths.StateRoot;
 
     public event Action<string>? IntercomChanged;
+    public event Action<string>? PresenceChanged;
     public event Action<string>? PresentationChanged;
 
     /// <summary>alert-LATEST.json path (EICAS).</summary>
@@ -44,6 +45,7 @@ internal sealed class LatchHub : IDisposable
         _watcher.Renamed += (_, e) => OnFs(_watcher, new FileSystemEventArgs(WatcherChangeTypes.Changed, StateRoot, e.Name));
 
         TryFireExisting(CdpHabitatPaths.IntercomLatchFileName, IntercomChanged);
+        TryFireExisting(CdpHabitatPaths.IntercomPresenceLatchFileName, PresenceChanged);
         TryFireExisting(CdpHabitatPaths.PresentationLatchFileName, PresentationChanged);
         TryFireExisting("alert-LATEST.json", AlertChanged);
         TryFireExisting("qrh-LATEST.json", QrhChanged);
@@ -60,6 +62,8 @@ internal sealed class LatchHub : IDisposable
         var name = e.Name;
         if (name.Equals(CdpHabitatPaths.IntercomLatchFileName, StringComparison.OrdinalIgnoreCase))
             CdpLatchIo.PostSettledIfExists(CdpHabitatPaths.GetLatchPath(name), p => IntercomChanged?.Invoke(p));
+        else if (name.Equals(CdpHabitatPaths.IntercomPresenceLatchFileName, StringComparison.OrdinalIgnoreCase))
+            CdpLatchIo.PostSettledIfExists(CdpHabitatPaths.GetLatchPath(name), p => PresenceChanged?.Invoke(p));
         else if (name.Equals(CdpHabitatPaths.PresentationLatchFileName, StringComparison.OrdinalIgnoreCase))
             CdpLatchIo.PostSettledIfExists(CdpHabitatPaths.GetLatchPath(name), p => PresentationChanged?.Invoke(p));
         else if (name.Equals("alert-LATEST.json", StringComparison.OrdinalIgnoreCase))

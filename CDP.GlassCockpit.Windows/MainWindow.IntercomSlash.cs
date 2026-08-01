@@ -23,7 +23,11 @@ public partial class MainWindow
         SlashList.MouseDoubleClick += (_, _) => CommitSlashSuggestion(run: true);
     }
 
-    void ComposerBox_OnTextChanged(object sender, TextChangedEventArgs e) => RefreshSlashPopup();
+    void ComposerBox_OnTextChanged(object sender, TextChangedEventArgs e)
+    {
+        NoteComposerPresenceChanged();
+        RefreshSlashPopup();
+    }
 
     void RefreshSlashPopup()
     {

@@ -22,6 +22,7 @@ public partial class MainWindow : Window
 
         LoadIntercomHistory();
         InitIntercomSlash();
+        InitIntercomPresence();
         InitCommandPalette();
         InitCascadeChord();
 
@@ -29,6 +30,7 @@ public partial class MainWindow : Window
 
         _latches = new LatchHub();
         _latches.IntercomChanged += OnIntercomChanged;
+        _latches.PresenceChanged += OnPresenceChanged;
         _latches.PresentationChanged += OnPresentationChanged;
         _latches.SoftOrganChanged += OnSoftOrganChanged;
         _latches.AlertChanged += OnAlertChanged;
@@ -45,6 +47,8 @@ public partial class MainWindow : Window
         };
         Closed += (_, _) =>
         {
+            _composingDebounce?.Stop();
+            _presenceStaleTimer?.Stop();
             _hosts.Dispose();
             _latches.Dispose();
         };

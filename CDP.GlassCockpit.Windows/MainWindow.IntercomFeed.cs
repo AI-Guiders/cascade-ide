@@ -17,6 +17,11 @@ public partial class MainWindow
     string? _selectedTopicId;
     string[] _selectedTopicEntryIds = [];
     int _pendingNewBelow;
+    string _intercomHeader = "Intercom";
+    string? _partnerPresenceLine;
+    DispatcherTimer? _presenceStaleTimer;
+    DispatcherTimer? _composingDebounce;
+    string? _lastPublishedPmPresence;
 
     void LoadIntercomHistory()
     {
@@ -60,7 +65,8 @@ public partial class MainWindow
             {
                 var raw = File.ReadAllText(path);
                 var view = LatchPaint.PaintIntercom(raw);
-                IntercomSubtitle.Text = view.Header;
+                _intercomHeader = view.Header;
+                MergeIntercomSubtitle();
 
                 // FileSystemWatcher often fires twice on atomic replace; also skip own Send echo.
                 if (view.MessageId is { Length: > 0 } id && !_seenIntercomIds.Add(id))
@@ -83,6 +89,78 @@ public partial class MainWindow
                 StatusText.Text = $"glass · intercom fail · {ex.Message}";
             }
         }, DispatcherPriority.Background);
+    }
+
+    void OnPresenceChanged(string path)
+    {
+        Dispatcher.BeginInvoke(() =>
+        {
+            try
+            {
+                ApplyPartnerPresenceFromDisk(path);
+            }
+            catch (Exception ex)
+            {
+                StatusText.Text = $"glass · presence fail · {ex.Message}";
+            }
+        }, DispatcherPriority.Background);
+    }
+
+    void InitIntercomPresence()
+    {
+        ApplyPartnerPresenceFromDisk(null);
+        _presenceStaleTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(15) };
+        _presenceStaleTimer.Tick += (_, _) => ApplyPartnerPresenceFromDisk(null);
+        _presenceStaleTimer.Start();
+
+        _composingDebounce = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(400) };
+        _composingDebounce.Tick += (_, _) =>
+        {
+            _composingDebounce.Stop();
+            PublishPmPresenceFromComposer();
+        };
+    }
+
+    void ApplyPartnerPresenceFromDisk(string? path)
+    {
+        string? json = null;
+        if (path is not null && File.Exists(path))
+            json = File.ReadAllText(path);
+        _partnerPresenceLine = GlassIntercomPresence.TryPartnerLine(json);
+        MergeIntercomSubtitle();
+    }
+
+    void MergeIntercomSubtitle()
+    {
+        IntercomSubtitle.Text = string.IsNullOrWhiteSpace(_partnerPresenceLine)
+            ? _intercomHeader
+            : $"{_intercomHeader} · {_partnerPresenceLine}";
+    }
+
+    void NoteComposerPresenceChanged()
+    {
+        if (_composingDebounce is null)
+            return;
+        _composingDebounce.Stop();
+        _composingDebounce.Start();
+    }
+
+    void PublishPmPresenceFromComposer()
+    {
+        var text = ComposerBox.Text ?? "";
+        var empty = string.IsNullOrWhiteSpace(text)
+                    || text is "Message @PF…" or "Message @PM…";
+        var state = empty ? "idle" : "composing";
+        if (string.Equals(_lastPublishedPmPresence, state, StringComparison.Ordinal))
+            return;
+        if (GlassIntercomPresence.TryPublish("pm", state))
+            _lastPublishedPmPresence = state;
+    }
+
+    void PublishPmIdle()
+    {
+        if (GlassIntercomPresence.TryPublish("pm", "idle"))
+            _lastPublishedPmPresence = "idle";
     }
 
     void SendBtn_OnClick(object sender, RoutedEventArgs e) => TrySendComposer();
@@ -133,6 +211,7 @@ public partial class MainWindow
 
         ComposerBox.Clear();
         HideSlashPopup();
+        PublishPmIdle();
         StatusText.Text = $"glass · intercom · sent {sent.Id} · @PM→@PF · {DateTime.Now:HH:mm:ss}";
     }
 
