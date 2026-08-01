@@ -8,6 +8,7 @@ public class SoftOrganMfdGlanceTests
     [Theory]
     [InlineData("Build", "toolchain")]
     [InlineData("Tests", "test_desk")]
+    [InlineData("DebugStack", "debug_desk")]
     [InlineData("Terminal", "sys")]
     [InlineData("Problems", "review")]
     [InlineData("SemanticMap", "arch")]
@@ -44,6 +45,31 @@ public class SoftOrganMfdGlanceTests
         Assert.Contains("total=5", body);
         Assert.Contains("failed=3", body);
         Assert.Contains("TestsMfdPageView", body);
+    }
+
+    [Fact]
+    public void TryFormatFromJson_debug_desk_includes_bp_and_flags()
+    {
+        const string json = """
+            {
+              "schema": "cide_debug_desk_latch/v1",
+              "active": true,
+              "pulse": "debug_desk · continue · STOPPED t=1 · bp=2",
+              "verdict": "continue",
+              "bp_count": 2,
+              "stopped": true,
+              "active_dap": true
+            }
+            """;
+
+        var body = SoftOrganMfdGlance.TryFormatFromJson("debug_desk", json);
+        Assert.NotNull(body);
+        Assert.Contains("debug_desk latch glance · active", body);
+        Assert.Contains("verdict=continue", body);
+        Assert.Contains("bp=2", body);
+        Assert.Contains("stopped=true", body);
+        Assert.Contains("active_dap=true", body);
+        Assert.Contains("DebugStackMfdPageView", body);
     }
 
     [Fact]

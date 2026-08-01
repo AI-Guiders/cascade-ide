@@ -21,6 +21,7 @@ public static class SoftOrganMfdGlance
         {
             "Build" => "toolchain",
             "Tests" => "test_desk",
+            "DebugStack" => "debug_desk",
             "Terminal" => "sys",
             "Problems" => "review",
             "SemanticMap" => "arch",
@@ -90,7 +91,10 @@ public static class SoftOrganMfdGlance
             AppendIfInt(root, "high_risk", "high_risk", sb);
             AppendIfInt(root, "mounted", "mounted", sb);
             AppendIfInt(root, "hotspot_count", "hotspots", sb);
+            AppendIfInt(root, "bp_count", "bp", sb);
             AppendIfBool(root, "machine_ok", "machine_ok", sb);
+            AppendIfBool(root, "stopped", "stopped", sb);
+            AppendIfBool(root, "active_dap", "active_dap", sb);
             AppendIfString(root, "seat", "seat", sb);
             AppendIfString(root, "profile", "profile", sb);
             AppendIfString(root, "mode", "mode", sb);
@@ -103,6 +107,8 @@ public static class SoftOrganMfdGlance
                 sb.AppendLine().AppendLine("(Build: CIDE Avalonia BuildMfdPageView + BuildOutputPanel; Glass WPF host deferred — latch glance only.)");
             else if (string.Equals(title, "test_desk", StringComparison.OrdinalIgnoreCase))
                 sb.AppendLine().AppendLine("(Tests MFD ← test_desk SoftOrgan; live host = CIDE Avalonia TestsMfdPageView; Glass WPF host deferred — latch glance only.)");
+            else if (string.Equals(title, "debug_desk", StringComparison.OrdinalIgnoreCase))
+                sb.AppendLine().AppendLine("(DebugStack MFD ← debug_desk SoftOrgan; live host = CIDE Avalonia DebugStackMfdPageView; Glass WPF host deferred — latch glance only.)");
             else if (string.Equals(title, "review", StringComparison.OrdinalIgnoreCase))
                 sb.AppendLine().AppendLine("(Problems MFD ← review SoftOrgan; Roslyn Problems host later.)");
             else if (string.Equals(title, "arch", StringComparison.OrdinalIgnoreCase))

@@ -63,6 +63,10 @@ public partial class MainWindowViewModel
     private string? _agentTestDeskChromeHint;
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ShowAgentDebugDeskChromeHint))]
+    private string? _agentDebugDeskChromeHint;
+
+    [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(ShowAgentPluginsChromeHint))]
     private string? _agentPluginsChromeHint;
 
