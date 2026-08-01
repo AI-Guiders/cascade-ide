@@ -1,9 +1,12 @@
-﻿<Application x:Class="CDP.GlassCockpit.Windows.App"
+<Application x:Class="CDP.GlassCockpit.Windows.App"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:local="clr-namespace:CDP.GlassCockpit.Windows"
              StartupUri="MainWindow.xaml">
-    <Application.Resources>
-         
-    </Application.Resources>
+  <Application.Resources>
+    <ResourceDictionary>
+      <ResourceDictionary.MergedDictionaries>
+        <ResourceDictionary Source="GlassDarkCockpit.xaml"/>
+      </ResourceDictionary.MergedDictionaries>
+    </ResourceDictionary>
+  </Application.Resources>
 </Application>

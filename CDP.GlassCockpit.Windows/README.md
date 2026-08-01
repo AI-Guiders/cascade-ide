@@ -48,7 +48,7 @@ Avalonia SoftOrgan/CabinOrgan ViewModel map: `ViewModels/README.md`.
 
 Glass is a **projector** (latches → pixels), not the agent loop. With CDP live, check:
 
-1. **SoftOrgan strip (top)** — indicator chips (PRS/IGN/PLAN…); full chrome_hint in ToolTip only. `+N` / `−` expand. CFG chip = settings tooltip.
+1. **SoftOrgan strip (top)** — `UiKit/GlassStatusChip` (Quiet/Caution/Warn/Fail); full chrome_hint in Tip only. `+N` / `−` expand. CFG chip = settings tip. Electric rail on indication band.
 2. **sa-desk** — appears in SoftOrgan catalog (quiet-chrome); should participate in band ordering, not as EICAS id.
 3. **EICAS / Plan** — alert/qrh still via `LatchPaint.Eicas` + `MainWindow.LatchEicas` (not SoftOrgan catalog members).
 4. **Intercom feed** — journal/composer still live via Intercom latches.

@@ -19,8 +19,11 @@ public partial class MainWindow
             {
                 var raw = File.ReadAllText(path);
                 var view = LatchPaint.PaintPresentation(raw);
-                PlanTitle.Text = string.IsNullOrWhiteSpace(view.Headline) ? "Presentation" : view.Headline;
+                var headline = string.IsNullOrWhiteSpace(view.Headline) ? "Presentation" : view.Headline;
+                PlanTitle.Text = headline;
                 PlanMeta.Text = view.Detail;
+                PlanReadout.ValueText = headline;
+                PlanReadout.SubText = string.IsNullOrWhiteSpace(view.Detail) ? null : view.Detail;
 
                 var layout = _session.ApplyTopology(view.Topology);
                 WpfMainGridColumns.Apply(MainGrid, layout.ColumnDefinitions);

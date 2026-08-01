@@ -1,0 +1,19 @@
+<UserControl x:Class="CDP.GlassCockpit.Windows.UiKit.GlassStatusChip"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <!-- Compact status indication — UiKit CascadeStatusChip adapted for electric Glass. -->
+  <Border x:Name="ChipFrame"
+          Background="{StaticResource Glass.ChipQuietBg}"
+          BorderBrush="{StaticResource Glass.ChipQuietBorder}"
+          BorderThickness="1"
+          CornerRadius="3"
+          Padding="7,2"
+          Margin="0,0,4,0">
+    <TextBlock x:Name="ChipLabel"
+               Text="{Binding Text, RelativeSource={RelativeSource AncestorType=UserControl}}"
+               Foreground="{StaticResource Glass.ChipQuietFg}"
+               FontFamily="Consolas"
+               FontSize="10"
+               FontWeight="SemiBold"/>
+  </Border>
+</UserControl>

@@ -2,11 +2,12 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:avalonEdit="http://icsharpcode.net/sharpdevelop/avalonedit"
+        xmlns:uikit="clr-namespace:CDP.GlassCockpit.Windows.UiKit"
         Title="CDP GlassCockpit · Windows"
         Height="800" Width="1400"
         WindowStartupLocation="CenterScreen"
-        Background="#111111"
-        Foreground="#E8E8E8">
+        Background="{StaticResource Glass.Bg}"
+        Foreground="{StaticResource Glass.Fg}">
   <Window.Resources>
     <ResourceDictionary>
       <ResourceDictionary.MergedDictionaries>
@@ -54,49 +55,43 @@
           <ColumnDefinition Width="*"/>
           <ColumnDefinition Width="Auto"/>
         </Grid.ColumnDefinitions>
-        <Border Background="{StaticResource Glass.CautionBg}" BorderBrush="{StaticResource Glass.CautionBorder}" BorderThickness="1" CornerRadius="4" Padding="8,3" Margin="0,0,8,0">
-          <TextBlock Text="ON GND" Foreground="{StaticResource Glass.CautionFg}" FontWeight="SemiBold" FontSize="11"/>
-        </Border>
-        <Border Grid.Column="1" Background="{StaticResource Glass.BgPanel}" BorderBrush="{StaticResource Glass.Border}" BorderThickness="1" CornerRadius="4" Padding="8,3" Margin="0,0,8,0">
-          <TextBlock x:Name="TopologyBadge" Text="(F)" Foreground="{StaticResource Glass.FgMuted}" FontFamily="Consolas" FontSize="11"/>
-        </Border>
-        <!-- Indication strip: chips, not prose. Full SoftOrgan text lives in ToolTip. -->
-        <Border Grid.Column="2" Background="{StaticResource Glass.BgPanel}" BorderBrush="{StaticResource Glass.Border}" BorderThickness="1" CornerRadius="4" Padding="8,4">
+        <uikit:GlassStatusChip Text="ON GND" Level="Caution" Margin="0,0,6,0"/>
+        <uikit:GlassStatusChip x:Name="TopologyBadge" Grid.Column="1" Text="(F)" Level="Quiet" Margin="0,0,6,0"/>
+        <!-- Indication strip: GlassStatusChip band (UiKit adapt). Full SoftOrgan text in Tip. -->
+        <Border Grid.Column="2" Background="{StaticResource Glass.BgPanel}" BorderBrush="{StaticResource Glass.Border}"
+                BorderThickness="1" CornerRadius="4" Padding="0">
           <DockPanel>
-            <Border x:Name="ChromeHintChip" DockPanel.Dock="Left" Background="{StaticResource Glass.BgRaised}"
-                    BorderBrush="{StaticResource Glass.Border}" BorderThickness="1" CornerRadius="3"
-                    Padding="6,2" Margin="0,0,6,0" ToolTip="settings.toml · loading…">
-              <TextBlock x:Name="ChromeHint" Text="CFG" Foreground="{StaticResource Glass.FgMuted}"
-                         FontFamily="Consolas" FontSize="10" FontWeight="SemiBold"/>
-            </Border>
-            <StackPanel x:Name="SoftOrganBand" Orientation="Horizontal" Visibility="Collapsed">
-              <ItemsControl x:Name="SoftOrganChips">
-                <ItemsControl.ItemsPanel>
-                  <ItemsPanelTemplate>
-                    <StackPanel Orientation="Horizontal"/>
-                  </ItemsPanelTemplate>
-                </ItemsControl.ItemsPanel>
-                <ItemsControl.ItemTemplate>
-                  <DataTemplate>
-                    <Border Background="{Binding Bg}" BorderBrush="{Binding Border}" BorderThickness="1"
-                            CornerRadius="3" Padding="6,2" Margin="0,0,4,0" ToolTip="{Binding Tip}">
-                      <TextBlock Text="{Binding Label}" Foreground="{Binding Fg}"
-                                 FontFamily="Consolas" FontSize="10" FontWeight="SemiBold"/>
-                    </Border>
-                  </DataTemplate>
-                </ItemsControl.ItemTemplate>
-              </ItemsControl>
-              <Border x:Name="SoftOrganOverflowHost" Visibility="Collapsed" Background="{StaticResource Glass.BgRaised}"
-                      BorderBrush="{StaticResource Glass.Border}" BorderThickness="1" CornerRadius="3"
-                      Padding="6,2" Cursor="Hand" MouseLeftButtonUp="SoftOrganOverflow_OnClick">
-                <TextBlock x:Name="SoftOrganOverflow" Text="" Foreground="{StaticResource Glass.FgDim}"
-                           FontFamily="Consolas" FontSize="10" FontWeight="SemiBold"/>
-              </Border>
-            </StackPanel>
+            <Border DockPanel.Dock="Left" Width="2" Background="{StaticResource Glass.ElectricRail}"
+                    CornerRadius="4,0,0,4" Margin="0,3,0,3"/>
+            <DockPanel Margin="8,4">
+              <uikit:GlassStatusChip x:Name="ChromeHintChip" DockPanel.Dock="Left" Text="CFG" Level="Quiet"
+                                    Tip="settings.toml · loading…" Margin="0,0,6,0"/>
+              <StackPanel x:Name="SoftOrganBand" Orientation="Horizontal" Visibility="Collapsed">
+                <ItemsControl x:Name="SoftOrganChips">
+                  <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                      <StackPanel Orientation="Horizontal"/>
+                    </ItemsPanelTemplate>
+                  </ItemsControl.ItemsPanel>
+                  <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                      <uikit:GlassStatusChip Text="{Binding Label}" Tip="{Binding Tip}" Level="{Binding Level}"/>
+                    </DataTemplate>
+                  </ItemsControl.ItemTemplate>
+                </ItemsControl>
+                <Border x:Name="SoftOrganOverflowHost" Visibility="Collapsed"
+                        Background="{StaticResource Glass.ChipQuietBg}"
+                        BorderBrush="{StaticResource Glass.ChipQuietBorder}" BorderThickness="1" CornerRadius="3"
+                        Padding="7,2" Cursor="Hand" MouseLeftButtonUp="SoftOrganOverflow_OnClick">
+                  <TextBlock x:Name="SoftOrganOverflow" Text="" Foreground="{StaticResource Glass.ChipQuietFg}"
+                             FontFamily="Consolas" FontSize="10" FontWeight="SemiBold"/>
+                </Border>
+              </StackPanel>
+            </DockPanel>
           </DockPanel>
         </Border>
         <TextBlock Grid.Column="3" VerticalAlignment="Center" Margin="10,0,0,0"
-                   Foreground="#666" FontSize="10" FontFamily="Consolas" Text="GLASS"/>
+                   Foreground="{StaticResource Glass.ElectricDim}" FontSize="10" FontFamily="Consolas" Text="GLASS"/>
       </Grid>
     </Border>
 
@@ -124,9 +119,10 @@
           </Border>
           <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="12,10">
             <StackPanel>
-              <TextBlock x:Name="PlanTitle" Text="(no solution yet)" FontSize="16" FontWeight="SemiBold" TextWrapping="Wrap"
-                         Foreground="{StaticResource Glass.FgTitle}" LineHeight="22" Margin="0,0,0,10"/>
-              <TextBlock x:Name="PlanMeta" FontSize="13" Foreground="{StaticResource Glass.FgMuted}" TextWrapping="Wrap" LineHeight="18"/>
+              <uikit:GlassEcamReadout x:Name="PlanReadout" Label="PLAN" ValueText="(no solution yet)"/>
+              <!-- Keep PlanTitle/PlanMeta for latch paint; mirrored into PlanReadout. -->
+              <TextBlock x:Name="PlanTitle" Visibility="Collapsed" Text="(no solution yet)"/>
+              <TextBlock x:Name="PlanMeta" Visibility="Collapsed"/>
             </StackPanel>
           </ScrollViewer>
         </DockPanel>

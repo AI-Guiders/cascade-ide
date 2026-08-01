@@ -14,11 +14,10 @@ public partial class MainWindow
     {
         WpfMainGridColumns.Apply(MainGrid, _session.Layout.ColumnDefinitions);
         TopologyBadge.Text = _session.Layout.Topology;
-        ChromeHint.Text = "CFG";
-        var cfgTip =
+        ChromeHintChip.Text = "CFG";
+        ChromeHintChip.Tip =
             $"settings.toml · {_session.Settings.Workspace.PrimaryWorkSurface} · tier={_session.Settings.Display.Presentation.Tier}" +
             (_session.Layout.ParseOk ? "" : $" · parse fail: {_session.Layout.ParseError}");
-        ChromeHintChip.ToolTip = cfgTip;
         SyncHostWindows();
     }
 

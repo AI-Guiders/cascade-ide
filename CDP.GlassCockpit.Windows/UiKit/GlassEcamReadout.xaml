@@ -1,0 +1,27 @@
+<UserControl x:Class="CDP.GlassCockpit.Windows.UiKit.GlassEcamReadout"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <!-- EcamReadout adapt — flat electric panel, not Avalonia island. -->
+  <Border Background="{StaticResource Glass.EcamBg}"
+          BorderBrush="{StaticResource Glass.EcamBorder}"
+          BorderThickness="1"
+          CornerRadius="4"
+          Padding="10,8">
+    <StackPanel>
+      <TextBlock x:Name="LabelBlock"
+                 FontSize="10"
+                 Foreground="{StaticResource Glass.EcamLabel}"
+                 Margin="0,0,0,2"/>
+      <TextBlock x:Name="ValueBlock"
+                 FontSize="16"
+                 FontWeight="SemiBold"
+                 FontFamily="Consolas"
+                 Foreground="{StaticResource Glass.EcamValue}"/>
+      <TextBlock x:Name="SubBlock"
+                 FontSize="10"
+                 Foreground="{StaticResource Glass.EcamSub}"
+                 Margin="0,2,0,0"
+                 Visibility="Collapsed"/>
+    </StackPanel>
+  </Border>
+</UserControl>

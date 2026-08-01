@@ -1,15 +1,13 @@
 #nullable enable
 
 using System.Windows;
-using System.Windows.Controls;
 using System.Windows.Input;
-using System.Windows.Media;
 using System.Windows.Threading;
 using CascadeIDE.SoftOrgan;
 
 namespace CDP.GlassCockpit.Windows;
 
-/// <summary>SoftOrgan chrome — indicator chips (not multiline prose). Full hint in ToolTip.</summary>
+/// <summary>SoftOrgan chrome — GlassStatusChip strip (not multiline prose). Full hint in ToolTip.</summary>
 public partial class MainWindow
 {
     readonly SoftOrganChromeAggregator _softOrgans = new();
@@ -18,9 +16,7 @@ public partial class MainWindow
     {
         public required string Label { get; init; }
         public required string Tip { get; init; }
-        public required Brush Bg { get; init; }
-        public required Brush Fg { get; init; }
-        public required Brush Border { get; init; }
+        public required GlassChipLevel Level { get; init; }
     }
 
     void OnSoftOrganChanged(string organId, string? chromeHint)
@@ -52,27 +48,16 @@ public partial class MainWindow
             return;
         }
 
-        var quietBg = (Brush)FindResource("Glass.BgRaised");
-        var quietFg = (Brush)FindResource("Glass.FgMuted");
-        var quietBorder = (Brush)FindResource("Glass.Border");
-        var hotBg = (Brush)FindResource("Glass.CautionBg");
-        var hotFg = (Brush)FindResource("Glass.CautionFg");
-        var hotBorder = (Brush)FindResource("Glass.CautionBorder");
-
-        var vms = band.Visible.Select(c => new SoftOrganChipVm
+        SoftOrganChips.ItemsSource = band.Visible.Select(c => new SoftOrganChipVm
         {
             Label = c.Label,
             Tip = $"{c.Id}\n{c.ToolTip}",
-            Bg = c.Hot ? hotBg : quietBg,
-            Fg = c.Hot ? hotFg : quietFg,
-            Border = c.Hot ? hotBorder : quietBorder
+            Level = c.Level
         }).ToList();
-
-        SoftOrganChips.ItemsSource = vms;
 
         if (band.IsExpanded)
         {
-            SoftOrganOverflow.Text = "−";
+            SoftOrganOverflow.Text = "\u2212";
             SoftOrganOverflowHost.ToolTip = SoftOrganChromeAggregator.CollapseLabel;
             SoftOrganOverflowHost.Visibility = Visibility.Visible;
         }
