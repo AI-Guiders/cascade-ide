@@ -150,14 +150,28 @@ public static class SoftOrganChromeDensityPolicy
         };
     }
 
-    public static bool LooksHot(string text)
+    public static bool LooksHot(string text) =>
+        ChipLevelFromHint(text) != GlassChipLevel.Quiet;
+
+    /// <summary>Map chrome_hint prose → indication level (Fail &gt; Warn &gt; Caution).</summary>
+    public static GlassChipLevel ChipLevelFromHint(string text)
     {
         if (string.IsNullOrWhiteSpace(text))
-            return false;
-        return text.Contains("WARN", StringComparison.OrdinalIgnoreCase)
-            || text.Contains("FAIL", StringComparison.OrdinalIgnoreCase)
-            || text.Contains("ERROR", StringComparison.OrdinalIgnoreCase)
+            return GlassChipLevel.Quiet;
+
+        if (text.Contains("FAIL", StringComparison.OrdinalIgnoreCase)
+            || text.Contains("ERROR", StringComparison.OrdinalIgnoreCase))
+            return GlassChipLevel.Fail;
+
+        if (text.Contains("WARN", StringComparison.OrdinalIgnoreCase)
             || text.Contains("ECL", StringComparison.OrdinalIgnoreCase)
-            || text.Contains("blocked", StringComparison.OrdinalIgnoreCase);
+            || text.Contains("blocked", StringComparison.OrdinalIgnoreCase))
+            return GlassChipLevel.Warn;
+
+        if (text.Contains("CAUTION", StringComparison.OrdinalIgnoreCase)
+            || text.Contains("ON GND", StringComparison.OrdinalIgnoreCase))
+            return GlassChipLevel.Caution;
+
+        return GlassChipLevel.Quiet;
     }
 }

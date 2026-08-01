@@ -58,7 +58,10 @@ public sealed class SoftOrganChromeAggregator
     }
 
     /// <summary>Human glass: compact organ chips (label + tooltip), not multiline chrome_hint prose.</summary>
-    public readonly record struct Chip(string Id, string Label, string ToolTip, bool Hot);
+    public readonly record struct Chip(string Id, string Label, string ToolTip, GlassChipLevel Level)
+    {
+        public bool Hot => Level != GlassChipLevel.Quiet;
+    }
 
     public readonly record struct ChipBand(IReadOnlyList<Chip> Visible, int HiddenCount, bool IsExpanded)
     {
@@ -89,7 +92,7 @@ public sealed class SoftOrganChromeAggregator
                     h.Id,
                     SoftOrganChromeDensityPolicy.ShortLabel(h.Id),
                     h.Text,
-                    SoftOrganChromeDensityPolicy.LooksHot(h.Text))).ToArray();
+                    SoftOrganChromeDensityPolicy.ChipLevelFromHint(h.Text))).ToArray();
 
             if (ordered.Count <= maxVisible)
             {
