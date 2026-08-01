@@ -3,7 +3,7 @@ using System.Text.Json;
 
 namespace CDP.GlassCockpit.Windows;
 
-/// <summary>alert/qrh latch → EICAS status lines.</summary>
+/// <summary>alert/qrh/ecl latch → EICAS status lines.</summary>
 internal static partial class LatchPaint
 {
     public sealed record EicasView(string StatusLine);
@@ -87,6 +87,38 @@ internal static partial class LatchPaint
                 : (!string.IsNullOrWhiteSpace(hotTitle) ? hotTitle!.Trim() : hotId!.Trim());
 
             return new EicasView($"EICAS · ADV · {head}");
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
+    /// <summary>ecl-LATEST.json → checklist advisory; null when no hot_id.</summary>
+    public static EicasView? PaintEcl(string json)
+    {
+        try
+        {
+            using var doc = JsonDocument.Parse(json);
+            var root = doc.RootElement;
+            var schema = Prop(root, "schema");
+            if (!string.Equals(schema, "cide_ecl_latch/v1", StringComparison.OrdinalIgnoreCase))
+                return null;
+            var origin = Prop(root, "origin");
+            if (!string.Equals(origin, "agent", StringComparison.OrdinalIgnoreCase))
+                return null;
+
+            var hotId = Prop(root, "hot_id");
+            if (string.IsNullOrWhiteSpace(hotId))
+                return null;
+
+            var pulse = Prop(root, "pulse");
+            var hotTitle = Prop(root, "hot_title");
+            var head = !string.IsNullOrWhiteSpace(pulse)
+                ? pulse!.Trim()
+                : (!string.IsNullOrWhiteSpace(hotTitle) ? hotTitle!.Trim() : hotId!.Trim());
+
+            return new EicasView($"EICAS · ECL · {head}");
         }
         catch
         {

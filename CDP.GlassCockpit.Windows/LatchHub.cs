@@ -24,6 +24,9 @@ internal sealed class LatchHub : IDisposable
     /// <summary>qrh-LATEST.json path (EICAS advisory).</summary>
     public event Action<string>? QrhChanged;
 
+    /// <summary>ecl-LATEST.json path (EICAS checklist advisory).</summary>
+    public event Action<string>? EclChanged;
+
     /// <summary>organId, chrome_hint (null/blank = clear).</summary>
     public event Action<string, string?>? SoftOrganChanged;
 
@@ -44,6 +47,7 @@ internal sealed class LatchHub : IDisposable
         TryFireExisting(CdpHabitatPaths.PresentationLatchFileName, PresentationChanged);
         TryFireExisting("alert-LATEST.json", AlertChanged);
         TryFireExisting("qrh-LATEST.json", QrhChanged);
+        TryFireExisting("ecl-LATEST.json", EclChanged);
         foreach (var id in SoftOrganLatchCatalog.Ids)
             TryFireSoftOrgan(id + "-LATEST.json");
     }
@@ -62,6 +66,8 @@ internal sealed class LatchHub : IDisposable
             CdpLatchIo.PostSettledIfExists(CdpHabitatPaths.GetLatchPath(name), p => AlertChanged?.Invoke(p));
         else if (name.Equals("qrh-LATEST.json", StringComparison.OrdinalIgnoreCase))
             CdpLatchIo.PostSettledIfExists(CdpHabitatPaths.GetLatchPath(name), p => QrhChanged?.Invoke(p));
+        else if (name.Equals("ecl-LATEST.json", StringComparison.OrdinalIgnoreCase))
+            CdpLatchIo.PostSettledIfExists(CdpHabitatPaths.GetLatchPath(name), p => EclChanged?.Invoke(p));
         else if (SoftOrganLatchCatalog.TryParseFileName(name, out var organId))
             CdpLatchIo.PostSettledIfExists(CdpHabitatPaths.GetLatchPath(name), _ => ApplySoftOrganFromDisk(organId, name));
     }

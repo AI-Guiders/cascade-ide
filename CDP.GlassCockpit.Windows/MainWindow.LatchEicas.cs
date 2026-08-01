@@ -6,7 +6,7 @@ using System.Windows.Threading;
 
 namespace CDP.GlassCockpit.Windows;
 
-/// <summary>Latch presentation/alert/qrh → Plan + EICAS health band.</summary>
+/// <summary>Latch presentation/alert/qrh/ecl → Plan + EICAS health band.</summary>
 public partial class MainWindow
 {
     readonly EicasBandAggregator _eicas = new();
@@ -71,6 +71,24 @@ public partial class MainWindow
             catch (Exception ex)
             {
                 StatusText.Text = $"glass · qrh fail · {ex.Message}";
+            }
+        }, DispatcherPriority.Background);
+    }
+
+    void OnEclChanged(string path)
+    {
+        Dispatcher.BeginInvoke(() =>
+        {
+            try
+            {
+                var raw = File.ReadAllText(path);
+                var view = LatchPaint.PaintEcl(raw);
+                _eicas.Apply("ecl", view?.StatusLine);
+                RefreshEicasHealth();
+            }
+            catch (Exception ex)
+            {
+                StatusText.Text = $"glass · ecl fail · {ex.Message}";
             }
         }, DispatcherPriority.Background);
     }

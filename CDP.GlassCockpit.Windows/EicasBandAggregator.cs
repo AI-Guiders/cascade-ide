@@ -3,8 +3,8 @@
 namespace CDP.GlassCockpit.Windows;
 
 /// <summary>
-/// Merge alert-LATEST + qrh-LATEST into MFD EICAS health line (WPF peel).
-/// Alert outranks qrh; clear sources drop out of the band.
+/// Merge alert-LATEST + qrh-LATEST + ecl-LATEST into MFD EICAS health line (WPF peel).
+/// Alert outranks qrh outranks ecl; clear sources drop out of the band.
 /// </summary>
 internal sealed class EicasBandAggregator
 {
@@ -21,6 +21,8 @@ internal sealed class EicasBandAggregator
                     return alert.Trim();
                 if (_lines.TryGetValue("qrh", out var qrh) && !string.IsNullOrWhiteSpace(qrh))
                     return qrh.Trim();
+                if (_lines.TryGetValue("ecl", out var ecl) && !string.IsNullOrWhiteSpace(ecl))
+                    return ecl.Trim();
                 return null;
             }
         }

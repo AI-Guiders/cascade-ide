@@ -33,6 +33,7 @@ public partial class MainWindow : Window
         _latches.SoftOrganChanged += OnSoftOrganChanged;
         _latches.AlertChanged += OnAlertChanged;
         _latches.QrhChanged += OnQrhChanged;
+        _latches.EclChanged += OnEclChanged;
         _latches.Start();
 
         StatusText.Text =
