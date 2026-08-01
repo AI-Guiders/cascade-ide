@@ -8,7 +8,7 @@
         Foreground="#E8E8E8">
   <DockPanel>
     <Border DockPanel.Dock="Top" Background="#1A1A1A" BorderBrush="#2E2E2E" BorderThickness="0,0,0,1" Padding="10,6">
-      <TextBlock x:Name="HostBadge" Text="host" FontFamily="Consolas" FontSize="11" Foreground="#8FD4A8"/>
+      <TextBlock x:Name="HostBadge" Text="host" FontFamily="Consolas" FontSize="11" Foreground="#AAAAAA"/>
     </Border>
     <ContentControl x:Name="HostSlot"/>
   </DockPanel>

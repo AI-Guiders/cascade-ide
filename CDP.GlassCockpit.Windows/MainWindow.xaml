@@ -8,6 +8,10 @@
         Background="#111111"
         Foreground="#E8E8E8">
   <Window.Resources>
+    <ResourceDictionary>
+      <ResourceDictionary.MergedDictionaries>
+        <ResourceDictionary Source="GlassDarkCockpit.xaml"/>
+      </ResourceDictionary.MergedDictionaries>
     <Style x:Key="ChromeBtn" TargetType="Button">
       <Setter Property="Background" Value="#2A2A2A"/>
       <Setter Property="Foreground" Value="#DDDDDD"/>
@@ -21,21 +25,22 @@
     <Style x:Key="TopicCardBtn" TargetType="Button" BasedOn="{StaticResource ChromeBtn}">
       <Style.Triggers>
         <DataTrigger Binding="{Binding IsSelected}" Value="True">
-          <Setter Property="Background" Value="#2A3A55"/>
-          <Setter Property="BorderBrush" Value="#7EB6FF"/>
-          <Setter Property="Foreground" Value="#E8F0FF"/>
+          <Setter Property="Background" Value="{StaticResource Glass.SelectBg}"/>
+          <Setter Property="BorderBrush" Value="{StaticResource Glass.SelectBorder}"/>
+          <Setter Property="Foreground" Value="{StaticResource Glass.SelectFg}"/>
         </DataTrigger>
       </Style.Triggers>
     </Style>
     <Style x:Key="TopicAllBtnStyle" TargetType="Button" BasedOn="{StaticResource ChromeBtn}">
       <Style.Triggers>
         <Trigger Property="Tag" Value="selected">
-          <Setter Property="Background" Value="#2A3A55"/>
-          <Setter Property="BorderBrush" Value="#7EB6FF"/>
-          <Setter Property="Foreground" Value="#E8F0FF"/>
+          <Setter Property="Background" Value="{StaticResource Glass.SelectBg}"/>
+          <Setter Property="BorderBrush" Value="{StaticResource Glass.SelectBorder}"/>
+          <Setter Property="Foreground" Value="{StaticResource Glass.SelectFg}"/>
         </Trigger>
       </Style.Triggers>
     </Style>
+    </ResourceDictionary>
   </Window.Resources>
 
   <Grid>
@@ -49,26 +54,26 @@
           <ColumnDefinition Width="*"/>
           <ColumnDefinition Width="Auto"/>
         </Grid.ColumnDefinitions>
-        <Border Background="#5A1A1A" BorderBrush="#C88A2A" BorderThickness="1" CornerRadius="4" Padding="8,3" Margin="0,0,8,0">
-          <TextBlock Text="ON GND" Foreground="#FFD27A" FontWeight="SemiBold" FontSize="11"/>
+        <Border Background="{StaticResource Glass.CautionBg}" BorderBrush="{StaticResource Glass.CautionBorder}" BorderThickness="1" CornerRadius="4" Padding="8,3" Margin="0,0,8,0">
+          <TextBlock Text="ON GND" Foreground="{StaticResource Glass.CautionFg}" FontWeight="SemiBold" FontSize="11"/>
         </Border>
-        <Border Grid.Column="1" Background="#1A2A22" BorderBrush="#2A5A40" BorderThickness="1" CornerRadius="4" Padding="8,3" Margin="0,0,8,0">
-          <TextBlock x:Name="TopologyBadge" Text="(F)" Foreground="#8FD4A8" FontFamily="Consolas" FontSize="11"/>
+        <Border Grid.Column="1" Background="{StaticResource Glass.BgPanel}" BorderBrush="{StaticResource Glass.Border}" BorderThickness="1" CornerRadius="4" Padding="8,3" Margin="0,0,8,0">
+          <TextBlock x:Name="TopologyBadge" Text="(F)" Foreground="{StaticResource Glass.FgMuted}" FontFamily="Consolas" FontSize="11"/>
         </Border>
-        <Border Grid.Column="2" Background="#1E2A3A" BorderBrush="#2F4A6A" BorderThickness="1" CornerRadius="4" Padding="10,5">
+        <Border Grid.Column="2" Background="{StaticResource Glass.BgPanel}" BorderBrush="{StaticResource Glass.Border}" BorderThickness="1" CornerRadius="4" Padding="10,5">
           <StackPanel>
-            <TextBlock x:Name="ChromeHint" Text="settings.toml · loading…" Foreground="#9BB6D4" FontSize="12"/>
+            <TextBlock x:Name="ChromeHint" Text="settings.toml · loading…" Foreground="{StaticResource Glass.FgMuted}" FontSize="12"/>
             <!-- SoftOrgan density: top-N lines + overflow (Avalonia WorkspaceChromeBand parity). -->
             <StackPanel x:Name="SoftOrganBand" Margin="0,2,0,0" Visibility="Collapsed">
               <ItemsControl x:Name="SoftOrganHintLines">
                 <ItemsControl.ItemTemplate>
                   <DataTemplate>
-                    <TextBlock Text="{Binding}" Foreground="#C9B896" FontSize="11" Opacity="0.85"
+                    <TextBlock Text="{Binding}" Foreground="{StaticResource Glass.FgDim}" FontSize="11" Opacity="0.85"
                                TextWrapping="Wrap"/>
                   </DataTemplate>
                 </ItemsControl.ItemTemplate>
               </ItemsControl>
-              <TextBlock x:Name="SoftOrganOverflow" Text="" Foreground="#C9B896" FontSize="11"
+              <TextBlock x:Name="SoftOrganOverflow" Text="" Foreground="{StaticResource Glass.FgDim}" FontSize="11"
                          Opacity="0.55" Margin="0,2,0,0" Visibility="Collapsed"
                          Cursor="Hand" ToolTip="Click to expand / collapse SoftOrgan latches"
                          MouseLeftButtonUp="SoftOrganOverflow_OnClick"/>
@@ -98,10 +103,10 @@
       </Grid.ColumnDefinitions>
 
       <!-- P -->
-      <Border x:Name="PfdZone" Grid.Column="0" BorderBrush="#003D4A" BorderThickness="1" Background="#161616" Margin="4">
+      <Border x:Name="PfdZone" Grid.Column="0" BorderBrush="{StaticResource Glass.Border}" BorderThickness="1" Background="#161616" Margin="4">
         <DockPanel>
           <Border DockPanel.Dock="Top" Background="#1E1E1E" Padding="10,6" BorderBrush="#2A2A2A" BorderThickness="0,0,0,1">
-            <TextBlock Text="P · PFD" FontWeight="SemiBold" FontSize="12" Foreground="#7FD4E0"/>
+            <TextBlock Text="P · PFD" FontWeight="SemiBold" FontSize="12" Foreground="{StaticResource Glass.FgTitle}"/>
           </Border>
           <StackPanel Margin="10">
             <TextBlock Text="Solution / map" FontSize="11" Foreground="#888" Margin="0,0,0,8"/>
@@ -114,11 +119,11 @@
       <GridSplitter Grid.Column="1" Width="4" HorizontalAlignment="Stretch" Background="#222"/>
 
       <!-- F Intercom / Editor (primary_work_surface) -->
-      <Border Grid.Column="2" BorderBrush="#4A3A10" BorderThickness="1" Background="#141414" Margin="0,4">
+      <Border Grid.Column="2" BorderBrush="{StaticResource Glass.Border}" BorderThickness="1" Background="#141414" Margin="0,4">
         <DockPanel>
           <Border DockPanel.Dock="Top" Background="#1E1E1E" Padding="12,8" BorderBrush="#2A2A2A" BorderThickness="0,0,0,1">
             <DockPanel>
-              <TextBlock x:Name="ForwardTitle" DockPanel.Dock="Left" Text="F · Intercom" FontWeight="SemiBold" FontSize="12" Foreground="#FFC75A" VerticalAlignment="Center"/>
+              <TextBlock x:Name="ForwardTitle" DockPanel.Dock="Left" Text="F · Intercom" FontWeight="SemiBold" FontSize="12" Foreground="{StaticResource Glass.FgTitle}" VerticalAlignment="Center"/>
               <TextBlock x:Name="IntercomSubtitle" HorizontalAlignment="Right" FontSize="11" Foreground="#888" VerticalAlignment="Center"/>
             </DockPanel>
           </Border>
@@ -140,7 +145,7 @@
                               Click="SaveFileBtn_OnClick" ToolTip="Save (Ctrl+S)" Margin="8,0,0,0"/>
                       <Button x:Name="OpenFileBtn" DockPanel.Dock="Right" Content="Open…" Style="{StaticResource ChromeBtn}"
                               Click="OpenFileBtn_OnClick" ToolTip="Open a file (Ctrl+O)" Margin="8,0,0,0"/>
-                      <TextBlock x:Name="EditorPathLabel" Text="(no file)" FontSize="11" Foreground="#9BB6D4"
+                      <TextBlock x:Name="EditorPathLabel" Text="(no file)" FontSize="11" Foreground="{StaticResource Glass.FgMuted}"
                                  FontFamily="Consolas" TextTrimming="CharacterEllipsis" VerticalAlignment="Center"/>
                     </DockPanel>
                   </Border>
@@ -167,7 +172,7 @@
                          PlacementTarget="{Binding ElementName=ComposerBox}"
                          StaysOpen="False"
                          AllowsTransparency="True">
-                    <Border Background="#1E2430" BorderBrush="#3F3F46" BorderThickness="1" Padding="4" MaxHeight="220" MinWidth="280">
+                    <Border Background="{StaticResource Glass.BgPanel}" BorderBrush="#3F3F46" BorderThickness="1" Padding="4" MaxHeight="220" MinWidth="280">
                       <ListBox x:Name="SlashList"
                                Background="Transparent"
                                BorderThickness="0"
@@ -178,7 +183,7 @@
                           <DataTemplate>
                             <StackPanel Margin="2,2">
                               <TextBlock Text="{Binding Title}" FontWeight="SemiBold"/>
-                              <TextBlock Text="{Binding Help}" Foreground="#9BB6D4" FontSize="11" TextWrapping="Wrap"/>
+                              <TextBlock Text="{Binding Help}" Foreground="{StaticResource Glass.FgMuted}" FontSize="11" TextWrapping="Wrap"/>
                             </StackPanel>
                           </DataTemplate>
                         </ListBox.ItemTemplate>
@@ -208,7 +213,7 @@
                 </Grid>
               </Border>
 
-              <Border DockPanel.Dock="Top" Background="#151820" BorderBrush="#2A2A2A" BorderThickness="0,0,0,1" Padding="8,6">
+              <Border DockPanel.Dock="Top" Background="{StaticResource Glass.BgRaised}" BorderBrush="#2A2A2A" BorderThickness="0,0,0,1" Padding="8,6">
                 <DockPanel>
                   <TextBlock DockPanel.Dock="Left" Text="Topics" FontSize="11" Foreground="#888" VerticalAlignment="Center" Margin="0,0,8,0"/>
                   <Button x:Name="TopicAllBtn" DockPanel.Dock="Left" Content="All" Style="{StaticResource TopicAllBtnStyle}"
@@ -241,11 +246,11 @@
                     <ItemsControl.ItemTemplate>
                       <DataTemplate>
                         <Border Margin="0,0,0,8" Padding="10,8" CornerRadius="6"
-                                Background="#1C2430" BorderBrush="#2F3F55" BorderThickness="1"
+                                Background="{StaticResource Glass.BubbleBg}" BorderBrush="{StaticResource Glass.BubbleBorder}" BorderThickness="1"
                                 HorizontalAlignment="Stretch">
                           <StackPanel>
                             <DockPanel Margin="0,0,0,4">
-                              <TextBlock Text="{Binding Role}" FontSize="11" FontWeight="SemiBold" Foreground="#7EB6FF"/>
+                              <TextBlock Text="{Binding Role}" FontSize="11" FontWeight="SemiBold" Foreground="{StaticResource Glass.BubbleMeta}"/>
                               <TextBlock DockPanel.Dock="Right" Text="{Binding When}" FontSize="10" Foreground="#666" HorizontalAlignment="Right"/>
                             </DockPanel>
                             <TextBlock Text="{Binding Body}" FontSize="13" TextWrapping="Wrap" Foreground="#E8E8E8" LineHeight="18"/>
@@ -259,7 +264,7 @@
                         VerticalAlignment="Bottom" HorizontalAlignment="Center"
                         Margin="0,0,0,12"
                         Style="{StaticResource ChromeBtn}"
-                        Background="#2A3A55" BorderBrush="#7EB6FF" Foreground="#E8F0FF"
+                        Background="{StaticResource Glass.SelectBg}" BorderBrush="{StaticResource Glass.SelectBorder}" Foreground="{StaticResource Glass.SelectFg}"
                         Visibility="Collapsed"
                         Click="NewMsgCueBtn_OnClick"
                         ToolTip="Jump to latest messages"/>
@@ -272,13 +277,13 @@
       <GridSplitter Grid.Column="3" Width="4" HorizontalAlignment="Stretch" Background="#222"/>
 
       <!-- M MFD shell -->
-      <Border x:Name="MfdZone" Grid.Column="4" BorderBrush="#3A2A55" BorderThickness="1" Background="#161616" Margin="4">
+      <Border x:Name="MfdZone" Grid.Column="4" BorderBrush="{StaticResource Glass.Border}" BorderThickness="1" Background="#161616" Margin="4">
         <DockPanel>
           <Border DockPanel.Dock="Top" Background="#1E1E1E" Padding="10,6" BorderBrush="#2A2A2A" BorderThickness="0,0,0,1">
-            <TextBlock Text="M · MFD" FontWeight="SemiBold" FontSize="12" Foreground="#B38CFF"/>
+            <TextBlock Text="M · MFD" FontWeight="SemiBold" FontSize="12" Foreground="{StaticResource Glass.FgTitle}"/>
           </Border>
-          <Border DockPanel.Dock="Top" Background="#1A1520" Padding="8,6" BorderBrush="#2A2A2A" BorderThickness="0,0,0,1">
-            <TextBlock x:Name="MfdHealth" Text="EICAS · idle" FontSize="11" Foreground="#9A8AB8"/>
+          <Border DockPanel.Dock="Top" Background="{StaticResource Glass.BgRaised}" Padding="8,6" BorderBrush="#2A2A2A" BorderThickness="0,0,0,1">
+            <TextBlock x:Name="MfdHealth" Text="EICAS · idle" FontSize="11" Foreground="{StaticResource Glass.FgMuted}"/>
           </Border>
           <ListBox x:Name="MfdPages"
                    DockPanel.Dock="Left"
@@ -326,16 +331,16 @@
 
     <Border x:Name="PaletteOverlay"
             Visibility="Collapsed"
-            Background="#AA000000"
+            Background="{StaticResource Glass.OverlayScrim}"
             Panel.ZIndex="100">
       <Border Width="520" MaxHeight="420"
               VerticalAlignment="Center" HorizontalAlignment="Center"
-              Background="#1A2030" BorderBrush="#4A6A90" BorderThickness="1"
+              Background="{StaticResource Glass.BgRaised}" BorderBrush="{StaticResource Glass.Border}" BorderThickness="1"
               Padding="12" CornerRadius="4">
         <DockPanel>
           <TextBlock DockPanel.Dock="Top" Text="Command palette" FontWeight="SemiBold" Margin="0,0,0,8"/>
           <TextBlock DockPanel.Dock="Bottom" Text="Ctrl+Q toggle · Esc close · Enter run"
-                     Foreground="#9BB6D4" FontSize="11" Margin="0,8,0,0"/>
+                     Foreground="{StaticResource Glass.FgMuted}" FontSize="11" Margin="0,8,0,0"/>
           <TextBox x:Name="PaletteQuery"
                    DockPanel.Dock="Top"
                    Margin="0,0,0,8"
@@ -348,7 +353,7 @@
               <DataTemplate>
                 <StackPanel Margin="2,3">
                   <TextBlock Text="{Binding Title}" FontWeight="SemiBold"/>
-                  <TextBlock Text="{Binding Help}" Foreground="#9BB6D4" FontSize="11" TextWrapping="Wrap"/>
+                  <TextBlock Text="{Binding Help}" Foreground="{StaticResource Glass.FgMuted}" FontSize="11" TextWrapping="Wrap"/>
                 </StackPanel>
               </DataTemplate>
             </ListBox.ItemTemplate>
@@ -359,17 +364,17 @@
 
     <Border x:Name="ChordOverlay"
             Visibility="Collapsed"
-            Background="#AA000000"
+            Background="{StaticResource Glass.OverlayScrim}"
             Panel.ZIndex="101">
       <Border Width="480" MaxHeight="380"
               VerticalAlignment="Center" HorizontalAlignment="Center"
-              Background="#152018" BorderBrush="#5A9A6A" BorderThickness="1"
+              Background="{StaticResource Glass.BgRaised}" BorderBrush="{StaticResource Glass.Border}" BorderThickness="1"
               Padding="12" CornerRadius="4">
         <DockPanel>
           <TextBlock DockPanel.Dock="Top" Text="CascadeChord · melody" FontWeight="SemiBold" Margin="0,0,0,8"/>
           <TextBlock DockPanel.Dock="Bottom"
                      Text="Ctrl+K · type alias (of/sf/h/…) · Enter · Esc · timeout 8s"
-                     Foreground="#9BD4B0" FontSize="11" Margin="0,8,0,0"/>
+                     Foreground="{StaticResource Glass.FgMuted}" FontSize="11" Margin="0,8,0,0"/>
           <TextBox x:Name="ChordQuery"
                    DockPanel.Dock="Top"
                    Margin="0,0,0,8"
@@ -384,7 +389,7 @@
                   <TextBlock Text="{Binding Alias}" FontFamily="Consolas" FontWeight="SemiBold" Width="36"/>
                   <StackPanel>
                     <TextBlock Text="{Binding Title}" FontWeight="SemiBold"/>
-                    <TextBlock Text="{Binding Help}" Foreground="#9BD4B0" FontSize="11" TextWrapping="Wrap"/>
+                    <TextBlock Text="{Binding Help}" Foreground="{StaticResource Glass.FgMuted}" FontSize="11" TextWrapping="Wrap"/>
                   </StackPanel>
                 </StackPanel>
               </DataTemplate>
