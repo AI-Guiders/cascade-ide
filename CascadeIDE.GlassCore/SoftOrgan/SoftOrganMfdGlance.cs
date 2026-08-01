@@ -10,6 +10,8 @@ namespace CascadeIDE.SoftOrgan;
 /// Build ← toolchain; Terminal ← sys (Glass WPF latch; CIDE Avalonia owns live hosts).
 /// SolutionExplorer intentionally unbound: Glass .sln TreeView/glance is the instrument peel;
 /// SoftOrganKind.FilesDesk is FM utility (CabinGlass pin only) — do not overlay FM latch.
+/// RelatedFiles SoftOrganMfdGlance stays ←refactor; SoftOrganKind.FindDesk shares CabinGlass pin
+/// but SoftOrganMfdGlance is 1:1 — do not displace refactor with find_desk (search ≠ debt/blast).
 /// </summary>
 public static class SoftOrganMfdGlance
 {

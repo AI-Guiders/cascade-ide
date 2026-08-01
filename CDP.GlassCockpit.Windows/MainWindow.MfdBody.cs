@@ -81,7 +81,7 @@ public partial class MainWindow
             "Tests" => "Tests page host (Glass WPF).\n\nLive host SSOT = CIDE Avalonia Views/TestsMfdPageView.\nGlass stays SoftOrgan test_desk latch glance until a WPF test-results host peel.\n\n(test_desk latch glance missing — go=test_desk when seat live.)",
             "DebugStack" => "DebugStack page host (Glass WPF).\n\nLive host SSOT = CIDE Avalonia Views/DebugStackMfdPageView.\nGlass stays SoftOrgan debug_desk latch glance until a WPF DAP stack host peel.\n\n(debug_desk latch glance missing — go=debug_desk when seat live.)",
             "HybridIndex" => "Hybrid Index host (Glass WPF).\n\nHCI live host SSOT = CIDE Avalonia Views/HybridIndexMfdPageView + Features/HybridIndex (HybridIndexOrchestrator).\nCabinGlass pin hybrid_index/hci/codebase_index → this MFD; no SoftOrganKind — SoftOrganMfdGlance unbound (do not invent SoftOrgan).\n\n(dig reject SoftOrgan glance — go=codebase_index_* / Avalonia HIS when live.)",
-            "RelatedFiles" => "Related Files host.\n\nfind_desk / related / refactor organ projection.",
+            "RelatedFiles" => "Related Files host (Glass WPF).\n\nSoftOrganMfdGlance ← refactor SoftOrgan (debt/blast latch).\nCabinGlass also pins find_desk/search → this MFD (+ chrome); SoftOrganKind.FindDesk DoD via pin — SoftOrganMfdGlance stays refactor (1:1 MFD map; search ≠ debt/blast).\n\n(find_usages host later.)",
             "Correspondence" => "Correspondence host.\n\ncrs organ projection — later inbox chrome.",
             "MarkdownPreview" => "Markdown Preview host.\n\nmd_preview / md_author projection.",
             "WebAiPortal" => "Web / AI Portal host.\n\nbrowser organ projection.",
