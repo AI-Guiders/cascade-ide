@@ -54,6 +54,7 @@ public partial class MainWindowViewModel
             ShowAgentCrmChromeHint,
             ShowAgentWebcamChromeHint,
             ShowAgentToolchainChromeHint,
+            ShowAgentTestDeskChromeHint,
             ShowAgentPluginsChromeHint,
             ShowAgentRefactorChromeHint,
             ShowAgentReviewChromeHint,
