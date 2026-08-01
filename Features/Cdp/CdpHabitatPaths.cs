@@ -17,6 +17,7 @@ public static class CdpHabitatPaths
     public const string IntercomPresenceLatchFileName = "intercom-presence-LATEST.json";
     public const string SeatsLatchFileName = "seats-LATEST.json";
     public const string LandLatchFileName = "land-LATEST.json";
+    public const string SharedLatchFileName = "shared-LATEST.json";
 
     public static string StateRoot =>
         Path.Combine(
@@ -34,6 +35,8 @@ public static class CdpHabitatPaths
     public static string SeatsLatchPath => GetLatchPath(SeatsLatchFileName);
 
     public static string LandLatchPath => GetLatchPath(LandLatchFileName);
+
+    public static string SharedLatchPath => GetLatchPath(SharedLatchFileName);
 
     /// <summary>Ensure state root exists; returns <see cref="StateRoot"/>.</summary>
     public static string EnsureStateRoot()

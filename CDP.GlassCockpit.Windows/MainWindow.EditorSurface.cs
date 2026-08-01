@@ -86,7 +86,7 @@ public partial class MainWindow
             ?? HighlightingManager.Instance.GetDefinition("C#");
         GlassAvalonEditTheme.ApplyDarkReadable(CodeEditor);
         _editorPath = path;
-        EditorPathLabel.Text = path;
+        RefreshEditorSharedChrome();
 
         if (line is > 0)
         {

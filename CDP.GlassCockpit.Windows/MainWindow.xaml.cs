@@ -34,6 +34,7 @@ public partial class MainWindow : Window
         _latches.PresentationChanged += OnPresentationChanged;
         _latches.SeatsChanged += OnSeatsChanged;
         _latches.LandChanged += OnLandChanged;
+        _latches.SharedChanged += OnSharedChanged;
         _latches.SoftOrganChanged += OnSoftOrganChanged;
         _latches.AlertChanged += OnAlertChanged;
         _latches.QrhChanged += OnQrhChanged;
