@@ -19,6 +19,7 @@ Hosts own UI paint only; ids and collapse policy live here.
 | `SoftOrganLatchCatalog` | Canonical latch stems (`{id}-LATEST.json`); `SaDesk` / `Canonicalize` (`sa_desk` → `sa-desk`); `Contains` / `TryParseFileName` |
 | `SoftOrganChromeDensityPolicy` | Priority table, `From`/`Collapse`/`ToggleExpanded`; `From`/`PriorityFor` go through `Canonicalize` |
 | `SoftOrganChromeAggregator` | Glass in-memory hints; `Apply` gated by catalog; Snapshot → VisibleLines + overflow |
+| `SoftOrganMfdGlance` | MFD page → SoftOrgan latch glance body (`Build`←toolchain, `Terminal`←sys) |
 
 EICAS ids (`alert` / `qrh` / …) stay on the density priority table for ordering when mixed, but are **not** SoftOrgan latch catalog members — Aggregator ignores them.
 
