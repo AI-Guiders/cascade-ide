@@ -130,13 +130,21 @@ public static class SoftOrganMfdGlance
             sb.AppendLine("┌ host ───────────────┐");
             sb.AppendLine("│ ■ Glass redirected TextBox │");
             sb.AppendLine("│ □ Avalonia ConPTY SSOT │");
-            sb.AppendLine("└─────────────────────┘");
+            sb.AppendLine("└──────────────────────┘");
+            return;
+        }
+
+        if (title.Equals("toolchain", StringComparison.OrdinalIgnoreCase))
+        {
+            sb.AppendLine("┌ host ───────────────┐");
+            sb.AppendLine("│ ■ Glass redirected log TextBox │");
+            sb.AppendLine("│ □ Avalonia BuildMfdPageView │");
+            sb.AppendLine("└──────────────────────┘");
             return;
         }
 
         var host = title.ToLowerInvariant() switch
         {
-            "toolchain" => "Avalonia BuildMfdPageView",
             "test_desk" => "Avalonia TestsMfdPageView",
             "debug_desk" => "Avalonia DebugStackMfdPageView",
             "review" => "Avalonia ProblemsMfdPageView",
@@ -152,7 +160,7 @@ public static class SoftOrganMfdGlance
         sb.AppendLine("┌ host ───────────────┐");
         sb.AppendLine("│ □ Glass peel        │");
         sb.Append("│ ■ ").Append(host).AppendLine();
-        sb.AppendLine("└─────────────────────┘");
+        sb.AppendLine("└──────────────────────┘");
     }
 
     static void AppendChipInt(JsonElement root, string prop, string label, List<string> chips)

@@ -51,8 +51,10 @@ public partial class MainWindow
 
         var showTerminal = MfdTerminalHost is not null
             && string.Equals(page, "Terminal", StringComparison.OrdinalIgnoreCase);
-        // Terminal host visibility owned by RefreshMfdTerminalVisibility (called from UpdateMfdBody).
-        MfdBody.Visibility = (showEditor || showSe || showTerminal) ? Visibility.Collapsed : Visibility.Visible;
+        var showBuild = MfdBuildHost is not null
+            && string.Equals(page, "Build", StringComparison.OrdinalIgnoreCase);
+        // Terminal/Build host visibility owned by RefreshMfd*Visibility (called from UpdateMfdBody).
+        MfdBody.Visibility = (showEditor || showSe || showTerminal || showBuild) ? Visibility.Collapsed : Visibility.Visible;
     }
 
     void TryOpenDogfoodFile()

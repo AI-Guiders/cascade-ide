@@ -98,8 +98,10 @@ public class SoftOrganMfdGlanceTests
         Assert.Contains("toolchain · 5/5 ok", body);
         Assert.Contains("ok=5", body);
         Assert.Contains("total=5", body);
-        Assert.Contains("BuildMfdPageView", body);
-        Assert.Contains("□ Glass peel", body);
+        Assert.Contains("Glass redirected log TextBox", body);
+        Assert.Contains("Avalonia BuildMfdPageView", body);
+        Assert.Contains("■ Glass redirected log TextBox", body);
+        Assert.Contains("□ Avalonia BuildMfdPageView", body);
     }
 
     [Fact]

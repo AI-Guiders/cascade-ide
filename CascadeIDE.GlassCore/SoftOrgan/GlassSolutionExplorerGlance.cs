@@ -114,6 +114,22 @@ public static partial class GlassSolutionExplorerGlance
         }
     }
 
+    /// <summary>Public resolve for Glass Build redirected peel (same preferred CascadeIDE.sln).</summary>
+    public static string? TryResolveSlnPath(string? workspaceRoot)
+    {
+        if (string.IsNullOrWhiteSpace(workspaceRoot))
+            return null;
+
+        try
+        {
+            return TryFindSln(workspaceRoot.Trim());
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
     static string? TryFindSln(string workspaceRoot)
     {
         try

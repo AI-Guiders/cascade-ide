@@ -50,6 +50,7 @@ public partial class MainWindow : Window
             _composingDebounce?.Stop();
             _presenceStaleTimer?.Stop();
             DisposeTerminalSession();
+            DisposeBuildSession();
             _hosts.Dispose();
             _latches.Dispose();
         };

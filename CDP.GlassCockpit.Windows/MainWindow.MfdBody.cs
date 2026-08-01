@@ -37,6 +37,7 @@ public partial class MainWindow
         RefreshSolutionExplorerTree();
         RefreshMfdEditorVisibility();
         RefreshMfdTerminalVisibility();
+        RefreshMfdBuildVisibility();
 
         if (MfdBody is null)
             return;
@@ -51,6 +52,13 @@ public partial class MainWindow
         }
 
         if (IsTerminalHostActive())
+        {
+            MfdBody.Text = "";
+            RefreshEicasHealth();
+            return;
+        }
+
+        if (IsBuildHostActive())
         {
             MfdBody.Text = "";
             RefreshEicasHealth();
@@ -84,7 +92,7 @@ public partial class MainWindow
         MfdBody.Text = page switch
         {
             "Terminal" => FormatMfdStub("Terminal", "Glass redirected TextBox", "Avalonia ConPTY SSOT · go=sys"),
-            "Build" => FormatMfdStub("Build", "BuildMfdPageView", "toolchain latch"),
+            "Build" => FormatMfdStub("Build", "Glass redirected log TextBox", "Avalonia BuildMfdPageView SSOT · go=toolchain"),
             "SolutionExplorer" => FormatMfdStub(
                 "SolutionExplorer",
                 "SolutionExplorerView",
