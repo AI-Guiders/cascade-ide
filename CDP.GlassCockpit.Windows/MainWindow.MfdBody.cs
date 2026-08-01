@@ -39,6 +39,7 @@ public partial class MainWindow
         RefreshMfdTerminalVisibility();
         RefreshMfdBuildVisibility();
         RefreshMfdTestsVisibility();
+        RefreshMfdGitVisibility();
 
         if (MfdBody is null)
             return;
@@ -67,6 +68,13 @@ public partial class MainWindow
         }
 
         if (IsTestsHostActive())
+        {
+            MfdBody.Text = "";
+            RefreshEicasHealth();
+            return;
+        }
+
+        if (IsGitHostActive())
         {
             MfdBody.Text = "";
             RefreshEicasHealth();
@@ -117,7 +125,7 @@ public partial class MainWindow
             "Problems" => FormatMfdStub("Problems", "ProblemsMfdPageView", "review latch when live"),
             "Tests" => FormatMfdStub("Tests", "Glass redirected log TextBox", "Avalonia TestsMfdPageView SSOT · go=test_desk"),
             "DebugStack" => FormatMfdStub("DebugStack", "DebugStackMfdPageView · IdeDapDebugSession", "debug_desk latch · DAP Avalonia SSOT"),
-            "Git" => FormatMfdStub("Git", "GitMfdPageView · GitPanel", "no SoftOrgan · Avalonia SSOT"),
+            "Git" => FormatMfdStub("Git", "Glass redirected status TextBox", "Avalonia GitMfdPageView SSOT"),
             "RelatedFiles" => FormatMfdStub("RelatedFiles", "RelatedFilesMfdPageView", "refactor latch when live"),
             "Correspondence" => FormatMfdStub("Correspondence", "CorrespondenceMfdPageView", "CRS · no SoftOrgan"),
             "MarkdownPreview" => FormatMfdStub("MarkdownPreview", "MarkdigMarkdownPreviewRenderer", "report latch when live"),

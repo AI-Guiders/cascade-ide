@@ -52,6 +52,7 @@ public partial class MainWindow : Window
             DisposeTerminalSession();
             DisposeBuildSession();
             DisposeTestsSession();
+            DisposeGitSession();
             _hosts.Dispose();
             _latches.Dispose();
         };
