@@ -12,6 +12,8 @@ namespace CascadeIDE.SoftOrgan;
 /// SoftOrganKind.FilesDesk is FM utility (CabinGlass pin only) — do not overlay FM latch.
 /// RelatedFiles SoftOrganMfdGlance stays ←refactor; SoftOrganKind.FindDesk shares CabinGlass pin
 /// but SoftOrganMfdGlance is 1:1 — do not displace refactor with find_desk (search ≠ debt/blast).
+/// SemanticMap SoftOrganMfdGlance ← arch SoftOrgan; live graph SSOT = Avalonia WorkspaceNavigationMapView
+/// (Skia) — Glass stays latch glance until WPF peel (do not dump adjacency into TextBlock).
 /// Correspondence intentionally unbound: CabinGlass pin correspondence/crs → MFD only; no SoftOrganKind
 /// (do not invent SoftOrgan; SoftOrganKind.Crm chrome stays await/callout — not CRS). Live CRS SSOT = Avalonia.
 /// </summary>
@@ -118,7 +120,7 @@ public static class SoftOrganMfdGlance
             else if (string.Equals(title, "review", StringComparison.OrdinalIgnoreCase))
                 sb.AppendLine().AppendLine("(Problems MFD ← review SoftOrgan; Roslyn Problems host later.)");
             else if (string.Equals(title, "arch", StringComparison.OrdinalIgnoreCase))
-                sb.AppendLine().AppendLine("(SemanticMap MFD ← arch SoftOrgan; graph host later.)");
+                sb.AppendLine().AppendLine("(SemanticMap MFD ← arch SoftOrgan; live host = CIDE Avalonia Views/WorkspaceNavigationMapView + WorkspaceNavigationMapViewModel (ADR 0039/0053/0056 Skia); Glass WPF host deferred — latch glance only.)");
             else if (string.Equals(title, "mcp", StringComparison.OrdinalIgnoreCase))
                 sb.AppendLine().AppendLine("(AiChatSettings MFD ← mcp SoftOrgan; mount panel later.)");
             else if (string.Equals(title, "report", StringComparison.OrdinalIgnoreCase))

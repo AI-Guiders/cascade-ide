@@ -162,6 +162,8 @@ public class SoftOrganMfdGlanceTests
         Assert.Contains("profile=cdp_desk", body);
         Assert.Contains("mode=as_built", body);
         Assert.Contains("SemanticMap MFD", body);
+        Assert.Contains("WorkspaceNavigationMapView", body);
+        Assert.Contains("Glass WPF host deferred", body);
     }
 
     [Fact]
