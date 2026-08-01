@@ -108,7 +108,7 @@ public partial class MainWindow
             "SemanticMap" => FormatMfdStub("SemanticMap", "WorkspaceNavigationMapView · Skia", "arch latch when live"),
             "Problems" => FormatMfdStub("Problems", "ProblemsMfdPageView", "review latch when live"),
             "Tests" => FormatMfdStub("Tests", "Glass redirected log TextBox", "Avalonia TestsMfdPageView SSOT · go=test_desk"),
-            "DebugStack" => FormatMfdStub("DebugStack", "DebugStackMfdPageView", "debug_desk · go=debug_desk"),
+            "DebugStack" => FormatMfdStub("DebugStack", "DebugStackMfdPageView · IdeDapDebugSession", "debug_desk latch · DAP Avalonia SSOT"),
             "HybridIndex" => FormatMfdStub("HybridIndex", "HybridIndexMfdPageView", "no SoftOrgan · go=codebase_index_*"),
             "RelatedFiles" => FormatMfdStub("RelatedFiles", "RelatedFilesMfdPageView", "refactor latch when live"),
             "Correspondence" => FormatMfdStub("Correspondence", "CorrespondenceMfdPageView", "CRS · no SoftOrgan"),
