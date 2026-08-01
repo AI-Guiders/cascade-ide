@@ -313,6 +313,10 @@
           <Grid>
             <TextBlock x:Name="MfdBody" TextWrapping="Wrap" FontSize="13" Foreground="#CCCCCC"
                        Margin="12" Text="Select an MFD page."/>
+            <TreeView x:Name="MfdSolutionExplorerTree" Visibility="Collapsed"
+                      Margin="8" FontSize="13" Background="Transparent" BorderThickness="0"
+                      Foreground="#CCCCCC"
+                      MouseDoubleClick="MfdSolutionExplorerTree_OnMouseDoubleClick"/>
             <ContentControl x:Name="MfdEditorHost" Visibility="Collapsed"/>
           </Grid>
         </DockPanel>

@@ -40,9 +40,15 @@ public partial class MainWindow
 
         var editorOnM = ReferenceEquals(EditorChrome.Parent, MfdEditorHost);
         var page = (MfdPages?.SelectedItem as ListBoxItem)?.Content?.ToString();
-        var show = editorOnM && string.Equals(page, "Editor", StringComparison.OrdinalIgnoreCase);
-        MfdEditorHost.Visibility = show ? Visibility.Visible : Visibility.Collapsed;
-        MfdBody.Visibility = show ? Visibility.Collapsed : Visibility.Visible;
+        var showEditor = editorOnM && string.Equals(page, "Editor", StringComparison.OrdinalIgnoreCase);
+        var showSe = MfdSolutionExplorerTree is not null
+            && string.Equals(page, "SolutionExplorer", StringComparison.OrdinalIgnoreCase)
+            && MfdSolutionExplorerTree.Items.Count > 0;
+
+        MfdEditorHost.Visibility = showEditor ? Visibility.Visible : Visibility.Collapsed;
+        if (MfdSolutionExplorerTree is not null)
+            MfdSolutionExplorerTree.Visibility = showSe ? Visibility.Visible : Visibility.Collapsed;
+        MfdBody.Visibility = (showEditor || showSe) ? Visibility.Collapsed : Visibility.Visible;
     }
 
     void TryOpenDogfoodFile()

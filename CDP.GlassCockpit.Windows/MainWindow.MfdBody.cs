@@ -33,6 +33,7 @@ public partial class MainWindow
 
     void UpdateMfdBody()
     {
+        RefreshSolutionExplorerTree();
         RefreshMfdEditorVisibility();
 
         if (MfdBody is null)
@@ -41,6 +42,14 @@ public partial class MainWindow
         var page = (MfdPages?.SelectedItem as ListBoxItem)?.Content?.ToString() ?? "?";
         if (string.Equals(page, "Editor", StringComparison.OrdinalIgnoreCase)
             && ReferenceEquals(EditorChrome.Parent, MfdEditorHost))
+        {
+            MfdBody.Text = "";
+            RefreshEicasHealth();
+            return;
+        }
+
+        if (string.Equals(page, "SolutionExplorer", StringComparison.OrdinalIgnoreCase)
+            && MfdSolutionExplorerTree is { Items.Count: > 0 })
         {
             MfdBody.Text = "";
             RefreshEicasHealth();
