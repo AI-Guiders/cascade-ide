@@ -12,6 +12,7 @@ public class SoftOrganMfdGlanceTests
     [InlineData("SemanticMap", "arch")]
     [InlineData("AiChatSettings", "mcp")]
     [InlineData("MarkdownPreview", "report")]
+    [InlineData("RelatedFiles", "refactor")]
     [InlineData("nope", null)]
     public void TryOrganIdForMfdPage_maps(string page, string? organ)
     {
@@ -139,5 +140,24 @@ public class SoftOrganMfdGlanceTests
         Assert.NotNull(body);
         Assert.Contains("report latch glance · idle", body);
         Assert.Contains("MarkdownPreview MFD", body);
+    }
+
+    [Fact]
+    public void TryFormatFromJson_refactor_includes_hotspots()
+    {
+        const string json = """
+            {
+              "schema": "cide_refactor_latch/v1",
+              "active": true,
+              "pulse": "refactor · hotspots=3 · go=refactor",
+              "hotspot_count": 3
+            }
+            """;
+
+        var body = SoftOrganMfdGlance.TryFormatFromJson("refactor", json);
+        Assert.NotNull(body);
+        Assert.Contains("refactor latch glance · active", body);
+        Assert.Contains("hotspots=3", body);
+        Assert.Contains("RelatedFiles MFD", body);
     }
 }
