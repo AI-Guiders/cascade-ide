@@ -57,6 +57,53 @@ public sealed class SoftOrganChromeAggregator
         }
     }
 
+    /// <summary>Human glass: compact organ chips (label + tooltip), not multiline chrome_hint prose.</summary>
+    public readonly record struct Chip(string Id, string Label, string ToolTip, bool Hot);
+
+    public readonly record struct ChipBand(IReadOnlyList<Chip> Visible, int HiddenCount, bool IsExpanded)
+    {
+        public bool HasContent => Visible.Count > 0;
+        public bool HasOverflow => HiddenCount > 0 || IsExpanded;
+    }
+
+    public ChipBand SnapshotChips(int maxVisible = 6)
+    {
+        lock (_gate)
+        {
+            var ordered = HintCandidatesUnlocked()
+                .OrderBy(h => h.Priority)
+                .ThenBy(h => h.Id, StringComparer.Ordinal)
+                .ToList();
+
+            if (ordered.Count == 0)
+            {
+                _expanded = false;
+                return new ChipBand(Array.Empty<Chip>(), 0, false);
+            }
+
+            if (maxVisible < 1)
+                maxVisible = 6;
+
+            static Chip[] Map(IEnumerable<SoftOrganChromeDensityPolicy.Hint> hints) =>
+                hints.Select(h => new Chip(
+                    h.Id,
+                    SoftOrganChromeDensityPolicy.ShortLabel(h.Id),
+                    h.Text,
+                    SoftOrganChromeDensityPolicy.LooksHot(h.Text))).ToArray();
+
+            if (ordered.Count <= maxVisible)
+            {
+                _expanded = false;
+                return new ChipBand(Map(ordered), 0, false);
+            }
+
+            if (_expanded)
+                return new ChipBand(Map(ordered), 0, true);
+
+            return new ChipBand(Map(ordered.Take(maxVisible)), ordered.Count - maxVisible, false);
+        }
+    }
+
     /// <summary>Store or clear chrome_hint for a catalog SoftOrgan id; unknown ids are ignored.</summary>
     public void Apply(string organId, string? chromeHint)
     {

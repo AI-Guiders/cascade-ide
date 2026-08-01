@@ -60,29 +60,43 @@
         <Border Grid.Column="1" Background="{StaticResource Glass.BgPanel}" BorderBrush="{StaticResource Glass.Border}" BorderThickness="1" CornerRadius="4" Padding="8,3" Margin="0,0,8,0">
           <TextBlock x:Name="TopologyBadge" Text="(F)" Foreground="{StaticResource Glass.FgMuted}" FontFamily="Consolas" FontSize="11"/>
         </Border>
-        <Border Grid.Column="2" Background="{StaticResource Glass.BgPanel}" BorderBrush="{StaticResource Glass.Border}" BorderThickness="1" CornerRadius="4" Padding="10,5">
-          <StackPanel>
-            <TextBlock x:Name="ChromeHint" Text="settings.toml · loading…" Foreground="{StaticResource Glass.FgMuted}" FontSize="12"/>
-            <!-- SoftOrgan density: top-N lines + overflow (Avalonia WorkspaceChromeBand parity). -->
-            <StackPanel x:Name="SoftOrganBand" Margin="0,2,0,0" Visibility="Collapsed">
-              <ItemsControl x:Name="SoftOrganHintLines">
+        <!-- Indication strip: chips, not prose. Full SoftOrgan text lives in ToolTip. -->
+        <Border Grid.Column="2" Background="{StaticResource Glass.BgPanel}" BorderBrush="{StaticResource Glass.Border}" BorderThickness="1" CornerRadius="4" Padding="8,4">
+          <DockPanel>
+            <Border x:Name="ChromeHintChip" DockPanel.Dock="Left" Background="{StaticResource Glass.BgRaised}"
+                    BorderBrush="{StaticResource Glass.Border}" BorderThickness="1" CornerRadius="3"
+                    Padding="6,2" Margin="0,0,6,0" ToolTip="settings.toml · loading…">
+              <TextBlock x:Name="ChromeHint" Text="CFG" Foreground="{StaticResource Glass.FgMuted}"
+                         FontFamily="Consolas" FontSize="10" FontWeight="SemiBold"/>
+            </Border>
+            <StackPanel x:Name="SoftOrganBand" Orientation="Horizontal" Visibility="Collapsed">
+              <ItemsControl x:Name="SoftOrganChips">
+                <ItemsControl.ItemsPanel>
+                  <ItemsPanelTemplate>
+                    <StackPanel Orientation="Horizontal"/>
+                  </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
                 <ItemsControl.ItemTemplate>
                   <DataTemplate>
-                    <TextBlock Text="{Binding}" Foreground="{StaticResource Glass.FgDim}" FontSize="11" Opacity="0.85"
-                               TextWrapping="Wrap"/>
+                    <Border Background="{Binding Bg}" BorderBrush="{Binding Border}" BorderThickness="1"
+                            CornerRadius="3" Padding="6,2" Margin="0,0,4,0" ToolTip="{Binding Tip}">
+                      <TextBlock Text="{Binding Label}" Foreground="{Binding Fg}"
+                                 FontFamily="Consolas" FontSize="10" FontWeight="SemiBold"/>
+                    </Border>
                   </DataTemplate>
                 </ItemsControl.ItemTemplate>
               </ItemsControl>
-              <TextBlock x:Name="SoftOrganOverflow" Text="" Foreground="{StaticResource Glass.FgDim}" FontSize="11"
-                         Opacity="0.55" Margin="0,2,0,0" Visibility="Collapsed"
-                         Cursor="Hand" ToolTip="Click to expand / collapse SoftOrgan latches"
-                         MouseLeftButtonUp="SoftOrganOverflow_OnClick"/>
+              <Border x:Name="SoftOrganOverflowHost" Visibility="Collapsed" Background="{StaticResource Glass.BgRaised}"
+                      BorderBrush="{StaticResource Glass.Border}" BorderThickness="1" CornerRadius="3"
+                      Padding="6,2" Cursor="Hand" MouseLeftButtonUp="SoftOrganOverflow_OnClick">
+                <TextBlock x:Name="SoftOrganOverflow" Text="" Foreground="{StaticResource Glass.FgDim}"
+                           FontFamily="Consolas" FontSize="10" FontWeight="SemiBold"/>
+              </Border>
             </StackPanel>
-          </StackPanel>
+          </DockPanel>
         </Border>
-        <TextBlock Grid.Column="3" VerticalAlignment="Center" Margin="12,0,0,0"
-                   Foreground="#888" FontSize="11"
-                   Text="GlassCockpit.Windows · GlassCore"/>
+        <TextBlock Grid.Column="3" VerticalAlignment="Center" Margin="10,0,0,0"
+                   Foreground="#666" FontSize="10" FontFamily="Consolas" Text="GLASS"/>
       </Grid>
     </Border>
 

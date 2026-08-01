@@ -110,4 +110,54 @@ public static class SoftOrganChromeDensityPolicy
             return null;
         return new Hint(id, text.Trim(), PriorityFor(id));
     }
+
+    /// <summary>Instrument mnemonic for human glass chips (not prose).</summary>
+    public static string ShortLabel(string id)
+    {
+        id = SoftOrganLatchCatalog.Canonicalize(id);
+        return id switch
+        {
+            "pressure" => "PRS",
+            "ignite" => "IGN",
+            "plan" => "PLAN",
+            "cabin" => "CAB",
+            "scope" => "SCP",
+            "alert" => "ALRT",
+            "eicas" => "EICAS",
+            "sa" => "SA",
+            SoftOrganLatchCatalog.SaDesk => "SA",
+            "qrh" => "QRH",
+            "ecl" => "ECL",
+            "chk" => "CHK",
+            "review" => "REV",
+            "refactor" => "REF",
+            "toolchain" => "TLC",
+            "test_desk" => "TEST",
+            "debug_desk" => "DBG",
+            "files_desk" => "FILES",
+            "find_desk" => "FIND",
+            "mcp" => "MCP",
+            "sys" => "SYS",
+            "domain" => "DOM",
+            "arch" => "ARCH",
+            "learn" => "LRN",
+            "onboard" => "ONB",
+            "webcam" => "CAM",
+            "crm" => "CRM",
+            "report" => "RPT",
+            "plugins" => "PLG",
+            _ => id.Length <= 5 ? id.ToUpperInvariant() : id[..4].ToUpperInvariant()
+        };
+    }
+
+    public static bool LooksHot(string text)
+    {
+        if (string.IsNullOrWhiteSpace(text))
+            return false;
+        return text.Contains("WARN", StringComparison.OrdinalIgnoreCase)
+            || text.Contains("FAIL", StringComparison.OrdinalIgnoreCase)
+            || text.Contains("ERROR", StringComparison.OrdinalIgnoreCase)
+            || text.Contains("ECL", StringComparison.OrdinalIgnoreCase)
+            || text.Contains("blocked", StringComparison.OrdinalIgnoreCase);
+    }
 }
