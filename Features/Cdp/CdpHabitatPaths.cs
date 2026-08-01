@@ -18,6 +18,7 @@ public static class CdpHabitatPaths
     public const string SeatsLatchFileName = "seats-LATEST.json";
     public const string LandLatchFileName = "land-LATEST.json";
     public const string SharedLatchFileName = "shared-LATEST.json";
+    public const string DiskLatchFileName = "disk-LATEST.json";
 
     public static string StateRoot =>
         Path.Combine(
@@ -37,6 +38,8 @@ public static class CdpHabitatPaths
     public static string LandLatchPath => GetLatchPath(LandLatchFileName);
 
     public static string SharedLatchPath => GetLatchPath(SharedLatchFileName);
+
+    public static string DiskLatchPath => GetLatchPath(DiskLatchFileName);
 
     /// <summary>Ensure state root exists; returns <see cref="StateRoot"/>.</summary>
     public static string EnsureStateRoot()

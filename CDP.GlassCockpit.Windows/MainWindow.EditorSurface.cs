@@ -186,6 +186,7 @@ public partial class MainWindow
         try
         {
             CodeEditor.Save(_editorPath);
+            PublishHumanDiskSave(_editorPath);
             StatusText.Text = $"glass · saved · {Path.GetFileName(_editorPath)} · {DateTime.Now:HH:mm:ss}";
         }
         catch (Exception ex)

@@ -37,6 +37,9 @@ internal sealed class LatchHub : IDisposable
     /// <summary>shared-LATEST.json path (dual-cockpit co-presence chrome).</summary>
     public event Action<string>? SharedChanged;
 
+    /// <summary>disk-LATEST.json path (agent Instant Save → AvalonEdit reload).</summary>
+    public event Action<string>? DiskChanged;
+
     /// <summary>organId, chrome_hint (null/blank = clear).</summary>
     public event Action<string, string?>? SoftOrganChanged;
 
@@ -62,6 +65,7 @@ internal sealed class LatchHub : IDisposable
         TryFireExisting(CdpHabitatPaths.SeatsLatchFileName, SeatsChanged);
         TryFireExisting(CdpHabitatPaths.LandLatchFileName, LandChanged);
         TryFireExisting(CdpHabitatPaths.SharedLatchFileName, SharedChanged);
+        TryFireExisting(CdpHabitatPaths.DiskLatchFileName, DiskChanged);
         foreach (var id in SoftOrganLatchCatalog.Ids)
             TryFireSoftOrgan(id + "-LATEST.json");
     }
@@ -90,6 +94,8 @@ internal sealed class LatchHub : IDisposable
             CdpLatchIo.PostSettledIfExists(CdpHabitatPaths.GetLatchPath(name), p => LandChanged?.Invoke(p));
         else if (name.Equals(CdpHabitatPaths.SharedLatchFileName, StringComparison.OrdinalIgnoreCase))
             CdpLatchIo.PostSettledIfExists(CdpHabitatPaths.GetLatchPath(name), p => SharedChanged?.Invoke(p));
+        else if (name.Equals(CdpHabitatPaths.DiskLatchFileName, StringComparison.OrdinalIgnoreCase))
+            CdpLatchIo.PostSettledIfExists(CdpHabitatPaths.GetLatchPath(name), p => DiskChanged?.Invoke(p));
         else if (SoftOrganLatchCatalog.TryParseFileName(name, out var organId))
             CdpLatchIo.PostSettledIfExists(CdpHabitatPaths.GetLatchPath(name), _ => ApplySoftOrganFromDisk(organId, name));
     }
