@@ -19,6 +19,8 @@ public class SoftOrganMfdGlanceTests
     [InlineData("HybridIndex", null)]
     [InlineData("WorkspaceHealth", null)]
     [InlineData("EnvironmentReadiness", null)]
+    [InlineData("Events", null)]
+    [InlineData("Hypotheses", null)]
     [InlineData("Correspondence", null)]
     [InlineData("nope", null)]
     public void TryOrganIdForMfdPage_maps(string page, string? organ)

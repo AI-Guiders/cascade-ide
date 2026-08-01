@@ -128,6 +128,21 @@ public partial class MainWindow
             return;
         }
 
+        if (string.Equals(page, "Hypotheses", StringComparison.OrdinalIgnoreCase)
+            && GlassHypothesesGlance.TryFormatFromWorkspaceRoot(_session.WorkspaceRoot) is { } hypGlance)
+        {
+            MfdBody.Text = hypGlance;
+            RefreshEicasHealth();
+            return;
+        }
+
+        if (string.Equals(page, "Events", StringComparison.OrdinalIgnoreCase))
+        {
+            MfdBody.Text = GlassEventsGlance.TryFormatCurrentHabitat();
+            RefreshEicasHealth();
+            return;
+        }
+
         MfdBody.Text = page switch
         {
             "Terminal" => FormatMfdStub("Terminal", "Glass redirected TextBox", "Avalonia ConPTY SSOT · go=sys"),
@@ -148,8 +163,8 @@ public partial class MainWindow
             "AiChatSettings" => FormatMfdStub("AiChatSettings", "options/ignite/mcp SoftOrgan", "settings.toml SSOT"),
             "WorkspaceHealth" => FormatMfdStub("WorkspaceHealth", "Glass FS status glance", "Avalonia IdeHealth SSOT"),
             "EnvironmentReadiness" => FormatMfdStub("EnvironmentReadiness", "Glass env probe glance", "Avalonia EnvReady SSOT"),
-            "Events" => FormatMfdStub("Events", "CIDE orphan page", "Glass stub"),
-            "Hypotheses" => FormatMfdStub("Hypotheses", "CIDE orphan page", "Glass stub"),
+            "Events" => FormatMfdStub("Events", "Glass latch/catalog glance", "Avalonia EventsMFD SSOT"),
+            "Hypotheses" => FormatMfdStub("Hypotheses", "Glass JSON status glance", "Avalonia Hypotheses SSOT"),
             "Editor" => FormatMfdStub("Editor", "on Forward", "primary_work_surface=editor"),
             "Chat" => GlassIntercomPresence.FormatChatMfdGlance(),
             _ => FormatMfdStub(page, "instrument peel later", "CabinGlass may select")
