@@ -49,6 +49,7 @@ public class SoftOrganMfdGlanceTests
         Assert.Contains("failed=3", body);
         Assert.Contains("TestsMfdPageView", body);
         Assert.Contains("□ Glass peel", body);
+        Assert.Contains("┌ host", body);
     }
 
     [Fact]

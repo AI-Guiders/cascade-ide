@@ -56,6 +56,7 @@ public static class SoftOrganMfdGlance
     }
 
     /// <summary>Format SoftOrgan latch JSON into MFD body (testable; no I/O).</summary>
+    /// <summary>Format SoftOrgan latch JSON into MFD body (testable; no I/O).</summary>
     public static string? TryFormatFromJson(string organId, string json)
     {
         if (string.IsNullOrWhiteSpace(json))
@@ -84,32 +85,32 @@ public static class SoftOrganMfdGlance
                 sb.AppendLine(pulseText);
             }
 
-            if (root.TryGetProperty("chrome_hint", out var hintEl)
-                && hintEl.ValueKind == JsonValueKind.String
-                && hintEl.GetString() is { Length: > 0 } hint)
-            {
-                var hintText = hint.Trim();
-                if (!string.Equals(hintText, pulseText, StringComparison.Ordinal))
-                    sb.AppendLine(hintText);
-            }
+            // Compact metrics chip row (skip stamped — noise for humans).
+            var chips = new List<string>();
+            AppendChipInt(root, "ok_count", "ok", chips);
+            AppendChipInt(root, "total_count", "total", chips);
+            AppendChipInt(root, "failed", "failed", chips);
+            AppendChipInt(root, "skipped", "skipped", chips);
+            AppendChipInt(root, "file_count", "files", chips);
+            AppendChipInt(root, "high_risk", "high_risk", chips);
+            AppendChipInt(root, "mounted", "mounted", chips);
+            AppendChipInt(root, "hotspot_count", "hotspots", chips);
+            AppendChipInt(root, "bp_count", "bp", chips);
+            AppendChipBool(root, "machine_ok", "machine_ok", chips);
+            AppendChipBool(root, "stopped", "stopped", chips);
+            AppendChipBool(root, "active_dap", "active_dap", chips);
+            AppendChipString(root, "verdict", "verdict", chips);
+            AppendChipString(root, "profile", "profile", chips);
+            AppendChipString(root, "mode", "mode", chips);
+            // seat only when not already in pulse
+            if (root.TryGetProperty("seat", out var seatEl)
+                && seatEl.ValueKind == JsonValueKind.String
+                && seatEl.GetString() is { Length: > 0 } seat
+                && (pulseText is null || pulseText.Contains("seat=", StringComparison.Ordinal) is false))
+                chips.Add("seat=" + seat.Trim());
 
-            AppendIfInt(root, "ok_count", "ok", sb);
-            AppendIfInt(root, "total_count", "total", sb);
-            AppendIfInt(root, "failed", "failed", sb);
-            AppendIfInt(root, "skipped", "skipped", sb);
-            AppendIfInt(root, "file_count", "files", sb);
-            AppendIfInt(root, "high_risk", "high_risk", sb);
-            AppendIfInt(root, "mounted", "mounted", sb);
-            AppendIfInt(root, "hotspot_count", "hotspots", sb);
-            AppendIfInt(root, "bp_count", "bp", sb);
-            AppendIfBool(root, "machine_ok", "machine_ok", sb);
-            AppendIfBool(root, "stopped", "stopped", sb);
-            AppendIfBool(root, "active_dap", "active_dap", sb);
-            AppendIfString(root, "seat", "seat", sb);
-            AppendIfString(root, "profile", "profile", sb);
-            AppendIfString(root, "mode", "mode", sb);
-            AppendIfString(root, "verdict", "verdict", sb);
-            AppendIfString(root, "stamped_utc", "stamped", sb);
+            if (chips.Count > 0)
+                sb.AppendLine(string.Join(" · ", chips));
 
             AppendHostFootnote(title, sb);
 
@@ -124,42 +125,46 @@ public static class SoftOrganMfdGlance
 
     static void AppendHostFootnote(string title, StringBuilder sb)
     {
-        var line = title.ToLowerInvariant() switch
+        var host = title.ToLowerInvariant() switch
         {
-            "sys" => "□ Glass peel · ■ Avalonia TerminalMfdPageView · ConPTY",
-            "toolchain" => "□ Glass peel · ■ Avalonia BuildMfdPageView",
-            "test_desk" => "□ Glass peel · ■ Avalonia TestsMfdPageView",
-            "debug_desk" => "□ Glass peel · ■ Avalonia DebugStackMfdPageView",
-            "review" => "□ Glass peel · ■ Avalonia ProblemsMfdPageView",
-            "arch" => "□ Glass peel · ■ Avalonia WorkspaceNavigationMapView",
-            "mcp" => "□ Glass peel · ■ AiChatSettings · mcp SoftOrgan",
-            "report" => "□ Glass peel · ■ Avalonia MarkdownPreview",
-            "refactor" => "□ Glass peel · ■ Avalonia RelatedFilesMfdPageView",
+            "sys" => "Avalonia TerminalMfdPageView · ConPTY",
+            "toolchain" => "Avalonia BuildMfdPageView",
+            "test_desk" => "Avalonia TestsMfdPageView",
+            "debug_desk" => "Avalonia DebugStackMfdPageView",
+            "review" => "Avalonia ProblemsMfdPageView",
+            "arch" => "Avalonia WorkspaceNavigationMapView",
+            "mcp" => "AiChatSettings · mcp SoftOrgan",
+            "report" => "Avalonia MarkdownPreview",
+            "refactor" => "Avalonia RelatedFilesMfdPageView",
             _ => null
         };
-        if (line is null)
+        if (host is null)
             return;
-        sb.AppendLine().AppendLine(line);
+
+        sb.AppendLine("┌ host ───────────────┐");
+        sb.AppendLine("│ □ Glass peel        │");
+        sb.Append("│ ■ ").Append(host).AppendLine();
+        sb.AppendLine("└─────────────────────┘");
     }
 
-    static void AppendIfInt(JsonElement root, string prop, string label, StringBuilder sb)
+    static void AppendChipInt(JsonElement root, string prop, string label, List<string> chips)
     {
         if (root.TryGetProperty(prop, out var el) && el.TryGetInt32(out var n))
-            sb.Append(label).Append('=').Append(n).AppendLine();
+            chips.Add(label + "=" + n);
     }
 
-    static void AppendIfBool(JsonElement root, string prop, string label, StringBuilder sb)
+    static void AppendChipBool(JsonElement root, string prop, string label, List<string> chips)
     {
         if (root.TryGetProperty(prop, out var el)
             && (el.ValueKind is JsonValueKind.True or JsonValueKind.False))
-            sb.Append(label).Append('=').Append(el.GetBoolean() ? "true" : "false").AppendLine();
+            chips.Add(label + "=" + (el.GetBoolean() ? "true" : "false"));
     }
 
-    static void AppendIfString(JsonElement root, string prop, string label, StringBuilder sb)
+    static void AppendChipString(JsonElement root, string prop, string label, List<string> chips)
     {
         if (root.TryGetProperty(prop, out var el)
             && el.ValueKind == JsonValueKind.String
             && el.GetString() is { Length: > 0 } s)
-            sb.Append(label).Append('=').Append(s.Trim()).AppendLine();
+            chips.Add(label + "=" + s.Trim());
     }
 }
