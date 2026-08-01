@@ -26,6 +26,7 @@ public partial class MainWindow : Window
         InitCommandPalette();
         InitCascadeChord();
 
+        EnsureEditorChrome();
         TryOpenDogfoodFile();
 
         _latches = new LatchHub();
@@ -57,6 +58,7 @@ public partial class MainWindow : Window
             DisposeBuildSession();
             DisposeTestsSession();
             DisposeGitSession();
+            DisposeEditorChrome();
             _hosts.Dispose();
             _latches.Dispose();
         };

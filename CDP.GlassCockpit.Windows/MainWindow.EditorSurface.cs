@@ -4,7 +4,6 @@ using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using ICSharpCode.AvalonEdit.Highlighting;
 using Microsoft.Win32;
 
 namespace CDP.GlassCockpit.Windows;
@@ -13,6 +12,20 @@ namespace CDP.GlassCockpit.Windows;
 public partial class MainWindow
 {
     string? _editorPath;
+    GlassAvalonEditChrome? _editorChrome;
+
+    void EnsureEditorChrome()
+    {
+        if (_editorChrome is not null)
+            return;
+        _editorChrome = new GlassAvalonEditChrome(CodeEditor);
+    }
+
+    void DisposeEditorChrome()
+    {
+        _editorChrome?.Dispose();
+        _editorChrome = null;
+    }
 
     void MountEditor(ContentControl host)
     {
@@ -80,11 +93,11 @@ public partial class MainWindow
 
     void OpenCodeFile(string path, int? line = null)
     {
+        EnsureEditorChrome();
         CodeEditor.Load(path);
-        CodeEditor.SyntaxHighlighting =
-            HighlightingManager.Instance.GetDefinitionByExtension(Path.GetExtension(path))
-            ?? HighlightingManager.Instance.GetDefinition("C#");
+        CodeEditor.SyntaxHighlighting = GlassAvalonEditTheme.ResolveDefinition(path);
         GlassAvalonEditTheme.ApplyDarkReadable(CodeEditor);
+        _editorChrome!.SetModeForPath(path);
         _editorPath = path;
         RefreshEditorSharedChrome();
 

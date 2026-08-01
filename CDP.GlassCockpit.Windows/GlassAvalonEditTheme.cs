@@ -1,5 +1,5 @@
 #nullable enable
-using System.Windows;
+using System.IO;
 using System.Windows.Media;
 using ICSharpCode.AvalonEdit;
 using ICSharpCode.AvalonEdit.Highlighting;
@@ -7,14 +7,16 @@ using ICSharpCode.AvalonEdit.Highlighting;
 namespace CDP.GlassCockpit.Windows;
 
 /// <summary>
-/// Stock AvalonEdit C# colours assume a light canvas — on dark glass they become
-/// unreadable. Remap to a calm GitHub-Dark / VS Dark+ palette (ADHD-friendly contrast).
+/// Native AvalonEdit path (XSHD + HighlightingManager). Dark canvas + one-shot dark remap of stock defs.
+/// No TextMate on WPF — that binding exists only for AvaloniaEdit.
 /// </summary>
 internal static class GlassAvalonEditTheme
 {
     static readonly Color Canvas = Color.FromRgb(0x0D, 0x11, 0x17);
     static readonly Color Ink = Color.FromRgb(0xE6, 0xED, 0xF3);
     static readonly Color Gutter = Color.FromRgb(0x6E, 0x76, 0x81);
+    static readonly object Gate = new();
+    static readonly HashSet<string> Remapped = new(StringComparer.Ordinal);
 
     static readonly Dictionary<string, Color> Named =
         new(StringComparer.OrdinalIgnoreCase)
@@ -22,6 +24,7 @@ internal static class GlassAvalonEditTheme
             ["Comment"] = Color.FromRgb(0x8B, 0x94, 0x9E),
             ["XmlComment"] = Color.FromRgb(0x8B, 0x94, 0x9E),
             ["String"] = Color.FromRgb(0xA5, 0xD6, 0xFF),
+            ["CharString"] = Color.FromRgb(0xA5, 0xD6, 0xFF),
             ["StringInterpolation"] = Color.FromRgb(0xA5, 0xD6, 0xFF),
             ["Char"] = Color.FromRgb(0xA5, 0xD6, 0xFF),
             ["Preprocessor"] = Color.FromRgb(0x8B, 0x94, 0x9E),
@@ -47,8 +50,48 @@ internal static class GlassAvalonEditTheme
             ["TypeKeywords"] = Color.FromRgb(0xFF, 0xA6, 0x57),
             ["SemanticKeywords"] = Color.FromRgb(0xFF, 0xA6, 0x57),
             ["NumberLiteral"] = Color.FromRgb(0x79, 0xC0, 0xFF),
+            ["Digits"] = Color.FromRgb(0x79, 0xC0, 0xFF),
             ["MethodName"] = Color.FromRgb(0xD2, 0xA8, 0xFF),
+            ["XmlTag"] = Color.FromRgb(0x7E, 0xE7, 0x87),
+            ["XmlAttribute"] = Color.FromRgb(0x79, 0xC0, 0xFF),
+            ["XmlAttributeQuotes"] = Color.FromRgb(0xA5, 0xD6, 0xFF),
+            ["XmlAttributeValue"] = Color.FromRgb(0xA5, 0xD6, 0xFF),
+            ["XmlName"] = Color.FromRgb(0x7E, 0xE7, 0x87),
+            ["HtmlElement"] = Color.FromRgb(0x7E, 0xE7, 0x87),
+            ["HtmlAttributeName"] = Color.FromRgb(0x79, 0xC0, 0xFF),
+            ["HtmlAttributeValue"] = Color.FromRgb(0xA5, 0xD6, 0xFF),
+            ["ScriptTag"] = Color.FromRgb(0xFF, 0x7B, 0x72),
+            ["JavaScriptKeyword"] = Color.FromRgb(0xFF, 0x7B, 0x72),
+            ["JavaScriptString"] = Color.FromRgb(0xA5, 0xD6, 0xFF),
+            ["JavaScriptNumber"] = Color.FromRgb(0x79, 0xC0, 0xFF),
+            ["JavaScriptComment"] = Color.FromRgb(0x8B, 0x94, 0x9E),
         };
+
+    public static IHighlightingDefinition? ResolveDefinition(string path)
+    {
+        var ext = Path.GetExtension(path);
+        var byExt = HighlightingManager.Instance.GetDefinitionByExtension(ext);
+        if (byExt is not null)
+            return RemapOnce(byExt);
+
+        var name = ext.ToLowerInvariant() switch
+        {
+            ".cs" or ".csx" => "C#",
+            ".xaml" or ".axaml" or ".csproj" or ".props" or ".targets" or ".config" or ".xml" => "XML",
+            ".json" or ".jsonc" => "JavaScript",
+            ".md" or ".markdown" => "MarkDown",
+            ".js" or ".mjs" or ".cjs" => "JavaScript",
+            ".html" or ".htm" => "HTML",
+            ".css" => "CSS",
+            _ => null
+        };
+
+        if (name is null)
+            return null;
+
+        var def = HighlightingManager.Instance.GetDefinition(name);
+        return def is null ? null : RemapOnce(def);
+    }
 
     public static void ApplyDarkReadable(TextEditor editor)
     {
@@ -66,23 +109,53 @@ internal static class GlassAvalonEditTheme
         editor.Options.AllowScrollBelowDocument = true;
         editor.TextArea.TextView.LinkTextForegroundBrush = new SolidColorBrush(Color.FromRgb(0x79, 0xC0, 0xFF));
 
-        var def = editor.SyntaxHighlighting;
-        if (def is null)
-            return;
+        if (editor.SyntaxHighlighting is { } def)
+            editor.SyntaxHighlighting = RemapOnce(def);
+    }
 
-        foreach (var color in def.NamedHighlightingColors)
+    static IHighlightingDefinition RemapOnce(IHighlightingDefinition def)
+    {
+        var key = def.Name ?? "";
+        lock (Gate)
         {
-            color.Background = null;
-            color.FontWeight = null;
-            color.Underline = null;
-            if (Named.TryGetValue(color.Name ?? "", out var fg))
-                color.Foreground = new SimpleHighlightingBrush(fg);
-            else
-                color.Foreground = new SimpleHighlightingBrush(Ink);
-        }
+            if (!Remapped.Add(key))
+                return def;
 
-        // Force TextView to rebuild colourizers with remapped brushes.
-        editor.SyntaxHighlighting = null;
-        editor.SyntaxHighlighting = def;
+            foreach (var color in def.NamedHighlightingColors)
+            {
+                color.Background = null;
+                color.Underline = null;
+                if (Named.TryGetValue(color.Name ?? "", out var fg))
+                {
+                    color.Foreground = new SimpleHighlightingBrush(fg);
+                    continue;
+                }
+
+                // Leave unknown names alone unless they look like light-theme black ink.
+                if (LooksUnreadableOnDark(color.Foreground))
+                    color.Foreground = new SimpleHighlightingBrush(Ink);
+            }
+
+            return def;
+        }
+    }
+
+    static bool LooksUnreadableOnDark(HighlightingBrush? brush)
+    {
+        if (brush is null)
+            return true;
+        try
+        {
+            var c = brush.GetColor(null);
+            if (c is null)
+                return true;
+            // Relative luminance — dark strokes vanish on #0D1117.
+            var l = (0.2126 * c.Value.R + 0.7152 * c.Value.G + 0.0722 * c.Value.B) / 255.0;
+            return l < 0.35;
+        }
+        catch
+        {
+            return true;
+        }
     }
 }
