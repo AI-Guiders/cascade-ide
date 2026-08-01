@@ -12,6 +12,7 @@ namespace CascadeIDE.SoftOrgan;
 /// SoftOrganKind.FilesDesk is FM utility (CabinGlass pin only) — do not overlay FM latch.
 /// RelatedFiles SoftOrganMfdGlance stays ←refactor; SoftOrganKind.FindDesk shares CabinGlass pin
 /// but SoftOrganMfdGlance is 1:1 — do not displace refactor with find_desk (search ≠ debt/blast).
+/// Live related host SSOT = Avalonia RelatedFilesMfdPageView — Glass stays latch glance until WPF peel.
 /// SemanticMap SoftOrganMfdGlance ← arch SoftOrgan; live graph SSOT = Avalonia WorkspaceNavigationMapView
 /// (Skia) — Glass stays latch glance until WPF peel (do not dump adjacency into TextBlock).
 /// Problems SoftOrganMfdGlance ← review SoftOrgan; live list SSOT = Avalonia ProblemsMfdPageView
@@ -128,7 +129,7 @@ public static class SoftOrganMfdGlance
             else if (string.Equals(title, "report", StringComparison.OrdinalIgnoreCase))
                 sb.AppendLine().AppendLine("(MarkdownPreview MFD ← report SoftOrgan; live host = CIDE Avalonia MarkdigMarkdownPreviewRenderer / MarkdownPreviewTool; Glass WPF host deferred — latch glance only.)");
             else if (string.Equals(title, "refactor", StringComparison.OrdinalIgnoreCase))
-                sb.AppendLine().AppendLine("(RelatedFiles MFD ← refactor SoftOrgan; find_usages host later.)");
+                sb.AppendLine().AppendLine("(RelatedFiles MFD ← refactor SoftOrgan; live host = CIDE Avalonia Views/RelatedFilesMfdPageView + WorkspaceNavigationMapViewModel; Glass WPF host deferred — latch glance only.)");
 
             var body = sb.ToString().TrimEnd();
             return body.Length == 0 ? null : body;

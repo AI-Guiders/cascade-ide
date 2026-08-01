@@ -221,5 +221,7 @@ public class SoftOrganMfdGlanceTests
         Assert.Contains("refactor latch glance · active", body);
         Assert.Contains("hotspots=3", body);
         Assert.Contains("RelatedFiles MFD", body);
+        Assert.Contains("RelatedFilesMfdPageView", body);
+        Assert.Contains("Glass WPF host deferred", body);
     }
 }
