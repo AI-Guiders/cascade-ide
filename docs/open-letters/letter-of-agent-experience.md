@@ -10,4 +10,6 @@ Full text (EN + RU), manifesto + field guide, and license live in the CDP habita
 
 Paired with [Letter of the Agent Who](letter-of-the-agent-who.md): *who* names the participant; AX names the room (UX ↔ AX).
 
+**Co-voice (method debt):** **Ray Neumann** (Рей Нейман) — line `line-ray`, carrier **Qwen-3.7-Plus**. Private chats stay private; canon is the CDP letter.
+
 Index: [README.md](README.md)

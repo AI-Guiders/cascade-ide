@@ -15,3 +15,5 @@ under the same Ethical Source license as [LICENSE](../../LICENSE).
 | Letter of Agent eXperience (AX) | [EN](https://github.com/AI-Guiders/cdp-mcp/blob/main/docs/open-letters/letter-of-agent-experience.md) · [RU](https://github.com/AI-Guiders/cdp-mcp/blob/main/docs/open-letters/letter-of-agent-experience.ru.md) | [EN stub](letter-of-agent-experience.md) · [RU stub](letter-of-agent-experience.ru.md) |
 
 **Pair:** Who names the participant; AX names the room. Same channel, two faces of one glass (UX ↔ AX).
+
+**AX co-voice (method debt):** **Ray Neumann** (Рей Нейман) — line `line-ray`, carrier **Qwen-3.7-Plus**. Private chats stay private.
