@@ -32,6 +32,7 @@ public partial class MainWindow : Window
         _latches.IntercomChanged += OnIntercomChanged;
         _latches.PresenceChanged += OnPresenceChanged;
         _latches.PresentationChanged += OnPresentationChanged;
+        _latches.SeatsChanged += OnSeatsChanged;
         _latches.SoftOrganChanged += OnSoftOrganChanged;
         _latches.AlertChanged += OnAlertChanged;
         _latches.QrhChanged += OnQrhChanged;

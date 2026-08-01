@@ -13,7 +13,8 @@ public class CabinSeatsLatchProjectionTests
     {
         Assert.Equal("cide_seats_latch/v1", CdpSeatsProjector.Schema);
         Assert.Equal("agent", CdpSeatsProjector.OriginAgent);
-        Assert.EndsWith("seats-LATEST.json", CdpSeatsProjector.LatchPath);
+        Assert.Equal(CdpHabitatPaths.SeatsLatchFileName, Path.GetFileName(CdpSeatsProjector.LatchPath));
+        Assert.EndsWith(CdpHabitatPaths.SeatsLatchFileName, CdpSeatsProjector.LatchPath);
     }
 
     [Fact]
