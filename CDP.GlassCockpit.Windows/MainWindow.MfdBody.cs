@@ -78,7 +78,7 @@ public partial class MainWindow
             "Build" => "Build page host (Glass WPF).\n\nMSBuild/output SSOT = CIDE Avalonia Views/BuildMfdPageView + Features/Build (BuildOutputPanelViewModel).\nGlass stays SoftOrgan toolchain latch glance until a WPF build-log host peel.\n\n(toolchain latch glance missing.)",
             "SolutionExplorer" => "Solution Explorer host (Glass WPF).\n\nNo .sln under workspace root yet.\nFull tree SSOT = CIDE Avalonia SolutionExplorerView.\n\n(workspace: " + (_session.WorkspaceRoot ?? "?") + ")",
             "SemanticMap" => "Semantic Map host.\n\nGraph surface later (not adjacency dump).",
-            "Tests" => "Tests page host.\n\ncdp_test / test_desk projection (CabinGlass catalog).",
+            "Tests" => "Tests page host (Glass WPF).\n\nLive host SSOT = CIDE Avalonia Views/TestsMfdPageView.\nGlass stays SoftOrgan test_desk latch glance until a WPF test-results host peel.\n\n(test_desk latch glance missing — go=test_desk when seat live.)",
             "HybridIndex" => "Hybrid Index host.\n\ncodebase_index organ → glass MFD (stub peel).",
             "RelatedFiles" => "Related Files host.\n\nfind_desk / related / refactor organ projection.",
             "Correspondence" => "Correspondence host.\n\ncrs organ projection — later inbox chrome.",

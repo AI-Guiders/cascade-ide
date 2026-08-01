@@ -28,6 +28,7 @@ public partial class MainWindowViewModel
     public bool ShowAgentCrmChromeHint => !string.IsNullOrWhiteSpace(AgentCrmChromeHint);
     public bool ShowAgentWebcamChromeHint => !string.IsNullOrWhiteSpace(AgentWebcamChromeHint);
     public bool ShowAgentToolchainChromeHint => !string.IsNullOrWhiteSpace(AgentToolchainChromeHint);
+    public bool ShowAgentTestDeskChromeHint => !string.IsNullOrWhiteSpace(AgentTestDeskChromeHint);
     public bool ShowAgentPluginsChromeHint => !string.IsNullOrWhiteSpace(AgentPluginsChromeHint);
     public bool ShowAgentRefactorChromeHint => !string.IsNullOrWhiteSpace(AgentRefactorChromeHint);
     public bool ShowAgentReviewChromeHint => !string.IsNullOrWhiteSpace(AgentReviewChromeHint);
@@ -97,6 +98,7 @@ public partial class MainWindowViewModel
             ("refactor", AgentRefactorChromeHint),
             ("plugins", AgentPluginsChromeHint),
             ("toolchain", AgentToolchainChromeHint),
+            ("test_desk", AgentTestDeskChromeHint),
             ("crm", AgentCrmChromeHint),
             ("report", AgentReportChromeHint),
             ("webcam", AgentWebcamChromeHint),
@@ -163,6 +165,9 @@ public partial class MainWindowViewModel
 
     public void ApplyToolchainChromeHint(string? hint) =>
         ApplyChromeHint(AgentToolchainChromeHint, hint, v => AgentToolchainChromeHint = v);
+
+    public void ApplyTestDeskChromeHint(string? hint) =>
+        ApplyChromeHint(AgentTestDeskChromeHint, hint, v => AgentTestDeskChromeHint = v);
 
     public void ApplyPluginsChromeHint(string? hint) =>
         ApplyChromeHint(AgentPluginsChromeHint, hint, v => AgentPluginsChromeHint = v);

@@ -20,6 +20,7 @@ public static class SoftOrganMfdGlance
         return mfdPage.Trim() switch
         {
             "Build" => "toolchain",
+            "Tests" => "test_desk",
             "Terminal" => "sys",
             "Problems" => "review",
             "SemanticMap" => "arch",
@@ -83,6 +84,8 @@ public static class SoftOrganMfdGlance
 
             AppendIfInt(root, "ok_count", "ok", sb);
             AppendIfInt(root, "total_count", "total", sb);
+            AppendIfInt(root, "failed", "failed", sb);
+            AppendIfInt(root, "skipped", "skipped", sb);
             AppendIfInt(root, "file_count", "files", sb);
             AppendIfInt(root, "high_risk", "high_risk", sb);
             AppendIfInt(root, "mounted", "mounted", sb);
@@ -91,12 +94,15 @@ public static class SoftOrganMfdGlance
             AppendIfString(root, "seat", "seat", sb);
             AppendIfString(root, "profile", "profile", sb);
             AppendIfString(root, "mode", "mode", sb);
+            AppendIfString(root, "verdict", "verdict", sb);
             AppendIfString(root, "stamped_utc", "stamped", sb);
 
             if (string.Equals(title, "sys", StringComparison.OrdinalIgnoreCase))
                 sb.AppendLine().AppendLine("(Terminal: CIDE Avalonia ConPTY = Views/TerminalMfdPageView; Glass WPF host deferred — latch glance only.)");
             else if (string.Equals(title, "toolchain", StringComparison.OrdinalIgnoreCase))
                 sb.AppendLine().AppendLine("(Build: CIDE Avalonia BuildMfdPageView + BuildOutputPanel; Glass WPF host deferred — latch glance only.)");
+            else if (string.Equals(title, "test_desk", StringComparison.OrdinalIgnoreCase))
+                sb.AppendLine().AppendLine("(Tests MFD ← test_desk SoftOrgan; live host = CIDE Avalonia TestsMfdPageView; Glass WPF host deferred — latch glance only.)");
             else if (string.Equals(title, "review", StringComparison.OrdinalIgnoreCase))
                 sb.AppendLine().AppendLine("(Problems MFD ← review SoftOrgan; Roslyn Problems host later.)");
             else if (string.Equals(title, "arch", StringComparison.OrdinalIgnoreCase))

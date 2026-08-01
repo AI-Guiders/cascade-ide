@@ -7,6 +7,7 @@ public class SoftOrganMfdGlanceTests
 {
     [Theory]
     [InlineData("Build", "toolchain")]
+    [InlineData("Tests", "test_desk")]
     [InlineData("Terminal", "sys")]
     [InlineData("Problems", "review")]
     [InlineData("SemanticMap", "arch")]
@@ -17,6 +18,32 @@ public class SoftOrganMfdGlanceTests
     public void TryOrganIdForMfdPage_maps(string page, string? organ)
     {
         Assert.Equal(organ, SoftOrganMfdGlance.TryOrganIdForMfdPage(page));
+    }
+
+    [Fact]
+    public void TryFormatFromJson_test_desk_includes_counts_and_verdict()
+    {
+        const string json = """
+            {
+              "schema": "cide_test_desk_latch/v1",
+              "active": true,
+              "pulse": "test_desk · retest · FAIL 2/5",
+              "verdict": "retest",
+              "ok_count": 2,
+              "total_count": 5,
+              "failed": 3,
+              "skipped": 0
+            }
+            """;
+
+        var body = SoftOrganMfdGlance.TryFormatFromJson("test_desk", json);
+        Assert.NotNull(body);
+        Assert.Contains("test_desk latch glance · active", body);
+        Assert.Contains("verdict=retest", body);
+        Assert.Contains("ok=2", body);
+        Assert.Contains("total=5", body);
+        Assert.Contains("failed=3", body);
+        Assert.Contains("TestsMfdPageView", body);
     }
 
     [Fact]
