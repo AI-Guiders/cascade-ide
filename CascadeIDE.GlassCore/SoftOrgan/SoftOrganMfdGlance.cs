@@ -122,7 +122,7 @@ public static class SoftOrganMfdGlance
             else if (string.Equals(title, "mcp", StringComparison.OrdinalIgnoreCase))
                 sb.AppendLine().AppendLine("(AiChatSettings MFD ← mcp SoftOrgan; mount panel later.)");
             else if (string.Equals(title, "report", StringComparison.OrdinalIgnoreCase))
-                sb.AppendLine().AppendLine("(MarkdownPreview MFD ← report SoftOrgan; md host later.)");
+                sb.AppendLine().AppendLine("(MarkdownPreview MFD ← report SoftOrgan; live host = CIDE Avalonia MarkdigMarkdownPreviewRenderer / MarkdownPreviewTool; Glass WPF host deferred — latch glance only.)");
             else if (string.Equals(title, "refactor", StringComparison.OrdinalIgnoreCase))
                 sb.AppendLine().AppendLine("(RelatedFiles MFD ← refactor SoftOrgan; find_usages host later.)");
 
