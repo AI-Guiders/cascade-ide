@@ -5,7 +5,8 @@ using CascadeIDE.SoftOrgan;
 
 namespace CDP.GlassCockpit.Windows;
 
-/// <summary>MFD page select + latch glance / stub body (CabinGlass + SoftOrganMfdGlance).</summary>
+/// <summary>MFD page select + latch glance / stub body (CabinGlass + SoftOrganMfdGlance).
+/// Editor: AvalonEdit mounts on MfdEditorHost when Forward=intercom (ADR 0120); stub only if editor stays on Forward.</summary>
 public partial class MainWindow
 {
     void SelectMfdPage(string? page)
@@ -94,9 +95,7 @@ public partial class MainWindow
             "EnvironmentReadiness" => FormatMfdStub("EnvironmentReadiness", "CIDE orphan page", "LSP/dotnet glance"),
             "Events" => FormatMfdStub("Events", "CIDE orphan page", "Glass stub"),
             "Hypotheses" => FormatMfdStub("Hypotheses", "CIDE orphan page", "Glass stub"),
-            "Editor" => _session.IsIntercomForward
-                ? FormatMfdStub("Editor", "AvalonEdit here when Forward=intercom", "ADR 0120")
-                : FormatMfdStub("Editor", "on Forward", "primary_work_surface=editor"),
+            "Editor" => FormatMfdStub("Editor", "on Forward", "primary_work_surface=editor"),
             "Chat" => GlassIntercomPresence.FormatChatMfdGlance(),
             _ => FormatMfdStub(page, "instrument peel later", "CabinGlass may select")
         };
