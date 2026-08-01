@@ -55,7 +55,7 @@ Glass is a **projector** (latches → pixels), not the agent loop. With CDP live
 5. **Forward / editor** — AvalonEdit mount + layout sync (LayoutSurface / EditorSurface).
 6. **MFD glance** — one page fills M (title `M · {page}`); catalog hidden — switch via seats/palette, not mouse list. Build/Terminal/… hosts; peers via SoftOrgan glance/stub.
 7. **PFD** — one Plan glance (no subtitle stack / nav list).
-8. **AE** — Cascadia 14.5 · GitHub-Dark canvas · stock XSHD dark remap (`GlassAvalonEditTheme`) · folding/search/current-line (`GlassAvalonEditChrome`). No TextMate on WPF (Avalonia-only).
+8. **AE** — Cascadia 14.5 · TextMateSharp Dark+ (`GlassAvalonEditTextMate`, WPF port of AvaloniaEdit.TextMate) · XSHD fallback · folding/search/current-line (`GlassAvalonEditChrome`).
 9. **Crash note** — Cursor OOM / «Window terminated» on Avalonia CIDE ≠ Glass failure; Glass process name `CDP.GlassCockpit.Windows`.
 
 Point `[cockpit_host] exe` at this Glass exe if Start/Stop should launch WPF (not `publish/CascadeIDE.exe`).

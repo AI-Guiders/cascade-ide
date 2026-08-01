@@ -13,18 +13,22 @@ public partial class MainWindow
 {
     string? _editorPath;
     GlassAvalonEditChrome? _editorChrome;
+    GlassAvalonEditTextMate? _editorTextMate;
 
     void EnsureEditorChrome()
     {
         if (_editorChrome is not null)
             return;
         _editorChrome = new GlassAvalonEditChrome(CodeEditor);
+        _editorTextMate ??= new GlassAvalonEditTextMate(CodeEditor);
     }
 
     void DisposeEditorChrome()
     {
         _editorChrome?.Dispose();
         _editorChrome = null;
+        _editorTextMate?.Dispose();
+        _editorTextMate = null;
     }
 
     void MountEditor(ContentControl host)
@@ -95,8 +99,9 @@ public partial class MainWindow
     {
         EnsureEditorChrome();
         CodeEditor.Load(path);
-        CodeEditor.SyntaxHighlighting = GlassAvalonEditTheme.ResolveDefinition(path);
         GlassAvalonEditTheme.ApplyDarkReadable(CodeEditor);
+        if (!_editorTextMate!.ApplyForPath(path))
+            CodeEditor.SyntaxHighlighting = GlassAvalonEditTheme.ResolveDefinition(path);
         _editorChrome!.SetModeForPath(path);
         _editorPath = path;
         RefreshEditorSharedChrome();
