@@ -51,6 +51,7 @@ public partial class MainWindow : Window
             _presenceStaleTimer?.Stop();
             DisposeTerminalSession();
             DisposeBuildSession();
+            DisposeTestsSession();
             _hosts.Dispose();
             _latches.Dispose();
         };

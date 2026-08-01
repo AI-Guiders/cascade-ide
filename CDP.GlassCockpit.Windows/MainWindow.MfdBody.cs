@@ -38,6 +38,7 @@ public partial class MainWindow
         RefreshMfdEditorVisibility();
         RefreshMfdTerminalVisibility();
         RefreshMfdBuildVisibility();
+        RefreshMfdTestsVisibility();
 
         if (MfdBody is null)
             return;
@@ -59,6 +60,13 @@ public partial class MainWindow
         }
 
         if (IsBuildHostActive())
+        {
+            MfdBody.Text = "";
+            RefreshEicasHealth();
+            return;
+        }
+
+        if (IsTestsHostActive())
         {
             MfdBody.Text = "";
             RefreshEicasHealth();
@@ -99,7 +107,7 @@ public partial class MainWindow
                 "no .sln · " + (_session.WorkspaceRoot ?? "?")),
             "SemanticMap" => FormatMfdStub("SemanticMap", "WorkspaceNavigationMapView · Skia", "arch latch when live"),
             "Problems" => FormatMfdStub("Problems", "ProblemsMfdPageView", "review latch when live"),
-            "Tests" => FormatMfdStub("Tests", "TestsMfdPageView", "test_desk · go=test_desk"),
+            "Tests" => FormatMfdStub("Tests", "Glass redirected log TextBox", "Avalonia TestsMfdPageView SSOT · go=test_desk"),
             "DebugStack" => FormatMfdStub("DebugStack", "DebugStackMfdPageView", "debug_desk · go=debug_desk"),
             "HybridIndex" => FormatMfdStub("HybridIndex", "HybridIndexMfdPageView", "no SoftOrgan · go=codebase_index_*"),
             "RelatedFiles" => FormatMfdStub("RelatedFiles", "RelatedFilesMfdPageView", "refactor latch when live"),

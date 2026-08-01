@@ -47,8 +47,10 @@ public class SoftOrganMfdGlanceTests
         Assert.Contains("ok=2", body);
         Assert.Contains("total=5", body);
         Assert.Contains("failed=3", body);
-        Assert.Contains("TestsMfdPageView", body);
-        Assert.Contains("□ Glass peel", body);
+        Assert.Contains("Glass redirected log TextBox", body);
+        Assert.Contains("Avalonia TestsMfdPageView", body);
+        Assert.Contains("■ Glass redirected log TextBox", body);
+        Assert.Contains("□ Avalonia TestsMfdPageView", body);
         Assert.Contains("┌ host", body);
     }
 
