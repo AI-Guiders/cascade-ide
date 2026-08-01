@@ -53,7 +53,7 @@ public partial class MainWindow
             "SemanticMap" => "Semantic Map host.\n\nGraph surface later (not adjacency dump).",
             "Tests" => "Tests page host.\n\ncdp_test / test_desk projection (CabinGlass catalog).",
             "HybridIndex" => "Hybrid Index host.\n\ncodebase_index organ → glass MFD (stub peel).",
-            "RelatedFiles" => "Related Files host.\n\nfind_desk / related organ projection.",
+            "RelatedFiles" => "Related Files host.\n\nfind_desk / related / refactor organ projection.",
             "Correspondence" => "Correspondence host.\n\ncrs organ projection — later inbox chrome.",
             "MarkdownPreview" => "Markdown Preview host.\n\nmd_preview / md_author projection.",
             "WebAiPortal" => "Web / AI Portal host.\n\nbrowser organ projection.",
