@@ -85,6 +85,9 @@ public partial class App : Application
     /// <summary>Agent Test-SA → quiet chrome (test_desk-LATEST.json).</summary>
     static Features.Cdp.CdpTestDeskProjector? TestDeskProjector { get; set; }
 
+    /// <summary>Agent Debug-SA → quiet chrome (debug_desk-LATEST.json).</summary>
+    static Features.Cdp.CdpDebugDeskProjector? DebugDeskProjector { get; set; }
+
     /// <summary>Agent plugins attention → quiet chrome (plugins-LATEST.json).</summary>
     static Features.Cdp.CdpPluginsProjector? PluginsProjector { get; set; }
 
@@ -146,6 +149,7 @@ public partial class App : Application
             WebcamProjector = Features.Cdp.CdpWebcamProjector.Start(vm);
             ToolchainProjector = Features.Cdp.CdpToolchainProjector.Start(vm);
             TestDeskProjector = Features.Cdp.CdpTestDeskProjector.Start(vm);
+            DebugDeskProjector = Features.Cdp.CdpDebugDeskProjector.Start(vm);
             PluginsProjector = Features.Cdp.CdpPluginsProjector.Start(vm);
             RefactorProjector = Features.Cdp.CdpRefactorProjector.Start(vm);
             ReviewProjector = Features.Cdp.CdpReviewProjector.Start(vm);
