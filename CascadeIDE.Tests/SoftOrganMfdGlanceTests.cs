@@ -17,6 +17,7 @@ public class SoftOrganMfdGlanceTests
     [InlineData("RelatedFiles", "refactor")]
     [InlineData("SolutionExplorer", null)]
     [InlineData("HybridIndex", null)]
+    [InlineData("Correspondence", null)]
     [InlineData("nope", null)]
     public void TryOrganIdForMfdPage_maps(string page, string? organ)
     {

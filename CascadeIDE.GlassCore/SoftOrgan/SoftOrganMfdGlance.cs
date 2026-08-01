@@ -12,6 +12,8 @@ namespace CascadeIDE.SoftOrgan;
 /// SoftOrganKind.FilesDesk is FM utility (CabinGlass pin only) — do not overlay FM latch.
 /// RelatedFiles SoftOrganMfdGlance stays ←refactor; SoftOrganKind.FindDesk shares CabinGlass pin
 /// but SoftOrganMfdGlance is 1:1 — do not displace refactor with find_desk (search ≠ debt/blast).
+/// Correspondence intentionally unbound: CabinGlass pin correspondence/crs → MFD only; no SoftOrganKind
+/// (do not invent SoftOrgan; SoftOrganKind.Crm chrome stays await/callout — not CRS). Live CRS SSOT = Avalonia.
 /// </summary>
 public static class SoftOrganMfdGlance
 {
