@@ -9,6 +9,12 @@
 - **Логика:** `Features/Terminal/TerminalPanelViewModel.cs` — `TerminalControlModel` + `IntegratedShellLaunch` (ConPTY на Windows, redirected fallback). Поток shell → `Feed(byte[])`; ввод пользователя → `UserInput` → PTY. ACP/агент дописывает вывод через `AppendOutput(string)`.
 - **DAL:** `Features/Terminal/DataAcquisition/*` — адаптировано из MIT-примеров AvaloniaTerminal.
 
+## Dual-HCI (Glass WPF)
+
+- **ConPTY SSOT** remains CIDE Avalonia (`TerminalMfdPageView` + `IntegratedShellLaunch`).
+- **Glass WPF** MFD Terminal is SoftOrgan `sys` latch glance / stub text — no AvaloniaTerminal host yet.
+- Dig reject (2026-08-01): do not fork ConPTY into Glass TextBlock; next real peel needs a Windows terminal control (or share redirected TextBox epic separately).
+
 ## Что ещё не заявлено
 
 - Вкладки сессий, профили shell, интеграция с задачами сборки как в VS Code Integrated Terminal.
