@@ -7,7 +7,7 @@ namespace CascadeIDE.SoftOrgan;
 
 /// <summary>
 /// MFD instrument glance: SoftOrgan latch pulse → human body text (stub peel).
-/// Build ← toolchain; Terminal ← sys (desk ops until ConPTY).
+/// Build ← toolchain; Terminal ← sys (Glass WPF latch; CIDE Avalonia owns ConPTY).
 /// </summary>
 public static class SoftOrganMfdGlance
 {
@@ -94,7 +94,7 @@ public static class SoftOrganMfdGlance
             AppendIfString(root, "stamped_utc", "stamped", sb);
 
             if (string.Equals(title, "sys", StringComparison.OrdinalIgnoreCase))
-                sb.AppendLine().AppendLine("(Terminal ConPTY later — sys desk ops until shell latch.)");
+                sb.AppendLine().AppendLine("(Terminal: CIDE Avalonia ConPTY = Views/TerminalMfdPageView; Glass WPF host deferred — latch glance only.)");
             else if (string.Equals(title, "toolchain", StringComparison.OrdinalIgnoreCase))
                 sb.AppendLine().AppendLine("(Build MFD ← toolchain SoftOrgan; MSBuild host later.)");
             else if (string.Equals(title, "review", StringComparison.OrdinalIgnoreCase))

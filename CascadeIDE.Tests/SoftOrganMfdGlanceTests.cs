@@ -59,7 +59,8 @@ public class SoftOrganMfdGlanceTests
         Assert.Contains("sys latch glance · active", body);
         Assert.Contains("ops · seat=cdp", body);
         Assert.Contains("seat=cdp", body);
-        Assert.Contains("ConPTY later", body);
+        Assert.Contains("CIDE Avalonia ConPTY", body);
+        Assert.Contains("Glass WPF host deferred", body);
     }
 
     [Fact]
