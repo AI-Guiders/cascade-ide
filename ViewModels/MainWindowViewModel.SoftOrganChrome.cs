@@ -30,6 +30,7 @@ public partial class MainWindowViewModel
     public bool ShowAgentToolchainChromeHint => !string.IsNullOrWhiteSpace(AgentToolchainChromeHint);
     public bool ShowAgentTestDeskChromeHint => !string.IsNullOrWhiteSpace(AgentTestDeskChromeHint);
     public bool ShowAgentDebugDeskChromeHint => !string.IsNullOrWhiteSpace(AgentDebugDeskChromeHint);
+    public bool ShowAgentFilesDeskChromeHint => !string.IsNullOrWhiteSpace(AgentFilesDeskChromeHint);
     public bool ShowAgentPluginsChromeHint => !string.IsNullOrWhiteSpace(AgentPluginsChromeHint);
     public bool ShowAgentRefactorChromeHint => !string.IsNullOrWhiteSpace(AgentRefactorChromeHint);
     public bool ShowAgentReviewChromeHint => !string.IsNullOrWhiteSpace(AgentReviewChromeHint);
@@ -57,6 +58,7 @@ public partial class MainWindowViewModel
             ShowAgentToolchainChromeHint,
             ShowAgentTestDeskChromeHint,
             ShowAgentDebugDeskChromeHint,
+            ShowAgentFilesDeskChromeHint,
             ShowAgentPluginsChromeHint,
             ShowAgentRefactorChromeHint,
             ShowAgentReviewChromeHint,
@@ -103,6 +105,7 @@ public partial class MainWindowViewModel
             ("toolchain", AgentToolchainChromeHint),
             ("test_desk", AgentTestDeskChromeHint),
             ("debug_desk", AgentDebugDeskChromeHint),
+            ("files_desk", AgentFilesDeskChromeHint),
             ("crm", AgentCrmChromeHint),
             ("report", AgentReportChromeHint),
             ("webcam", AgentWebcamChromeHint),
@@ -175,6 +178,9 @@ public partial class MainWindowViewModel
 
     public void ApplyDebugDeskChromeHint(string? hint) =>
         ApplyChromeHint(AgentDebugDeskChromeHint, hint, v => AgentDebugDeskChromeHint = v);
+
+    public void ApplyFilesDeskChromeHint(string? hint) =>
+        ApplyChromeHint(AgentFilesDeskChromeHint, hint, v => AgentFilesDeskChromeHint = v);
 
     public void ApplyPluginsChromeHint(string? hint) =>
         ApplyChromeHint(AgentPluginsChromeHint, hint, v => AgentPluginsChromeHint = v);

@@ -39,6 +39,7 @@ public static class MainWindowPresentationCapabilitiesProjection
         bool showAgentToolchainChromeHint = false,
         bool showAgentTestDeskChromeHint = false,
         bool showAgentDebugDeskChromeHint = false,
+        bool showAgentFilesDeskChromeHint = false,
         bool showAgentPluginsChromeHint = false,
         bool showAgentRefactorChromeHint = false,
         bool showAgentReviewChromeHint = false,
@@ -62,6 +63,7 @@ public static class MainWindowPresentationCapabilitiesProjection
         || showAgentToolchainChromeHint
         || showAgentTestDeskChromeHint
         || showAgentDebugDeskChromeHint
+        || showAgentFilesDeskChromeHint
         || showAgentPluginsChromeHint
         || showAgentRefactorChromeHint
         || showAgentReviewChromeHint

@@ -84,12 +84,12 @@ public sealed class SoftOrganChromeDensityPolicyTests
         var h = SoftOrganChromeDensityPolicy.From("sa_desk", "hint");
         Assert.NotNull(h);
         Assert.Equal(SoftOrganLatchCatalog.SaDesk, h.Value.Id);
-        Assert.Equal(23, h.Value.Priority);
+        Assert.Equal(24, h.Value.Priority);
 
         var facade = AgentChromeHintDensityPolicy.From("SA_DESK", "hint");
         Assert.NotNull(facade);
         Assert.Equal(SoftOrganLatchCatalog.SaDesk, facade.Value.Id);
-        Assert.Equal(23, facade.Value.Priority);
+        Assert.Equal(24, facade.Value.Priority);
     }
 
     [Fact]
@@ -98,7 +98,7 @@ public sealed class SoftOrganChromeDensityPolicyTests
         string[] avaloniaSeats =
         [
             "pressure", "ignite", "plan", "cabin", "scope", "review", "refactor", "plugins",
-            "toolchain", "test_desk", "debug_desk", "crm", "report", "webcam", "sys", "onboard", "arch", "mcp", "learn", "domain",
+            "toolchain", "test_desk", "debug_desk", "files_desk", "crm", "report", "webcam", "sys", "onboard", "arch", "mcp", "learn", "domain",
             SoftOrganLatchCatalog.SaDesk,
         ];
 

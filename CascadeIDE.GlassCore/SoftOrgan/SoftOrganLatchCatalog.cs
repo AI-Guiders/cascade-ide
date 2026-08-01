@@ -17,7 +17,7 @@ public static class SoftOrganLatchCatalog
         new HashSet<string>(StringComparer.OrdinalIgnoreCase)
         {
             "pressure", "ignite", "plan", "cabin", "scope", "review", "refactor", "plugins",
-            "toolchain", "test_desk", "debug_desk", "crm", "report", "webcam", "sys", "onboard", "arch", "mcp", "learn", "domain",
+            "toolchain", "test_desk", "debug_desk", "files_desk", "crm", "report", "webcam", "sys", "onboard", "arch", "mcp", "learn", "domain",
             SaDesk
         };
 
@@ -40,6 +40,13 @@ public static class SoftOrganLatchCatalog
             || id.Equals("cdp_debug_sa", StringComparison.OrdinalIgnoreCase)
             || id.Equals("debug_desk", StringComparison.OrdinalIgnoreCase))
             return "debug_desk";
+        if (id.Equals("files", StringComparison.OrdinalIgnoreCase)
+            || id.Equals("explorer", StringComparison.OrdinalIgnoreCase)
+            || id.Equals("fm", StringComparison.OrdinalIgnoreCase)
+            || id.Equals("file_manager", StringComparison.OrdinalIgnoreCase)
+            || id.Equals("cdp_files", StringComparison.OrdinalIgnoreCase)
+            || id.Equals("files_desk", StringComparison.OrdinalIgnoreCase))
+            return "files_desk";
         return id;
     }
 
