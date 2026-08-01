@@ -32,8 +32,22 @@ public partial class MainWindow
 
     void MfdPages_OnSelectionChanged(object sender, SelectionChangedEventArgs e) => UpdateMfdBody();
 
+    string CurrentMfdPage() =>
+        (MfdPages?.SelectedItem as ListBoxItem)?.Content?.ToString() ?? "?";
+
+    void RefreshMfdZoneTitle()
+    {
+        if (MfdZoneTitle is null)
+            return;
+        var page = CurrentMfdPage();
+        MfdZoneTitle.Text = string.Equals(page, "?", StringComparison.Ordinal)
+            ? "M · MFD"
+            : $"M · {page}";
+    }
+
     void UpdateMfdBody()
     {
+        RefreshMfdZoneTitle();
         RefreshSolutionExplorerTree();
         RefreshMfdEditorVisibility();
         RefreshMfdTerminalVisibility();
@@ -44,7 +58,7 @@ public partial class MainWindow
         if (MfdBody is null)
             return;
 
-        var page = (MfdPages?.SelectedItem as ListBoxItem)?.Content?.ToString() ?? "?";
+        var page = CurrentMfdPage();
         if (string.Equals(page, "Editor", StringComparison.OrdinalIgnoreCase)
             && ReferenceEquals(EditorChrome.Parent, MfdEditorHost))
         {

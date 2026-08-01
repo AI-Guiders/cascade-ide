@@ -39,7 +39,7 @@ public partial class MainWindow
             return;
 
         var editorOnM = ReferenceEquals(EditorChrome.Parent, MfdEditorHost);
-        var page = (MfdPages?.SelectedItem as ListBoxItem)?.Content?.ToString();
+        var page = CurrentMfdPage();
         var showEditor = editorOnM && string.Equals(page, "Editor", StringComparison.OrdinalIgnoreCase);
         var showSe = MfdSolutionExplorerTree is not null
             && string.Equals(page, "SolutionExplorer", StringComparison.OrdinalIgnoreCase)

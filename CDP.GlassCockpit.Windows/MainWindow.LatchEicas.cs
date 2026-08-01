@@ -105,7 +105,6 @@ public partial class MainWindow
             return;
         }
 
-        var page = (MfdPages?.SelectedItem as ListBoxItem)?.Content?.ToString() ?? "?";
-        MfdHealth.Text = $"EICAS · idle · page={page}";
+        MfdHealth.Text = $"EICAS · idle · {CurrentMfdPage()}";
     }
 }

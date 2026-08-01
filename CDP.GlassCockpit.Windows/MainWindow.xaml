@@ -102,17 +102,19 @@
         <ColumnDefinition Width="340"/>
       </Grid.ColumnDefinitions>
 
-      <!-- P -->
+      <!-- P · one page (no nav list) — glance fills the instrument -->
       <Border x:Name="PfdZone" Grid.Column="0" BorderBrush="{StaticResource Glass.Border}" BorderThickness="1" Background="#161616" Margin="4">
         <DockPanel>
           <Border DockPanel.Dock="Top" Background="#1E1E1E" Padding="10,6" BorderBrush="#2A2A2A" BorderThickness="0,0,0,1">
-            <TextBlock Text="P · PFD" FontWeight="SemiBold" FontSize="12" Foreground="{StaticResource Glass.FgTitle}"/>
+            <TextBlock x:Name="PfdZoneTitle" Text="P · Plan" FontWeight="SemiBold" FontSize="12" Foreground="{StaticResource Glass.FgTitle}"/>
           </Border>
-          <StackPanel Margin="10">
-            <TextBlock Text="Solution / map" FontSize="11" Foreground="#888" Margin="0,0,0,8"/>
-            <TextBlock x:Name="PlanTitle" Text="(no solution yet)" FontSize="14" FontWeight="SemiBold" TextWrapping="Wrap" Margin="0,0,0,12"/>
-            <TextBlock x:Name="PlanMeta" FontSize="12" Foreground="#AAAAAA" TextWrapping="Wrap"/>
-          </StackPanel>
+          <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="12,10">
+            <StackPanel>
+              <TextBlock x:Name="PlanTitle" Text="(no solution yet)" FontSize="16" FontWeight="SemiBold" TextWrapping="Wrap"
+                         Foreground="{StaticResource Glass.FgTitle}" LineHeight="22" Margin="0,0,0,10"/>
+              <TextBlock x:Name="PlanMeta" FontSize="13" Foreground="{StaticResource Glass.FgMuted}" TextWrapping="Wrap" LineHeight="18"/>
+            </StackPanel>
+          </ScrollViewer>
         </DockPanel>
       </Border>
 
@@ -137,7 +139,7 @@
             </Grid.RowDefinitions>
 
             <ContentControl x:Name="ForwardEditorHost" Grid.Row="0">
-              <Border x:Name="EditorChrome" Background="#121212">
+              <Border x:Name="EditorChrome" Background="#0D1117">
                 <DockPanel>
                   <Border DockPanel.Dock="Top" Background="#1A1A1A" Padding="10,4" BorderBrush="#2A2A2A" BorderThickness="0,0,0,1">
                     <DockPanel>
@@ -150,11 +152,11 @@
                     </DockPanel>
                   </Border>
                   <avalonEdit:TextEditor x:Name="CodeEditor"
-                                         FontFamily="Consolas"
-                                         FontSize="13"
-                                         Background="#1E1E1E"
-                                         Foreground="#D4D4D4"
-                                         LineNumbersForeground="#858585"
+                                         FontFamily="Cascadia Code, Consolas, Courier New"
+                                         FontSize="14.5"
+                                         Background="#0D1117"
+                                         Foreground="#E6EDF3"
+                                         LineNumbersForeground="#6E7681"
                                          ShowLineNumbers="True"
                                          WordWrap="False"
                                          IsReadOnly="False"/>
@@ -276,23 +278,19 @@
 
       <GridSplitter Grid.Column="3" Width="4" HorizontalAlignment="Stretch" Background="#222"/>
 
-      <!-- M MFD shell -->
+      <!-- M · one page fills instrument; page select via seats/palette (not mouse list) -->
       <Border x:Name="MfdZone" Grid.Column="4" BorderBrush="{StaticResource Glass.Border}" BorderThickness="1" Background="#161616" Margin="4">
         <DockPanel>
           <Border DockPanel.Dock="Top" Background="#1E1E1E" Padding="10,6" BorderBrush="#2A2A2A" BorderThickness="0,0,0,1">
-            <TextBlock Text="M · MFD" FontWeight="SemiBold" FontSize="12" Foreground="{StaticResource Glass.FgTitle}"/>
+            <TextBlock x:Name="MfdZoneTitle" Text="M · Terminal" FontWeight="SemiBold" FontSize="12" Foreground="{StaticResource Glass.FgTitle}"/>
           </Border>
           <Border DockPanel.Dock="Top" Background="{StaticResource Glass.BgRaised}" Padding="8,6" BorderBrush="#2A2A2A" BorderThickness="0,0,0,1">
             <TextBlock x:Name="MfdHealth" Text="EICAS · idle" FontSize="11" Foreground="{StaticResource Glass.FgMuted}"/>
           </Border>
+          <!-- Catalog kept for SelectMfdPage / seats latch; not shown (aviation: one page on glass). -->
           <ListBox x:Name="MfdPages"
-                   DockPanel.Dock="Left"
-                   Width="130"
-                   Background="#141414"
-                   Foreground="#DDD"
-                   BorderThickness="0"
-                   FontFamily="Segoe UI"
-                   FontSize="12"
+                   Visibility="Collapsed"
+                   Width="0" Height="0"
                    SelectionChanged="MfdPages_OnSelectionChanged">
             <ListBoxItem Content="SolutionExplorer"/>
             <ListBoxItem Content="Terminal" IsSelected="True"/>
