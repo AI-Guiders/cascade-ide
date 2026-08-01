@@ -97,7 +97,7 @@ public partial class MainWindow
             "Editor" => _session.IsIntercomForward
                 ? FormatMfdStub("Editor", "AvalonEdit here when Forward=intercom", "ADR 0120")
                 : FormatMfdStub("Editor", "on Forward", "primary_work_surface=editor"),
-            "Chat" => FormatMfdStub("Chat", "Intercom on Forward", "also on M when needed"),
+            "Chat" => GlassIntercomPresence.FormatChatMfdGlance(),
             _ => FormatMfdStub(page, "instrument peel later", "CabinGlass may select")
         };
         RefreshEicasHealth();

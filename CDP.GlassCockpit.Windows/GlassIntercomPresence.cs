@@ -120,6 +120,35 @@ internal static class GlassIntercomPresence
         }
     }
 
+    /// <summary>MFD Chat secondary card — Forward is primary; no SoftOrgan invent.</summary>
+    public static string FormatChatMfdGlance()
+    {
+        var now = DateTimeOffset.UtcNow;
+        string pf = "—", pm = "—";
+        try
+        {
+            var doc = TryReadRaw();
+            if (doc is not null && string.Equals(doc.Schema, Schema, StringComparison.OrdinalIgnoreCase))
+            {
+                pf = Effective(doc.Pf, now)?.State ?? "—";
+                pm = Effective(doc.Pm, now)?.State ?? "—";
+            }
+        }
+        catch
+        {
+            // keep dashes
+        }
+
+        return
+            "Chat\n" +
+            "┌ status ──────────────┐\n" +
+            "│ ■ Forward Intercom   │\n" +
+            "│ □ SoftOrgan bind     │\n" +
+            $"│ @PF {pf} · @PM {pm}\n" +
+            "└─────────────────────┘";
+    }
+
+
     static PresenceDoc? TryReadRaw()
     {
         var path = CdpHabitatPaths.IntercomPresenceLatchPath;
