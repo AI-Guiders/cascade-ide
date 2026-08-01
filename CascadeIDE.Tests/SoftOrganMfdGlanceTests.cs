@@ -141,6 +141,8 @@ public class SoftOrganMfdGlanceTests
         Assert.Contains("high_risk=0", body);
         Assert.Contains("machine_ok=true", body);
         Assert.Contains("Problems MFD", body);
+        Assert.Contains("ProblemsMfdPageView", body);
+        Assert.Contains("Glass WPF host deferred", body);
     }
 
     [Fact]

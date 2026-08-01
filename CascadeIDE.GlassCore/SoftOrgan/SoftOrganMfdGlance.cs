@@ -14,6 +14,8 @@ namespace CascadeIDE.SoftOrgan;
 /// but SoftOrganMfdGlance is 1:1 — do not displace refactor with find_desk (search ≠ debt/blast).
 /// SemanticMap SoftOrganMfdGlance ← arch SoftOrgan; live graph SSOT = Avalonia WorkspaceNavigationMapView
 /// (Skia) — Glass stays latch glance until WPF peel (do not dump adjacency into TextBlock).
+/// Problems SoftOrganMfdGlance ← review SoftOrgan; live list SSOT = Avalonia ProblemsMfdPageView
+/// — Glass stays latch glance until WPF peel (sa_desk chrome ≠ Problems MFD).
 /// Correspondence intentionally unbound: CabinGlass pin correspondence/crs → MFD only; no SoftOrganKind
 /// (do not invent SoftOrgan; SoftOrganKind.Crm chrome stays await/callout — not CRS). Live CRS SSOT = Avalonia.
 /// </summary>
@@ -118,7 +120,7 @@ public static class SoftOrganMfdGlance
             else if (string.Equals(title, "debug_desk", StringComparison.OrdinalIgnoreCase))
                 sb.AppendLine().AppendLine("(DebugStack MFD ← debug_desk SoftOrgan; live host = CIDE Avalonia DebugStackMfdPageView; Glass WPF host deferred — latch glance only.)");
             else if (string.Equals(title, "review", StringComparison.OrdinalIgnoreCase))
-                sb.AppendLine().AppendLine("(Problems MFD ← review SoftOrgan; Roslyn Problems host later.)");
+                sb.AppendLine().AppendLine("(Problems MFD ← review SoftOrgan; live host = CIDE Avalonia Views/ProblemsMfdPageView + ProblemsPanelViewModel; Glass WPF host deferred — latch glance only.)");
             else if (string.Equals(title, "arch", StringComparison.OrdinalIgnoreCase))
                 sb.AppendLine().AppendLine("(SemanticMap MFD ← arch SoftOrgan; live host = CIDE Avalonia Views/WorkspaceNavigationMapView + WorkspaceNavigationMapViewModel (ADR 0039/0053/0056 Skia); Glass WPF host deferred — latch glance only.)");
             else if (string.Equals(title, "mcp", StringComparison.OrdinalIgnoreCase))
