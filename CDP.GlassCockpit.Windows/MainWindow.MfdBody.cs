@@ -113,6 +113,21 @@ public partial class MainWindow
             return;
         }
 
+        if (string.Equals(page, "WorkspaceHealth", StringComparison.OrdinalIgnoreCase)
+            && GlassWorkspaceHealthGlance.TryFormatFromWorkspaceRoot(_session.WorkspaceRoot) is { } whGlance)
+        {
+            MfdBody.Text = whGlance;
+            RefreshEicasHealth();
+            return;
+        }
+
+        if (string.Equals(page, "EnvironmentReadiness", StringComparison.OrdinalIgnoreCase))
+        {
+            MfdBody.Text = GlassEnvironmentReadinessGlance.TryFormatCurrentProcess();
+            RefreshEicasHealth();
+            return;
+        }
+
         MfdBody.Text = page switch
         {
             "Terminal" => FormatMfdStub("Terminal", "Glass redirected TextBox", "Avalonia ConPTY SSOT · go=sys"),
@@ -131,8 +146,8 @@ public partial class MainWindow
             "MarkdownPreview" => FormatMfdStub("MarkdownPreview", "MarkdigMarkdownPreviewRenderer", "report latch when live"),
             "WebAiPortal" => FormatMfdStub("WebAiPortal", "WebAiPortalMfdPageView", "WebView2 peel deferred"),
             "AiChatSettings" => FormatMfdStub("AiChatSettings", "options/ignite/mcp SoftOrgan", "settings.toml SSOT"),
-            "WorkspaceHealth" => FormatMfdStub("WorkspaceHealth", "CIDE orphan page", "Glass stub"),
-            "EnvironmentReadiness" => FormatMfdStub("EnvironmentReadiness", "CIDE orphan page", "LSP/dotnet glance"),
+            "WorkspaceHealth" => FormatMfdStub("WorkspaceHealth", "Glass FS status glance", "Avalonia IdeHealth SSOT"),
+            "EnvironmentReadiness" => FormatMfdStub("EnvironmentReadiness", "Glass env probe glance", "Avalonia EnvReady SSOT"),
             "Events" => FormatMfdStub("Events", "CIDE orphan page", "Glass stub"),
             "Hypotheses" => FormatMfdStub("Hypotheses", "CIDE orphan page", "Glass stub"),
             "Editor" => FormatMfdStub("Editor", "on Forward", "primary_work_surface=editor"),
