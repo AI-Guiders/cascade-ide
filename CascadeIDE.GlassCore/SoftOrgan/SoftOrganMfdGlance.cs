@@ -8,6 +8,8 @@ namespace CascadeIDE.SoftOrgan;
 /// <summary>
 /// MFD instrument glance: SoftOrgan latch pulse → human body text (stub peel).
 /// Build ← toolchain; Terminal ← sys (Glass WPF latch; CIDE Avalonia owns live hosts).
+/// SolutionExplorer intentionally unbound: Glass .sln TreeView/glance is the instrument peel;
+/// SoftOrganKind.FilesDesk is FM utility (CabinGlass pin only) — do not overlay FM latch.
 /// </summary>
 public static class SoftOrganMfdGlance
 {

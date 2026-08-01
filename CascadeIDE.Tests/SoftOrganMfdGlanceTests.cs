@@ -15,6 +15,8 @@ public class SoftOrganMfdGlanceTests
     [InlineData("AiChatSettings", "mcp")]
     [InlineData("MarkdownPreview", "report")]
     [InlineData("RelatedFiles", "refactor")]
+    [InlineData("SolutionExplorer", null)]
+    [InlineData("HybridIndex", null)]
     [InlineData("nope", null)]
     public void TryOrganIdForMfdPage_maps(string page, string? organ)
     {
