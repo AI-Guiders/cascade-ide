@@ -74,29 +74,47 @@ public partial class MainWindow
 
         MfdBody.Text = page switch
         {
-            "Terminal" => "Terminal page host (Glass WPF).\n\nConPTY SSOT = CIDE Avalonia Views/TerminalMfdPageView + Features/Terminal (IntegratedShellLaunch).\nGlass stays SoftOrgan sys latch glance until a Windows terminal control peel.\n\n(sys latch glance missing — go=sys when seat live.)",
-            "Build" => "Build page host (Glass WPF).\n\nMSBuild/output SSOT = CIDE Avalonia Views/BuildMfdPageView + Features/Build (BuildOutputPanelViewModel).\nGlass stays SoftOrgan toolchain latch glance until a WPF build-log host peel.\n\n(toolchain latch glance missing.)",
-            "SolutionExplorer" => "Solution Explorer host (Glass WPF).\n\nNo .sln under workspace root yet.\nFull tree SSOT = CIDE Avalonia SolutionExplorerView.\nCabinGlass pin files_desk/explorer/fm → this MFD; SoftOrganKind.FilesDesk exists (FM utility ADR-0016) but SoftOrganMfdGlance unbound — Glass .sln TreeView/glance is instrument peel (do not overlay FM latch).\n\n(workspace: " + (_session.WorkspaceRoot ?? "?") + ")",
-            "SemanticMap" => "Semantic Map host (Glass WPF).\n\nLive host SSOT = CIDE Avalonia Views/WorkspaceNavigationMapView + Features/WorkspaceNavigation (WorkspaceNavigationMapViewModel; ADR 0039/0053/0056 Skia pipeline; ADR 0113 HCI orientation ≠ SM graph). SoftOrganMfdGlance ← arch SoftOrgan. Glass stays latch glance + CabinGlass MFD pin stub until a WPF graph host peel (do not fork Avalonia Skia semantic map into TextBlock; HybridIndex MFD ≠ this page).\n\n(Glass SemanticMap peel deferred.)",
-            "Problems" => "Problems host (Glass WPF).\n\nLive host SSOT = CIDE Avalonia Views/ProblemsMfdPageView + ProblemsPanelViewModel (Roslyn diagnostics list). SoftOrganMfdGlance ← review SoftOrgan. Glass stays latch glance + CabinGlass MFD pin stub until a WPF Problems list peel (do not fork Avalonia diagnostics ListBox into TextBlock; SoftOrgan sa_desk chrome ≠ this MFD — alert/qrh stay EICAS).\n\n(Glass Problems peel deferred.)",
-            "Tests" => "Tests page host (Glass WPF).\n\nLive host SSOT = CIDE Avalonia Views/TestsMfdPageView.\nGlass stays SoftOrgan test_desk latch glance until a WPF test-results host peel.\n\n(test_desk latch glance missing — go=test_desk when seat live.)",
-            "DebugStack" => "DebugStack page host (Glass WPF).\n\nLive host SSOT = CIDE Avalonia Views/DebugStackMfdPageView.\nGlass stays SoftOrgan debug_desk latch glance until a WPF DAP stack host peel.\n\n(debug_desk latch glance missing — go=debug_desk when seat live.)",
-            "HybridIndex" => "Hybrid Index host (Glass WPF).\n\nHCI live host SSOT = CIDE Avalonia Views/HybridIndexMfdPageView + Features/HybridIndex (HybridIndexOrchestrator).\nCabinGlass pin hybrid_index/hci/codebase_index → this MFD; no SoftOrganKind — SoftOrganMfdGlance unbound (do not invent SoftOrgan).\n\n(dig reject SoftOrgan glance — go=codebase_index_* / Avalonia HIS when live.)",
-            "RelatedFiles" => "Related Files host (Glass WPF).\n\nLive host SSOT = CIDE Avalonia Views/RelatedFilesMfdPageView + WorkspaceNavigationMapViewModel (related list/graph; show_related_files_mfd_page). SoftOrganMfdGlance ← refactor SoftOrgan (debt/blast latch). CabinGlass also pins find_desk/search → this MFD (+ chrome); SoftOrganKind.FindDesk DoD via pin — SoftOrganMfdGlance stays refactor (1:1 MFD map; search ≠ debt/blast). Glass stays latch glance + CabinGlass stub until a WPF related/find_usages host peel (do not fork Avalonia related list/Skia into TextBlock).\n\n(Glass RelatedFiles peel deferred.)",
-            "Correspondence" => "Correspondence host (Glass WPF).\n\nCRS live host SSOT = CIDE Avalonia Views/CorrespondenceMfdPageView + WorkspaceNavigationMapViewModel.Correspondence (ADR 0155/0156) + cdp_analysis_scene feature=correspondence.\nGlass stays CabinGlass MFD pin stub until a WPF CRS host peel (do not fork Avalonia doc↔code surface into TextBlock; SoftOrganMfdGlance unbound — no SoftOrganKind for CRS).\n\n(Glass CRS peel deferred.)",
-            "MarkdownPreview" => "Markdown Preview host (Glass WPF).\n\nLive host SSOT = CIDE Avalonia MarkdigMarkdownPreviewRenderer + MarkdownPreviewToolViewModel / MarkdownPreviewWindow (editor+chat preview). SoftOrganMfdGlance ← report SoftOrgan (domain/learn/onboard/evidence/pfd pins → this MFD). Glass stays latch glance + CabinGlass stub until a WPF md host peel (do not fork Markdig Avalonia Control into TextBlock).\n\n(Glass MarkdownPreview peel deferred.)",
-            "WebAiPortal" => "Web / AI Portal host (Glass WPF).\n\nLive host SSOT = CIDE Avalonia Views/WebAiPortalMfdPageView + Features/WebAiPortal (WebAiPortalCommandBridge, ADR 0108 WebView tool bridge) + show_web_ai_portal_page. SoftOrganMfdGlance unbound (no SoftOrganKind for portal). Glass stays CabinGlass MFD pin stub until a WPF WebView2 portal peel (do not fork Avalonia portal into TextBlock; CDP browser organ ≠ this MFD).\n\n(Glass WebAiPortal peel deferred.)",
-            "AiChatSettings" => "AI Chat Settings host.\n\noptions / ignite / mcp SoftOrgan projection (settings.toml SSOT).",
-            "WorkspaceHealth" => "Workspace Health host.\n\nCIDE MfdShellPage orphan — Glass stub (0-sync reverse).",
-            "EnvironmentReadiness" => "Environment Readiness host.\n\nCIDE MfdShellPage orphan — LSP/dotnet glance stub.",
-            "Events" => "Events host.\n\nCIDE MfdShellPage orphan — Glass stub (0-sync reverse).",
-            "Hypotheses" => "Hypotheses host.\n\nCIDE MfdShellPage orphan — Glass stub (0-sync reverse).",
+            "Terminal" => FormatMfdStub("Terminal", "TerminalMfdPageView · ConPTY", "sys latch · go=sys"),
+            "Build" => FormatMfdStub("Build", "BuildMfdPageView", "toolchain latch"),
+            "SolutionExplorer" => FormatMfdStub(
+                "SolutionExplorer",
+                "SolutionExplorerView",
+                "no .sln · " + (_session.WorkspaceRoot ?? "?")),
+            "SemanticMap" => FormatMfdStub("SemanticMap", "WorkspaceNavigationMapView · Skia", "arch latch when live"),
+            "Problems" => FormatMfdStub("Problems", "ProblemsMfdPageView", "review latch when live"),
+            "Tests" => FormatMfdStub("Tests", "TestsMfdPageView", "test_desk · go=test_desk"),
+            "DebugStack" => FormatMfdStub("DebugStack", "DebugStackMfdPageView", "debug_desk · go=debug_desk"),
+            "HybridIndex" => FormatMfdStub("HybridIndex", "HybridIndexMfdPageView", "no SoftOrgan · go=codebase_index_*"),
+            "RelatedFiles" => FormatMfdStub("RelatedFiles", "RelatedFilesMfdPageView", "refactor latch when live"),
+            "Correspondence" => FormatMfdStub("Correspondence", "CorrespondenceMfdPageView", "CRS · no SoftOrgan"),
+            "MarkdownPreview" => FormatMfdStub("MarkdownPreview", "MarkdigMarkdownPreviewRenderer", "report latch when live"),
+            "WebAiPortal" => FormatMfdStub("WebAiPortal", "WebAiPortalMfdPageView", "WebView2 peel deferred"),
+            "AiChatSettings" => FormatMfdStub("AiChatSettings", "options/ignite/mcp SoftOrgan", "settings.toml SSOT"),
+            "WorkspaceHealth" => FormatMfdStub("WorkspaceHealth", "CIDE orphan page", "Glass stub"),
+            "EnvironmentReadiness" => FormatMfdStub("EnvironmentReadiness", "CIDE orphan page", "LSP/dotnet glance"),
+            "Events" => FormatMfdStub("Events", "CIDE orphan page", "Glass stub"),
+            "Hypotheses" => FormatMfdStub("Hypotheses", "CIDE orphan page", "Glass stub"),
             "Editor" => _session.IsIntercomForward
-                ? "Editor page — AvalonEdit mounts here when Forward=intercom (ADR 0120)."
-                : "Editor is on Forward (primary_work_surface=editor).",
-            "Chat" => "Chat/Intercom also on M when needed; primary Intercom is Forward.",
-            _ => $"{page} page host.\n\nInstrument content peels later. (CabinGlass catalog may select this.)"
+                ? FormatMfdStub("Editor", "AvalonEdit here when Forward=intercom", "ADR 0120")
+                : FormatMfdStub("Editor", "on Forward", "primary_work_surface=editor"),
+            "Chat" => FormatMfdStub("Chat", "Intercom on Forward", "also on M when needed"),
+            _ => FormatMfdStub(page, "instrument peel later", "CabinGlass may select")
         };
         RefreshEicasHealth();
+    }
+
+    /// <summary>Human MFD card: concise + graphic presence (not text-wall dig notes).</summary>
+    static string FormatMfdStub(string title, string liveHost, string note) =>
+        $"{title}\n" +
+        "┌ status ──────────────┐\n" +
+        "│ □ Glass peel         │\n" +
+        $"│ ■ Avalonia · {TrimCard(liveHost)}\n" +
+        $"│ · {TrimCard(note)}\n" +
+        "└─────────────────────┘";
+
+    static string TrimCard(string s)
+    {
+        s = s.Trim();
+        return s.Length <= 36 ? s : s[..33] + "…";
     }
 }

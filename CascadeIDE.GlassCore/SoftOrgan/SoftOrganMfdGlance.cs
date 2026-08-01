@@ -74,7 +74,6 @@ public static class SoftOrganMfdGlance
                 sb.Append(activeEl.GetBoolean() ? " · active" : " · idle");
 
             sb.AppendLine();
-            sb.AppendLine();
 
             string? pulseText = null;
             if (root.TryGetProperty("pulse", out var pulseEl)
@@ -112,24 +111,7 @@ public static class SoftOrganMfdGlance
             AppendIfString(root, "verdict", "verdict", sb);
             AppendIfString(root, "stamped_utc", "stamped", sb);
 
-            if (string.Equals(title, "sys", StringComparison.OrdinalIgnoreCase))
-                sb.AppendLine().AppendLine("(Terminal: CIDE Avalonia ConPTY = Views/TerminalMfdPageView; Glass WPF host deferred — latch glance only.)");
-            else if (string.Equals(title, "toolchain", StringComparison.OrdinalIgnoreCase))
-                sb.AppendLine().AppendLine("(Build: CIDE Avalonia BuildMfdPageView + BuildOutputPanel; Glass WPF host deferred — latch glance only.)");
-            else if (string.Equals(title, "test_desk", StringComparison.OrdinalIgnoreCase))
-                sb.AppendLine().AppendLine("(Tests MFD ← test_desk SoftOrgan; live host = CIDE Avalonia TestsMfdPageView; Glass WPF host deferred — latch glance only.)");
-            else if (string.Equals(title, "debug_desk", StringComparison.OrdinalIgnoreCase))
-                sb.AppendLine().AppendLine("(DebugStack MFD ← debug_desk SoftOrgan; live host = CIDE Avalonia DebugStackMfdPageView; Glass WPF host deferred — latch glance only.)");
-            else if (string.Equals(title, "review", StringComparison.OrdinalIgnoreCase))
-                sb.AppendLine().AppendLine("(Problems MFD ← review SoftOrgan; live host = CIDE Avalonia Views/ProblemsMfdPageView + ProblemsPanelViewModel; Glass WPF host deferred — latch glance only.)");
-            else if (string.Equals(title, "arch", StringComparison.OrdinalIgnoreCase))
-                sb.AppendLine().AppendLine("(SemanticMap MFD ← arch SoftOrgan; live host = CIDE Avalonia Views/WorkspaceNavigationMapView + WorkspaceNavigationMapViewModel (ADR 0039/0053/0056 Skia); Glass WPF host deferred — latch glance only.)");
-            else if (string.Equals(title, "mcp", StringComparison.OrdinalIgnoreCase))
-                sb.AppendLine().AppendLine("(AiChatSettings MFD ← mcp SoftOrgan; mount panel later.)");
-            else if (string.Equals(title, "report", StringComparison.OrdinalIgnoreCase))
-                sb.AppendLine().AppendLine("(MarkdownPreview MFD ← report SoftOrgan; live host = CIDE Avalonia MarkdigMarkdownPreviewRenderer / MarkdownPreviewTool; Glass WPF host deferred — latch glance only.)");
-            else if (string.Equals(title, "refactor", StringComparison.OrdinalIgnoreCase))
-                sb.AppendLine().AppendLine("(RelatedFiles MFD ← refactor SoftOrgan; live host = CIDE Avalonia Views/RelatedFilesMfdPageView + WorkspaceNavigationMapViewModel; Glass WPF host deferred — latch glance only.)");
+            AppendHostFootnote(title, sb);
 
             var body = sb.ToString().TrimEnd();
             return body.Length == 0 ? null : body;
@@ -138,6 +120,26 @@ public static class SoftOrganMfdGlance
         {
             return null;
         }
+    }
+
+    static void AppendHostFootnote(string title, StringBuilder sb)
+    {
+        var line = title.ToLowerInvariant() switch
+        {
+            "sys" => "□ Glass peel · ■ Avalonia TerminalMfdPageView · ConPTY",
+            "toolchain" => "□ Glass peel · ■ Avalonia BuildMfdPageView",
+            "test_desk" => "□ Glass peel · ■ Avalonia TestsMfdPageView",
+            "debug_desk" => "□ Glass peel · ■ Avalonia DebugStackMfdPageView",
+            "review" => "□ Glass peel · ■ Avalonia ProblemsMfdPageView",
+            "arch" => "□ Glass peel · ■ Avalonia WorkspaceNavigationMapView",
+            "mcp" => "□ Glass peel · ■ AiChatSettings · mcp SoftOrgan",
+            "report" => "□ Glass peel · ■ Avalonia MarkdownPreview",
+            "refactor" => "□ Glass peel · ■ Avalonia RelatedFilesMfdPageView",
+            _ => null
+        };
+        if (line is null)
+            return;
+        sb.AppendLine().AppendLine(line);
     }
 
     static void AppendIfInt(JsonElement root, string prop, string label, StringBuilder sb)

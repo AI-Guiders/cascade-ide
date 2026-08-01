@@ -48,6 +48,7 @@ public class SoftOrganMfdGlanceTests
         Assert.Contains("total=5", body);
         Assert.Contains("failed=3", body);
         Assert.Contains("TestsMfdPageView", body);
+        Assert.Contains("□ Glass peel", body);
     }
 
     [Fact]
@@ -73,6 +74,7 @@ public class SoftOrganMfdGlanceTests
         Assert.Contains("stopped=true", body);
         Assert.Contains("active_dap=true", body);
         Assert.Contains("DebugStackMfdPageView", body);
+        Assert.Contains("□ Glass peel", body);
     }
 
     [Fact]
@@ -95,8 +97,8 @@ public class SoftOrganMfdGlanceTests
         Assert.Contains("toolchain · 5/5 ok", body);
         Assert.Contains("ok=5", body);
         Assert.Contains("total=5", body);
-        Assert.Contains("CIDE Avalonia BuildMfdPageView", body);
-        Assert.Contains("Glass WPF host deferred", body);
+        Assert.Contains("BuildMfdPageView", body);
+        Assert.Contains("□ Glass peel", body);
     }
 
     [Fact]
@@ -116,8 +118,9 @@ public class SoftOrganMfdGlanceTests
         Assert.Contains("sys latch glance · active", body);
         Assert.Contains("ops · seat=cdp", body);
         Assert.Contains("seat=cdp", body);
-        Assert.Contains("CIDE Avalonia ConPTY", body);
-        Assert.Contains("Glass WPF host deferred", body);
+        Assert.Contains("TerminalMfdPageView", body);
+        Assert.Contains("ConPTY", body);
+        Assert.Contains("□ Glass peel", body);
     }
 
     [Fact]
@@ -140,9 +143,8 @@ public class SoftOrganMfdGlanceTests
         Assert.Contains("files=28", body);
         Assert.Contains("high_risk=0", body);
         Assert.Contains("machine_ok=true", body);
-        Assert.Contains("Problems MFD", body);
         Assert.Contains("ProblemsMfdPageView", body);
-        Assert.Contains("Glass WPF host deferred", body);
+        Assert.Contains("□ Glass peel", body);
     }
 
     [Fact]
@@ -163,9 +165,8 @@ public class SoftOrganMfdGlanceTests
         Assert.Contains("arch latch glance · active", body);
         Assert.Contains("profile=cdp_desk", body);
         Assert.Contains("mode=as_built", body);
-        Assert.Contains("SemanticMap MFD", body);
         Assert.Contains("WorkspaceNavigationMapView", body);
-        Assert.Contains("Glass WPF host deferred", body);
+        Assert.Contains("□ Glass peel", body);
     }
 
     [Fact]
@@ -184,7 +185,7 @@ public class SoftOrganMfdGlanceTests
         Assert.NotNull(body);
         Assert.Contains("mcp latch glance · idle", body);
         Assert.Contains("mounted=0", body);
-        Assert.Contains("AiChatSettings MFD", body);
+        Assert.Contains("AiChatSettings", body);
     }
 
     [Fact]
@@ -201,7 +202,8 @@ public class SoftOrganMfdGlanceTests
         var body = SoftOrganMfdGlance.TryFormatFromJson("report", json);
         Assert.NotNull(body);
         Assert.Contains("report latch glance · idle", body);
-        Assert.Contains("MarkdownPreview MFD", body);
+        Assert.Contains("MarkdownPreview", body);
+        Assert.Contains("□ Glass peel", body);
     }
 
     [Fact]
@@ -220,8 +222,7 @@ public class SoftOrganMfdGlanceTests
         Assert.NotNull(body);
         Assert.Contains("refactor latch glance · active", body);
         Assert.Contains("hotspots=3", body);
-        Assert.Contains("RelatedFiles MFD", body);
         Assert.Contains("RelatedFilesMfdPageView", body);
-        Assert.Contains("Glass WPF host deferred", body);
+        Assert.Contains("□ Glass peel", body);
     }
 }
