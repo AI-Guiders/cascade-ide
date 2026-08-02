@@ -12,6 +12,7 @@ public static class GlassMelodyGlassActions
     public const string RunGitStatus = "run_git_status";
     public const string RunBuild = "run_build";
     public const string RunTests = "run_tests_glass";
+    public const string RunSelectLines = "run_select_lines";
 
     static readonly Dictionary<string, string> CommandIdToAction =
         new(StringComparer.Ordinal)
@@ -21,6 +22,7 @@ public static class GlassMelodyGlassActions
             ["build_structured"] = RunBuild,
             ["build"] = RunBuild,
             ["run_tests"] = RunTests,
+            ["select"] = RunSelectLines,
             ["show_terminal_panel"] = "mfd_terminal",
             ["show_solution_explorer_page"] = "mfd_solution_explorer",
             ["show_hybrid_index_page"] = "mfd_hybrid_index",

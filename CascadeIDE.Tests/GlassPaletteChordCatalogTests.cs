@@ -148,6 +148,8 @@ public sealed class GlassPaletteChordCatalogTests
                     && br == GlassMelodyGlassActions.RunBuild);
         Assert.True(GlassMelodyGlassActions.TryMapCommandId("run_tests", out var bt)
                     && bt == GlassMelodyGlassActions.RunTests);
+        Assert.True(GlassMelodyGlassActions.TryMapCommandId("select", out var sel)
+                    && sel == GlassMelodyGlassActions.RunSelectLines);
 
         var gsRow = GlassIntentMelodyCatalog.ToRowId("git_status");
         Assert.False(GlassCommandPaletteCatalog.IsNonExecutableMelodyRow(gsRow));
@@ -155,6 +157,23 @@ public sealed class GlassPaletteChordCatalogTests
         var unknown = GlassIntentMelodyCatalog.ToRowId("debug_attach");
         Assert.True(GlassCommandPaletteCatalog.IsNonExecutableMelodyRow(unknown));
         Assert.False(GlassCommandPaletteCatalog.IsNonExecutableMelodyRow("open_file"));
+    }
+
+    [Fact]
+    public void Melody_Tail_parses_parametric_line_range()
+    {
+        Assert.Equal("els", GlassMelodyTail.AliasPrefix("els:10:20"));
+        Assert.Equal("10:20", GlassMelodyTail.ArgRemainder("els:10:20"));
+        Assert.Equal("10;20", GlassMelodyTail.ArgRemainder("els;10;20"));
+        Assert.True(GlassMelodyTail.TryParseLineRange("40", out var one, out var oneEnd) && one == 40 && oneEnd is null);
+        Assert.True(GlassMelodyTail.TryParseLineRange("10:20", out var a, out var b) && a == 10 && b == 20);
+        Assert.True(GlassMelodyTail.TryParseLineRange("10;20", out var c, out var d) && c == 10 && d == 20);
+        Assert.False(GlassMelodyTail.TryParseLineRange("", out _, out _));
+
+        var rows = GlassCommandPaletteCatalog.Filter("c:els:10");
+        Assert.Contains(rows, e => e.Keywords == "els");
+        Assert.False(GlassCommandPaletteCatalog.IsNonExecutableMelodyRow(
+            GlassIntentMelodyCatalog.ToRowId("select")));
     }
 
 }

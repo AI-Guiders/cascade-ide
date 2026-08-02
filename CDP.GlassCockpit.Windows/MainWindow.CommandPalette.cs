@@ -105,14 +105,28 @@ public partial class MainWindow
         if (GlassCommandPaletteCatalog.IsNonExecutableMelodyRow(entry.Id))
             return;
 
-        CloseCommandPalette();
-
         if (GlassMelodyGlassActions.TryMapRowId(entry.Id, out var glassAction))
         {
+            if (glassAction == GlassMelodyGlassActions.RunSelectLines)
+            {
+                if (!GlassCommandPaletteCatalog.TryGetMelodyTail(PaletteQuery.Text, out var tail)
+                    || !GlassMelodyTail.TryParseLineRange(GlassMelodyTail.ArgRemainder(tail), out var start, out var end))
+                {
+                    StatusText.Text = "glass · c:els — need c:els:<line> or c:els:<start>:<end>";
+                    return;
+                }
+
+                CloseCommandPalette();
+                SelectOpenDocumentLines(start, end);
+                return;
+            }
+
+            CloseCommandPalette();
             RunPaletteEntry(glassAction);
             return;
         }
 
+        CloseCommandPalette();
         RunPaletteEntry(entry.Id);
     }
 

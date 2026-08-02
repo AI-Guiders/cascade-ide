@@ -42,11 +42,12 @@ public static class GlassIntentMelodyCatalog
     public static IReadOnlyList<GlassMelodyAlias> FilterByTailPrefix(string tailNormalized)
     {
         var all = All();
-        if (string.IsNullOrEmpty(tailNormalized))
+        var aliasPrefix = GlassMelodyTail.AliasPrefix(tailNormalized);
+        if (string.IsNullOrEmpty(aliasPrefix))
             return all;
 
         return all
-            .Where(a => a.Alias.StartsWith(tailNormalized, StringComparison.Ordinal))
+            .Where(a => a.Alias.StartsWith(aliasPrefix, StringComparison.Ordinal))
             .ToArray();
     }
 

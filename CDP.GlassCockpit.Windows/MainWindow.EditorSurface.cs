@@ -108,15 +108,41 @@ public partial class MainWindow
 
         if (line is > 0)
         {
-            var max = Math.Max(1, CodeEditor.Document.LineCount);
-            var start = Math.Min(line.Value, max);
-            var end = lineEnd is > 0 ? Math.Min(Math.Max(lineEnd.Value, start), max) : start;
-            var startDoc = CodeEditor.Document.GetLineByNumber(start);
-            var endDoc = CodeEditor.Document.GetLineByNumber(end);
-            CodeEditor.Select(startDoc.Offset, endDoc.EndOffset - startDoc.Offset);
-            CodeEditor.ScrollToLine(start);
-            CodeEditor.TextArea.Caret.BringCaretToView();
+            SelectOpenDocumentLines(line.Value, lineEnd);
         }
+
+        if (_session.IsIntercomForward)
+        {
+            MountEditor(MfdEditorHost);
+            SelectMfdPage("Editor");
+        }
+
+        RefreshMfdEditorVisibility();
+    }
+
+    /// <summary>Select 1-based line range in the currently open AvalonEdit document (c:els / attach chips).</summary>
+    internal void SelectOpenDocumentLines(int startLine, int? endLine = null)
+    {
+        if (CodeEditor?.Document is null || CodeEditor.Document.LineCount < 1)
+        {
+            StatusText.Text = "glass · c:els — no open document";
+            return;
+        }
+
+        var max = CodeEditor.Document.LineCount;
+        var start = Math.Clamp(startLine, 1, max);
+        var end = endLine is > 0 ? Math.Clamp(endLine.Value, 1, max) : start;
+        if (end < start)
+            (start, end) = (end, start);
+
+        var startDoc = CodeEditor.Document.GetLineByNumber(start);
+        var endDoc = CodeEditor.Document.GetLineByNumber(end);
+        CodeEditor.Select(startDoc.Offset, endDoc.EndOffset - startDoc.Offset);
+        CodeEditor.ScrollToLine(start);
+        CodeEditor.TextArea.Caret.BringCaretToView();
+        StatusText.Text = end == start
+            ? $"glass · c:els · L{start}"
+            : $"glass · c:els · L{start}:{end}";
 
         if (_session.IsIntercomForward)
         {
