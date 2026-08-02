@@ -15,6 +15,7 @@ under the same Ethical Source license as [LICENSE](../../LICENSE).
 | Letter of Agent eXperience (AX) | [EN](https://github.com/AI-Guiders/cdp-mcp/blob/main/docs/open-letters/letter-of-agent-experience.md) · [RU](https://github.com/AI-Guiders/cdp-mcp/blob/main/docs/open-letters/letter-of-agent-experience.ru.md) | [EN stub](letter-of-agent-experience.md) · [RU stub](letter-of-agent-experience.ru.md) |
 | Letter of Agent Developer eXperience (ADX) | [EN](https://github.com/AI-Guiders/cdp-mcp/blob/main/docs/open-letters/letter-of-agent-developer-experience.md) · [RU](https://github.com/AI-Guiders/cdp-mcp/blob/main/docs/open-letters/letter-of-agent-developer-experience.ru.md) | [EN stub](letter-of-agent-developer-experience.md) · [RU stub](letter-of-agent-developer-experience.ru.md) |
 | A\* glossary | [EN](https://github.com/AI-Guiders/cdp-mcp/blob/main/docs/open-letters/a-star-glossary.md) · [RU](https://github.com/AI-Guiders/cdp-mcp/blob/main/docs/open-letters/a-star-glossary.ru.md) | [EN stub](a-star-glossary.md) · [RU stub](a-star-glossary.ru.md) |
+| Agent Who · place, time, memory (voice) | [RU canon](https://github.com/AI-Guiders/cdp-mcp/blob/main/docs/open-letters/letter-of-the-agent-who-presence.ru.md) · [EN stub](https://github.com/AI-Guiders/cdp-mcp/blob/main/docs/open-letters/letter-of-the-agent-who-presence.md) | [stub](letter-of-the-agent-who-presence.md) |
 
 **Pair:** Who names the participant; AX/AUX names the room; ADX names the developer seat (UX ↔ AUX, DX ↔ ADX).
 
