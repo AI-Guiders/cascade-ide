@@ -157,6 +157,14 @@ public partial class MainWindow
             return;
         }
 
+        if (string.Equals(page, "FlightDataStorage", StringComparison.OrdinalIgnoreCase)
+            || string.Equals(page, "Fds", StringComparison.OrdinalIgnoreCase))
+        {
+            MfdBody.Text = GlassFdsGlance.Format(_session.WorkspaceRoot);
+            RefreshEicasHealth();
+            return;
+        }
+
         MfdBody.Text = page switch
         {
             "Terminal" => FormatMfdStub("Terminal", "Glass redirected TextBox", "Avalonia ConPTY SSOT · go=sys"),
@@ -181,6 +189,7 @@ public partial class MainWindow
             "Hypotheses" => FormatMfdStub("Hypotheses", "Glass JSON status glance", "Avalonia Hypotheses SSOT"),
             "Editor" => FormatMfdStub("Editor", "on Forward", "primary_work_surface=editor"),
             "Chat" => GlassIntercomPresence.FormatChatMfdGlance(),
+            "FlightDataStorage" or "Fds" => GlassFdsGlance.Format(_session.WorkspaceRoot),
             _ => FormatMfdStub(page, "instrument peel later", "CabinGlass may select")
         };
         RefreshEicasHealth();
