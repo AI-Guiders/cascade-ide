@@ -13,7 +13,7 @@ public static class GlassSlashCatalog
     [
         new("help", "/help", "List Glass slash commands"),
         new("status", "/status", "Glass session / latch status line"),
-        new("topics", "/topics", "List Intercom topic cards"),
+        new("topics", "/topics", "List topic cards (30m gap) · /topics N to select"),
         new("fds", "/fds", "Open Flight Data Storage MFD (plans/reports/notes)"),
         new("open", "/open", "Open path[:line] in AvalonEdit (thin attach↔code)"),
         new("attach", "/attach", "Insert [path:line] chip from editor selection (ADR 0128 thin)"),

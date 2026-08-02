@@ -9,6 +9,9 @@ namespace CDP.GlassCockpit.Windows;
 /// <summary>Intercom feed rebuild, topic filter, scroll pin, new-msg cue.</summary>
 public partial class MainWindow
 {
+    /// <summary>Journal window for 30m topic clustering (wider than on-screen feed when filtered).</summary>
+    public const int TopicClusterTail = 240;
+
     void RebuildIntercomFeedFromJournal(bool stickEnd = false)
     {
         var wasPinned = CascadeIDE.Intercom.GlassIntercomFeedScroll.IsPinnedToEnd(
@@ -17,7 +20,7 @@ public partial class MainWindow
             FeedScroll.ViewportHeight);
         var priorOffset = FeedScroll.VerticalOffset;
 
-        var entries = GlassIntercomJournal.LoadTail(80);
+        var entries = GlassIntercomJournal.LoadTail(TopicClusterTail);
         foreach (var e in entries)
         {
             if (e.Id.Length > 0)
@@ -27,6 +30,12 @@ public partial class MainWindow
         var clustered = GlassIntercomTopics.Cluster(entries);
         _selectedTopicId = CascadeIDE.Intercom.GlassIntercomTopicSelection.Survive(
             _selectedTopicId, clustered, _selectedTopicEntryIds);
+
+        if (stickEnd && entries.Count > 0)
+        {
+            _selectedTopicId = CascadeIDE.Intercom.GlassIntercomTopicFollow.AfterStickEnd(
+                _selectedTopicId, clustered, entries[^1].Id);
+        }
 
         _topics.Clear();
         foreach (var t in clustered)
@@ -48,7 +57,7 @@ public partial class MainWindow
         _feed.Clear();
         _feed.Add(new ChatBubble(
             "system",
-            "MVP: Forward respects primary_work_surface. Intercom→editor on M; dark AvalonEdit theme. Virtual History + topic cards.",
+            "MVP: Forward respects primary_work_surface. Intercom→editor on M; dark AvalonEdit theme. Virtual History + topic cards (30m gap).",
             DateTime.Now.ToString("HH:mm")));
 
         IEnumerable<GlassIntercomJournal.Entry> shown = entries;

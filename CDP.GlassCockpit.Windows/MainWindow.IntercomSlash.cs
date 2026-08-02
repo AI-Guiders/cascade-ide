@@ -209,11 +209,45 @@ public partial class MainWindow
             return true;
         }
 
+        if (cmd.Id == "topics")
+        {
+            RebuildIntercomFeedFromJournal(stickEnd: false);
+            if (!string.IsNullOrWhiteSpace(argsTail)
+                && int.TryParse(argsTail.Trim(), out var ordinal)
+                && ordinal > 0)
+            {
+                var clustered = GlassIntercomTopics.Cluster(
+                    GlassIntercomJournal.LoadTail(TopicClusterTail));
+                var pick = CascadeIDE.Intercom.GlassIntercomTopicFollow.IdByOrdinal(clustered, ordinal);
+                if (pick is null)
+                {
+                    AppendSlashBubble(cmd.Path,
+                        $"no topic #{ordinal} (have {_topics.Count})\n" + BuildGlassTopicsSlashBody());
+                }
+                else
+                {
+                    _selectedTopicId = pick;
+                    RebuildIntercomFeedFromJournal(stickEnd: true);
+                    AppendSlashBubble(cmd.Path, $"selected #{ordinal}\n" + BuildGlassTopicsSlashBody());
+                }
+            }
+            else
+            {
+                AppendSlashBubble(cmd.Path,
+                    BuildGlassTopicsSlashBody()
+                    + "\n\n(usage: /topics · /topics N — 1-based · 30m quiet gap)");
+            }
+
+            ComposerBox.Clear();
+            HideSlashPopup();
+            StatusText.Text = $"glass · slash · {cmd.Path} · {DateTime.Now:HH:mm:ss}";
+            return true;
+        }
+
         var body = cmd.Id switch
         {
             "help" => GlassSlashCatalog.FormatHelp(),
             "status" => BuildGlassStatusSlashBody(),
-            "topics" => BuildGlassTopicsSlashBody(),
             "letter" => BuildGlassLetterSlashBody(),
             _ => $"Unhandled {cmd.Path}",
         };

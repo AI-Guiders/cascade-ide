@@ -109,7 +109,7 @@ internal static class GlassIntercomJournal
     public static IReadOnlyList<Entry> LoadTail(int limit = 40)
     {
         if (limit < 1) limit = 1;
-        if (limit > 200) limit = 200;
+        if (limit > 500) limit = 500;
 
         lock (Gate)
         {
