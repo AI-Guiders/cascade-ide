@@ -80,6 +80,8 @@ public sealed class GlassPaletteChordCatalogTests
         Assert.Equal("slash_open", GlassChordCatalog.Exact("op")!.ActionId);
         Assert.Equal("mfd_build", GlassChordCatalog.Exact("mb")!.ActionId);
         Assert.Equal("mfd_tests", GlassChordCatalog.Exact("ms")!.ActionId);
+        Assert.Equal("mfd_git", GlassChordCatalog.Exact("mg")!.ActionId);
+        Assert.Equal("slash_citizen", GlassChordCatalog.Exact("cz")!.ActionId);
     }
 
     [Fact]
@@ -88,5 +90,7 @@ public sealed class GlassPaletteChordCatalogTests
         Assert.Contains(GlassCommandPaletteCatalog.Filter("fds"), e => e.Id is "slash_fds" or "mfd_fds");
         Assert.Contains(GlassCommandPaletteCatalog.Filter("attach"), e => e.Id == "slash_attach");
         Assert.Contains(GlassCommandPaletteCatalog.Filter("mfd_build"), e => e.Id == "mfd_build");
+        Assert.Contains(GlassCommandPaletteCatalog.Filter("mfd_git"), e => e.Id == "mfd_git");
+        Assert.Contains(GlassCommandPaletteCatalog.Filter("citizen"), e => e.Id == "slash_citizen");
     }
 }

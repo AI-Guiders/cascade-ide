@@ -140,6 +140,9 @@ public partial class MainWindow
             case "slash_open":
                 TryRunGlassSlash("/open");
                 break;
+            case "slash_citizen":
+                TryRunGlassSlash("/citizen");
+                break;
             case "topics_all":
                 TopicAllBtn_OnClick(TopicAllBtn, new RoutedEventArgs());
                 break;
@@ -157,6 +160,9 @@ public partial class MainWindow
                 break;
             case "mfd_tests":
                 SelectMfdPage("Tests");
+                break;
+            case "mfd_git":
+                SelectMfdPage("Git");
                 break;
             default:
                 StatusText.Text = $"glass · palette · unknown {id}";

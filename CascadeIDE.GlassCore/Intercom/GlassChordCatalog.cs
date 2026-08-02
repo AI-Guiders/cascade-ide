@@ -24,6 +24,8 @@ public static class GlassChordCatalog
         new("mt", "MFD Terminal", "mfd_terminal", "Select MFD Terminal page"),
         new("mb", "MFD Build", "mfd_build", "Select MFD Build page"),
         new("ms", "MFD Tests", "mfd_tests", "Select MFD Tests page"),
+        new("mg", "MFD Git", "mfd_git", "Select MFD Git page"),
+        new("cz", "Slash /citizen", "slash_citizen", "Habitat citizen dialog"),
         new("pq", "Command palette", "palette", "Open Ctrl+Q palette"),
     ];
 
