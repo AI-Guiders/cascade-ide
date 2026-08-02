@@ -107,33 +107,44 @@ public sealed class GlassPaletteChordCatalogTests
     public void Melody_TryGetTail_parses_c_prefix()
     {
         Assert.True(GlassCommandPaletteCatalog.TryGetMelodyTail("c:", out var empty) && empty == "");
-        Assert.True(GlassCommandPaletteCatalog.TryGetMelodyTail("C:of", out var of) && of == "of");
-        Assert.True(GlassCommandPaletteCatalog.TryGetMelodyTail("  c: fd ", out var fd) && fd == "fd");
+        Assert.True(GlassCommandPaletteCatalog.TryGetMelodyTail("C:gs", out var gs) && gs == "gs");
+        Assert.True(GlassCommandPaletteCatalog.TryGetMelodyTail("  c: br ", out var br) && br == "br");
         Assert.False(GlassCommandPaletteCatalog.TryGetMelodyTail("f:foo", out _));
         Assert.False(GlassCommandPaletteCatalog.TryGetMelodyTail("open", out _));
     }
 
     [Fact]
-    public void Melody_Filter_empty_tail_starts_with_hint_and_lists_aliases_with_help()
+    public void Melody_Filter_empty_tail_lists_intent_catalog_aliases_with_help()
     {
         var rows = GlassCommandPaletteCatalog.Filter("c:");
         Assert.NotEmpty(rows);
         Assert.Equal(GlassCommandPaletteCatalog.MelodyHintId, rows[0].Id);
         Assert.Contains("Command Melody", rows[0].Title, StringComparison.Ordinal);
-        Assert.Contains(rows, e => e.Title.StartsWith("c:of", StringComparison.Ordinal) && e.Help.Length > 0);
-        Assert.Contains(rows, e => e.Id == "open_file" && e.Keywords == "of");
+        Assert.True(GlassIntentMelodyCatalog.All().Count > 0, "intent-catalog.toml must load (embed/disk)");
+        Assert.Contains(rows, e => e.Keywords == "gs" && e.Help.Length > 0);
+        Assert.Contains(rows, e => e.Id == GlassIntentMelodyCatalog.ToRowId("git_status"));
+        Assert.DoesNotContain(rows, e => e.Keywords == "of"); // GlassChord-only peel retired for c:
     }
 
     [Fact]
     public void Melody_Filter_prefix_and_no_match()
     {
-        var of = GlassCommandPaletteCatalog.Filter("c:of");
-        Assert.DoesNotContain(of, e => e.Id == GlassCommandPaletteCatalog.MelodyHintId);
-        Assert.Contains(of, e => e.Id == "open_file");
+        var gs = GlassCommandPaletteCatalog.Filter("c:gs");
+        Assert.DoesNotContain(gs, e => e.Id == GlassCommandPaletteCatalog.MelodyHintId);
+        Assert.Contains(gs, e => e.Keywords == "gs");
+        Assert.Contains(gs, e => e.Keywords == "gsu"); // prefix
 
         var miss = GlassCommandPaletteCatalog.Filter("c:zzzz");
         Assert.Single(miss);
         Assert.Equal(GlassCommandPaletteCatalog.MelodyNoMatchId, miss[0].Id);
+    }
+
+    [Fact]
+    public void Melody_catalog_rows_are_non_executable_discoverability()
+    {
+        Assert.True(GlassCommandPaletteCatalog.IsNonExecutableMelodyRow(
+            GlassIntentMelodyCatalog.ToRowId("git_status")));
+        Assert.False(GlassCommandPaletteCatalog.IsNonExecutableMelodyRow("open_file"));
     }
 
 }

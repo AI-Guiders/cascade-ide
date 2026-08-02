@@ -26,6 +26,12 @@
     <None Include="..\Settings\defaults-settings.toml" Link="Settings\defaults-settings.toml" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
+  <!-- CIDE Intent Melody SSOT for Glass Ctrl+Q c: discoverability. -->
+  <ItemGroup>
+    <EmbeddedResource Include="..\IntentMelody\intent-catalog.toml" Link="IntentMelody\intent-catalog.toml" />
+    <None Include="..\IntentMelody\intent-catalog.toml" Link="IntentMelody\intent-catalog.toml" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
   <!-- Same presentation sources as CascadeIDE — toolkit-agnostic. Avalonia monitor probes stay in CascadeIDE. -->
   <ItemGroup>
     <Compile Include="..\Services\Presentation\PresentationAnchorKind.cs" Link="Presentation\PresentationAnchorKind.cs" />

@@ -55,7 +55,8 @@ public static class GlassCommandPaletteCatalog
     }
 
     public static bool IsNonExecutableMelodyRow(string id) =>
-        id is MelodyHintId or MelodyNoMatchId;
+        id is MelodyHintId or MelodyNoMatchId
+        || GlassIntentMelodyCatalog.IsMelodyDiscoverabilityRow(id);
 
     public static IReadOnlyList<GlassPaletteEntry> Filter(string? query)
     {
@@ -76,31 +77,29 @@ public static class GlassCommandPaletteCatalog
     }
 
     /// <summary>
-    /// <c>c:</c> → Glass chord aliases with Help (discoverability).
-    /// Full Avalonia <c>intent-catalog.toml</c> MelodyInterpreter remains a later peel.
+    /// <c>c:</c> → CIDE <c>intent-catalog.toml</c> melody aliases with Help (discoverability).
+    /// Glass chord aliases stay on Ctrl+K (<see cref="GlassChordCatalog"/>).
     /// </summary>
     public static IReadOnlyList<GlassPaletteEntry> FilterMelody(string tailNormalized)
     {
-        var chords = GlassChordCatalog.Filter(tailNormalized)
-            .Where(c => c.ActionId != "palette")
-            .ToArray();
+        var aliases = GlassIntentMelodyCatalog.FilterByTailPrefix(tailNormalized);
 
         if (string.IsNullOrEmpty(tailNormalized))
         {
-            var samples = string.Join(", ", GlassChordCatalog.Filter("").Take(6).Select(c => "c:" + c.Alias));
+            var samples = GlassIntentMelodyCatalog.SampleAliases(6);
             var hint = new GlassPaletteEntry(
                 MelodyHintId,
                 $"Command Melody: type tail after c: (e.g. {samples}).",
-                "Discoverability — Glass chord aliases with Help. Full CIDE intent-catalog = next peel.",
+                "Discoverability — CIDE intent-catalog.toml melody_slug + Help. Ide execute in Glass = later peel.",
                 "c: melody intent");
             return
             [
                 hint,
-                ..chords.Select(ToMelodyEntry),
+                ..aliases.Select(ToMelodyEntry),
             ];
         }
 
-        if (chords.Length == 0)
+        if (aliases.Count == 0)
         {
             return
             [
@@ -112,9 +111,13 @@ public static class GlassCommandPaletteCatalog
             ];
         }
 
-        return chords.Select(ToMelodyEntry).ToArray();
+        return aliases.Select(ToMelodyEntry).ToArray();
     }
 
-    static GlassPaletteEntry ToMelodyEntry(GlassChordEntry c) =>
-        new(c.ActionId, $"c:{c.Alias} — {c.Title}", c.Help, c.Alias);
+    static GlassPaletteEntry ToMelodyEntry(GlassIntentMelodyCatalog.GlassMelodyAlias a) =>
+        new(
+            GlassIntentMelodyCatalog.ToRowId(a.CommandId),
+            $"c:{a.Alias} — {a.CommandId}",
+            a.Help,
+            a.Alias);
 }
