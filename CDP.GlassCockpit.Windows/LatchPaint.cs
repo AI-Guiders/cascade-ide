@@ -155,7 +155,7 @@ internal static partial class LatchPaint
         var n = string.IsNullOrWhiteSpace(name) ? null : name.Trim();
         n ??= k switch
         {
-            "operator" => "Who",
+            "operator" => "Света",
             "citizen" => "Citizen",
             _ => "Кир"
         };
@@ -170,7 +170,8 @@ internal static partial class LatchPaint
         {
             "guest" or "cursor" or "external" => "guest",
             "citizen" or "fm" or "peer" => "citizen",
-            "operator" or "who" or "human" or "pm" => "operator",
+            // "who" is Agent Who (agent identity) — never an operator alias
+            "operator" or "human" or "pm" => "operator",
             _ => null
         };
     }
