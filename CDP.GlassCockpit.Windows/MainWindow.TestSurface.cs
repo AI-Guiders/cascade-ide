@@ -64,7 +64,7 @@ public partial class MainWindow
         TestsOutput.ScrollToEnd();
     }
 
-    void TestsRun_OnClick(object sender, RoutedEventArgs e)
+    internal void TestsRun_OnClick(object sender, RoutedEventArgs e)
     {
         if (_testRunner is { IsRunning: true })
             return;
@@ -100,14 +100,14 @@ public partial class MainWindow
         }
     }
 
-    void TestsCancel_OnClick(object sender, RoutedEventArgs e)
+    internal void TestsCancel_OnClick(object sender, RoutedEventArgs e)
     {
         _testRunner?.Cancel();
         if (TestsStatusLabel is not null)
             TestsStatusLabel.Text = "redirected · cancel";
     }
 
-    void TestsClear_OnClick(object sender, RoutedEventArgs e)
+    internal void TestsClear_OnClick(object sender, RoutedEventArgs e)
     {
         _testBuffer.Clear();
         if (TestsOutput is not null)

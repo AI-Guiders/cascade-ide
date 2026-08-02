@@ -64,7 +64,7 @@ public partial class MainWindow
         BuildOutput.ScrollToEnd();
     }
 
-    void BuildRun_OnClick(object sender, RoutedEventArgs e)
+    internal void BuildRun_OnClick(object sender, RoutedEventArgs e)
     {
         if (_buildRunner is { IsRunning: true })
             return;
@@ -100,14 +100,14 @@ public partial class MainWindow
         }
     }
 
-    void BuildCancel_OnClick(object sender, RoutedEventArgs e)
+    internal void BuildCancel_OnClick(object sender, RoutedEventArgs e)
     {
         _buildRunner?.Cancel();
         if (BuildStatusLabel is not null)
             BuildStatusLabel.Text = "redirected · cancel";
     }
 
-    void BuildClear_OnClick(object sender, RoutedEventArgs e)
+    internal void BuildClear_OnClick(object sender, RoutedEventArgs e)
     {
         _buildBuffer.Clear();
         if (BuildOutput is not null)

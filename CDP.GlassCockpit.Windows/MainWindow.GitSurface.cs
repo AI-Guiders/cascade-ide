@@ -64,7 +64,7 @@ public partial class MainWindow
         GitOutput.ScrollToEnd();
     }
 
-    void GitStatus_OnClick(object sender, RoutedEventArgs e)
+    internal void GitStatus_OnClick(object sender, RoutedEventArgs e)
     {
         if (_gitRunner is { IsRunning: true })
             return;
@@ -100,10 +100,10 @@ public partial class MainWindow
         }
     }
 
-    void GitCancel_OnClick(object sender, RoutedEventArgs e) =>
+    internal void GitCancel_OnClick(object sender, RoutedEventArgs e) =>
         _gitRunner?.Cancel();
 
-    void GitClear_OnClick(object sender, RoutedEventArgs e)
+    internal void GitClear_OnClick(object sender, RoutedEventArgs e)
     {
         _gitBuffer.Clear();
         if (GitOutput is not null)

@@ -90,7 +90,7 @@ public partial class MainWindow
                && MfdTerminalHost.Visibility == Visibility.Visible;
     }
 
-    void TerminalInput_OnKeyDown(object sender, KeyEventArgs e)
+    internal void TerminalInput_OnKeyDown(object sender, KeyEventArgs e)
     {
         if (e.Key != Key.Enter || TerminalInput is null)
             return;
@@ -103,7 +103,7 @@ public partial class MainWindow
         _terminalShell?.SendLine(line);
     }
 
-    void TerminalRestart_OnClick(object sender, RoutedEventArgs e)
+    internal void TerminalRestart_OnClick(object sender, RoutedEventArgs e)
     {
         DisposeTerminalSession();
         _terminalBuffer.Clear();

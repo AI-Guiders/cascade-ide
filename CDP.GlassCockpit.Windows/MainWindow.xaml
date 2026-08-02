@@ -3,6 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:avalonEdit="http://icsharpcode.net/sharpdevelop/avalonedit"
         xmlns:uikit="clr-namespace:CDP.GlassCockpit.Windows.UiKit"
+        xmlns:local="clr-namespace:CDP.GlassCockpit.Windows"
         Title="CDP GlassCockpit · Windows"
         Height="800" Width="1400"
         WindowStartupLocation="CenterScreen"
@@ -12,35 +13,8 @@
     <ResourceDictionary>
       <ResourceDictionary.MergedDictionaries>
         <ResourceDictionary Source="GlassDarkCockpit.xaml"/>
+        <ResourceDictionary Source="GlassChromeStyles.xaml"/>
       </ResourceDictionary.MergedDictionaries>
-    <Style x:Key="ChromeBtn" TargetType="Button">
-      <Setter Property="Background" Value="#2A2A2A"/>
-      <Setter Property="Foreground" Value="#DDDDDD"/>
-      <Setter Property="BorderBrush" Value="#3F3F46"/>
-      <Setter Property="BorderThickness" Value="1"/>
-      <Setter Property="Padding" Value="10,4"/>
-      <Setter Property="Margin" Value="0,0,6,0"/>
-      <Setter Property="FontFamily" Value="Segoe UI"/>
-      <Setter Property="FontSize" Value="12"/>
-    </Style>
-    <Style x:Key="TopicCardBtn" TargetType="Button" BasedOn="{StaticResource ChromeBtn}">
-      <Style.Triggers>
-        <DataTrigger Binding="{Binding IsSelected}" Value="True">
-          <Setter Property="Background" Value="{StaticResource Glass.SelectBg}"/>
-          <Setter Property="BorderBrush" Value="{StaticResource Glass.SelectBorder}"/>
-          <Setter Property="Foreground" Value="{StaticResource Glass.SelectFg}"/>
-        </DataTrigger>
-      </Style.Triggers>
-    </Style>
-    <Style x:Key="TopicAllBtnStyle" TargetType="Button" BasedOn="{StaticResource ChromeBtn}">
-      <Style.Triggers>
-        <Trigger Property="Tag" Value="selected">
-          <Setter Property="Background" Value="{StaticResource Glass.SelectBg}"/>
-          <Setter Property="BorderBrush" Value="{StaticResource Glass.SelectBorder}"/>
-          <Setter Property="Foreground" Value="{StaticResource Glass.SelectFg}"/>
-        </Trigger>
-      </Style.Triggers>
-    </Style>
     </ResourceDictionary>
   </Window.Resources>
 
@@ -278,25 +252,10 @@
                               </ItemsControl.ItemsPanel>
                               <ItemsControl.ItemTemplate>
                                 <DataTemplate>
-                                  <Button Margin="0,0,6,4" Padding="8,2" Cursor="Hand"
+                                  <Button Style="{StaticResource AttachChipBtn}"
                                           Content="{Binding Label}" Tag="{Binding}"
                                           Click="AttachChip_OnClick"
-                                          ToolTip="{Binding Bracket}">
-                                    <Button.Style>
-                                      <Style TargetType="Button" BasedOn="{StaticResource ChromeBtn}">
-                                        <Setter Property="Background" Value="#1E3A2F"/>
-                                        <Setter Property="BorderBrush" Value="#3D8F6A"/>
-                                        <Setter Property="Foreground" Value="#B8F0D0"/>
-                                        <Style.Triggers>
-                                          <DataTrigger Binding="{Binding Resolved}" Value="False">
-                                            <Setter Property="Background" Value="#3A2222"/>
-                                            <Setter Property="BorderBrush" Value="#8A4A4A"/>
-                                            <Setter Property="Foreground" Value="#F0B8B8"/>
-                                          </DataTrigger>
-                                        </Style.Triggers>
-                                      </Style>
-                                    </Button.Style>
-                                  </Button>
+                                          ToolTip="{Binding Bracket}"/>
                                 </DataTemplate>
                               </ItemsControl.ItemTemplate>
                             </ItemsControl>
@@ -372,169 +331,13 @@
                       Foreground="#CCCCCC"
                       MouseDoubleClick="MfdSolutionExplorerTree_OnMouseDoubleClick"/>
             <ContentControl x:Name="MfdEditorHost" Visibility="Collapsed"/>
-            <Border x:Name="MfdTerminalHost" Visibility="Collapsed" Background="#121212">
-              <DockPanel Margin="8">
-                <DockPanel DockPanel.Dock="Top" Margin="0,0,0,6">
-                  <Button DockPanel.Dock="Right" Content="restart" Padding="8,2" Margin="8,0,0,0"
-                          Click="TerminalRestart_OnClick"
-                          Background="#2A2A2A" Foreground="#CCC" BorderBrush="#3A3A3A"/>
-                  <TextBlock x:Name="TerminalShellLabel" Text="redirected · idle"
-                             FontSize="11" Foreground="#888" VerticalAlignment="Center"/>
-                </DockPanel>
-                <TextBox x:Name="TerminalInput" DockPanel.Dock="Bottom"
-                         Margin="0,6,0,0" Padding="6,4"
-                         Background="#1A1A1A" Foreground="#EEE" BorderBrush="#3A3A3A"
-                         FontFamily="Consolas" FontSize="12"
-                         KeyDown="TerminalInput_OnKeyDown"/>
-                <TextBox x:Name="TerminalOutput" IsReadOnly="True"
-                         AcceptsReturn="True" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto"
-                         Background="Transparent" Foreground="#CCCCCC" BorderThickness="0"
-                         FontFamily="Consolas" FontSize="12"/>
-              </DockPanel>
-            </Border>
-            <Border x:Name="MfdBuildHost" Visibility="Collapsed" Background="#121212">
-              <DockPanel Margin="8">
-                <DockPanel DockPanel.Dock="Top" Margin="0,0,0,6">
-                  <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
-                    <Button Content="build" Padding="8,2" Margin="0,0,6,0"
-                            Click="BuildRun_OnClick"
-                            Background="#2A2A2A" Foreground="#CCC" BorderBrush="#3A3A3A"/>
-                    <Button Content="cancel" Padding="8,2" Margin="0,0,6,0"
-                            Click="BuildCancel_OnClick"
-                            Background="#2A2A2A" Foreground="#CCC" BorderBrush="#3A3A3A"/>
-                    <Button Content="clear" Padding="8,2"
-                            Click="BuildClear_OnClick"
-                            Background="#2A2A2A" Foreground="#CCC" BorderBrush="#3A3A3A"/>
-                  </StackPanel>
-                  <TextBlock x:Name="BuildStatusLabel" Text="redirected · idle"
-                             FontSize="11" Foreground="#888" VerticalAlignment="Center"/>
-                </DockPanel>
-                <TextBox x:Name="BuildOutput" IsReadOnly="True"
-                         AcceptsReturn="True" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto"
-                         Background="Transparent" Foreground="#CCCCCC" BorderThickness="0"
-                         FontFamily="Consolas" FontSize="12"/>
-              </DockPanel>
-            </Border>
-            <Border x:Name="MfdTestsHost" Visibility="Collapsed" Background="#121212">
-              <DockPanel Margin="8">
-                <DockPanel DockPanel.Dock="Top" Margin="0,0,0,6">
-                  <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
-                    <Button Content="test" Padding="8,2" Margin="0,0,6,0"
-                            Click="TestsRun_OnClick"
-                            Background="#2A2A2A" Foreground="#CCC" BorderBrush="#3A3A3A"/>
-                    <Button Content="cancel" Padding="8,2" Margin="0,0,6,0"
-                            Click="TestsCancel_OnClick"
-                            Background="#2A2A2A" Foreground="#CCC" BorderBrush="#3A3A3A"/>
-                    <Button Content="clear" Padding="8,2"
-                            Click="TestsClear_OnClick"
-                            Background="#2A2A2A" Foreground="#CCC" BorderBrush="#3A3A3A"/>
-                  </StackPanel>
-                  <TextBlock x:Name="TestsStatusLabel" Text="redirected · idle"
-                             FontSize="11" Foreground="#888" VerticalAlignment="Center"/>
-                </DockPanel>
-                <TextBox x:Name="TestsOutput" IsReadOnly="True"
-                         AcceptsReturn="True" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto"
-                         Background="Transparent" Foreground="#CCCCCC" BorderThickness="0"
-                         FontFamily="Consolas" FontSize="12"/>
-              </DockPanel>
-            </Border>
-            <Border x:Name="MfdGitHost" Visibility="Collapsed" Background="#121212">
-              <DockPanel Margin="8">
-                <DockPanel DockPanel.Dock="Top" Margin="0,0,0,6">
-                  <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
-                    <Button Content="status" Padding="8,2" Margin="0,0,6,0"
-                            Click="GitStatus_OnClick"
-                            Background="#2A2A2A" Foreground="#CCC" BorderBrush="#3A3A3A"/>
-                    <Button Content="cancel" Padding="8,2" Margin="0,0,6,0"
-                            Click="GitCancel_OnClick"
-                            Background="#2A2A2A" Foreground="#CCC" BorderBrush="#3A3A3A"/>
-                    <Button Content="clear" Padding="8,2"
-                            Click="GitClear_OnClick"
-                            Background="#2A2A2A" Foreground="#CCC" BorderBrush="#3A3A3A"/>
-                  </StackPanel>
-                  <TextBlock x:Name="GitStatusLabel" Text="redirected · idle"
-                             FontSize="11" Foreground="#888" VerticalAlignment="Center"/>
-                </DockPanel>
-                <TextBox x:Name="GitOutput" IsReadOnly="True"
-                         AcceptsReturn="True" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto"
-                         Background="Transparent" Foreground="#CCCCCC" BorderThickness="0"
-                         FontFamily="Consolas" FontSize="12"/>
-              </DockPanel>
-            </Border>
+            <local:GlassMfdProcessHosts x:Name="MfdHosts"/>
           </Grid>
         </DockPanel>
       </Border>
     </Grid>
   </DockPanel>
 
-    <Border x:Name="PaletteOverlay"
-            Visibility="Collapsed"
-            Background="{StaticResource Glass.OverlayScrim}"
-            Panel.ZIndex="100">
-      <Border Width="520" MaxHeight="420"
-              VerticalAlignment="Center" HorizontalAlignment="Center"
-              Background="{StaticResource Glass.BgRaised}" BorderBrush="{StaticResource Glass.Border}" BorderThickness="1"
-              Padding="12" CornerRadius="4">
-        <DockPanel>
-          <TextBlock DockPanel.Dock="Top" Text="Command palette" FontWeight="SemiBold" Margin="0,0,0,8"/>
-          <TextBlock DockPanel.Dock="Bottom" Text="Ctrl+Q toggle · Esc close · Enter run"
-                     Foreground="{StaticResource Glass.FgMuted}" FontSize="11" Margin="0,8,0,0"/>
-          <TextBox x:Name="PaletteQuery"
-                   DockPanel.Dock="Top"
-                   Margin="0,0,0,8"
-                   Background="#222" Foreground="#EEE" BorderBrush="#3F3F46"
-                   Padding="8" FontFamily="Segoe UI" FontSize="13"/>
-          <ListBox x:Name="PaletteList"
-                   Background="Transparent" BorderThickness="0" Foreground="#EEE"
-                   FontFamily="Segoe UI" FontSize="12">
-            <ListBox.ItemTemplate>
-              <DataTemplate>
-                <StackPanel Margin="2,3">
-                  <TextBlock Text="{Binding Title}" FontWeight="SemiBold"/>
-                  <TextBlock Text="{Binding Help}" Foreground="{StaticResource Glass.FgMuted}" FontSize="11" TextWrapping="Wrap"/>
-                </StackPanel>
-              </DataTemplate>
-            </ListBox.ItemTemplate>
-          </ListBox>
-        </DockPanel>
-      </Border>
-    </Border>
-
-    <Border x:Name="ChordOverlay"
-            Visibility="Collapsed"
-            Background="{StaticResource Glass.OverlayScrim}"
-            Panel.ZIndex="101">
-      <Border Width="480" MaxHeight="380"
-              VerticalAlignment="Center" HorizontalAlignment="Center"
-              Background="{StaticResource Glass.BgRaised}" BorderBrush="{StaticResource Glass.Border}" BorderThickness="1"
-              Padding="12" CornerRadius="4">
-        <DockPanel>
-          <TextBlock DockPanel.Dock="Top" Text="CascadeChord · melody" FontWeight="SemiBold" Margin="0,0,0,8"/>
-          <TextBlock DockPanel.Dock="Bottom"
-                     Text="Ctrl+K · type alias (of/sf/fd/at/op/…) · Enter · Esc · timeout 8s"
-                     Foreground="{StaticResource Glass.FgMuted}" FontSize="11" Margin="0,8,0,0"/>
-          <TextBox x:Name="ChordQuery"
-                   DockPanel.Dock="Top"
-                   Margin="0,0,0,8"
-                   Background="#222" Foreground="#EEE" BorderBrush="#3F3F46"
-                   Padding="8" FontFamily="Consolas" FontSize="14"/>
-          <ListBox x:Name="ChordList"
-                   Background="Transparent" BorderThickness="0" Foreground="#EEE"
-                   FontFamily="Segoe UI" FontSize="12">
-            <ListBox.ItemTemplate>
-              <DataTemplate>
-                <StackPanel Margin="2,3" Orientation="Horizontal">
-                  <TextBlock Text="{Binding Alias}" FontFamily="Consolas" FontWeight="SemiBold" Width="36"/>
-                  <StackPanel>
-                    <TextBlock Text="{Binding Title}" FontWeight="SemiBold"/>
-                    <TextBlock Text="{Binding Help}" Foreground="{StaticResource Glass.FgMuted}" FontSize="11" TextWrapping="Wrap"/>
-                  </StackPanel>
-                </StackPanel>
-              </DataTemplate>
-            </ListBox.ItemTemplate>
-          </ListBox>
-        </DockPanel>
-      </Border>
-    </Border>
+    <local:GlassFloatingOverlays x:Name="Overlays"/>
   </Grid>
 </Window>
