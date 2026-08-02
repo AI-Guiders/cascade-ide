@@ -4,6 +4,7 @@ using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using CascadeIDE.Features.Cdp;
+using CascadeIDE.Intercom;
 
 namespace CDP.GlassCockpit.Windows;
 
@@ -40,7 +41,8 @@ internal static class GlassIntercomJournal
         string Origin,
         DateTimeOffset StampedUtc,
         string RoleLabel,
-        string WhenLabel);
+        string WhenLabel,
+        IReadOnlyList<GlassAttachChip> Chips);
 
     public static void Append(
         string id,
@@ -139,7 +141,13 @@ internal static class GlassIntercomJournal
                     var kind = Prop(root, "kind");
                     var (resolvedName, resolvedKind) = LatchPaint.ResolveIntercomIdentity(from, origin, name, kind);
                     var role = LatchPaint.FormatIntercomRole(from, to, resolvedName, resolvedKind);
-                    all.Add(new Entry(id, from, to, body.Replace("\r\n", "\n"), origin, dto, role, when));
+                    JsonElement? attachments = null;
+                    if (root.TryGetProperty("attachments", out var attEl)
+                        && attEl.ValueKind == JsonValueKind.Array)
+                        attachments = attEl;
+                    var chips = GlassAttachChipPeel.Peel(body, attachments);
+                    all.Add(new Entry(
+                        id, from, to, body.Replace("\r\n", "\n"), origin, dto, role, when, chips));
                 }
                 catch
                 {

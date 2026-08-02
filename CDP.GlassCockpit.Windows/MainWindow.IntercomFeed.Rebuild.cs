@@ -64,7 +64,7 @@ public partial class MainWindow
         }
 
         foreach (var e in shown)
-            _feed.Add(new ChatBubble(e.RoleLabel, e.Body, e.WhenLabel));
+            _feed.Add(new ChatBubble(e.RoleLabel, e.Body, e.WhenLabel, e.Chips));
 
         while (_feed.Count > 81)
             _feed.RemoveAt(1);

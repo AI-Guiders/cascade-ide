@@ -215,5 +215,12 @@ public partial class MainWindow
         bool IsSelected,
         IReadOnlyList<string> EntryIds);
 
-    public sealed record ChatBubble(string Role, string Body, string When);
+    public sealed record ChatBubble(
+        string Role,
+        string Body,
+        string When,
+        IReadOnlyList<CascadeIDE.Intercom.GlassAttachChip>? Chips = null)
+    {
+        public bool HasChips => Chips is { Count: > 0 };
+    }
 }

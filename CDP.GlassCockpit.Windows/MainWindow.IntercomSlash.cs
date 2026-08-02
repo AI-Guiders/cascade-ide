@@ -173,6 +173,15 @@ public partial class MainWindow
             return true;
         }
 
+        if (cmd.Id == "attach")
+        {
+            var attachBody = TryAttachSlash(argsTail);
+            AppendSlashBubble(cmd.Path, attachBody);
+            HideSlashPopup();
+            StatusText.Text = $"glass · slash · {cmd.Path} · {DateTime.Now:HH:mm:ss}";
+            return true;
+        }
+
         var body = cmd.Id switch
         {
             "help" => GlassSlashCatalog.FormatHelp(),
@@ -223,9 +232,119 @@ public partial class MainWindow
         return line is int L ? $"opened {path}:{L}" : $"opened {path}";
     }
 
+    string TryAttachSlash(string argsTail)
+    {
+        string path;
+        int? lineStart = null;
+        int? lineEnd = null;
+
+        if (!string.IsNullOrWhiteSpace(argsTail))
+        {
+            var raw = argsTail.Trim().Trim('"');
+            path = raw;
+            var colon = raw.LastIndexOf(':');
+            if (colon > 1
+                && colon < raw.Length - 1
+                && !raw[(colon + 1)..].Contains('\\')
+                && !raw[(colon + 1)..].Contains('/'))
+            {
+                var linePart = raw[(colon + 1)..];
+                var dash = linePart.IndexOf('-');
+                if (dash > 0
+                    && int.TryParse(linePart[..dash], out var a)
+                    && int.TryParse(linePart[(dash + 1)..], out var b)
+                    && a > 0
+                    && b >= a)
+                {
+                    path = raw[..colon];
+                    lineStart = a;
+                    lineEnd = b;
+                }
+                else if (int.TryParse(linePart, out var ln) && ln > 0)
+                {
+                    path = raw[..colon];
+                    lineStart = ln;
+                }
+            }
+        }
+        else
+        {
+            if (string.IsNullOrWhiteSpace(_editorPath))
+                return "usage: /attach [path[:line[-line]]]\n(or open a file / select lines in AvalonEdit)";
+
+            path = _editorPath;
+            var sel = CodeEditor.TextArea.Selection;
+            if (!sel.IsEmpty && sel.SurroundingSegment is { } seg)
+            {
+                var startOff = seg.Offset;
+                var endOff = Math.Max(seg.Offset, seg.EndOffset - 1);
+                lineStart = CodeEditor.Document.GetLineByOffset(startOff).LineNumber;
+                lineEnd = CodeEditor.Document.GetLineByOffset(endOff).LineNumber;
+                if (lineEnd < lineStart)
+                    (lineStart, lineEnd) = (lineEnd, lineStart);
+                if (lineEnd == lineStart)
+                    lineEnd = null;
+            }
+            else
+            {
+                lineStart = CodeEditor.TextArea.Caret.Line;
+            }
+        }
+
+        if (!Path.IsPathRooted(path))
+        {
+            var root = _session.WorkspaceRoot;
+            if (!string.IsNullOrWhiteSpace(root))
+                path = Path.Combine(root, path);
+        }
+
+        var display = path;
+        var rootWs = _session.WorkspaceRoot;
+        if (!string.IsNullOrWhiteSpace(rootWs)
+            && path.StartsWith(rootWs, StringComparison.OrdinalIgnoreCase))
+        {
+            display = path[rootWs.Length..].TrimStart(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+        }
+
+        var bracket = GlassAttachChipPeel.FormatBracket(display, lineStart, lineEnd);
+        var cur = ComposerBox.Text ?? "";
+        if (cur is "Message @PF…" or "Message @PM…")
+            cur = "";
+        ComposerBox.Text = string.IsNullOrWhiteSpace(cur)
+            ? bracket
+            : cur.TrimEnd() + " " + bracket;
+        ComposerBox.CaretIndex = ComposerBox.Text.Length;
+        ComposerBox.Focus();
+        return $"chip → composer {bracket}";
+    }
+
+    void AttachChip_OnClick(object sender, RoutedEventArgs e)
+    {
+        if (sender is not System.Windows.Controls.Button { Tag: GlassAttachChip chip })
+            return;
+
+        var path = chip.File;
+        if (!Path.IsPathRooted(path))
+        {
+            var root = _session.WorkspaceRoot;
+            if (!string.IsNullOrWhiteSpace(root))
+                path = Path.Combine(root, path);
+        }
+
+        if (!File.Exists(path))
+        {
+            StatusText.Text = $"glass · attach · missing {path}";
+            return;
+        }
+
+        OpenCodeFile(path, chip.LineStart);
+        StatusText.Text = $"glass · attach · {chip.Label} · {DateTime.Now:HH:mm:ss}";
+    }
+
     void AppendSlashBubble(string path, string body)
     {
-        _feed.Add(new ChatBubble("slash", $"{path}\n{body}", DateTime.Now.ToString("HH:mm:ss")));
+        var chips = GlassAttachChipPeel.FromBody(body);
+        _feed.Add(new ChatBubble("slash", $"{path}\n{body}", DateTime.Now.ToString("HH:mm:ss"), chips));
         FeedScroll.ScrollToEnd();
     }
 

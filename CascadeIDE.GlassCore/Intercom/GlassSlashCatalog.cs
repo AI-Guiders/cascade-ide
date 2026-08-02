@@ -16,6 +16,7 @@ public static class GlassSlashCatalog
         new("topics", "/topics", "List Intercom topic cards"),
         new("fds", "/fds", "Open Flight Data Storage MFD (plans/reports/notes)"),
         new("open", "/open", "Open path[:line] in AvalonEdit (thin attach↔code)"),
+        new("attach", "/attach", "Insert [path:line] chip from editor selection (ADR 0128 thin)"),
         new("letter", "/letter", "Where the Agent Who letter lives (CDP canon)"),
     ];
 

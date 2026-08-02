@@ -270,6 +270,23 @@
                               <TextBlock DockPanel.Dock="Right" Text="{Binding When}" FontSize="10" Foreground="#666" HorizontalAlignment="Right"/>
                             </DockPanel>
                             <TextBlock Text="{Binding Body}" FontSize="13" TextWrapping="Wrap" Foreground="#E8E8E8" LineHeight="18"/>
+                            <ItemsControl ItemsSource="{Binding Chips}" Margin="0,6,0,0">
+                              <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                  <WrapPanel Orientation="Horizontal"/>
+                                </ItemsPanelTemplate>
+                              </ItemsControl.ItemsPanel>
+                              <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                  <Button Margin="0,0,6,4" Padding="8,2" Cursor="Hand"
+                                          Style="{StaticResource ChromeBtn}"
+                                          Background="#2A3340" BorderBrush="#4A6A8A" Foreground="#C8E0FF"
+                                          Content="{Binding Label}" Tag="{Binding}"
+                                          Click="AttachChip_OnClick"
+                                          ToolTip="{Binding Bracket}"/>
+                                </DataTemplate>
+                              </ItemsControl.ItemTemplate>
+                            </ItemsControl>
                           </StackPanel>
                         </Border>
                       </DataTemplate>
