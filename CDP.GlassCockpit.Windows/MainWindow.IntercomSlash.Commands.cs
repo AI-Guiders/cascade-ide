@@ -303,7 +303,7 @@ public partial class MainWindow
             EditorDirty: dirty,
             MfdPage: CurrentMfdPage(),
             Topology: _session.Layout.Topology,
-            
+            ColumnDefinitions: _session.Layout.ColumnDefinitions,
             LatchStateRoot: _latches.StateRoot));
     }
 
