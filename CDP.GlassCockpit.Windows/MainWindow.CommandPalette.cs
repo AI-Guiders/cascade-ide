@@ -102,6 +102,9 @@ public partial class MainWindow
             entry = _paletteEntries[0];
         }
 
+        if (GlassCommandPaletteCatalog.IsNonExecutableMelodyRow(entry.Id))
+            return;
+
         CloseCommandPalette();
         RunPaletteEntry(entry.Id);
     }

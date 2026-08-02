@@ -102,4 +102,38 @@ public sealed class GlassPaletteChordCatalogTests
         Assert.Contains(GlassCommandPaletteCatalog.Filter("solution"), e => e.Id == "mfd_solution_explorer");
         Assert.Contains(GlassCommandPaletteCatalog.Filter("hypotheses"), e => e.Id == "mfd_hypotheses");
     }
+
+    [Fact]
+    public void Melody_TryGetTail_parses_c_prefix()
+    {
+        Assert.True(GlassCommandPaletteCatalog.TryGetMelodyTail("c:", out var empty) && empty == "");
+        Assert.True(GlassCommandPaletteCatalog.TryGetMelodyTail("C:of", out var of) && of == "of");
+        Assert.True(GlassCommandPaletteCatalog.TryGetMelodyTail("  c: fd ", out var fd) && fd == "fd");
+        Assert.False(GlassCommandPaletteCatalog.TryGetMelodyTail("f:foo", out _));
+        Assert.False(GlassCommandPaletteCatalog.TryGetMelodyTail("open", out _));
+    }
+
+    [Fact]
+    public void Melody_Filter_empty_tail_starts_with_hint_and_lists_aliases_with_help()
+    {
+        var rows = GlassCommandPaletteCatalog.Filter("c:");
+        Assert.NotEmpty(rows);
+        Assert.Equal(GlassCommandPaletteCatalog.MelodyHintId, rows[0].Id);
+        Assert.Contains("Command Melody", rows[0].Title, StringComparison.Ordinal);
+        Assert.Contains(rows, e => e.Title.StartsWith("c:of", StringComparison.Ordinal) && e.Help.Length > 0);
+        Assert.Contains(rows, e => e.Id == "open_file" && e.Keywords == "of");
+    }
+
+    [Fact]
+    public void Melody_Filter_prefix_and_no_match()
+    {
+        var of = GlassCommandPaletteCatalog.Filter("c:of");
+        Assert.DoesNotContain(of, e => e.Id == GlassCommandPaletteCatalog.MelodyHintId);
+        Assert.Contains(of, e => e.Id == "open_file");
+
+        var miss = GlassCommandPaletteCatalog.Filter("c:zzzz");
+        Assert.Single(miss);
+        Assert.Equal(GlassCommandPaletteCatalog.MelodyNoMatchId, miss[0].Id);
+    }
+
 }
