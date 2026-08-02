@@ -19,6 +19,19 @@ internal sealed class GlassHostWindows : IDisposable
 
     public GlassHostWindows(MainWindow main) => _main = main;
 
+    /// <summary>TopLevels for agent_surface layout Sense (roles match contract).</summary>
+    public IReadOnlyList<(string Role, Window Window)> EnumerateRoleWindows()
+    {
+        var list = new List<(string, Window)> { ("main", _main) };
+        if (_pfdHost is { IsVisible: true })
+            list.Add(("pfd_host", _pfdHost));
+        if (_mfdHost is { IsVisible: true })
+            list.Add(("mfd_host", _mfdHost));
+        if (_pmHost is { IsVisible: true })
+            list.Add(("pm_host", _pmHost));
+        return list;
+    }
+
     public void Sync(PresentationTopologyFlags flags)
     {
         if (_syncing)

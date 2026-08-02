@@ -19,6 +19,10 @@ public static class CdpHabitatPaths
     public const string LandLatchFileName = "land-LATEST.json";
     public const string SharedLatchFileName = "shared-LATEST.json";
     public const string DiskLatchFileName = "disk-LATEST.json";
+    /// <summary>Agent surface RPC request (CDP → Glass). Not SoftOrgan chrome.</summary>
+    public const string SurfaceCmdLatchFileName = "surface-cmd-LATEST.json";
+    /// <summary>Agent surface RPC reply (Glass → CDP).</summary>
+    public const string SurfaceReplyLatchFileName = "surface-reply-LATEST.json";
 
     public static string StateRoot =>
         Path.Combine(
@@ -40,6 +44,10 @@ public static class CdpHabitatPaths
     public static string SharedLatchPath => GetLatchPath(SharedLatchFileName);
 
     public static string DiskLatchPath => GetLatchPath(DiskLatchFileName);
+
+    public static string SurfaceCmdLatchPath => GetLatchPath(SurfaceCmdLatchFileName);
+
+    public static string SurfaceReplyLatchPath => GetLatchPath(SurfaceReplyLatchFileName);
 
     /// <summary>Ensure state root exists; returns <see cref="StateRoot"/>.</summary>
     public static string EnsureStateRoot()

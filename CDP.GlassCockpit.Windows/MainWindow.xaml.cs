@@ -6,6 +6,7 @@ namespace CDP.GlassCockpit.Windows;
 public partial class MainWindow : Window
 {
     readonly LatchHub _latches;
+    readonly GlassSurfaceCommandHub _surface;
     readonly GlassSession _session;
 
     public MainWindow()
@@ -43,6 +44,9 @@ public partial class MainWindow : Window
         _latches.EclChanged += OnEclChanged;
         _latches.Start();
 
+        _surface = new GlassSurfaceCommandHub(this);
+        _surface.Start();
+
         StatusText.Text =
             $"glass · {_session.Layout.Topology} · cols={_session.Layout.ColumnDefinitions} · {_latches.StateRoot}";
         Loaded += (_, _) =>
@@ -59,10 +63,14 @@ public partial class MainWindow : Window
             DisposeTestsSession();
             DisposeGitSession();
             DisposeEditorChrome();
+            _surface.Dispose();
             _hosts.Dispose();
             _latches.Dispose();
         };
         UpdateMfdBody();
         RefreshEicasHealth();
     }
+
+    internal IReadOnlyList<(string Role, Window Window)> EnumerateSurfaceWindows() =>
+        _hosts.EnumerateRoleWindows();
 }
