@@ -18,6 +18,10 @@ public class EicasBandAggregatorTests
         Assert.Contains("QRH-1", a.BandText!);
         Assert.Contains("ECL", a.BandText!);
         Assert.Equal("warn", a.Severity);
+        Assert.Equal(3, a.BandChips.Count);
+        Assert.Equal("warn", a.BandChips[0].Severity);
+        Assert.Equal("adv", a.BandChips[1].Severity);
+        Assert.Equal("adv", a.BandChips[2].Severity);
     }
 
     [Fact]

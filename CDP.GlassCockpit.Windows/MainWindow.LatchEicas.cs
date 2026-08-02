@@ -1,6 +1,7 @@
 #nullable enable
 
 using System.IO;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Threading;
@@ -100,25 +101,46 @@ public partial class MainWindow
 
     void RefreshEicasHealth()
     {
-        if (MfdHealth is null)
+        if (MfdHealthBand is null)
             return;
 
-        var text = _eicas.BandText;
-        if (!string.IsNullOrWhiteSpace(text))
+        MfdHealthBand.Items.Clear();
+
+        var chips = _eicas.BandChips;
+        if (chips.Count == 0)
         {
-            MfdHealth.Text = text;
-            MfdHealth.Foreground = _eicas.Severity switch
+            MfdHealthBand.Items.Add(MakeEicasChip(
+                $"EICAS · CLEAR · {CurrentMfdPage()}",
+                "idle"));
+            return;
+        }
+
+        for (var i = 0; i < chips.Count; i++)
+        {
+            var chip = chips[i];
+            var block = MakeEicasChip(chip.Text, chip.Severity);
+            if (i > 0)
+                block.Margin = new Thickness(12, 0, 0, 0);
+            MfdHealthBand.Items.Add(block);
+        }
+    }
+
+    TextBlock MakeEicasChip(string text, string severity)
+    {
+        return new TextBlock
+        {
+            Text = text,
+            FontSize = 11,
+            FontFamily = new FontFamily("Consolas"),
+            VerticalAlignment = VerticalAlignment.Center,
+            Foreground = severity switch
             {
                 "warn" => Brushes.OrangeRed,
                 "caut" => Brushes.Gold,
                 "adv" => Brushes.DeepSkyBlue,
                 _ => MutedFg()
-            };
-            return;
-        }
-
-        MfdHealth.Text = $"EICAS · CLEAR · {CurrentMfdPage()}";
-        MfdHealth.Foreground = MutedFg();
+            }
+        };
     }
 
     Brush MutedFg()

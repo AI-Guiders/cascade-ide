@@ -13,6 +13,9 @@ public sealed class EicasBandAggregator
     readonly Dictionary<string, string> _lines = new(StringComparer.OrdinalIgnoreCase);
     readonly object _gate = new();
 
+    /// <summary>Per-line chip for Avalonia-parity horizontal EICAS band.</summary>
+    public readonly record struct BandChip(string Text, string Severity);
+
     /// <summary>Highest-priority single line (compat).</summary>
     public string? BandLine
     {
@@ -21,6 +24,33 @@ public sealed class EicasBandAggregator
             var stack = BandStack;
             return stack.Count == 0 ? null : stack[0];
         }
+    }
+
+    /// <summary>Stack with per-line severity (WARN/CAUT/ADV) for clearer Glass chrome.</summary>
+    public IReadOnlyList<BandChip> BandChips
+    {
+        get
+        {
+            var stack = BandStack;
+            if (stack.Count == 0)
+                return Array.Empty<BandChip>();
+
+            var chips = new BandChip[stack.Count];
+            for (var i = 0; i < stack.Count; i++)
+                chips[i] = new BandChip(stack[i], SeverityOfLine(stack[i]));
+            return chips;
+        }
+    }
+
+    public static string SeverityOfLine(string line)
+    {
+        if (string.IsNullOrWhiteSpace(line))
+            return "idle";
+        if (line.Contains("· WARN ·", StringComparison.Ordinal))
+            return "warn";
+        if (line.Contains("· CAUT ·", StringComparison.Ordinal))
+            return "caut";
+        return "adv";
     }
 
     /// <summary>Assembled multi-line band for clear Glass EICAS.</summary>

@@ -316,10 +316,13 @@
             <TextBlock x:Name="MfdZoneTitle" Text="M · Terminal" FontWeight="SemiBold" FontSize="12" Foreground="{StaticResource Glass.FgTitle}"/>
           </Border>
           <Border DockPanel.Dock="Top" Background="{StaticResource Glass.BgRaised}" Padding="8,6" BorderBrush="#2A2A2A" BorderThickness="0,0,0,1">
-            <TextBlock x:Name="MfdHealth" Text="EICAS · CLEAR"
-                       FontSize="11" FontFamily="Consolas"
-                       Foreground="{StaticResource Glass.FgMuted}"
-                       TextWrapping="Wrap" LineHeight="15"/>
+            <ItemsControl x:Name="MfdHealthBand">
+              <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                  <StackPanel Orientation="Horizontal"/>
+                </ItemsPanelTemplate>
+              </ItemsControl.ItemsPanel>
+            </ItemsControl>
           </Border>
           <!-- Catalog kept for SelectMfdPage / seats latch; not shown (aviation: one page on glass). -->
           <ListBox x:Name="MfdPages"
