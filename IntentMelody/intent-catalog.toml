@@ -762,15 +762,17 @@ intent = "show"
 help = "Диагностики открытого .cs."
 group = "Workspace"
 
-# get_ide_state — Сводка состояния IDE (JSON). (/state show)
+# get_ide_state — IDE state glance. (c:st · /state show · Glass /status IOP)
 [[command]]
 command_id = "get_ide_state"
+melody_slug = "st"
+melody_shape = "simple"
 
 [[command.slash]]
 path = "/state show"
 domain = "state"
 intent = "show"
-help = "Сводка состояния IDE (JSON)."
+help = "IDE state glance (Glass: /status IOP)."
 group = "Workspace"
 
 # open_solution_dialog — Открыть диалог выбора .sln / .slnx. (c:so · /solution open)

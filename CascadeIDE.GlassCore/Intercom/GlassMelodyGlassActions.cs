@@ -29,6 +29,7 @@ public static class GlassMelodyGlassActions
             ["show_environment_readiness_page"] = "mfd_env_ready",
             ["show_chat_page"] = "mfd_chat",
             ["focus_editor"] = "mfd_editor",
+            ["get_ide_state"] = "slash_status",
         };
 
     public static bool TryMapCommandId(string? commandId, out string glassActionId)

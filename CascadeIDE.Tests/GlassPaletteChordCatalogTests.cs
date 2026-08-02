@@ -175,5 +175,43 @@ public sealed class GlassPaletteChordCatalogTests
         Assert.False(GlassCommandPaletteCatalog.IsNonExecutableMelodyRow(
             GlassIntentMelodyCatalog.ToRowId("select")));
     }
+    [Fact]
+    public void Status_IOP_glance_format_includes_editor_mfd_topology()
+    {
+        var body = GlassIopStatusGlance.Format(new GlassIopStatusGlance.Snapshot(
+            WorkspaceRoot: "D:/ws",
+            IntercomForward: true,
+            StatusLine: "glass ok",
+            Subtitle: "peer",
+            EditorPath: "D:/ws/MainWindow.cs",
+            CaretLine: 42,
+            EditorDirty: true,
+            MfdPage: "Editor",
+            Topology: "integrated",
+            ColumnDefinitions: "* * *",
+            LatchStateRoot: "D:/ws/.cdp/latches"));
+
+        Assert.Contains("workspace: D:/ws", body, StringComparison.Ordinal);
+        Assert.Contains("editor: D:/ws/MainWindow.cs", body, StringComparison.Ordinal);
+        Assert.Contains("caret: 42", body, StringComparison.Ordinal);
+        Assert.Contains("dirty: yes", body, StringComparison.Ordinal);
+        Assert.Contains("mfd: Editor", body, StringComparison.Ordinal);
+        Assert.Contains("topology: integrated", body, StringComparison.Ordinal);
+        Assert.Contains("latch:", body, StringComparison.Ordinal);
+        Assert.Contains("intercom forward: True", body, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Melody_get_ide_state_maps_to_slash_status_and_c_st()
+    {
+        Assert.True(GlassMelodyGlassActions.TryMapCommandId("get_ide_state", out var action)
+                    && action == "slash_status");
+        Assert.False(GlassCommandPaletteCatalog.IsNonExecutableMelodyRow(
+            GlassIntentMelodyCatalog.ToRowId("get_ide_state")));
+
+        var rows = GlassCommandPaletteCatalog.Filter("c:st");
+        Assert.Contains(rows, e => e.Keywords == "st");
+        Assert.Contains(rows, e => e.Id == GlassIntentMelodyCatalog.ToRowId("get_ide_state"));
+    }
 
 }

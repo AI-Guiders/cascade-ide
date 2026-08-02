@@ -284,10 +284,28 @@ public partial class MainWindow
     }
 
     string BuildGlassStatusSlashBody()
-        => $"workspace: {_session.WorkspaceRoot}\n"
-           + $"intercom forward: {_session.IsIntercomForward}\n"
-           + $"status: {StatusText.Text}\n"
-           + $"subtitle: {IntercomSubtitle.Text}";
+    {
+        int? caret = null;
+        bool? dirty = null;
+        if (CodeEditor?.Document is not null)
+        {
+            caret = CodeEditor.TextArea.Caret.Line;
+            dirty = CodeEditor.IsModified;
+        }
+
+        return GlassIopStatusGlance.Format(new GlassIopStatusGlance.Snapshot(
+            WorkspaceRoot: _session.WorkspaceRoot,
+            IntercomForward: _session.IsIntercomForward,
+            StatusLine: StatusText.Text,
+            Subtitle: IntercomSubtitle.Text,
+            EditorPath: _editorPath,
+            CaretLine: caret,
+            EditorDirty: dirty,
+            MfdPage: CurrentMfdPage(),
+            Topology: _session.Layout.Topology,
+            
+            LatchStateRoot: _latches.StateRoot));
+    }
 
     string BuildGlassTopicsSlashBody()
     {
