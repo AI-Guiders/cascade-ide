@@ -55,6 +55,17 @@ public static class GlassIntentMelodyCatalog
 
     public static string ToRowId(string commandId) => MelodyRowIdPrefix + commandId;
 
+    public static bool TryParseRowId(string? rowId, out string commandId)
+    {
+        commandId = "";
+        if (string.IsNullOrWhiteSpace(rowId)
+            || !rowId.StartsWith(MelodyRowIdPrefix, StringComparison.Ordinal))
+            return false;
+
+        commandId = rowId[MelodyRowIdPrefix.Length..].Trim();
+        return commandId.Length > 0;
+    }
+
 #if DEBUG
     internal static void ResetForTests() { /* lazy fixed — reload needs process restart; tests use live embed */ }
 #endif

@@ -106,6 +106,13 @@ public partial class MainWindow
             return;
 
         CloseCommandPalette();
+
+        if (GlassMelodyGlassActions.TryMapRowId(entry.Id, out var glassAction))
+        {
+            RunPaletteEntry(glassAction);
+            return;
+        }
+
         RunPaletteEntry(entry.Id);
     }
 
@@ -113,6 +120,18 @@ public partial class MainWindow
     {
         switch (id)
         {
+            case GlassMelodyGlassActions.RunGitStatus:
+                SelectMfdPage("Git");
+                GitStatus_OnClick(this, new RoutedEventArgs());
+                break;
+            case GlassMelodyGlassActions.RunBuild:
+                SelectMfdPage("Build");
+                BuildRun_OnClick(this, new RoutedEventArgs());
+                break;
+            case GlassMelodyGlassActions.RunTests:
+                SelectMfdPage("Tests");
+                TestsRun_OnClick(this, new RoutedEventArgs());
+                break;
             case "open_file":
                 TryPickOpenFile();
                 break;

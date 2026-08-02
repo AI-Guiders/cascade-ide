@@ -140,10 +140,20 @@ public sealed class GlassPaletteChordCatalogTests
     }
 
     [Fact]
-    public void Melody_catalog_rows_are_non_executable_discoverability()
+    public void Melody_catalog_rows_allowlist_exec_vs_browse()
     {
-        Assert.True(GlassCommandPaletteCatalog.IsNonExecutableMelodyRow(
-            GlassIntentMelodyCatalog.ToRowId("git_status")));
+        Assert.True(GlassMelodyGlassActions.TryMapCommandId("git_status", out var git)
+                    && git == GlassMelodyGlassActions.RunGitStatus);
+        Assert.True(GlassMelodyGlassActions.TryMapCommandId("build_solution_ui", out var br)
+                    && br == GlassMelodyGlassActions.RunBuild);
+        Assert.True(GlassMelodyGlassActions.TryMapCommandId("run_tests", out var bt)
+                    && bt == GlassMelodyGlassActions.RunTests);
+
+        var gsRow = GlassIntentMelodyCatalog.ToRowId("git_status");
+        Assert.False(GlassCommandPaletteCatalog.IsNonExecutableMelodyRow(gsRow));
+
+        var unknown = GlassIntentMelodyCatalog.ToRowId("debug_attach");
+        Assert.True(GlassCommandPaletteCatalog.IsNonExecutableMelodyRow(unknown));
         Assert.False(GlassCommandPaletteCatalog.IsNonExecutableMelodyRow("open_file"));
     }
 

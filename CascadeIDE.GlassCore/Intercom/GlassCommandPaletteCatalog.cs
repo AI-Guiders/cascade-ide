@@ -56,7 +56,8 @@ public static class GlassCommandPaletteCatalog
 
     public static bool IsNonExecutableMelodyRow(string id) =>
         id is MelodyHintId or MelodyNoMatchId
-        || GlassIntentMelodyCatalog.IsMelodyDiscoverabilityRow(id);
+        || (GlassIntentMelodyCatalog.IsMelodyDiscoverabilityRow(id)
+            && !GlassMelodyGlassActions.TryMapRowId(id, out _));
 
     public static IReadOnlyList<GlassPaletteEntry> Filter(string? query)
     {
@@ -90,7 +91,7 @@ public static class GlassCommandPaletteCatalog
             var hint = new GlassPaletteEntry(
                 MelodyHintId,
                 $"Command Melody: type tail after c: (e.g. {samples}).",
-                "Discoverability — CIDE intent-catalog.toml melody_slug + Help. Ide execute in Glass = later peel.",
+                "Discoverability — CIDE intent-catalog.toml. Allowlisted Melody → Glass run (git/build/tests/MFD); rest browse-only.",
                 "c: melody intent");
             return
             [
@@ -114,10 +115,14 @@ public static class GlassCommandPaletteCatalog
         return aliases.Select(ToMelodyEntry).ToArray();
     }
 
-    static GlassPaletteEntry ToMelodyEntry(GlassIntentMelodyCatalog.GlassMelodyAlias a) =>
-        new(
+    static GlassPaletteEntry ToMelodyEntry(GlassIntentMelodyCatalog.GlassMelodyAlias a)
+    {
+        var mapped = GlassMelodyGlassActions.TryMapCommandId(a.CommandId, out _);
+        var help = mapped ? a.Help + " · Glass run" : a.Help + " · browse-only in Glass";
+        return new(
             GlassIntentMelodyCatalog.ToRowId(a.CommandId),
             $"c:{a.Alias} — {a.CommandId}",
-            a.Help,
+            help,
             a.Alias);
+    }
 }
