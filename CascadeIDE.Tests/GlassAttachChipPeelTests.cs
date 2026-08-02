@@ -45,4 +45,23 @@ public class GlassAttachChipPeelTests
         Assert.Equal("[a/b.cs:2-5]", GlassAttachChipPeel.FormatBracket("a\\b.cs", 2, 5));
         Assert.Equal("[x.cs:1]", GlassAttachChipPeel.FormatBracket("x.cs", 1));
     }
+
+    [Fact]
+    public void StripBracketsForDisplay_keeps_prose_drops_path_chips()
+    {
+        var body = GlassAttachChipPeel.StripBracketsForDisplay(
+            "see [LatchPaint.cs:40] and [M:Foo] please");
+        Assert.Contains("see", body);
+        Assert.Contains("[M:Foo]", body);
+        Assert.DoesNotContain("LatchPaint", body);
+        Assert.Contains("please", body);
+    }
+
+    [Fact]
+    public void ResolveAgainstDisk_marks_missing()
+    {
+        var chip = new GlassAttachChip("Nope.cs", "Nope.cs", 1);
+        var resolved = GlassAttachChipPeel.ResolveAgainstDisk(chip, workspaceRoot: null);
+        Assert.False(resolved.Resolved);
+    }
 }

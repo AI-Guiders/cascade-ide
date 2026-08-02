@@ -95,7 +95,7 @@ public partial class MainWindow
         OpenCodeFile(src);
     }
 
-    void OpenCodeFile(string path, int? line = null)
+    void OpenCodeFile(string path, int? line = null, int? lineEnd = null)
     {
         EnsureEditorChrome();
         CodeEditor.Load(path);
@@ -108,10 +108,13 @@ public partial class MainWindow
 
         if (line is > 0)
         {
-            var target = Math.Min(line.Value, Math.Max(1, CodeEditor.Document.LineCount));
-            CodeEditor.ScrollToLine(target);
-            CodeEditor.TextArea.Caret.Line = target;
-            CodeEditor.TextArea.Caret.Column = 1;
+            var max = Math.Max(1, CodeEditor.Document.LineCount);
+            var start = Math.Min(line.Value, max);
+            var end = lineEnd is > 0 ? Math.Min(Math.Max(lineEnd.Value, start), max) : start;
+            var startDoc = CodeEditor.Document.GetLineByNumber(start);
+            var endDoc = CodeEditor.Document.GetLineByNumber(end);
+            CodeEditor.Select(startDoc.Offset, endDoc.EndOffset - startDoc.Offset);
+            CodeEditor.ScrollToLine(start);
             CodeEditor.TextArea.Caret.BringCaretToView();
         }
 

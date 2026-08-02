@@ -384,28 +384,28 @@ public partial class MainWindow
         if (sender is not System.Windows.Controls.Button { Tag: GlassAttachChip chip })
             return;
 
-        var path = chip.File;
-        if (!Path.IsPathRooted(path))
+        var path = GlassAttachChipPeel.ResolvePath(chip.File, _session.WorkspaceRoot);
+        if (path.Length == 0 || !File.Exists(path))
         {
-            var root = _session.WorkspaceRoot;
-            if (!string.IsNullOrWhiteSpace(root))
-                path = Path.Combine(root, path);
-        }
-
-        if (!File.Exists(path))
-        {
-            StatusText.Text = $"glass · attach · missing {path}";
+            StatusText.Text = $"glass · attach · missing {chip.File}";
             return;
         }
 
-        OpenCodeFile(path, chip.LineStart);
+        OpenCodeFile(path, chip.LineStart, chip.LineEnd);
         StatusText.Text = $"glass · attach · {chip.Label} · {DateTime.Now:HH:mm:ss}";
     }
 
     void AppendSlashBubble(string path, string body)
     {
-        var chips = GlassAttachChipPeel.FromBody(body);
-        _feed.Add(new ChatBubble("slash", $"{path}\n{body}", DateTime.Now.ToString("HH:mm:ss"), chips));
+        var chips = GlassAttachChipPeel.ResolveAgainstDisk(
+            GlassAttachChipPeel.FromBody(body),
+            _session.WorkspaceRoot);
+        var display = chips.Count > 0
+            ? GlassAttachChipPeel.StripBracketsForDisplay(body)
+            : body;
+        if (string.IsNullOrWhiteSpace(display) && chips.Count > 0)
+            display = "(attach)";
+        _feed.Add(new ChatBubble("slash", $"{path}\n{display}", DateTime.Now.ToString("HH:mm:ss"), chips));
         FeedScroll.ScrollToEnd();
     }
 

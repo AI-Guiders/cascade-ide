@@ -1,5 +1,6 @@
 #nullable enable
 
+using CascadeIDE.Intercom;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Threading;
@@ -72,8 +73,17 @@ public partial class MainWindow
             }
         }
 
+        var ws = _session.WorkspaceRoot;
         foreach (var e in shown)
-            _feed.Add(new ChatBubble(e.RoleLabel, e.Body, e.WhenLabel, e.Chips));
+        {
+            var chips = GlassAttachChipPeel.ResolveAgainstDisk(e.Chips, ws);
+            var body = chips.Count > 0
+                ? GlassAttachChipPeel.StripBracketsForDisplay(e.Body)
+                : e.Body;
+            if (string.IsNullOrWhiteSpace(body) && chips.Count > 0)
+                body = "(attach)";
+            _feed.Add(new ChatBubble(e.RoleLabel, body, e.WhenLabel, chips));
+        }
 
         while (_feed.Count > 81)
             _feed.RemoveAt(1);

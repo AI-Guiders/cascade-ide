@@ -10,7 +10,8 @@ public sealed record GlassAttachChip(
     string Label,
     string File,
     int? LineStart = null,
-    int? LineEnd = null)
+    int? LineEnd = null,
+    bool Resolved = true)
 {
     public string Bracket => GlassAttachChipPeel.FormatBracket(File, LineStart, LineEnd);
 }
@@ -32,6 +33,56 @@ public static partial class GlassAttachChipPeel
         }
 
         return $"[{path}]";
+    }
+
+    /// <summary>Disk resolve for feed chip chrome (Avalonia IntercomAttachLinkVisualStatus thin).</summary>
+    public static GlassAttachChip ResolveAgainstDisk(GlassAttachChip chip, string? workspaceRoot)
+    {
+        var path = ResolvePath(chip.File, workspaceRoot);
+        var ok = path.Length > 0 && File.Exists(path);
+        return chip with { Resolved = ok };
+    }
+
+    public static IReadOnlyList<GlassAttachChip> ResolveAgainstDisk(
+        IReadOnlyList<GlassAttachChip> chips,
+        string? workspaceRoot)
+    {
+        if (chips.Count == 0)
+            return chips;
+        var list = new List<GlassAttachChip>(chips.Count);
+        foreach (var c in chips)
+            list.Add(ResolveAgainstDisk(c, workspaceRoot));
+        return list;
+    }
+
+    public static string ResolvePath(string file, string? workspaceRoot)
+    {
+        var path = (file ?? "").Trim();
+        if (path.Length == 0)
+            return "";
+        if (Path.IsPathRooted(path))
+            return path;
+        if (!string.IsNullOrWhiteSpace(workspaceRoot))
+            return Path.Combine(workspaceRoot, path);
+        return path;
+    }
+
+    /// <summary>Drop peeled <c>[path:line]</c> markers from bubble prose when chips render below.</summary>
+    public static string StripBracketsForDisplay(string? body)
+    {
+        if (string.IsNullOrWhiteSpace(body))
+            return body ?? "";
+
+        var stripped = BodyBracket().Replace(body, m =>
+        {
+            if (!TryParseBracketInner(m.Groups[1].Value, out _))
+                return m.Value;
+            return "";
+        });
+
+        stripped = Regex.Replace(stripped, "[ \\t]{2,}", " ");
+        stripped = Regex.Replace(stripped, " *\\n *", "\n");
+        return stripped.Trim();
     }
 
     public static IReadOnlyList<GlassAttachChip> Peel(

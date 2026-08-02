@@ -279,11 +279,24 @@
                               <ItemsControl.ItemTemplate>
                                 <DataTemplate>
                                   <Button Margin="0,0,6,4" Padding="8,2" Cursor="Hand"
-                                          Style="{StaticResource ChromeBtn}"
-                                          Background="#2A3340" BorderBrush="#4A6A8A" Foreground="#C8E0FF"
                                           Content="{Binding Label}" Tag="{Binding}"
                                           Click="AttachChip_OnClick"
-                                          ToolTip="{Binding Bracket}"/>
+                                          ToolTip="{Binding Bracket}">
+                                    <Button.Style>
+                                      <Style TargetType="Button" BasedOn="{StaticResource ChromeBtn}">
+                                        <Setter Property="Background" Value="#1E3A2F"/>
+                                        <Setter Property="BorderBrush" Value="#3D8F6A"/>
+                                        <Setter Property="Foreground" Value="#B8F0D0"/>
+                                        <Style.Triggers>
+                                          <DataTrigger Binding="{Binding Resolved}" Value="False">
+                                            <Setter Property="Background" Value="#3A2222"/>
+                                            <Setter Property="BorderBrush" Value="#8A4A4A"/>
+                                            <Setter Property="Foreground" Value="#F0B8B8"/>
+                                          </DataTrigger>
+                                        </Style.Triggers>
+                                      </Style>
+                                    </Button.Style>
+                                  </Button>
                                 </DataTemplate>
                               </ItemsControl.ItemTemplate>
                             </ItemsControl>
