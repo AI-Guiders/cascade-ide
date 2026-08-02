@@ -39,22 +39,16 @@ public partial class MainWindow
     {
         if (view.MessageId is not { Length: > 0 } id)
             return;
-        // RoleLabel looks like "@PM → @PF · human"
-        var role = view.RoleLabel;
-        var from = "?";
-        var to = "?";
-        var origin = "?";
-        var parts = role.Split('·', 2, StringSplitOptions.TrimEntries);
-        if (parts.Length == 2)
-            origin = parts[1];
-        var arrow = parts[0].Split('→', 2, StringSplitOptions.TrimEntries);
-        if (arrow.Length == 2)
-        {
-            from = arrow[0].Trim().TrimStart('@').ToLowerInvariant();
-            to = arrow[1].Trim().TrimStart('@').ToLowerInvariant();
-        }
 
-        GlassIntercomJournal.Append(id, from, to, view.Body, origin, DateTimeOffset.Now);
+        GlassIntercomJournal.Append(
+            id,
+            view.FromSeat,
+            view.ToSeat,
+            view.Body,
+            view.Origin,
+            DateTimeOffset.Now,
+            view.Name,
+            view.Kind);
     }
 
     void OnIntercomChanged(string path)
@@ -212,7 +206,7 @@ public partial class MainWindow
         ComposerBox.Clear();
         HideSlashPopup();
         PublishPmIdle();
-        StatusText.Text = $"glass · intercom · sent {sent.Id} · @PM→@PF · {DateTime.Now:HH:mm:ss}";
+        StatusText.Text = $"glass · intercom · sent {sent.Id} · {sent.RoleLabel} · {DateTime.Now:HH:mm:ss}";
     }
 
     public sealed record TopicCard(

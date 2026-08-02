@@ -42,7 +42,15 @@ internal static class GlassIntercomJournal
         string RoleLabel,
         string WhenLabel);
 
-    public static void Append(string id, string fromSeat, string toSeat, string body, string origin, DateTimeOffset stampedUtc)
+    public static void Append(
+        string id,
+        string fromSeat,
+        string toSeat,
+        string body,
+        string origin,
+        DateTimeOffset stampedUtc,
+        string? name = null,
+        string? kind = null)
     {
         if (string.IsNullOrWhiteSpace(id) || string.IsNullOrWhiteSpace(body))
             return;
@@ -72,6 +80,7 @@ internal static class GlassIntercomJournal
                     }
                 }
 
+                var (resolvedName, resolvedKind) = LatchPaint.ResolveIntercomIdentity(fromSeat, origin, name, kind);
                 var payload = new
                 {
                     schema = GlassIntercomSend.Schema,
@@ -80,6 +89,8 @@ internal static class GlassIntercomJournal
                     to_seat = toSeat,
                     body,
                     origin,
+                    name = resolvedName,
+                    kind = resolvedKind,
                     stamped_utc = stampedUtc,
                     acked = false
                 };
@@ -124,7 +135,10 @@ internal static class GlassIntercomJournal
                     if (dto == default)
                         dto = DateTimeOffset.UtcNow;
                     var when = dto.ToLocalTime().ToString("HH:mm");
-                    var role = $"@{from.ToUpperInvariant()} → @{to.ToUpperInvariant()} · {origin}";
+                    var name = Prop(root, "name") ?? Prop(root, "display_name");
+                    var kind = Prop(root, "kind");
+                    var (resolvedName, resolvedKind) = LatchPaint.ResolveIntercomIdentity(from, origin, name, kind);
+                    var role = LatchPaint.FormatIntercomRole(from, to, resolvedName, resolvedKind);
                     all.Add(new Entry(id, from, to, body.Replace("\r\n", "\n"), origin, dto, role, when));
                 }
                 catch

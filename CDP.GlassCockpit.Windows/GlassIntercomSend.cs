@@ -41,6 +41,7 @@ internal static partial class GlassIntercomSend
             body = text;
 
         var id = Guid.NewGuid().ToString("N")[..12];
+        var (name, kind) = LatchPaint.ResolveIntercomIdentity("pm", "human", null, null);
         var doc = new IntercomVoiceDoc
         {
             Schema = Schema,
@@ -49,6 +50,8 @@ internal static partial class GlassIntercomSend
             ToSeat = "pf",
             Body = body,
             Origin = "human",
+            Name = name,
+            Kind = kind,
             StampedUtc = DateTimeOffset.UtcNow,
             Acked = false
         };
@@ -61,8 +64,8 @@ internal static partial class GlassIntercomSend
             var tmp = path + "." + Guid.NewGuid().ToString("N")[..8] + ".tmp";
             File.WriteAllText(tmp, json);
             File.Move(tmp, path, overwrite: true);
-            GlassIntercomJournal.Append(id, "pm", "pf", body, "human", doc.StampedUtc);
-            return new Sent(id, body, "@PM → @PF · human");
+            GlassIntercomJournal.Append(id, "pm", "pf", body, "human", doc.StampedUtc, name, kind);
+            return new Sent(id, body, LatchPaint.FormatIntercomRole("pm", "pf", name, kind));
         }
         catch
         {
@@ -81,6 +84,8 @@ internal static partial class GlassIntercomSend
         public string ToSeat { get; set; } = "pf";
         public string Body { get; set; } = "";
         public string Origin { get; set; } = "human";
+        public string? Name { get; set; }
+        public string? Kind { get; set; }
         public DateTimeOffset StampedUtc { get; set; }
         public bool Acked { get; set; }
     }

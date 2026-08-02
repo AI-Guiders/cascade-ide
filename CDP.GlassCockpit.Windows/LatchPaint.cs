@@ -13,7 +13,12 @@ internal static partial class LatchPaint
         string RoleLabel,
         string WhenLabel,
         string StatusLine,
-        string? MessageId);
+        string? MessageId,
+        string FromSeat = "?",
+        string ToSeat = "?",
+        string Origin = "?",
+        string? Name = null,
+        string? Kind = null);
 
     public sealed record PresentationView(
         string Headline,
@@ -36,9 +41,12 @@ internal static partial class LatchPaint
             var stamped = Prop(root, "stamped_utc") ?? "";
             var acked = root.TryGetProperty("acked", out var a) && a.ValueKind is JsonValueKind.True;
             var body = Prop(root, "body") ?? "(empty)";
+            var name = Prop(root, "name") ?? Prop(root, "display_name");
+            var kind = Prop(root, "kind");
+            var (resolvedName, resolvedKind) = ResolveIntercomIdentity(from, origin, name, kind);
 
             var whenLabel = TryLocalTime(stamped) ?? DateTime.Now.ToString("HH:mm");
-            var role = $"@{from.ToUpperInvariant()} → @{to.ToUpperInvariant()} · {origin}";
+            var role = FormatIntercomRole(from, to, resolvedName, resolvedKind);
             var header = acked ? $"{role} · acked" : $"{role} · unread";
             if (!string.IsNullOrEmpty(id))
                 header += $" · {id}";
@@ -48,8 +56,13 @@ internal static partial class LatchPaint
                 body.Replace("\r\n", "\n"),
                 role,
                 whenLabel,
-                $"intercom · {from}→{to} · {(acked ? "acked" : "unread")}",
-                string.IsNullOrWhiteSpace(id) ? null : id);
+                $"intercom · {resolvedName} · {resolvedKind} · {(acked ? "acked" : "unread")}",
+                string.IsNullOrWhiteSpace(id) ? null : id,
+                from,
+                to,
+                origin,
+                resolvedName,
+                resolvedKind);
         }
         catch (Exception ex)
         {
@@ -121,4 +134,47 @@ internal static partial class LatchPaint
             return dto.ToLocalTime().ToString("HH:mm");
         return null;
     }
+
+    /// <summary>Parity with cdp-mcp <c>CideIntercomVoiceLatch.ResolveIdentity</c>.</summary>
+    internal static (string Name, string Kind) ResolveIntercomIdentity(
+        string fromSeat,
+        string origin,
+        string? name,
+        string? kind)
+    {
+        var k = NormalizeIntercomKind(kind);
+        if (k is null)
+        {
+            if (string.Equals(origin, "human", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(fromSeat, "pm", StringComparison.OrdinalIgnoreCase))
+                k = "operator";
+            else
+                k = "guest";
+        }
+
+        var n = string.IsNullOrWhiteSpace(name) ? null : name.Trim();
+        n ??= k switch
+        {
+            "operator" => "Who",
+            "citizen" => "Citizen",
+            _ => "Кир"
+        };
+        return (n, k);
+    }
+
+    static string? NormalizeIntercomKind(string? raw)
+    {
+        if (string.IsNullOrWhiteSpace(raw))
+            return null;
+        return raw.Trim().ToLowerInvariant() switch
+        {
+            "guest" or "cursor" or "external" => "guest",
+            "citizen" or "fm" or "peer" => "citizen",
+            "operator" or "who" or "human" or "pm" => "operator",
+            _ => null
+        };
+    }
+
+    internal static string FormatIntercomRole(string fromSeat, string toSeat, string name, string kind) =>
+        $"{name} · {kind} @{fromSeat.Trim().ToUpperInvariant()} → @{toSeat.Trim().ToUpperInvariant()}";
 }

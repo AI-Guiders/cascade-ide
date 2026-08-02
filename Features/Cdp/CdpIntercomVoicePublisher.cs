@@ -58,6 +58,8 @@ internal static partial class CdpIntercomVoicePublisher
             ToSeat = SeatPf,
             Body = body,
             Origin = OriginHuman,
+            Name = "Who",
+            Kind = "operator",
             StampedUtc = DateTimeOffset.UtcNow,
             Acked = false
         };
@@ -92,6 +94,8 @@ internal static partial class CdpIntercomVoicePublisher
         public string ToSeat { get; set; } = SeatPf;
         public string Body { get; set; } = "";
         public string Origin { get; set; } = OriginHuman;
+        public string? Name { get; set; }
+        public string? Kind { get; set; }
         public DateTimeOffset StampedUtc { get; set; }
         public bool Acked { get; set; }
     }
