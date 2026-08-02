@@ -2,7 +2,6 @@
 using System.IO;
 using System.Text.Json;
 using System.Text.Json.Nodes;
-using System.Windows;
 using System.Windows.Threading;
 using CascadeIDE.Features.Cdp;
 
@@ -98,36 +97,115 @@ internal sealed class GlassSurfaceCommandHub : IDisposable
         _lastHandledId = id;
         var op = (root.TryGetProperty("op", out var opEl) ? opEl.GetString() : null)?.Trim().ToLowerInvariant()
                  ?? "layout";
+        JsonElement args = default;
+        var hasArgs = root.TryGetProperty("args", out args);
+        string? Arg(string key)
+        {
+            if (!hasArgs || args.ValueKind != JsonValueKind.Object)
+                return null;
+            if (!args.TryGetProperty(key, out var el))
+                return null;
+            return el.ValueKind == JsonValueKind.String ? el.GetString() : el.ToString();
+        }
+
+        var windows = _main.EnumerateSurfaceWindows();
 
         if (op is "layout")
         {
-            var windows = _main.EnumerateSurfaceWindows();
             var json = GlassUiLayoutSnapshot.BuildJsonAllWindows(windows);
             using var layoutDoc = JsonDocument.Parse(json);
-            var resultNode = JsonNode.Parse(layoutDoc.RootElement.GetRawText());
-            WriteReply(new JsonObject
-            {
-                ["schema"] = "agent_surface/v0",
-                ["id"] = id,
-                ["ok"] = true,
-                ["op"] = "layout",
-                ["result"] = resultNode,
-                ["stamped_utc"] = DateTimeOffset.UtcNow.ToString("o")
-            });
+            WriteOk(id, op, JsonNode.Parse(layoutDoc.RootElement.GetRawText()));
             return;
         }
 
+        string detail;
+        JsonNode? result = null;
+        switch (op)
+        {
+            case "highlight":
+                detail = GlassSurfaceActions.Highlight(windows, Arg("name"));
+                break;
+            case "focus":
+                detail = GlassSurfaceActions.Focus(windows, Arg("name"));
+                break;
+            case "click":
+                detail = GlassSurfaceActions.Click(windows, Arg("name"));
+                break;
+            case "set_text":
+                detail = GlassSurfaceActions.SetText(windows, Arg("name"), Arg("text"));
+                break;
+            case "send_keys":
+                detail = GlassSurfaceActions.SendKeys(windows, Arg("name"), Arg("keys"));
+                break;
+            case "appearance":
+                detail = GlassSurfaceActions.Appearance(windows, Arg("name"));
+                if (detail.StartsWith('{'))
+                {
+                    result = JsonNode.Parse(detail);
+                    detail = "OK";
+                }
+
+                break;
+            case "colors" or "colors_under_cursor":
+                detail = GlassSurfaceActions.ColorsUnderCursor(windows);
+                if (detail.StartsWith('{'))
+                {
+                    result = JsonNode.Parse(detail);
+                    detail = result?["error"]?.GetValue<string>() is { } e ? e : "OK";
+                }
+
+                break;
+            default:
+                WriteReply(new JsonObject
+                {
+                    ["schema"] = "agent_surface/v0",
+                    ["id"] = id,
+                    ["ok"] = false,
+                    ["op"] = op,
+                    ["error"] = "not_implemented",
+                    ["detail"] = "Glass host: layout|highlight|focus|click|set_text|send_keys|appearance|colors",
+                    ["stamped_utc"] = DateTimeOffset.UtcNow.ToString("o")
+                });
+                return;
+        }
+
+        var ok = detail == "OK";
+        var body = new JsonObject
+        {
+            ["schema"] = "agent_surface/v0",
+            ["id"] = id,
+            ["ok"] = ok,
+            ["op"] = op,
+            ["stamped_utc"] = DateTimeOffset.UtcNow.ToString("o")
+        };
+        if (ok)
+        {
+            if (result is not null)
+                body["result"] = result;
+            else
+                body["result"] = "OK";
+        }
+        else
+        {
+            body["error"] = "surface_action_failed";
+            body["detail"] = detail;
+            if (result is not null)
+                body["result"] = result;
+        }
+
+        WriteReply(body);
+    }
+
+    void WriteOk(string id, string op, JsonNode? result) =>
         WriteReply(new JsonObject
         {
             ["schema"] = "agent_surface/v0",
             ["id"] = id,
-            ["ok"] = false,
+            ["ok"] = true,
             ["op"] = op,
-            ["error"] = "not_implemented",
-            ["detail"] = "Glass host v0: layout only",
+            ["result"] = result,
             ["stamped_utc"] = DateTimeOffset.UtcNow.ToString("o")
         });
-    }
 
     static void WriteReply(JsonObject body)
     {
