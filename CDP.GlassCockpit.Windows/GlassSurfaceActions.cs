@@ -11,7 +11,7 @@ namespace CDP.GlassCockpit.Windows;
 /// <summary>
 /// WPF Aim/Drive for agent_surface/v0 (CIDE ide_* parity intent). Toolkit-local — not Avalonia SSOT.
 /// </summary>
-internal static class GlassSurfaceActions
+internal static partial class GlassSurfaceActions
 {
     static readonly Dictionary<Window, (Canvas Layer, Border Overlay)> Overlays = new();
     static DispatcherTimer? _hideTimer;

@@ -155,6 +155,27 @@ internal sealed class GlassSurfaceCommandHub : IDisposable
                 }
 
                 break;
+            case "set_control_layout":
+                detail = GlassSurfaceActions.SetControlLayout(windows, Arg("name"), Arg("layout"));
+                break;
+            case "set_panel_size":
+                detail = GlassSurfaceActions.SetPanelSize(windows, Arg("panel"), Arg("width"), Arg("height"));
+                break;
+            case "request_confirmation":
+            {
+                // Modal MessageBox — RPC ok when answered; result is ok|cancel.
+                var answer = GlassSurfaceActions.RequestConfirmation(windows, Arg("message"));
+                WriteReply(new JsonObject
+                {
+                    ["schema"] = "agent_surface/v0",
+                    ["id"] = id,
+                    ["ok"] = answer is "ok" or "cancel",
+                    ["op"] = op,
+                    ["result"] = answer,
+                    ["stamped_utc"] = DateTimeOffset.UtcNow.ToString("o")
+                });
+                return;
+            }
             default:
                 WriteReply(new JsonObject
                 {
@@ -163,7 +184,8 @@ internal sealed class GlassSurfaceCommandHub : IDisposable
                     ["ok"] = false,
                     ["op"] = op,
                     ["error"] = "not_implemented",
-                    ["detail"] = "Glass host: layout|highlight|focus|click|set_text|send_keys|appearance|colors",
+                    ["detail"] =
+                        "Glass host: layout|highlight|focus|click|set_text|send_keys|appearance|colors|set_control_layout|set_panel_size|request_confirmation",
                     ["stamped_utc"] = DateTimeOffset.UtcNow.ToString("o")
                 });
                 return;
