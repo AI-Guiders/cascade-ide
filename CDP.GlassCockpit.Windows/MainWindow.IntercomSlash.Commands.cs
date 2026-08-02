@@ -77,7 +77,9 @@ public partial class MainWindow
             ComposerBox.Clear();
             HideSlashPopup();
             PublishPmIdle();
-            StatusText.Text = $"glass · citizen · queued {sent.Id} · waiting habitat bridge · {DateTime.Now:HH:mm:ss}";
+            StatusText.Text =
+                CascadeIDE.Intercom.CitizenDialogRequestStatus.FormatLine(sent.Id, "pending", null)
+                + $" · {DateTime.Now:HH:mm:ss}";
             return true;
         }
 

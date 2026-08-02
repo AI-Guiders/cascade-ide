@@ -85,6 +85,25 @@ public partial class MainWindow
         }, DispatcherPriority.Background);
     }
 
+    void OnCitizenDialogRequestChanged(string path)
+    {
+        Dispatcher.BeginInvoke(() =>
+        {
+            try
+            {
+                var raw = File.ReadAllText(path);
+                var view = CascadeIDE.Intercom.CitizenDialogRequestStatus.TryPaint(raw);
+                if (view is null)
+                    return;
+                StatusText.Text = $"{view.StatusLine} · {DateTime.Now:HH:mm:ss}";
+            }
+            catch (Exception ex)
+            {
+                StatusText.Text = $"glass · citizen request fail · {ex.Message}";
+            }
+        }, DispatcherPriority.Background);
+    }
+
     void OnPresenceChanged(string path)
     {
         Dispatcher.BeginInvoke(() =>

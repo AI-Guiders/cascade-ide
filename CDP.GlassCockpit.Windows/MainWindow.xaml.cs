@@ -33,6 +33,7 @@ public partial class MainWindow : Window
 
         _latches = new LatchHub();
         _latches.IntercomChanged += OnIntercomChanged;
+        _latches.CitizenDialogRequestChanged += OnCitizenDialogRequestChanged;
         _latches.PresenceChanged += OnPresenceChanged;
         _latches.PresentationChanged += OnPresentationChanged;
         _latches.SeatsChanged += OnSeatsChanged;

@@ -19,6 +19,9 @@ internal sealed class LatchHub : IDisposable
     public event Action<string>? PresenceChanged;
     public event Action<string>? PresentationChanged;
 
+    /// <summary>citizen-dialog-request-LATEST.json path (Glass /citizen → habitat bridge status).</summary>
+    public event Action<string>? CitizenDialogRequestChanged;
+
     /// <summary>alert-LATEST.json path (EICAS).</summary>
     public event Action<string>? AlertChanged;
 
@@ -59,6 +62,7 @@ internal sealed class LatchHub : IDisposable
         TryFireExisting(CdpHabitatPaths.IntercomLatchFileName, IntercomChanged);
         TryFireExisting(CdpHabitatPaths.IntercomPresenceLatchFileName, PresenceChanged);
         TryFireExisting(CdpHabitatPaths.PresentationLatchFileName, PresentationChanged);
+        TryFireExisting(CdpHabitatPaths.CitizenDialogRequestLatchFileName, CitizenDialogRequestChanged);
         TryFireExisting("alert-LATEST.json", AlertChanged);
         TryFireExisting("qrh-LATEST.json", QrhChanged);
         TryFireExisting("ecl-LATEST.json", EclChanged);
@@ -82,6 +86,8 @@ internal sealed class LatchHub : IDisposable
             CdpLatchIo.PostSettledIfExists(CdpHabitatPaths.GetLatchPath(name), p => PresenceChanged?.Invoke(p));
         else if (name.Equals(CdpHabitatPaths.PresentationLatchFileName, StringComparison.OrdinalIgnoreCase))
             CdpLatchIo.PostSettledIfExists(CdpHabitatPaths.GetLatchPath(name), p => PresentationChanged?.Invoke(p));
+        else if (name.Equals(CdpHabitatPaths.CitizenDialogRequestLatchFileName, StringComparison.OrdinalIgnoreCase))
+            CdpLatchIo.PostSettledIfExists(CdpHabitatPaths.GetLatchPath(name), p => CitizenDialogRequestChanged?.Invoke(p));
         else if (name.Equals("alert-LATEST.json", StringComparison.OrdinalIgnoreCase))
             CdpLatchIo.PostSettledIfExists(CdpHabitatPaths.GetLatchPath(name), p => AlertChanged?.Invoke(p));
         else if (name.Equals("qrh-LATEST.json", StringComparison.OrdinalIgnoreCase))
