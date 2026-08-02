@@ -3,6 +3,7 @@ using System.Text.Json;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Runtime.InteropServices;
 using System.Windows.Media;
 using System.Windows.Threading;
 
@@ -190,7 +191,12 @@ internal static partial class GlassSurfaceActions
         if (source is null)
             return "No PresentationSource for control (window not ready).";
         var target = (Keyboard.FocusedElement as UIElement) ?? fe;
-        _ = mods; // chord modifiers reserved; primary key raised on focused element
+        if (mods != ModifierKeys.None)
+        {
+            SendInputChord(key, mods);
+            return "OK";
+        }
+
         var down = new KeyEventArgs(Keyboard.PrimaryDevice, source, 0, key)
         {
             RoutedEvent = Keyboard.KeyDownEvent,
@@ -271,6 +277,76 @@ internal static partial class GlassSurfaceActions
         brush is SolidColorBrush sc
             ? $"#{sc.Color.A:X2}{sc.Color.R:X2}{sc.Color.G:X2}{sc.Color.B:X2}"
             : brush?.ToString();
+
+
+    static void SendInputChord(Key key, ModifierKeys mods)
+    {
+        var inputs = new List<INPUT>();
+        void Down(ushort vk) => inputs.Add(KeyInput(vk, keyUp: false));
+        void Up(ushort vk) => inputs.Add(KeyInput(vk, keyUp: true));
+
+        if (mods.HasFlag(ModifierKeys.Control)) Down(0x11);
+        if (mods.HasFlag(ModifierKeys.Alt)) Down(0x12);
+        if (mods.HasFlag(ModifierKeys.Shift)) Down(0x10);
+        if (mods.HasFlag(ModifierKeys.Windows)) Down(0x5B);
+
+        var vk = (ushort)KeyInterop.VirtualKeyFromKey(key);
+        Down(vk);
+        Up(vk);
+
+        if (mods.HasFlag(ModifierKeys.Windows)) Up(0x5B);
+        if (mods.HasFlag(ModifierKeys.Shift)) Up(0x10);
+        if (mods.HasFlag(ModifierKeys.Alt)) Up(0x12);
+        if (mods.HasFlag(ModifierKeys.Control)) Up(0x11);
+
+        _ = SendInput((uint)inputs.Count, inputs.ToArray(), Marshal.SizeOf<INPUT>());
+    }
+
+    static INPUT KeyInput(ushort vk, bool keyUp)
+    {
+        const uint KEYEVENTF_KEYUP = 0x0002;
+        return new INPUT
+        {
+            type = 1,
+            U = new InputUnion
+            {
+                ki = new KEYBDINPUT
+                {
+                    wVk = vk,
+                    wScan = 0,
+                    dwFlags = keyUp ? KEYEVENTF_KEYUP : 0,
+                    time = 0,
+                    dwExtraInfo = nint.Zero
+                }
+            }
+        };
+    }
+
+    [DllImport("user32.dll", SetLastError = true)]
+    static extern uint SendInput(uint nInputs, INPUT[] pInputs, int cbSize);
+
+    [StructLayout(LayoutKind.Sequential)]
+    struct INPUT
+    {
+        public uint type;
+        public InputUnion U;
+    }
+
+    [StructLayout(LayoutKind.Explicit)]
+    struct InputUnion
+    {
+        [FieldOffset(0)] public KEYBDINPUT ki;
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    struct KEYBDINPUT
+    {
+        public ushort wVk;
+        public ushort wScan;
+        public uint dwFlags;
+        public uint time;
+        public nint dwExtraInfo;
+    }
 
     static bool TryParseKeys(string spec, out Key key, out ModifierKeys mods, out string? error)
     {

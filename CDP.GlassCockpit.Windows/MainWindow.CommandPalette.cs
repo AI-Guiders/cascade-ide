@@ -226,4 +226,54 @@ public partial class MainWindow
                 break;
         }
     }
+
+    /// <summary>Agent surface: open Ctrl+Q palette, optional query, optional execute (melody dogfood).</summary>
+    internal string AgentSurfacePalette(string? query, bool execute)
+    {
+        if (PaletteOverlay.Visibility != Visibility.Visible)
+        {
+            PaletteQuery.Text = "";
+            RefreshPaletteFilter();
+            CloseCascadeChord();
+            PaletteOverlay.Visibility = Visibility.Visible;
+        }
+
+        if (!string.IsNullOrWhiteSpace(query))
+        {
+            PaletteQuery.Text = query.Trim();
+            RefreshPaletteFilter();
+        }
+
+        PaletteQuery.Focus();
+        Keyboard.Focus(PaletteQuery);
+
+        string? executed = null;
+        string? lastFeed = null;
+        if (execute)
+        {
+            if (_paletteEntries.Count == 0)
+                return System.Text.Json.JsonSerializer.Serialize(new { ok = false, error = "no_palette_hits", query = PaletteQuery.Text });
+
+            var before = _feed.Count;
+            ExecutePaletteSelection();
+            executed = "true";
+            if (_feed.Count > 0)
+                lastFeed = _feed[^1].Body;
+            else if (before == 0)
+                lastFeed = StatusText.Text;
+        }
+
+        return System.Text.Json.JsonSerializer.Serialize(new
+        {
+            ok = true,
+            open = PaletteOverlay.Visibility == Visibility.Visible,
+            query = PaletteQuery.Text ?? "",
+            hits = _paletteEntries.Count,
+            top = _paletteEntries.Count > 0 ? _paletteEntries[0].Title : null,
+            executed,
+            last_feed = lastFeed,
+            status = StatusText.Text
+        });
+    }
+
 }
