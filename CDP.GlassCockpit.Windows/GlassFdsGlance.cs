@@ -11,7 +11,7 @@ namespace CDP.GlassCockpit.Windows;
 /// Flight Data Storage (FDS) — MFD shelf peel for shared plans/reports/notes.
 /// ≠ FDR (<c>go=flight_data</c> black-box tape).
 /// </summary>
-internal static class GlassFdsGlance
+internal static partial class GlassFdsGlance
 {
     public static string Format(string? workspaceRoot)
     {
@@ -25,6 +25,7 @@ internal static class GlassFdsGlance
         AppendShared(sb);
         AppendReport(sb);
         AppendPressure(sb);
+        AppendIgniteWake(sb);
 
         if (!string.IsNullOrWhiteSpace(workspaceRoot))
         {
