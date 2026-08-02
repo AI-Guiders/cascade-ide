@@ -27,6 +27,13 @@ public static class GlassCommandPaletteCatalog
         new("mfd_build", "MFD: Build", "Select MFD Build redirected log", "mfd build"),
         new("mfd_tests", "MFD: Tests", "Select MFD Tests redirected log", "mfd tests"),
         new("mfd_git", "MFD: Git", "Select MFD Git redirected status", "mfd git status scm"),
+        new("mfd_solution_explorer", "MFD: SolutionExplorer", "Solution tree / workspace glance", "mfd solution explorer tree"),
+        new("mfd_hybrid_index", "MFD: HybridIndex", "Hybrid codebase index glance", "mfd hybrid index hci"),
+        new("mfd_workspace_health", "MFD: WorkspaceHealth", "Workspace health glance", "mfd workspace health wh"),
+        new("mfd_env_ready", "MFD: EnvironmentReadiness", "Environment readiness glance", "mfd env ready environment"),
+        new("mfd_events", "MFD: Events", "Events / latch catalog glance", "mfd events latch"),
+        new("mfd_hypotheses", "MFD: Hypotheses", "Debug hypotheses glance", "mfd hypotheses debug"),
+        new("mfd_chat", "MFD: Chat", "Intercom presence MFD glance", "mfd chat intercom presence"),
     ];
 
     public static IReadOnlyList<GlassPaletteEntry> Filter(string? query)

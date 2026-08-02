@@ -82,6 +82,13 @@ public sealed class GlassPaletteChordCatalogTests
         Assert.Equal("mfd_tests", GlassChordCatalog.Exact("ms")!.ActionId);
         Assert.Equal("mfd_git", GlassChordCatalog.Exact("mg")!.ActionId);
         Assert.Equal("slash_citizen", GlassChordCatalog.Exact("cz")!.ActionId);
+        Assert.Equal("mfd_solution_explorer", GlassChordCatalog.Exact("sx")!.ActionId);
+        Assert.Equal("mfd_hybrid_index", GlassChordCatalog.Exact("hi")!.ActionId);
+        Assert.Equal("mfd_workspace_health", GlassChordCatalog.Exact("wh")!.ActionId);
+        Assert.Equal("mfd_env_ready", GlassChordCatalog.Exact("er")!.ActionId);
+        Assert.Equal("mfd_events", GlassChordCatalog.Exact("ev")!.ActionId);
+        Assert.Equal("mfd_hypotheses", GlassChordCatalog.Exact("hy")!.ActionId);
+        Assert.Equal("mfd_chat", GlassChordCatalog.Exact("ic")!.ActionId);
     }
 
     [Fact]
@@ -92,5 +99,7 @@ public sealed class GlassPaletteChordCatalogTests
         Assert.Contains(GlassCommandPaletteCatalog.Filter("mfd_build"), e => e.Id == "mfd_build");
         Assert.Contains(GlassCommandPaletteCatalog.Filter("mfd_git"), e => e.Id == "mfd_git");
         Assert.Contains(GlassCommandPaletteCatalog.Filter("citizen"), e => e.Id == "slash_citizen");
+        Assert.Contains(GlassCommandPaletteCatalog.Filter("solution"), e => e.Id == "mfd_solution_explorer");
+        Assert.Contains(GlassCommandPaletteCatalog.Filter("hypotheses"), e => e.Id == "mfd_hypotheses");
     }
 }

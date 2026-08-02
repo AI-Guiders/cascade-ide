@@ -164,6 +164,27 @@ public partial class MainWindow
             case "mfd_git":
                 SelectMfdPage("Git");
                 break;
+            case "mfd_solution_explorer":
+                SelectMfdPage("SolutionExplorer");
+                break;
+            case "mfd_hybrid_index":
+                SelectMfdPage("HybridIndex");
+                break;
+            case "mfd_workspace_health":
+                SelectMfdPage("WorkspaceHealth");
+                break;
+            case "mfd_env_ready":
+                SelectMfdPage("EnvironmentReadiness");
+                break;
+            case "mfd_events":
+                SelectMfdPage("Events");
+                break;
+            case "mfd_hypotheses":
+                SelectMfdPage("Hypotheses");
+                break;
+            case "mfd_chat":
+                SelectMfdPage("Chat");
+                break;
             default:
                 StatusText.Text = $"glass · palette · unknown {id}";
                 break;
