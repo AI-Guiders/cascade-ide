@@ -131,6 +131,15 @@ public partial class MainWindow
             case "slash_letter":
                 TryRunGlassSlash("/letter");
                 break;
+            case "slash_fds":
+                TryRunGlassSlash("/fds");
+                break;
+            case "slash_attach":
+                TryRunGlassSlash("/attach");
+                break;
+            case "slash_open":
+                TryRunGlassSlash("/open");
+                break;
             case "topics_all":
                 TopicAllBtn_OnClick(TopicAllBtn, new RoutedEventArgs());
                 break;
@@ -139,6 +148,15 @@ public partial class MainWindow
                 break;
             case "mfd_terminal":
                 SelectMfdPage("Terminal");
+                break;
+            case "mfd_fds":
+                SelectMfdPage("FlightDataStorage");
+                break;
+            case "mfd_build":
+                SelectMfdPage("Build");
+                break;
+            case "mfd_tests":
+                SelectMfdPage("Tests");
                 break;
             default:
                 StatusText.Text = $"glass · palette · unknown {id}";

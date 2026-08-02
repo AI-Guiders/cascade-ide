@@ -71,4 +71,22 @@ public sealed class GlassPaletteChordCatalogTests
             missing.Length == 0,
             "Chord ActionId without palette entry: " + string.Join(", ", missing));
     }
+
+    [Fact]
+    public void Chord_Exact_lived_aliases_fds_attach_open()
+    {
+        Assert.Equal("mfd_fds", GlassChordCatalog.Exact("fd")!.ActionId);
+        Assert.Equal("slash_attach", GlassChordCatalog.Exact("at")!.ActionId);
+        Assert.Equal("slash_open", GlassChordCatalog.Exact("op")!.ActionId);
+        Assert.Equal("mfd_build", GlassChordCatalog.Exact("mb")!.ActionId);
+        Assert.Equal("mfd_tests", GlassChordCatalog.Exact("ms")!.ActionId);
+    }
+
+    [Fact]
+    public void Palette_includes_fds_attach_and_mfd_pages()
+    {
+        Assert.Contains(GlassCommandPaletteCatalog.Filter("fds"), e => e.Id is "slash_fds" or "mfd_fds");
+        Assert.Contains(GlassCommandPaletteCatalog.Filter("attach"), e => e.Id == "slash_attach");
+        Assert.Contains(GlassCommandPaletteCatalog.Filter("mfd_build"), e => e.Id == "mfd_build");
+    }
 }

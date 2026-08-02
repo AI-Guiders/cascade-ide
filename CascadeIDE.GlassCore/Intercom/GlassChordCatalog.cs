@@ -16,9 +16,14 @@ public static class GlassChordCatalog
         new("st", "Slash /status", "slash_status", "Glass session / latch status"),
         new("tp", "Slash /topics", "slash_topics", "List Intercom topics"),
         new("lt", "Slash /letter", "slash_letter", "Agent Who letter links"),
+        new("fd", "MFD FDS", "mfd_fds", "Flight Data Storage shelf"),
+        new("at", "Slash /attach", "slash_attach", "Attach chip from editor selection"),
+        new("op", "Slash /open", "slash_open", "Open path[:line] via slash"),
         new("ta", "Topics: All", "topics_all", "Clear topic filter"),
         new("me", "MFD Editor", "mfd_editor", "Select MFD Editor page"),
         new("mt", "MFD Terminal", "mfd_terminal", "Select MFD Terminal page"),
+        new("mb", "MFD Build", "mfd_build", "Select MFD Build page"),
+        new("ms", "MFD Tests", "mfd_tests", "Select MFD Tests page"),
         new("pq", "Command palette", "palette", "Open Ctrl+Q palette"),
     ];
 

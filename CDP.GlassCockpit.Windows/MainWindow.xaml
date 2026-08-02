@@ -495,7 +495,7 @@
         <DockPanel>
           <TextBlock DockPanel.Dock="Top" Text="CascadeChord · melody" FontWeight="SemiBold" Margin="0,0,0,8"/>
           <TextBlock DockPanel.Dock="Bottom"
-                     Text="Ctrl+K · type alias (of/sf/h/…) · Enter · Esc · timeout 8s"
+                     Text="Ctrl+K · type alias (of/sf/fd/at/op/…) · Enter · Esc · timeout 8s"
                      Foreground="{StaticResource Glass.FgMuted}" FontSize="11" Margin="0,8,0,0"/>
           <TextBox x:Name="ChordQuery"
                    DockPanel.Dock="Top"
