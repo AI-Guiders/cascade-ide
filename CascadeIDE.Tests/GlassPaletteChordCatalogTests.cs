@@ -168,6 +168,20 @@ public sealed class GlassPaletteChordCatalogTests
                     && isc == "slash_attach");
         Assert.Contains(GlassIntentMelodyCatalog.All(), a => a.Alias == "of");
         Assert.Contains(GlassIntentMelodyCatalog.All(), a => a.Alias == "fe");
+        Assert.True(GlassMelodyGlassActions.TryMapCommandId("save_document", out var sf)
+                    && sf == "save_file");
+        Assert.True(GlassMelodyGlassActions.TryMapCommandId("focus_composer", out var fc)
+                    && fc == "focus_composer");
+        Assert.True(GlassMelodyGlassActions.TryMapCommandId("glass.slash_help", out var sh)
+                    && sh == "slash_help");
+        Assert.True(GlassMelodyGlassActions.TryMapCommandId("glass.slash_citizen", out var cz)
+                    && cz == "slash_citizen");
+        Assert.True(GlassMelodyGlassActions.TryMapCommandId("glass.mfd_events", out var ev)
+                    && ev == "mfd_events");
+        Assert.Contains(GlassIntentMelodyCatalog.All(), a => a.Alias == "sf");
+        Assert.Contains(GlassIntentMelodyCatalog.All(), a => a.Alias == "fc");
+        Assert.Contains(GlassIntentMelodyCatalog.All(), a => a.Alias == "cz");
+        Assert.Contains(GlassIntentMelodyCatalog.All(), a => a.Alias == "wh");
 
     }
 

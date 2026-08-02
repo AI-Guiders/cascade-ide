@@ -35,6 +35,18 @@ public static class GlassMelodyGlassActions
             ["open_file_dialog"] = "open_file",
             ["intercom.attach_selection"] = "slash_attach",
             ["intercom.attach_scope"] = "slash_attach",
+            // Glass peels already in RunPaletteEntry — cabin c: without inventing Avalonia hosts.
+            ["save_document"] = "save_file",
+            ["focus_composer"] = "focus_composer",
+            ["glass.slash_help"] = "slash_help",
+            ["glass.slash_fds"] = "slash_fds",
+            ["glass.slash_topics"] = "slash_topics",
+            ["glass.slash_letter"] = "slash_letter",
+            ["glass.slash_citizen"] = "slash_citizen",
+            ["glass.mfd_fds"] = "mfd_fds",
+            ["glass.mfd_workspace_health"] = "mfd_workspace_health",
+            ["glass.mfd_events"] = "mfd_events",
+            ["glass.mfd_hypotheses"] = "mfd_hypotheses",
         };
 
     public static bool TryMapCommandId(string? commandId, out string glassActionId)

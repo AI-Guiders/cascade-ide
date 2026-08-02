@@ -753,6 +753,80 @@ intent = "focus"
 help = "Фокус в редактор."
 group = "Редактор"
 
+# save_document — Сохранить буфер. (c:sf · Glass save_file)
+[[command]]
+command_id = "save_document"
+melody_slug = "sf"
+melody_shape = "simple"
+
+[[command.slash]]
+path = "/file save"
+domain = "file"
+intent = "save"
+help = "Сохранить открытый буфер редактора."
+group = "Файл"
+
+# focus_composer — Фокус в Intercom composer. (c:fc)
+[[command]]
+command_id = "focus_composer"
+melody_slug = "fc"
+melody_shape = "simple"
+
+# glass.slash_help — Glass /help. (c:sh)
+[[command]]
+command_id = "glass.slash_help"
+melody_slug = "sh"
+melody_shape = "simple"
+
+# glass.slash_fds — Glass /fds. (c:fd)
+[[command]]
+command_id = "glass.slash_fds"
+melody_slug = "fd"
+melody_shape = "simple"
+
+# glass.slash_topics — Glass /topics. (c:tp)
+[[command]]
+command_id = "glass.slash_topics"
+melody_slug = "tp"
+melody_shape = "simple"
+
+# glass.slash_letter — Glass /letter. (c:lt)
+[[command]]
+command_id = "glass.slash_letter"
+melody_slug = "lt"
+melody_shape = "simple"
+
+# glass.slash_citizen — Glass /citizen. (c:cz)
+[[command]]
+command_id = "glass.slash_citizen"
+melody_slug = "cz"
+melody_shape = "simple"
+
+# glass.mfd_fds — MFD Flight Data Storage. (c:mf)
+[[command]]
+command_id = "glass.mfd_fds"
+melody_slug = "mf"
+melody_shape = "simple"
+
+# glass.mfd_workspace_health — MFD Workspace Health. (c:wh)
+[[command]]
+command_id = "glass.mfd_workspace_health"
+melody_slug = "wh"
+melody_shape = "simple"
+
+# glass.mfd_events — MFD Events. (c:ev)
+[[command]]
+command_id = "glass.mfd_events"
+melody_slug = "ev"
+melody_shape = "simple"
+
+# glass.mfd_hypotheses — MFD Hypotheses. (c:hy)
+[[command]]
+command_id = "glass.mfd_hypotheses"
+melody_slug = "hy"
+melody_shape = "simple"
+
+
 # get_current_file_diagnostics — Диагностики открытого .cs. (/diagnostics show)
 [[command]]
 command_id = "get_current_file_diagnostics"
