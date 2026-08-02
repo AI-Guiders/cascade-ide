@@ -123,7 +123,8 @@ public sealed class GlassPaletteChordCatalogTests
         Assert.True(GlassIntentMelodyCatalog.All().Count > 0, "intent-catalog.toml must load (embed/disk)");
         Assert.Contains(rows, e => e.Keywords == "gs" && e.Help.Length > 0);
         Assert.Contains(rows, e => e.Id == GlassIntentMelodyCatalog.ToRowId("git_status"));
-        Assert.DoesNotContain(rows, e => e.Keywords == "of"); // GlassChord-only peel retired for c:
+        Assert.Contains(rows, e => e.Keywords == "of"); // c:of → open_file_dialog allowlist
+        Assert.Contains(rows, e => e.Keywords == "fe"); // c:fe → focus_editor
     }
 
     [Fact]
@@ -157,6 +158,17 @@ public sealed class GlassPaletteChordCatalogTests
         var unknown = GlassIntentMelodyCatalog.ToRowId("debug_attach");
         Assert.True(GlassCommandPaletteCatalog.IsNonExecutableMelodyRow(unknown));
         Assert.False(GlassCommandPaletteCatalog.IsNonExecutableMelodyRow("open_file"));
+        Assert.True(GlassMelodyGlassActions.TryMapCommandId("open_file_dialog", out var of)
+                    && of == "open_file");
+        Assert.True(GlassMelodyGlassActions.TryMapCommandId("open_file", out var of2)
+                    && of2 == "open_file");
+        Assert.True(GlassMelodyGlassActions.TryMapCommandId("intercom.attach_selection", out var ias)
+                    && ias == "slash_attach");
+        Assert.True(GlassMelodyGlassActions.TryMapCommandId("intercom.attach_scope", out var isc)
+                    && isc == "slash_attach");
+        Assert.Contains(GlassIntentMelodyCatalog.All(), a => a.Alias == "of");
+        Assert.Contains(GlassIntentMelodyCatalog.All(), a => a.Alias == "fe");
+
     }
 
     [Fact]

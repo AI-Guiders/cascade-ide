@@ -30,6 +30,11 @@ public static class GlassMelodyGlassActions
             ["show_chat_page"] = "mfd_chat",
             ["focus_editor"] = "mfd_editor",
             ["get_ide_state"] = "slash_status",
+            // File/IOP peels already on Glass palette — DIG REJECT solution/portal/Markdig/correspondence hosts.
+            ["open_file"] = "open_file",
+            ["open_file_dialog"] = "open_file",
+            ["intercom.attach_selection"] = "slash_attach",
+            ["intercom.attach_scope"] = "slash_attach",
         };
 
     public static bool TryMapCommandId(string? commandId, out string glassActionId)

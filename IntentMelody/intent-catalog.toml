@@ -740,9 +740,11 @@ group = "Git"
 # Workspace & search
 # ==============================================================================
 
-# focus_editor — Фокус в редактор. (/editor focus)
+# focus_editor — Фокус в редактор. (c:fe · /editor focus)
 [[command]]
 command_id = "focus_editor"
+melody_slug = "fe"
+melody_shape = "simple"
 
 [[command.slash]]
 path = "/editor focus"
@@ -847,9 +849,11 @@ completion = "workspace_files"
 auto_run_on_commit = true
 arg_tail = "required"
 
-# open_file_dialog — Диалог выбора файла. (/file pick)
+# open_file_dialog — Диалог выбора файла. (c:of · /file pick)
 [[command]]
 command_id = "open_file_dialog"
+melody_slug = "of"
+melody_shape = "simple"
 
 [[command.slash]]
 path = "/file pick"
