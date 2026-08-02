@@ -153,6 +153,16 @@ public partial class MainWindow
             return false;
         }
 
+        if (cmd.Id == "fds")
+        {
+            SelectMfdPage("FlightDataStorage");
+            AppendSlashBubble(cmd.Path, GlassFdsGlance.Format(_session.WorkspaceRoot));
+            ComposerBox.Clear();
+            HideSlashPopup();
+            StatusText.Text = $"glass · slash · {cmd.Path} · {DateTime.Now:HH:mm:ss}";
+            return true;
+        }
+
         if (cmd.Id == "open")
         {
             var openBody = TryOpenPathSlash(argsTail);
