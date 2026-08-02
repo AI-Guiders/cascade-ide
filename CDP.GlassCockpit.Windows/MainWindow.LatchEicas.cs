@@ -2,7 +2,9 @@
 
 using System.IO;
 using System.Windows.Controls;
+using System.Windows.Media;
 using System.Windows.Threading;
+using CascadeIDE.Intercom;
 
 namespace CDP.GlassCockpit.Windows;
 
@@ -101,13 +103,33 @@ public partial class MainWindow
         if (MfdHealth is null)
             return;
 
-        var line = _eicas.BandLine;
-        if (!string.IsNullOrWhiteSpace(line))
+        var text = _eicas.BandText;
+        if (!string.IsNullOrWhiteSpace(text))
         {
-            MfdHealth.Text = line;
+            MfdHealth.Text = text;
+            MfdHealth.Foreground = _eicas.Severity switch
+            {
+                "warn" => Brushes.OrangeRed,
+                "caut" => Brushes.Gold,
+                "adv" => Brushes.DeepSkyBlue,
+                _ => MutedFg()
+            };
             return;
         }
 
-        MfdHealth.Text = $"EICAS · idle · {CurrentMfdPage()}";
+        MfdHealth.Text = $"EICAS · CLEAR · {CurrentMfdPage()}";
+        MfdHealth.Foreground = MutedFg();
+    }
+
+    Brush MutedFg()
+    {
+        try
+        {
+            return (Brush)FindResource("Glass.FgMuted");
+        }
+        catch
+        {
+            return Brushes.Gray;
+        }
     }
 }
