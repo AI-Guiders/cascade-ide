@@ -182,6 +182,33 @@ public partial class MainWindow
             return true;
         }
 
+        if (cmd.Id == "citizen")
+        {
+            if (string.IsNullOrWhiteSpace(argsTail))
+            {
+                AppendSlashBubble(cmd.Path, "usage: /citizen your message\nTalks to habitat citizen (dialog), not guest Кир @PF.");
+                ComposerBox.Clear();
+                HideSlashPopup();
+                StatusText.Text = $"glass · slash · {cmd.Path} · usage · {DateTime.Now:HH:mm:ss}";
+                return true;
+            }
+
+            var sent = GlassCitizenDialogRequest.TryEnqueue(argsTail);
+            if (sent is null)
+            {
+                StatusText.Text = "glass · citizen · enqueue failed";
+                return true;
+            }
+
+            _seenIntercomIds.Add(sent.Id);
+            RebuildIntercomFeedFromJournal(stickEnd: true);
+            ComposerBox.Clear();
+            HideSlashPopup();
+            PublishPmIdle();
+            StatusText.Text = $"glass · citizen · queued {sent.Id} · waiting habitat bridge · {DateTime.Now:HH:mm:ss}";
+            return true;
+        }
+
         var body = cmd.Id switch
         {
             "help" => GlassSlashCatalog.FormatHelp(),

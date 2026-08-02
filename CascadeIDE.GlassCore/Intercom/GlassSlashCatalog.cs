@@ -17,6 +17,7 @@ public static class GlassSlashCatalog
         new("fds", "/fds", "Open Flight Data Storage MFD (plans/reports/notes)"),
         new("open", "/open", "Open path[:line] in AvalonEdit (thin attach↔code)"),
         new("attach", "/attach", "Insert [path:line] chip from editor selection (ADR 0128 thin)"),
+        new("citizen", "/citizen", "Talk to habitat citizen (dialog peer · GigaChat) — not guest @PF"),
         new("letter", "/letter", "Where the Agent Who letter lives (CDP canon)"),
     ];
 

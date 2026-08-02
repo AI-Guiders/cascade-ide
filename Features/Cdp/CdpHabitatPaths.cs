@@ -23,6 +23,8 @@ public static class CdpHabitatPaths
     public const string SurfaceCmdLatchFileName = "surface-cmd-LATEST.json";
     /// <summary>Agent surface RPC reply (Glass → CDP).</summary>
     public const string SurfaceReplyLatchFileName = "surface-reply-LATEST.json";
+    /// <summary>Glass Intercom → habitat citizen dialog request (poll by cdp-mcp bridge).</summary>
+    public const string CitizenDialogRequestLatchFileName = "citizen-dialog-request-LATEST.json";
 
     public static string StateRoot =>
         Path.Combine(
@@ -48,6 +50,8 @@ public static class CdpHabitatPaths
     public static string SurfaceCmdLatchPath => GetLatchPath(SurfaceCmdLatchFileName);
 
     public static string SurfaceReplyLatchPath => GetLatchPath(SurfaceReplyLatchFileName);
+
+    public static string CitizenDialogRequestLatchPath => GetLatchPath(CitizenDialogRequestLatchFileName);
 
     /// <summary>Ensure state root exists; returns <see cref="StateRoot"/>.</summary>
     public static string EnsureStateRoot()
