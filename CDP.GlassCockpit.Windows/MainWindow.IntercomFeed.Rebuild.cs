@@ -38,6 +38,8 @@ public partial class MainWindow
             _topics.Add(new TopicCard(t.Id, t.Title, selected, t.EntryIds));
         }
 
+        TopicsEmptyHint.Visibility = _topics.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
+
         if (_selectedTopicId is null)
             _selectedTopicEntryIds = [];
 

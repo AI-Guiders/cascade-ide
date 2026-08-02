@@ -1,6 +1,7 @@
 #nullable enable
 
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
@@ -138,7 +139,7 @@ public partial class MainWindow
 
     bool TryRunGlassSlash(string? raw)
     {
-        if (!GlassSlashCatalog.TryResolve(raw, out var cmd, out _))
+        if (!GlassSlashCatalog.TryResolve(raw, out var cmd, out var argsTail))
         {
             if (GlassSlashCatalog.IsSlashLine(raw))
             {
@@ -150,6 +151,16 @@ public partial class MainWindow
             }
 
             return false;
+        }
+
+        if (cmd.Id == "open")
+        {
+            var openBody = TryOpenPathSlash(argsTail);
+            AppendSlashBubble(cmd.Path, openBody);
+            ComposerBox.Clear();
+            HideSlashPopup();
+            StatusText.Text = $"glass · slash · {cmd.Path} · {DateTime.Now:HH:mm:ss}";
+            return true;
         }
 
         var body = cmd.Id switch
@@ -168,6 +179,40 @@ public partial class MainWindow
         return true;
     }
 
+    string TryOpenPathSlash(string argsTail)
+    {
+        if (string.IsNullOrWhiteSpace(argsTail))
+            return "usage: /open path[:line]\nexample: /open LatchPaint.cs:40";
+
+        var raw = argsTail.Trim().Trim('"');
+        int? line = null;
+        var path = raw;
+        var colon = raw.LastIndexOf(':');
+        if (colon > 1
+            && colon < raw.Length - 1
+            && int.TryParse(raw[(colon + 1)..], out var ln)
+            && ln > 0
+            && !raw[(colon + 1)..].Contains('\\')
+            && !raw[(colon + 1)..].Contains('/'))
+        {
+            path = raw[..colon];
+            line = ln;
+        }
+
+        if (!Path.IsPathRooted(path))
+        {
+            var root = _session.WorkspaceRoot;
+            if (!string.IsNullOrWhiteSpace(root))
+                path = Path.Combine(root, path);
+        }
+
+        if (!File.Exists(path))
+            return $"not found: {path}";
+
+        OpenCodeFile(path, line);
+        return line is int L ? $"opened {path}:{L}" : $"opened {path}";
+    }
+
     void AppendSlashBubble(string path, string body)
     {
         _feed.Add(new ChatBubble("slash", $"{path}\n{body}", DateTime.Now.ToString("HH:mm:ss")));
@@ -183,7 +228,7 @@ public partial class MainWindow
     string BuildGlassTopicsSlashBody()
     {
         if (_topics.Count == 0)
-            return "(no topics)";
+            return "(no topics yet — journal empty or single quiet gap; send a few messages)";
         return string.Join('\n', _topics.Select(t =>
             $"{(t.IsSelected ? "*" : " ")} {t.Title} ({t.EntryIds.Count})"));
     }

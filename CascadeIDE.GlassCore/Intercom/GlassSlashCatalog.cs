@@ -14,6 +14,7 @@ public static class GlassSlashCatalog
         new("help", "/help", "List Glass slash commands"),
         new("status", "/status", "Glass session / latch status line"),
         new("topics", "/topics", "List Intercom topic cards"),
+        new("open", "/open", "Open path[:line] in AvalonEdit (thin attach↔code)"),
         new("letter", "/letter", "Where the Agent Who letter lives (CDP canon)"),
     ];
 
