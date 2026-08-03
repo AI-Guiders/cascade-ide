@@ -1,17 +1,21 @@
 #nullable enable
 
+using System.Collections.ObjectModel;
 using System.IO;
-using System.Text.Json;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using CascadeIDE.Features.Cdp;
+using CascadeIDE.SoftOrgan;
 
 namespace CDP.GlassCockpit.Windows;
 
-/// <summary>Glass MFD DebugStack — live spectator from debug_desk latch (DAP stopped → SoftOrgan FSW).</summary>
+/// <summary>Glass MFD DebugStack — live spectator + DAP command latch from debug_desk.</summary>
 public partial class MainWindow
 {
+    readonly ObservableCollection<GlassDebugDeskLatchReader.StackFrame> _debugStackFrames = new();
+    int _debugSelectedFrameIndex;
+
     void RefreshMfdDebugVisibility()
     {
         if (MfdDebugStackHost is null || MfdBody is null)
@@ -36,23 +40,54 @@ public partial class MainWindow
 
     internal void DebugRefresh_OnClick(object sender, RoutedEventArgs e) => RefreshDebugSpectator();
 
+    internal void DebugContinue_OnClick(object sender, RoutedEventArgs e) =>
+        SendDapCommand(GlassDapCommandBridge.Continue);
+
+    internal void DebugStepInto_OnClick(object sender, RoutedEventArgs e) =>
+        SendDapCommand(GlassDapCommandBridge.StepInto);
+
+    internal void DebugStepOver_OnClick(object sender, RoutedEventArgs e) =>
+        SendDapCommand(GlassDapCommandBridge.StepOver);
+
+    internal void DebugStepOut_OnClick(object sender, RoutedEventArgs e) =>
+        SendDapCommand(GlassDapCommandBridge.StepOut);
+
+    void SendDapCommand(string command)
+    {
+        if (!GlassDapCommandBridge.TryPublish(command))
+        {
+            StatusText.Text = $"glass · debug · cmd fail · {command}";
+            return;
+        }
+
+        StatusText.Text = $"glass · debug · {command} · {DateTime.Now:HH:mm:ss}";
+    }
+
+    internal void DebugStack_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (DebugStackList?.SelectedItem is not GlassDebugDeskLatchReader.StackFrame frame)
+            return;
+
+        _debugSelectedFrameIndex = frame.Index;
+        if (frame.Index == _lastLocalsFrameIndex)
+            return;
+
+        if (!GlassDapCommandBridge.TryPublishVariables(frame.Index))
+        {
+            StatusText.Text = $"glass · debug · frame {frame.Index} · locals req fail";
+            return;
+        }
+
+        StatusText.Text = $"glass · debug · frame {frame.Index} · locals requested";
+    }
+
     internal void DebugStack_OnMouseDoubleClick(object sender, MouseButtonEventArgs e)
     {
-        if (DebugStackList?.SelectedItem is not string line)
+        if (DebugStackList?.SelectedItem is not GlassDebugDeskLatchReader.StackFrame frame)
             return;
-        // "name · file:line"
-        var at = line.LastIndexOf('·');
-        if (at < 0)
+        if (frame.File is null || !File.Exists(frame.File))
             return;
-        var loc = line[(at + 1)..].Trim();
-        var colon = loc.LastIndexOf(':');
-        if (colon <= 0)
-            return;
-        var file = loc[..colon].Trim();
-        if (!int.TryParse(loc[(colon + 1)..].Trim(), out var lineNo))
-            return;
-        if (File.Exists(file))
-            OpenCodeFile(file, lineNo);
+        OpenCodeFile(frame.File, frame.Line);
     }
 
     void OnDebugDeskLatchChanged()
@@ -61,12 +96,17 @@ public partial class MainWindow
             RefreshDebugSpectator();
     }
 
+    int _lastLocalsFrameIndex = -1;
+
     void RefreshDebugSpectator()
     {
         if (DebugStackList is null || DebugLocalsList is null)
             return;
 
-        DebugStackList.Items.Clear();
+        if (!ReferenceEquals(DebugStackList.ItemsSource, _debugStackFrames))
+            DebugStackList.ItemsSource = _debugStackFrames;
+
+        _debugStackFrames.Clear();
         DebugLocalsList.Items.Clear();
 
         var path = CdpHabitatPaths.GetLatchPath("debug_desk-LATEST.json");
@@ -75,67 +115,54 @@ public partial class MainWindow
         {
             if (DebugStatusLabel is not null)
                 DebugStatusLabel.Text = "debug · live · no latch";
-            DebugStackList.Items.Add("(no DAP session · live latch)");
+            _debugStackFrames.Add(new GlassDebugDeskLatchReader.StackFrame(0, "(no DAP session · live latch)", null, 0));
             return;
         }
 
         try
         {
-            using var doc = JsonDocument.Parse(raw);
-            var root = doc.RootElement;
-            var frames = 0;
-            if (root.TryGetProperty("stack", out var stack) && stack.ValueKind == JsonValueKind.Array)
-            {
-                foreach (var f in stack.EnumerateArray())
-                {
-                    var name = f.TryGetProperty("name", out var n) ? n.GetString() ?? "?" : "?";
-                    var file = f.TryGetProperty("file", out var fl) ? fl.GetString() : null;
-                    var line = f.TryGetProperty("line", out var ln) && ln.TryGetInt32(out var li) ? li : 0;
-                    DebugStackList.Items.Add(file is null ? name : $"{name} · {file}:{line}");
-                    frames++;
-                }
-            }
+            var snap = GlassDebugDeskLatchReader.Read(raw);
+            foreach (var f in snap.Stack)
+                _debugStackFrames.Add(f);
 
-            if (root.TryGetProperty("locals", out var locals) && locals.ValueKind == JsonValueKind.Array)
-            {
-                foreach (var v in locals.EnumerateArray())
-                {
-                    var name = v.TryGetProperty("name", out var n) ? n.GetString() ?? "?" : "?";
-                    var val = v.TryGetProperty("value", out var vv) ? vv.GetString() ?? "" : "";
-                    DebugLocalsList.Items.Add($"{name} = {val}");
-                }
-            }
+            _lastLocalsFrameIndex = snap.LocalsFrameIndex;
+            foreach (var v in snap.Locals)
+                DebugLocalsList.Items.Add($"{v.Name} = {v.Value}");
 
-            var pulse = root.TryGetProperty("pulse", out var pulseEl) ? pulseEl.GetString() : null;
-            var verdict = root.TryGetProperty("verdict", out var verdEl) ? verdEl.GetString() : null;
-            var stopped = root.TryGetProperty("stopped", out var stEl) && stEl.ValueKind == JsonValueKind.True;
-            var activeDap = root.TryGetProperty("active_dap", out var ad) && ad.ValueKind == JsonValueKind.True;
-            var bp = root.TryGetProperty("bp_count", out var bpEl) && bpEl.TryGetInt32(out var bpi) ? bpi : 0;
-
-            if (frames == 0)
+            if (_debugStackFrames.Count == 0)
             {
-                if (pulse is { Length: > 0 })
-                    DebugStackList.Items.Add(pulse);
+                if (snap.Pulse is { Length: > 0 })
+                    _debugStackFrames.Add(new GlassDebugDeskLatchReader.StackFrame(0, snap.Pulse, null, 0));
                 else
-                    DebugStackList.Items.Add(stopped
-                        ? "(stopped · frames pending enrich)"
-                        : "(latch idle · no frames)");
+                    _debugStackFrames.Add(new GlassDebugDeskLatchReader.StackFrame(
+                        0,
+                        snap.Stopped ? "(stopped · frames pending enrich)" : "(latch idle · no frames)",
+                        null,
+                        0));
             }
+            else if (_debugSelectedFrameIndex >= 0 && _debugSelectedFrameIndex < _debugStackFrames.Count)
+                DebugStackList.SelectedIndex = _debugSelectedFrameIndex;
 
-            if (DebugLocalsList.Items.Count == 0 && verdict is { Length: > 0 })
-                DebugLocalsList.Items.Add($"verdict = {verdict}");
+            if (DebugLocalsList.Items.Count == 0)
+            {
+                if (snap.Verdict is { Length: > 0 })
+                    DebugLocalsList.Items.Add($"verdict = {snap.Verdict}");
+                else if (_debugStackFrames.Count > 0 && snap.LocalsFrameIndex != _debugSelectedFrameIndex)
+                    DebugLocalsList.Items.Add($"(frame {_debugSelectedFrameIndex} · locals pending)");
+            }
 
             if (DebugStatusLabel is not null)
             {
-                var mode = frames > 0 ? "live" : "latch";
-                var stopBit = stopped ? "stopped" : "run";
-                var dapBit = activeDap ? "dap" : "idle";
-                DebugStatusLabel.Text = $"debug · {mode} · {stopBit} · {dapBit} · frames {frames} · bp={bp}";
+                var mode = snap.Stack.Count > 0 ? "live" : "latch";
+                var stopBit = snap.Stopped ? "stopped" : "run";
+                var dapBit = snap.ActiveDap ? "dap" : "idle";
+                DebugStatusLabel.Text =
+                    $"debug · {mode} · {stopBit} · {dapBit} · frames {snap.Stack.Count} · bp={snap.BpCount}";
             }
         }
         catch (Exception ex)
         {
-            DebugStackList.Items.Add(ex.Message);
+            _debugStackFrames.Add(new GlassDebugDeskLatchReader.StackFrame(0, ex.Message, null, 0));
             if (DebugStatusLabel is not null)
                 DebugStatusLabel.Text = "debug · latch parse fail";
         }
