@@ -80,8 +80,9 @@ public class SoftOrganMfdGlanceTests
         Assert.Contains("bp=2", body);
         Assert.Contains("stopped=true", body);
         Assert.Contains("active_dap=true", body);
-        Assert.Contains("DebugStackMfdPageView", body);
-        Assert.Contains("□ Glass peel", body);
+        Assert.Contains("DebugStack", body);
+        Assert.Contains("■ Glass spectator ListBox", body);
+        Assert.Contains("□ Avalonia DebugStack / DAP", body);
     }
 
     [Fact]
@@ -153,8 +154,9 @@ public class SoftOrganMfdGlanceTests
         Assert.Contains("files=28", body);
         Assert.Contains("high_risk=0", body);
         Assert.Contains("machine_ok=true", body);
-        Assert.Contains("ProblemsMfdPageView", body);
-        Assert.Contains("□ Glass peel", body);
+        Assert.Contains("Problems", body);
+        Assert.Contains("■ Glass Problems ListBox", body);
+        Assert.Contains("□ Avalonia ProblemsMfdPageView", body);
     }
 
     [Fact]
@@ -175,8 +177,9 @@ public class SoftOrganMfdGlanceTests
         Assert.Contains("arch latch glance · active", body);
         Assert.Contains("profile=cdp_desk", body);
         Assert.Contains("mode=as_built", body);
-        Assert.Contains("WorkspaceNavigationMapView", body);
-        Assert.Contains("□ Glass peel", body);
+        Assert.Contains("Semantic list", body);
+        Assert.Contains("■ Glass Semantic list v1", body);
+        Assert.Contains("□ Avalonia Skia map", body);
     }
 
     [Fact]
@@ -212,8 +215,9 @@ public class SoftOrganMfdGlanceTests
         var body = SoftOrganMfdGlance.TryFormatFromJson("report", json);
         Assert.NotNull(body);
         Assert.Contains("report latch glance · idle", body);
-        Assert.Contains("MarkdownPreview", body);
-        Assert.Contains("□ Glass peel", body);
+        Assert.Contains("Markdig", body);
+        Assert.Contains("■ Glass Markdig plain", body);
+        Assert.Contains("□ Avalonia MarkdownPreview", body);
     }
 
     [Fact]
@@ -232,7 +236,8 @@ public class SoftOrganMfdGlanceTests
         Assert.NotNull(body);
         Assert.Contains("refactor latch glance · active", body);
         Assert.Contains("hotspots=3", body);
-        Assert.Contains("RelatedFilesMfdPageView", body);
-        Assert.Contains("□ Glass peel", body);
+        Assert.Contains("RelatedFiles", body);
+        Assert.Contains("■ Glass RelatedFiles list", body);
+        Assert.Contains("□ Avalonia RelatedFilesMfd", body);
     }
 }

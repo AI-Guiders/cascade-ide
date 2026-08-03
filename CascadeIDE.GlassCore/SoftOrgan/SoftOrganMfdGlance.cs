@@ -154,20 +154,20 @@ public static class SoftOrganMfdGlance
 
         var host = title.ToLowerInvariant() switch
         {
-            "debug_desk" => "Avalonia DebugStackMfdPageView",
-            "review" => "Avalonia ProblemsMfdPageView",
-            "arch" => "Avalonia WorkspaceNavigationMapView",
-            "mcp" => "AiChatSettings · mcp SoftOrgan",
-            "report" => "Avalonia MarkdownPreview",
-            "refactor" => "Avalonia RelatedFilesMfdPageView",
-            _ => null
+            "debug_desk" => ("■ Glass spectator ListBox", "□ Avalonia DebugStack / DAP"),
+            "review" => ("■ Glass Problems ListBox", "□ Avalonia ProblemsMfdPageView"),
+            "arch" => ("■ Glass Semantic list v1", "□ Avalonia Skia map"),
+            "mcp" => ("■ AiChatSettings SoftOrgan", "□ options host"),
+            "report" => ("■ Glass Markdig plain", "□ Avalonia MarkdownPreview"),
+            "refactor" => ("■ Glass RelatedFiles list", "□ Avalonia RelatedFilesMfd"),
+            _ => ((string?)null, (string?)null)
         };
-        if (host is null)
+        if (host.Item1 is null)
             return;
 
         sb.AppendLine("┌ host ───────────────┐");
-        sb.AppendLine("│ □ Glass peel        │");
-        sb.Append("│ ■ ").Append(host).AppendLine();
+        sb.Append("│ ").Append(host.Item1).AppendLine(" │");
+        sb.Append("│ ").Append(host.Item2).AppendLine(" │");
         sb.AppendLine("└──────────────────────┘");
     }
 
