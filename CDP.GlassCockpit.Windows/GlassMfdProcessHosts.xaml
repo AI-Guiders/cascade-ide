@@ -67,6 +67,12 @@
           <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
             <Button x:Name="GitStatusBtn" Content="refresh" Padding="8,2" Margin="0,0,6,0"
                     Background="#2A2A2A" Foreground="#CCC" BorderBrush="#3A3A3A"/>
+            <Button x:Name="GitStageBtn" Content="stage" Padding="8,2" Margin="0,0,6,0"
+                    Background="#2A2A2A" Foreground="#CCC" BorderBrush="#3A3A3A"/>
+            <Button x:Name="GitUnstageBtn" Content="unstage" Padding="8,2" Margin="0,0,6,0"
+                    Background="#2A2A2A" Foreground="#CCC" BorderBrush="#3A3A3A"/>
+            <Button x:Name="GitCommitBtn" Content="commit" Padding="8,2" Margin="0,0,6,0"
+                    Background="#2A2A2A" Foreground="#CCC" BorderBrush="#3A3A3A"/>
             <Button x:Name="GitCancelBtn" Content="cancel" Padding="8,2" Margin="0,0,6,0"
                     Background="#2A2A2A" Foreground="#CCC" BorderBrush="#3A3A3A"/>
             <Button x:Name="GitClearBtn" Content="clear" Padding="8,2"
@@ -74,6 +80,13 @@
           </StackPanel>
           <TextBlock x:Name="GitStatusLabel" Text="git · idle"
                      FontSize="11" Foreground="#888" VerticalAlignment="Center"/>
+        </DockPanel>
+        <DockPanel DockPanel.Dock="Bottom" Margin="0,6,0,0">
+          <TextBlock DockPanel.Dock="Left" Text="msg" FontSize="11" Foreground="#888"
+                     VerticalAlignment="Center" Margin="0,0,8,0"/>
+          <TextBox x:Name="GitCommitMessage" Height="26"
+                   Background="#1A1A1A" Foreground="#DDD" BorderBrush="#3A3A3A"
+                   FontFamily="Consolas" FontSize="12" VerticalContentAlignment="Center"/>
         </DockPanel>
         <Grid>
           <Grid.ColumnDefinitions>

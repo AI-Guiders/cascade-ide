@@ -22,6 +22,9 @@ public partial class GlassMfdProcessHosts : UserControl
         TestsCancelBtn.Click += host.TestsCancel_OnClick;
         TestsClearBtn.Click += host.TestsClear_OnClick;
         GitStatusBtn.Click += host.GitStatus_OnClick;
+        GitStageBtn.Click += host.GitStage_OnClick;
+        GitUnstageBtn.Click += host.GitUnstage_OnClick;
+        GitCommitBtn.Click += host.GitCommit_OnClick;
         GitCancelBtn.Click += host.GitCancel_OnClick;
         GitClearBtn.Click += host.GitClear_OnClick;
         GitList.SelectionChanged += host.GitList_OnSelectionChanged;

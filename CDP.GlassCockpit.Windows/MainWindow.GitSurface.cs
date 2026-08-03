@@ -10,7 +10,7 @@ using CascadeIDE.SoftOrgan;
 
 namespace CDP.GlassCockpit.Windows;
 
-/// <summary>Glass MFD Git — porcelain ListBox + diff TextBox (Avalonia GitPanel parity v1).</summary>
+/// <summary>Glass MFD Git — porcelain ListBox + diff + stage/unstage/commit Process-redirect.</summary>
 public partial class MainWindow
 {
     readonly ObservableCollection<GlassGitPorcelainParse.Row> _gitRows = new();
@@ -55,6 +55,75 @@ public partial class MainWindow
             GitOutput.Text = "";
         if (GitStatusLabel is not null)
             GitStatusLabel.Text = "git · idle";
+    }
+
+    internal void GitStage_OnClick(object sender, RoutedEventArgs e)
+    {
+        if (GitList?.SelectedItem is not GlassGitPorcelainParse.Row row)
+        {
+            if (GitStatusLabel is not null)
+                GitStatusLabel.Text = "git · select a row to stage";
+            return;
+        }
+
+        var cwd = _session.WorkspaceRoot ?? Environment.CurrentDirectory;
+        var r = GlassGitProcess.Run(cwd, "add", "--", row.Path);
+        if (GitOutput is not null && !string.IsNullOrWhiteSpace(r.Output))
+            GitOutput.Text = r.Output;
+        if (GitStatusLabel is not null)
+            GitStatusLabel.Text = r.Ok ? $"git · staged · {row.Path}" : "git · stage fail";
+        if (r.Ok)
+            StartGitRefresh();
+    }
+
+    internal void GitUnstage_OnClick(object sender, RoutedEventArgs e)
+    {
+        if (GitList?.SelectedItem is not GlassGitPorcelainParse.Row row)
+        {
+            if (GitStatusLabel is not null)
+                GitStatusLabel.Text = "git · select a row to unstage";
+            return;
+        }
+
+        if (!row.IsStaged)
+        {
+            if (GitStatusLabel is not null)
+                GitStatusLabel.Text = "git · row not staged";
+            return;
+        }
+
+        var cwd = _session.WorkspaceRoot ?? Environment.CurrentDirectory;
+        var r = GlassGitProcess.Run(cwd, "restore", "--staged", "--", row.Path);
+        if (GitOutput is not null && !string.IsNullOrWhiteSpace(r.Output))
+            GitOutput.Text = r.Output;
+        if (GitStatusLabel is not null)
+            GitStatusLabel.Text = r.Ok ? $"git · unstaged · {row.Path}" : "git · unstage fail";
+        if (r.Ok)
+            StartGitRefresh();
+    }
+
+    internal void GitCommit_OnClick(object sender, RoutedEventArgs e)
+    {
+        var msg = GitCommitMessage?.Text?.Trim() ?? "";
+        if (string.IsNullOrWhiteSpace(msg))
+        {
+            if (GitStatusLabel is not null)
+                GitStatusLabel.Text = "git · commit needs message";
+            return;
+        }
+
+        var cwd = _session.WorkspaceRoot ?? Environment.CurrentDirectory;
+        var r = GlassGitProcess.Run(cwd, "commit", "-m", msg);
+        if (GitOutput is not null)
+            GitOutput.Text = string.IsNullOrWhiteSpace(r.Output) ? (r.Ok ? "(committed)" : "commit failed") : r.Output;
+        if (GitStatusLabel is not null)
+            GitStatusLabel.Text = r.Ok ? "git · committed" : "git · commit fail";
+        if (r.Ok)
+        {
+            if (GitCommitMessage is not null)
+                GitCommitMessage.Text = "";
+            StartGitRefresh();
+        }
     }
 
     internal void GitList_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
