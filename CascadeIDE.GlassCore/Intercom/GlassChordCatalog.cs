@@ -79,4 +79,8 @@ public static class GlassChordCatalog
             return null;
         return Entries.FirstOrDefault(e => e.Alias.Equals(q, StringComparison.Ordinal));
     }
+
+    /// <summary>Melody-tail suggestions for AwaitMelodyTail overlay (intent-catalog SSOT).</summary>
+    public static IReadOnlyList<GlassChordMelodyEntry> FilterMelodyTail(string? tailNormalized) =>
+        GlassChordMelody.FilterSuggestions(GlassChordMelody.NormalizeInput(tailNormalized));
 }

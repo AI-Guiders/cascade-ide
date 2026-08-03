@@ -112,6 +112,22 @@ public static class GlassHybridIndexGlance
         return sb.ToString().TrimEnd();
     }
 
+  /// <summary>FS glance + live <c>codebase_index_status</c> JSON when probe succeeds.</summary>
+    public static string? TryFormatLiveFromWorkspaceRoot(string? workspaceRoot, string? indexDir = null)
+    {
+        var fs = TryFormatFromWorkspaceRoot(workspaceRoot, indexDir);
+        if (fs is null)
+            return null;
+
+        var json = GlassHybridIndexStatusProbe.TryFetchStatusJson(workspaceRoot);
+        if (string.IsNullOrWhiteSpace(json))
+            return fs;
+
+        return fs + Environment.NewLine + Environment.NewLine
+               + "status json ·" + Environment.NewLine
+               + json;
+    }
+
     static string ShortPath(string databasePath, string? workspaceRoot)
     {
         if (string.IsNullOrWhiteSpace(databasePath))
