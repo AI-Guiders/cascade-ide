@@ -4,12 +4,14 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Media;
+using System.Windows.Threading;
 using CascadeIDE.Intercom;
 
 namespace CDP.GlassCockpit.Windows;
 
 /// <summary>WPF Intercom feed body — ADR 0129/0170 subset via GlassCore <see cref="IntercomMarkdown"/>.</summary>
-public sealed class GlassIntercomMarkdownBody : ContentControl
+/// <remarks>StackPanel (not ContentControl): setting Content during DataTemplate expand double-parents the built tree.</remarks>
+public sealed class GlassIntercomMarkdownBody : StackPanel
 {
     public static readonly DependencyProperty MarkdownProperty = DependencyProperty.Register(
         nameof(Markdown),
@@ -25,7 +27,18 @@ public sealed class GlassIntercomMarkdownBody : ContentControl
 
     static void OnMarkdownChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
     {
-        ((GlassIntercomMarkdownBody)d).Content = GlassIntercomMarkdownRenderer.Build(e.NewValue as string);
+        var body = (GlassIntercomMarkdownBody)d;
+        var md = e.NewValue as string;
+        // Escape DataTemplate ApplyTemplatedParentValue reentrancy (XamlParseException / double parent).
+        body.Dispatcher.BeginInvoke(
+            () => body.Rebuild(md),
+            DispatcherPriority.DataBind);
+    }
+
+    void Rebuild(string? markdown)
+    {
+        Children.Clear();
+        Children.Add(GlassIntercomMarkdownRenderer.Build(markdown));
     }
 }
 
@@ -38,6 +51,7 @@ internal static class GlassIntercomMarkdownRenderer
     static readonly Brush LinkFg = brush("#7EB8FF");
     static readonly Brush HrBrush = brush("#555555");
     static readonly FontFamily Mono = new("Consolas, Cascadia Mono, Courier New");
+    static readonly TextDecorationCollection LinkUnderline = CreateLinkUnderline();
 
     public static FrameworkElement Build(string? markdown)
     {
@@ -93,7 +107,6 @@ internal static class GlassIntercomMarkdownRenderer
     static FrameworkElement BuildDocument(string prose)
     {
         var panel = new StackPanel { Orientation = Orientation.Vertical };
-        // Large wrap budget — WPF TextBlock wraps by pixels; avoid char-prewrap crushing layout.
         foreach (var row in IntercomMarkdown.LayoutDocument(prose, maxChars: 10_000))
         {
             switch (row.Kind)
@@ -208,7 +221,7 @@ internal static class GlassIntercomMarkdownRenderer
                 IntercomMarkdownStyle.Link => new Run(run.Text)
                 {
                     Foreground = LinkFg,
-                    TextDecorations = TextDecorations.Underline,
+                    TextDecorations = LinkUnderline,
                 },
                 _ => new Run(run.Text),
             };
@@ -217,6 +230,13 @@ internal static class GlassIntercomMarkdownRenderer
 
         if (tb.Inlines.Count == 0)
             tb.Text = "";
+    }
+
+    static TextDecorationCollection CreateLinkUnderline()
+    {
+        var c = TextDecorations.Underline.Clone();
+        c.Freeze();
+        return c;
     }
 
     static SolidColorBrush brush(string hex)
