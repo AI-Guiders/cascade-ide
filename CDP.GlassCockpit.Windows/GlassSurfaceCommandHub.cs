@@ -154,6 +154,25 @@ internal sealed class GlassSurfaceCommandHub : IDisposable
 
                 break;
             }
+            case "run" or "action":
+            {
+                detail = _main.AgentSurfaceRun(
+                    Arg("action") ?? Arg("id") ?? Arg("name"),
+                    Arg("command_id") ?? Arg("command"),
+                    Arg("text") ?? Arg("args") ?? Arg("query"),
+                    Arg("start") ?? Arg("line"),
+                    Arg("end"));
+                if (detail.StartsWith('{'))
+                {
+                    result = JsonNode.Parse(detail);
+                    var okNode = result?["ok"]?.GetValue<bool?>();
+                    detail = okNode == false
+                        ? (result?["error"]?.GetValue<string>() ?? "run_failed")
+                        : "OK";
+                }
+
+                break;
+            }
             case "appearance":
                 detail = GlassSurfaceActions.Appearance(windows, Arg("name"));
                 if (detail.StartsWith('{'))
@@ -202,7 +221,7 @@ internal sealed class GlassSurfaceCommandHub : IDisposable
                     ["op"] = op,
                     ["error"] = "not_implemented",
                     ["detail"] =
-                        "Glass host: layout|highlight|focus|click|set_text|send_keys|palette|appearance|colors|set_control_layout|set_panel_size|request_confirmation",
+                        "Glass host: layout|highlight|focus|click|set_text|send_keys|palette|run|appearance|colors|set_control_layout|set_panel_size|request_confirmation",
                     ["stamped_utc"] = DateTimeOffset.UtcNow.ToString("o")
                 });
                 return;

@@ -276,4 +276,93 @@ public partial class MainWindow
         });
     }
 
+    /// <summary>Agent surface: run Glass action / melody command_id / slash text without Ctrl+Q ritual.</summary>
+    internal string AgentSurfaceRun(string? action, string? commandId, string? text, string? startRaw, string? endRaw)
+    {
+        CloseCommandPalette();
+        CloseCascadeChord();
+
+        var slash = text?.Trim();
+        if (!string.IsNullOrEmpty(slash) && slash[0] == '/')
+        {
+            var handled = TryRunGlassSlash(slash);
+            return System.Text.Json.JsonSerializer.Serialize(new
+            {
+                ok = handled,
+                kind = "slash",
+                text = slash,
+                error = handled ? null : "slash_not_handled",
+                status = StatusText.Text,
+                last_feed = _feed.Count > 0 ? _feed[^1].Body : null
+            });
+        }
+
+        string? glassAction = null;
+        if (!string.IsNullOrWhiteSpace(commandId)
+            && GlassMelodyGlassActions.TryMapCommandId(commandId, out var mapped))
+            glassAction = mapped;
+        else if (!string.IsNullOrWhiteSpace(action))
+            glassAction = action.Trim();
+        else if (!string.IsNullOrWhiteSpace(slash))
+            glassAction = slash;
+
+        if (string.IsNullOrWhiteSpace(glassAction))
+        {
+            return System.Text.Json.JsonSerializer.Serialize(new
+            {
+                ok = false,
+                error = "run_target_required",
+                hint = "action=|command_id=|text=/slash…"
+            });
+        }
+
+        if (glassAction == GlassMelodyGlassActions.RunSelectLines)
+        {
+            int start;
+            int end;
+            if (!string.IsNullOrWhiteSpace(startRaw) && int.TryParse(startRaw.Trim(), out start))
+            {
+                end = !string.IsNullOrWhiteSpace(endRaw) && int.TryParse(endRaw.Trim(), out var e) ? e : start;
+            }
+            else if (!string.IsNullOrWhiteSpace(slash)
+                     && GlassMelodyTail.TryParseLineRange(slash, out start, out var endOpt))
+            {
+                end = endOpt ?? start;
+            }
+            else
+            {
+                return System.Text.Json.JsonSerializer.Serialize(new
+                {
+                    ok = false,
+                    error = "select_range_required",
+                    hint = "start=/end= or text=L or L:L",
+                    action = glassAction
+                });
+            }
+
+            SelectOpenDocumentLines(start, end);
+            return System.Text.Json.JsonSerializer.Serialize(new
+            {
+                ok = true,
+                kind = "select",
+                action = glassAction,
+                start,
+                end,
+                status = StatusText.Text
+            });
+        }
+
+        RunPaletteEntry(glassAction);
+        return System.Text.Json.JsonSerializer.Serialize(new
+        {
+            ok = true,
+            kind = "action",
+            action = glassAction,
+            command_id = commandId,
+            status = StatusText.Text,
+            last_feed = _feed.Count > 0 ? _feed[^1].Body : null
+        });
+    }
+
+
 }
