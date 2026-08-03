@@ -12,14 +12,13 @@
 ## Dual-HCI (Glass WPF)
 
 - **Operator unHOLD 2026-08-03:** full WPF hosts (design later) — dig reject «ConPTY stays Avalonia forever» cancelled for depth wave.
-- **DAL SSOT (Avalonia-free already):** `Features/Terminal/DataAcquisition/*` — `IIntegratedShellSession` · `WindowsConPtyIntegratedShellSession` · `RedirectedIntegratedShellSession` · `IntegratedShellLaunch` (byte[] DataReceived/Send/Resize). No AvaloniaTerminal refs.
+- **DAL SSOT (linked into GlassCore):** `Features/Terminal/DataAcquisition/*` compiled in `CascadeIDE.GlassCore` (Compile Include + CascadeIDE Compile Remove) — `IIntegratedShellSession` · `WindowsConPtyIntegratedShellSession` · `RedirectedIntegratedShellSession` · `IntegratedShellLaunch` (byte[] DataReceived/Send/Resize). No AvaloniaTerminal refs.
 - **Avalonia UI SSOT:** `TerminalMfdPageView` + `AvaloniaTerminal.TerminalControl` + `TerminalPanelViewModel` (`Feed`/`UserInput`).
-- **Glass now:** redirected Process + TextBox (`GlassRedirectedShell`) — v1 presence; ANSI stripped; `TERM=dumb`.
-- **Glass ConPTY peel path (dig 2026-08-03):**
-  1. Extract/link DataAcquisition into Avalonia-free core (`CascadeIDE.GlassCore` or shared Terminal lib) so Avalonia + Glass share one ConPTY factory.
-  2. Glass host: ConPTY session + **WPF ANSI control** (not TextBox). Dig reject 2026-08-01 still forbids ConPTY→TextBlock fork; full TTY needs VT renderer (candidate: WT-backed WPF control, or custom grid on `DataReceived`).
-  3. SoftOrgan glance footnote flips to `■ Glass ConPTY` when host ships.
-- Dig act (2026-08-01): Glass redirected TextBox thin peel shipped as dual-HCI instrument presence.
+- **Glass now (2026-08-03):** shared ConPTY factory via `GlassConPtyShell` + TextBox interim (ANSI strip). Label `conpty · {shell}`. **Depth OPEN:** WPF VT control (not TextBox) — dig reject ConPTY→TextBlock as full TTY still holds.
+- **Glass ConPTY peel path:**
+  1. ~~Extract/link DataAcquisition → GlassCore~~ **DONE**
+  2. Glass host: ConPTY session shared — **DONE** (TextBox interim); WPF VT renderer still OPEN (EasyWindowsTerminalControl / custom grid).
+  3. SoftOrgan glance footnote → `■ Glass ConPTY` when VT ships (now: session shared · VT OPEN).
 - Dig act (2026-08-01): Glass redirected TextBox thin peel shipped as dual-HCI instrument presence.
 
 ## Что ещё не заявлено
