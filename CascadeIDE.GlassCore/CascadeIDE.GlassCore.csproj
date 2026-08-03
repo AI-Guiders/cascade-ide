@@ -2,7 +2,9 @@
 
   
   <ItemGroup>
+    <InternalsVisibleTo Include="CascadeIDE" />
     <InternalsVisibleTo Include="CascadeIDE.Tests" />
+    <InternalsVisibleTo Include="CDP.GlassCockpit.Windows" />
   </ItemGroup>
 <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
@@ -191,6 +193,14 @@
     <Compile Include="..\Services\TomlTableMerge.cs" Link="Services\TomlTableMerge.cs" />
     <!-- Peel12: canonical path normalize/compare (breakpoints, DAP, focus latch). -->
     <Compile Include="..\Services\CanonicalFilePath.cs" Link="Services\CanonicalFilePath.cs" />
+    <!-- Peel13: Terminal ConPTY/redirected DAL — Avalonia-free; Glass + CascadeIDE share factory. -->
+    <Compile Include="..\Features\Terminal\DataAcquisition\IIntegratedShellSession.cs" Link="Terminal\DataAcquisition\IIntegratedShellSession.cs" />
+    <Compile Include="..\Features\Terminal\DataAcquisition\IntegratedShellLaunch.cs" Link="Terminal\DataAcquisition\IntegratedShellLaunch.cs" />
+    <Compile Include="..\Features\Terminal\DataAcquisition\IntegratedShellStreamSanitizer.cs" Link="Terminal\DataAcquisition\IntegratedShellStreamSanitizer.cs" />
+    <Compile Include="..\Features\Terminal\DataAcquisition\IntegratedShellBackspaceBurstGuard.cs" Link="Terminal\DataAcquisition\IntegratedShellBackspaceBurstGuard.cs" />
+    <Compile Include="..\Features\Terminal\DataAcquisition\IntegratedTerminalSessionHost.cs" Link="Terminal\DataAcquisition\IntegratedTerminalSessionHost.cs" />
+    <Compile Include="..\Features\Terminal\DataAcquisition\WindowsConPtyIntegratedShellSession.cs" Link="Terminal\DataAcquisition\WindowsConPtyIntegratedShellSession.cs" />
+    <Compile Include="..\Features\Terminal\DataAcquisition\RedirectedIntegratedShellSession.cs" Link="Terminal\DataAcquisition\RedirectedIntegratedShellSession.cs" />
   </ItemGroup>
 
   <ItemGroup>

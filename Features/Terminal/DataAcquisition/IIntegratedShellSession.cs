@@ -1,6 +1,6 @@
 namespace CascadeIDE.Features.Terminal.DataAcquisition;
 
-internal interface IIntegratedShellSession : IDisposable
+public interface IIntegratedShellSession : IDisposable
 {
     event Action<byte[]>? DataReceived;
 
@@ -13,7 +13,7 @@ internal interface IIntegratedShellSession : IDisposable
     void Resize(int cols, int rows);
 }
 
-internal sealed record ShellLaunchConfiguration(
+public sealed record ShellLaunchConfiguration(
     string FileName,
     IReadOnlyList<string> Arguments,
     string DisplayName,

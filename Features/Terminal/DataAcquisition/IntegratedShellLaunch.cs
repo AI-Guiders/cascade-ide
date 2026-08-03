@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using System.Text;
 using CascadeIDE.Contracts;
+using CascadeIDE.Services;
 
 namespace CascadeIDE.Features.Terminal.DataAcquisition;
 
@@ -9,7 +10,7 @@ namespace CascadeIDE.Features.Terminal.DataAcquisition;
 /// Адаптировано из MIT-примеров AvaloniaTerminal.
 /// </summary>
 [IoBoundary]
-internal static class IntegratedShellLaunch
+public static class IntegratedShellLaunch
 {
     public static string ResolveWorkingDirectory(string? solutionPath)
     {
