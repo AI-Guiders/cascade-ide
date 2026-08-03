@@ -80,5 +80,53 @@
                  FontFamily="Consolas" FontSize="12"/>
       </DockPanel>
     </Border>
+    <Border x:Name="MfdProblemsHost" Visibility="Collapsed" Background="#121212">
+      <DockPanel Margin="8">
+        <DockPanel DockPanel.Dock="Top" Margin="0,0,0,6">
+          <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
+            <Button x:Name="ProblemsRefreshBtn" Content="refresh" Padding="8,2" Margin="0,0,6,0"
+                    Background="#2A2A2A" Foreground="#CCC" BorderBrush="#3A3A3A"/>
+            <Button x:Name="ProblemsClearBtn" Content="clear" Padding="8,2"
+                    Background="#2A2A2A" Foreground="#CCC" BorderBrush="#3A3A3A"/>
+          </StackPanel>
+          <TextBlock x:Name="ProblemsStatusLabel" Text="0 ошиб., 0 предупр."
+                     FontSize="11" Foreground="#888" VerticalAlignment="Center"/>
+        </DockPanel>
+        <ListBox x:Name="ProblemsList" Background="Transparent" BorderThickness="0"
+                 ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+          <ListBox.ItemTemplate>
+            <DataTemplate>
+              <Border Margin="0,0,0,4" Padding="10,7,10,8" CornerRadius="5"
+                      BorderThickness="1" BorderBrush="#22FFFFFF" Background="#12000000">
+                <Grid>
+                  <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="4"/>
+                    <ColumnDefinition Width="*"/>
+                  </Grid.ColumnDefinitions>
+                  <Border Grid.Column="0" Width="4" CornerRadius="2" Margin="0,0,10,0">
+                    <Border.Style>
+                      <Style TargetType="Border">
+                        <Setter Property="Background" Value="#D7A33C"/>
+                        <Style.Triggers>
+                          <DataTrigger Binding="{Binding IsError}" Value="True">
+                            <Setter Property="Background" Value="#E05858"/>
+                          </DataTrigger>
+                        </Style.Triggers>
+                      </Style>
+                    </Border.Style>
+                  </Border>
+                  <StackPanel Grid.Column="1">
+                    <TextBlock Text="{Binding HeaderLine}" FontFamily="Consolas" FontSize="11.5"
+                               FontWeight="SemiBold" TextWrapping="Wrap" Foreground="#E8E8E8"/>
+                    <TextBlock Text="{Binding Message}" FontSize="11" TextWrapping="Wrap"
+                               Foreground="#AAAAAA" Margin="0,4,0,0"/>
+                  </StackPanel>
+                </Grid>
+              </Border>
+            </DataTemplate>
+          </ListBox.ItemTemplate>
+        </ListBox>
+      </DockPanel>
+    </Border>
   </Grid>
 </UserControl>

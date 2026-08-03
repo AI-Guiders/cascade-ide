@@ -54,6 +54,7 @@ public partial class MainWindow
         RefreshMfdBuildVisibility();
         RefreshMfdTestsVisibility();
         RefreshMfdGitVisibility();
+        RefreshMfdProblemsVisibility();
 
         if (MfdBody is null)
             return;
@@ -89,6 +90,13 @@ public partial class MainWindow
         }
 
         if (IsGitHostActive())
+        {
+            MfdBody.Text = "";
+            RefreshEicasHealth();
+            return;
+        }
+
+        if (IsProblemsHostActive())
         {
             MfdBody.Text = "";
             RefreshEicasHealth();
@@ -174,7 +182,7 @@ public partial class MainWindow
                 "SolutionExplorerView",
                 "no .sln · " + (_session.WorkspaceRoot ?? "?")),
             "SemanticMap" => FormatMfdStub("SemanticMap", "WorkspaceNavigationMapView · Skia", "arch latch when live"),
-            "Problems" => FormatMfdStub("Problems", "ProblemsMfdPageView", "review latch when live"),
+            "Problems" => FormatMfdStub("Problems", "Glass ListBox host", "refresh → dotnet build parse · dbl-click open"),
             "Tests" => FormatMfdStub("Tests", "Glass redirected log TextBox", "Avalonia TestsMfdPageView SSOT · go=test_desk"),
             "DebugStack" => FormatMfdStub("DebugStack", "DebugStackMfdPageView · IdeDapDebugSession", "debug_desk latch · DAP Avalonia SSOT"),
             "Git" => FormatMfdStub("Git", "Glass redirected status TextBox", "Avalonia GitMfdPageView SSOT"),

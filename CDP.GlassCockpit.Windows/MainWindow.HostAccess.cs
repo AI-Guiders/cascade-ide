@@ -31,4 +31,8 @@ public partial class MainWindow
     Border? MfdGitHost => MfdHosts?.MfdGitHost;
     TextBlock? GitStatusLabel => MfdHosts?.GitStatusLabel;
     TextBox? GitOutput => MfdHosts?.GitOutput;
+
+    Border? MfdProblemsHost => MfdHosts?.MfdProblemsHost;
+    TextBlock? ProblemsStatusLabel => MfdHosts?.ProblemsStatusLabel;
+    ListBox? ProblemsList => MfdHosts?.ProblemsList;
 }

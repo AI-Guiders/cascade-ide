@@ -26,5 +26,8 @@ public partial class GlassMfdProcessHosts : UserControl
         GitStatusBtn.Click += host.GitStatus_OnClick;
         GitCancelBtn.Click += host.GitCancel_OnClick;
         GitClearBtn.Click += host.GitClear_OnClick;
+        ProblemsRefreshBtn.Click += host.ProblemsRefresh_OnClick;
+        ProblemsClearBtn.Click += host.ProblemsClear_OnClick;
+        ProblemsList.MouseDoubleClick += host.ProblemsList_OnMouseDoubleClick;
     }
 }
