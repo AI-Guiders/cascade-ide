@@ -40,6 +40,26 @@
     <Compile Remove="CascadeIDE.GlassCore\**\*.cs" />
     <Compile Remove="CDP.GlassCockpit.Windows\**\*.cs" />
     <Compile Remove="CasaField.Core\**\*.cs" />
+    <!-- Peel15: CRS DAL lives in GlassCore (shared resolver for Glass Correspondence). -->
+    <Compile Remove="Features\Workspace\DataAcquisition\WorkspaceTextFileReader.cs" />
+    <Compile Remove="Features\Workspace\CasaFieldTomlModels.cs" />
+    <Compile Remove="Features\UiChrome\UiWorkspaceRoutingToml.cs" />
+    <Compile Remove="Features\UiChrome\UiModeTomlModels.cs" />
+    <Compile Remove="Features\Workspace\WorkspaceTomlModels.cs" />
+    <Compile Remove="Features\Workspace\DataAcquisition\RepositoryWorkspaceTomlLoader.cs" />
+    <Compile Remove="Services\WorkspaceAdrMapResolver.cs" />
+    <Compile Remove="Services\WorkspaceFeatureResolver.cs" />
+    <Compile Remove="Services\DocsTemplatesCatalogResolver.cs" />
+    <Compile Remove="Services\Intercom\MarkdownProseSegments.cs" />
+    <Compile Remove="Services\Intercom\BracketCodeReferenceParser.cs" />
+    <Compile Remove="Features\WorkspaceNavigation\Application\CodeAnchor.cs" />
+    <Compile Remove="Features\WorkspaceNavigation\Application\WorkspaceExplicitCodeAnchor.cs" />
+    <Compile Remove="Features\WorkspaceNavigation\Application\DocReverseAnchorMatch.cs" />
+    <Compile Remove="Features\WorkspaceNavigation\Application\WorkspaceCorrespondenceCodeAnchorsLoader.cs" />
+    <Compile Remove="Features\WorkspaceNavigation\Application\DocReverseAnchorResolver.cs" />
+    <Compile Remove="Features\WorkspaceNavigation\Application\WorkspaceCorrespondenceResolver.cs" />
+    <Compile Remove="Features\WorkspaceNavigation\Application\CorrespondenceKindsCatalog.cs" />
+    <Compile Remove="Features\WorkspaceNavigation\Application\CorrespondenceLayersProjection.cs" />
     <!-- Peel13: Terminal DAL lives in GlassCore (shared ConPTY factory). -->
     <Compile Remove="Features\Terminal\DataAcquisition\IIntegratedShellSession.cs" />
     <Compile Remove="Features\Terminal\DataAcquisition\IntegratedShellLaunch.cs" />
@@ -244,7 +264,7 @@
     <EmbeddedResource Include="UiModes\*.toml" />
     <EmbeddedResource Include="Hotkeys\hotkeys.toml" />
     <EmbeddedResource Include="IntentMelody\intent-catalog.toml" />
-    <EmbeddedResource Include="wire\correspondence\correspondence-kinds.v1.json" />
+    <!-- Peel15: correspondence-kinds embedded in GlassCore -->
     <EmbeddedResource Include="AiPrompts\maf-ide-agent.prompts.md" />
     <EmbeddedResource Include="AiPrompts\web-ai-portal-bridge-adr0108.prompts.md" />
     <EmbeddedResource Include="AiPrompts\web-ai-portal-bridge-adr0108.chat-paste.txt" />

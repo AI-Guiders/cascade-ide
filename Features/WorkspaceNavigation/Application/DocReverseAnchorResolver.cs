@@ -1,6 +1,7 @@
 #nullable enable
 
 using System.Text.RegularExpressions;
+using CascadeIDE.Features.Workspace.DataAcquisition;
 using CascadeIDE.Services;
 using CascadeIDE.Services.Intercom;
 

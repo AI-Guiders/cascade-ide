@@ -193,6 +193,26 @@
     <Compile Include="..\Services\TomlTableMerge.cs" Link="Services\TomlTableMerge.cs" />
     <!-- Peel12: canonical path normalize/compare (breakpoints, DAP, focus latch). -->
     <Compile Include="..\Services\CanonicalFilePath.cs" Link="Services\CanonicalFilePath.cs" />
+    <!-- Peel15: CRS Application DAL (Avalonia-free) for Glass Correspondence host. -->
+    <Compile Include="..\Features\Workspace\DataAcquisition\WorkspaceTextFileReader.cs" Link="Features\Workspace\DataAcquisition\WorkspaceTextFileReader.cs" />
+    <Compile Include="..\Features\Workspace\CasaFieldTomlModels.cs" Link="Features\Workspace\CasaFieldTomlModels.cs" />
+    <Compile Include="..\Features\UiChrome\UiWorkspaceRoutingToml.cs" Link="Features\UiChrome\UiWorkspaceRoutingToml.cs" />
+    <Compile Include="..\Features\UiChrome\UiModeTomlModels.cs" Link="Features\UiChrome\UiModeTomlModels.cs" />
+    <Compile Include="..\Features\Workspace\WorkspaceTomlModels.cs" Link="Features\Workspace\WorkspaceTomlModels.cs" />
+    <Compile Include="..\Features\Workspace\DataAcquisition\RepositoryWorkspaceTomlLoader.cs" Link="Features\Workspace\DataAcquisition\RepositoryWorkspaceTomlLoader.cs" />
+    <Compile Include="..\Services\WorkspaceAdrMapResolver.cs" Link="Services\WorkspaceAdrMapResolver.cs" />
+    <Compile Include="..\Services\WorkspaceFeatureResolver.cs" Link="Services\WorkspaceFeatureResolver.cs" />
+    <Compile Include="..\Services\DocsTemplatesCatalogResolver.cs" Link="Services\DocsTemplatesCatalogResolver.cs" />
+    <Compile Include="..\Services\Intercom\MarkdownProseSegments.cs" Link="Services\Intercom\MarkdownProseSegments.cs" />
+    <Compile Include="..\Services\Intercom\BracketCodeReferenceParser.cs" Link="Services\Intercom\BracketCodeReferenceParser.cs" />
+    <Compile Include="..\Features\WorkspaceNavigation\Application\CodeAnchor.cs" Link="WorkspaceNavigation\Application\CodeAnchor.cs" />
+    <Compile Include="..\Features\WorkspaceNavigation\Application\WorkspaceExplicitCodeAnchor.cs" Link="WorkspaceNavigation\Application\WorkspaceExplicitCodeAnchor.cs" />
+    <Compile Include="..\Features\WorkspaceNavigation\Application\DocReverseAnchorMatch.cs" Link="WorkspaceNavigation\Application\DocReverseAnchorMatch.cs" />
+    <Compile Include="..\Features\WorkspaceNavigation\Application\WorkspaceCorrespondenceCodeAnchorsLoader.cs" Link="WorkspaceNavigation\Application\WorkspaceCorrespondenceCodeAnchorsLoader.cs" />
+    <Compile Include="..\Features\WorkspaceNavigation\Application\DocReverseAnchorResolver.cs" Link="WorkspaceNavigation\Application\DocReverseAnchorResolver.cs" />
+    <Compile Include="..\Features\WorkspaceNavigation\Application\WorkspaceCorrespondenceResolver.cs" Link="WorkspaceNavigation\Application\WorkspaceCorrespondenceResolver.cs" />
+    <Compile Include="..\Features\WorkspaceNavigation\Application\CorrespondenceKindsCatalog.cs" Link="WorkspaceNavigation\Application\CorrespondenceKindsCatalog.cs" />
+    <Compile Include="..\Features\WorkspaceNavigation\Application\CorrespondenceLayersProjection.cs" Link="WorkspaceNavigation\Application\CorrespondenceLayersProjection.cs" />
     <!-- Peel13: Terminal ConPTY/redirected DAL — Avalonia-free; Glass + CascadeIDE share factory. -->
     <Compile Include="..\Features\Terminal\DataAcquisition\IIntegratedShellSession.cs" Link="Terminal\DataAcquisition\IIntegratedShellSession.cs" />
     <Compile Include="..\Features\Terminal\DataAcquisition\IntegratedShellLaunch.cs" Link="Terminal\DataAcquisition\IntegratedShellLaunch.cs" />
@@ -203,7 +223,11 @@
     <Compile Include="..\Features\Terminal\DataAcquisition\RedirectedIntegratedShellSession.cs" Link="Terminal\DataAcquisition\RedirectedIntegratedShellSession.cs" />
   </ItemGroup>
 
-  <ItemGroup>
+    <ItemGroup>
+    <EmbeddedResource Include="..\wire\correspondence\correspondence-kinds.v1.json" Link="wire\correspondence\correspondence-kinds.v1.json" />
+  </ItemGroup>
+
+<ItemGroup>
     <Compile Remove="CascadeIDE_GlassCore.cs" />
     <Compile Remove="Class1.cs" />
   </ItemGroup>
