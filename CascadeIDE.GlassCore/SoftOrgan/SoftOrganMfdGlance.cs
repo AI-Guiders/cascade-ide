@@ -159,7 +159,7 @@ public static class SoftOrganMfdGlance
             "arch" => ("■ Glass Semantic list v1", "□ Avalonia Skia map"),
             "mcp" => ("■ AiChatSettings SoftOrgan", "□ options host"),
             "report" => ("■ Glass Markdig plain", "□ Avalonia MarkdownPreview"),
-            "refactor" => ("■ Glass RelatedFiles list", "□ Avalonia RelatedFilesMfd"),
+            "refactor" => ("■ Glass RelatedFiles WNM-shape feed", "□ Avalonia RelatedFilesMfd / IdeMcp"),
             _ => ((string?)null, (string?)null)
         };
         if (host.Item1 is null)

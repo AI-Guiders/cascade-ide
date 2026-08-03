@@ -204,7 +204,7 @@ public partial class MainWindow
             "Tests" => FormatMfdStub("Tests", "Glass redirected log TextBox", "Avalonia TestsMfdPageView SSOT"),
             "DebugStack" => FormatMfdStub("DebugStack", "Glass live DAP latch host", "debug_desk SoftOrgan · stack/locals"),
             "Git" => FormatMfdStub("Git", "Glass porcelain+diff host", "commit/push later"),
-            "RelatedFiles" => FormatMfdStub("RelatedFiles", "Glass heuristic list", "full map orchestrator later"),
+            "RelatedFiles" => FormatMfdStub("RelatedFiles", "Glass WNM-shaped list feed", "IdeMcp orchestrator later"),
             "Correspondence" => FormatMfdStub("Correspondence", "Glass CRS FS host", "full resolver later"),
             "MarkdownPreview" => FormatMfdStub("MarkdownPreview", "Glass Markdig plain", "rich tree later"),
             "WebAiPortal" => FormatMfdStub("WebAiPortal", "Glass WebView2", "embedded browser"),

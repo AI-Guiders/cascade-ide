@@ -9,10 +9,10 @@ using CascadeIDE.SoftOrgan;
 
 namespace CDP.GlassCockpit.Windows;
 
-/// <summary>Glass MFD RelatedFiles — heuristic list (Avalonia RelatedFilesMfdPageView peel v1).</summary>
+/// <summary>Glass MFD RelatedFiles — WNM-shaped list feed (Avalonia RelatedFilesMfd peel v1).</summary>
 public partial class MainWindow
 {
-    readonly ObservableCollection<GlassRelatedFilesHeuristic.Item> _relatedItems = new();
+    readonly ObservableCollection<GlassRelatedFilesFeed.Item> _relatedItems = new();
 
     void RefreshMfdRelatedVisibility()
     {
@@ -43,18 +43,19 @@ public partial class MainWindow
 
     internal void RelatedList_OnMouseDoubleClick(object sender, MouseButtonEventArgs e)
     {
-        if (RelatedList?.SelectedItem is not GlassRelatedFilesHeuristic.Item item)
+        if (RelatedList?.SelectedItem is not GlassRelatedFilesFeed.Item item)
             return;
-        OpenCodeFile(item.FilePath);
-        StatusText.Text = $"glass · related · {Path.GetFileName(item.FilePath)}";
+        OpenCodeFile(item.FullPath);
+        StatusText.Text = $"glass · related · {Path.GetFileName(item.FullPath)}";
     }
 
     void RefreshRelatedItems()
     {
         _relatedItems.Clear();
-        foreach (var i in GlassRelatedFilesHeuristic.Collect(_session.WorkspaceRoot, _editorPath))
+        foreach (var i in GlassRelatedFilesFeed.Collect(_session.WorkspaceRoot, _editorPath))
             _relatedItems.Add(i);
         if (RelatedStatusLabel is not null)
-            RelatedStatusLabel.Text = $"related · {_relatedItems.Count} · anchor {Path.GetFileName(_editorPath ?? "?")}";
+            RelatedStatusLabel.Text =
+                $"related · {_relatedItems.Count} · anchor {Path.GetFileName(_editorPath ?? "?")}";
     }
 }

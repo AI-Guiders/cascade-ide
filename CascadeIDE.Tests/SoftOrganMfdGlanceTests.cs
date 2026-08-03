@@ -236,7 +236,7 @@ public class SoftOrganMfdGlanceTests
         Assert.Contains("refactor latch glance · active", body);
         Assert.Contains("hotspots=3", body);
         Assert.Contains("RelatedFiles", body);
-        Assert.Contains("■ Glass RelatedFiles list", body);
-        Assert.Contains("□ Avalonia RelatedFilesMfd", body);
+        Assert.Contains("■ Glass RelatedFiles WNM-shape feed", body);
+        Assert.Contains("□ Avalonia RelatedFilesMfd / IdeMcp", body);
     }
 }
