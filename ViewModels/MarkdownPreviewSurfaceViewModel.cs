@@ -180,7 +180,7 @@ public abstract partial class MarkdownPreviewSurfaceViewModel : ObservableObject
             return;
 
         var ws = TryGetWorkspaceRoot();
-        if (!BracketCodeReferenceParser.TryToAttachmentAnchor(
+        if (!BracketCodeReferenceAttachment.TryToAttachmentAnchor(
                 reference,
                 _editorVm.CurrentFilePath,
                 ws,
@@ -222,7 +222,7 @@ public abstract partial class MarkdownPreviewSurfaceViewModel : ObservableObject
         if (!BracketCodeReferenceParser.TryParse(artifact.CodeBracket, out var reference, out _))
             return;
 
-        if (!BracketCodeReferenceParser.TryToAttachmentAnchor(
+        if (!BracketCodeReferenceAttachment.TryToAttachmentAnchor(
                 reference,
                 _editorVm.CurrentFilePath,
                 ws,

@@ -135,7 +135,7 @@ internal sealed partial class IdeMcpCommandExecutor
         var solutionPath = TryGetAttachSolutionPath();
         var indexDir = CascadeIDE.Features.HybridIndex.Application.HybridIndexIndexDirectoryRelative.ResolveOrDefault(
             _vm.GetCascadeSettingsForExecutor().HybridIndex.IndexDir);
-        if (!BracketCodeReferenceParser.TryToAttachmentAnchor(
+        if (!BracketCodeReferenceAttachment.TryToAttachmentAnchor(
                 reference,
                 activeFile,
                 workspaceRoot,

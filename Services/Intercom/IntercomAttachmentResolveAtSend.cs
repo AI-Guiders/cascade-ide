@@ -254,7 +254,7 @@ public static class IntercomAttachmentResolveAtSend
         out AttachmentAnchor anchor,
         out string error)
     {
-        if (!BracketCodeReferenceParser.TryToAttachmentAnchor(
+        if (!BracketCodeReferenceAttachment.TryToAttachmentAnchor(
                 reference,
                 activeFilePath,
                 workspaceRoot,

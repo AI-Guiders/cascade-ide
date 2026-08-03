@@ -54,7 +54,7 @@ public static class ForgeLensOpenService
         if (!BracketCodeReferenceParser.TryParse(artifact.CodeBracket, out var reference, out error))
             return false;
 
-        if (!BracketCodeReferenceParser.TryToAttachmentAnchor(
+        if (!BracketCodeReferenceAttachment.TryToAttachmentAnchor(
                 reference,
                 activeFilePath,
                 workspaceRoot,

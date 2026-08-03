@@ -32,7 +32,7 @@ public static class AnchorDraftPreviewResolver
         if (!BracketCodeReferenceParser.TryParse(text, out var reference, out error))
             return false;
 
-        if (!BracketCodeReferenceParser.TryToAttachmentAnchor(
+        if (!BracketCodeReferenceAttachment.TryToAttachmentAnchor(
                 reference,
                 activeFilePath,
                 workspaceRoot,

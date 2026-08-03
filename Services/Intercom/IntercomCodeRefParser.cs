@@ -260,7 +260,7 @@ public static class IntercomCodeRefParser
             return false;
         }
 
-        if (!BracketCodeReferenceParser.TryToAttachmentAnchor(
+        if (!BracketCodeReferenceAttachment.TryToAttachmentAnchor(
                 reference,
                 editor.CurrentFilePath,
                 workspaceRoot,

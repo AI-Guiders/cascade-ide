@@ -90,7 +90,7 @@ public static class CideMagicLinkExecutor
             if (!BracketCodeReferenceParser.TryParse(request.BracketInner, out var reference, out var parseError))
                 return $"bracket_parse_failed: {parseError}";
 
-            if (!BracketCodeReferenceParser.TryToAttachmentAnchor(
+            if (!BracketCodeReferenceAttachment.TryToAttachmentAnchor(
                     reference,
                     vm.CurrentFilePath,
                     root,

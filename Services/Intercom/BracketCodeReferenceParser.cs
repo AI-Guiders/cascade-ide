@@ -1,8 +1,6 @@
 #nullable enable
 
-using System.Text.Json;
 using System.Text.RegularExpressions;
-using CascadeIDE.Models.Intercom;
 
 namespace CascadeIDE.Services.Intercom;
 
@@ -52,70 +50,6 @@ public static class BracketCodeReferenceParser
         return TryParseH1(text, out reference, out error);
     }
 
-    public static bool TryToAttachmentAnchor(
-        in BracketCodeReference reference,
-        string? activeFilePath,
-        string? workspaceRoot,
-        out AttachmentAnchor anchor,
-        out string error) =>
-        TryToAttachmentAnchor(
-            reference,
-            activeFilePath,
-            workspaceRoot,
-            solutionPath: null,
-            indexDirectoryRelative: null,
-            out anchor,
-            out error);
-
-    public static bool TryToAttachmentAnchor(
-        in BracketCodeReference reference,
-        string? activeFilePath,
-        string? workspaceRoot,
-        string? solutionPath,
-        string? indexDirectoryRelative,
-        out AttachmentAnchor anchor,
-        out string error)
-    {
-        anchor = new AttachmentAnchor();
-        error = "";
-
-        if (!IntercomMemberFileInference.TryResolveRelativeFile(
-                reference.File,
-                reference.MemberKey,
-                activeFilePath,
-                workspaceRoot,
-                solutionPath,
-                indexDirectoryRelative,
-                out var file,
-                out error))
-        {
-            return false;
-        }
-
-        JsonElement? syntaxScope = null;
-        if (!string.IsNullOrWhiteSpace(reference.ScopeKind))
-        {
-            var index = reference.ScopeIndexInParent is > 0 ? reference.ScopeIndexInParent.Value : 1;
-            var parentMember = string.IsNullOrWhiteSpace(reference.MemberKey) ? null : reference.MemberKey.Trim();
-            syntaxScope = JsonSerializer.SerializeToElement(new Dictionary<string, object?>
-            {
-                ["kind"] = reference.ScopeKind.Trim(),
-                ["indexInParent"] = index,
-                ["parentMemberKey"] = parentMember,
-            });
-        }
-
-        anchor = new AttachmentAnchor
-        {
-            File = file.Replace('\\', '/'),
-            MemberKey = string.IsNullOrWhiteSpace(reference.MemberKey) ? null : reference.MemberKey.Trim(),
-            LineStart = reference.LineStart,
-            LineEnd = reference.LineEnd,
-            SyntaxScope = syntaxScope,
-        };
-
-        return true;
-    }
 
     private static bool TryParseL2(string text, out BracketCodeReference reference, out string error)
     {
