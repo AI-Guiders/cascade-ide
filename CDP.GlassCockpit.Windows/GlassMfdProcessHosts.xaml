@@ -12,8 +12,9 @@
                      FontSize="11" Foreground="#888" VerticalAlignment="Center"/>
         </DockPanel>
         <!-- Avalonia EOL · Glass cabin = WPF: ready WT terminal (EasyWindowsTerminalControl). -->
+        <!-- No StartupCommandLine here: Loaded while Collapsed starts ConPTY at 0×0 (no input). MainWindow starts after layout + Focus. -->
         <term:EasyTerminalControl x:Name="TerminalVt"
-                                  StartupCommandLine="pwsh.exe -NoLogo -NoExit"
+                                  Focusable="True"
                                   FontFamilyWhenSettingTheme="Cascadia Code"
                                   FontSizeWhenSettingTheme="12"/>
       </DockPanel>

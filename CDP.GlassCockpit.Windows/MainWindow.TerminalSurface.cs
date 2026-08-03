@@ -3,7 +3,10 @@
 using System.Text;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
+using System.Windows.Threading;
 using CascadeIDE.Features.Terminal.DataAcquisition;
+using EasyWindowsTerminalControl;
 
 namespace CDP.GlassCockpit.Windows;
 
@@ -15,6 +18,7 @@ public partial class MainWindow
 {
     bool _terminalStarted;
     string _terminalDisplayName = "?";
+    bool _terminalSizeHooked;
 
     void EnsureTerminalSession()
     {
@@ -22,6 +26,44 @@ public partial class MainWindow
             return;
 
         if (_terminalStarted)
+        {
+            FocusTerminalVt();
+            return;
+        }
+
+        // HwndHost+ConPTY started at 0×0 (Collapsed) eats input — wait for real layout.
+        if (TerminalVt.ActualWidth < 8 || TerminalVt.ActualHeight < 8)
+        {
+            if (!_terminalSizeHooked)
+            {
+                _terminalSizeHooked = true;
+                TerminalVt.SizeChanged += TerminalVt_OnSizedForStart;
+            }
+
+            return;
+        }
+
+        StartTerminalNow();
+    }
+
+    void TerminalVt_OnSizedForStart(object sender, SizeChangedEventArgs e)
+    {
+        if (TerminalVt is null)
+            return;
+
+        if (e.NewSize.Width < 8 || e.NewSize.Height < 8)
+            return;
+
+        TerminalVt.SizeChanged -= TerminalVt_OnSizedForStart;
+        _terminalSizeHooked = false;
+
+        if (!_terminalStarted && IsTerminalHostActive())
+            StartTerminalNow();
+    }
+
+    void StartTerminalNow()
+    {
+        if (TerminalVt is null || _terminalStarted)
             return;
 
         try
@@ -30,11 +72,16 @@ public partial class MainWindow
                 _session.WorkspaceRoot ?? Environment.CurrentDirectory);
             var launch = IntegratedShellLaunch.ResolveLaunchConfiguration(cwd);
             _terminalDisplayName = launch.DisplayName;
+            TerminalVt.WorkingDirectory = launch.WorkingDirectory;
             TerminalVt.StartupCommandLine = BuildStartupCommandLine(launch);
-            TerminalVt.RestartTerm();
+            TerminalVt.InputCapture =
+                EasyTerminalControl.INPUT_CAPTURE.TabKey | EasyTerminalControl.INPUT_CAPTURE.DirectionKeys;
+            // Restart replaces any 0×0 auto-start from Loaded while Collapsed.
+            _ = TerminalVt.RestartTerm();
             _terminalStarted = true;
             if (TerminalShellLabel is not null)
                 TerminalShellLabel.Text = $"vt · {_terminalDisplayName} · {launch.WorkingDirectory}";
+            FocusTerminalVt();
         }
         catch (Exception ex)
         {
@@ -44,10 +91,26 @@ public partial class MainWindow
         }
     }
 
+    void FocusTerminalVt()
+    {
+        if (TerminalVt is null)
+            return;
+
+        TerminalVt.Focusable = true;
+        TerminalVt.Focus();
+        Keyboard.Focus(TerminalVt);
+    }
+
     void DisposeTerminalSession()
     {
         if (TerminalVt is null)
             return;
+
+        if (_terminalSizeHooked)
+        {
+            TerminalVt.SizeChanged -= TerminalVt_OnSizedForStart;
+            _terminalSizeHooked = false;
+        }
 
         try
         {
@@ -71,7 +134,16 @@ public partial class MainWindow
         MfdTerminalHost.Visibility = show ? Visibility.Visible : Visibility.Collapsed;
 
         if (show)
-            EnsureTerminalSession();
+        {
+            // After layout: size HWND, (re)start ConPTY, steal focus from Composer.
+            Dispatcher.BeginInvoke(
+                () =>
+                {
+                    EnsureTerminalSession();
+                    FocusTerminalVt();
+                },
+                DispatcherPriority.Loaded);
+        }
     }
 
     bool IsTerminalHostActive()
@@ -87,7 +159,13 @@ public partial class MainWindow
     internal void TerminalRestart_OnClick(object sender, RoutedEventArgs e)
     {
         DisposeTerminalSession();
-        EnsureTerminalSession();
+        Dispatcher.BeginInvoke(
+            () =>
+            {
+                EnsureTerminalSession();
+                FocusTerminalVt();
+            },
+            DispatcherPriority.Loaded);
     }
 
     static string BuildStartupCommandLine(ShellLaunchConfiguration launch)
