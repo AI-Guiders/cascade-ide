@@ -163,8 +163,10 @@ public sealed class GlassPaletteChordCatalogTests
         var gsRow = GlassIntentMelodyCatalog.ToRowId("git_status");
         Assert.False(GlassCommandPaletteCatalog.IsNonExecutableMelodyRow(gsRow));
 
-        var unknown = GlassIntentMelodyCatalog.ToRowId("debug_attach");
+        var unknown = GlassIntentMelodyCatalog.ToRowId("cockpit_open_command_line");
         Assert.True(GlassCommandPaletteCatalog.IsNonExecutableMelodyRow(unknown));
+        Assert.True(GlassMelodyGlassActions.TryMapCommandId("debug_attach", out var da)
+                    && da == "mfd_debug_stack");
         Assert.False(GlassCommandPaletteCatalog.IsNonExecutableMelodyRow("open_file"));
         Assert.True(GlassMelodyGlassActions.TryMapCommandId("open_file_dialog", out var of)
                     && of == "open_file");
@@ -186,6 +188,12 @@ public sealed class GlassPaletteChordCatalogTests
                     && cz == "slash_citizen");
         Assert.True(GlassMelodyGlassActions.TryMapCommandId("glass.mfd_events", out var ev)
                     && ev == "mfd_events");
+        Assert.True(GlassMelodyGlassActions.TryMapCommandId("show_web_ai_portal_page", out var wai)
+                    && wai == GlassMelodyGlassActions.RunWebAiPortal);
+        Assert.True(GlassMelodyGlassActions.TryMapCommandId("git_diff", out var gd)
+                    && gd == GlassMelodyGlassActions.RunGitStatus);
+        Assert.True(GlassMelodyGlassActions.TryMapCommandId("debug_launch", out var dl)
+                    && dl == "mfd_debug_stack");
         Assert.Contains(GlassIntentMelodyCatalog.All(), a => a.Alias == "sf");
         Assert.Contains(GlassIntentMelodyCatalog.All(), a => a.Alias == "fc");
         Assert.Contains(GlassIntentMelodyCatalog.All(), a => a.Alias == "cz");
@@ -208,6 +216,9 @@ public sealed class GlassPaletteChordCatalogTests
         Assert.Contains(rows, e => e.Keywords == "els");
         Assert.False(GlassCommandPaletteCatalog.IsNonExecutableMelodyRow(
             GlassIntentMelodyCatalog.ToRowId("select")));
+
+        var chordRows = GlassChordCatalog.FilterMelodyTail("els:10");
+        Assert.Contains(chordRows, e => e.Alias == "els");
     }
     [Fact]
     public void Status_IOP_glance_format_includes_editor_mfd_topology()
