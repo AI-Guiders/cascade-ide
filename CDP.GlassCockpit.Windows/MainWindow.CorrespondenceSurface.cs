@@ -8,7 +8,7 @@ using CascadeIDE.SoftOrgan;
 
 namespace CDP.GlassCockpit.Windows;
 
-/// <summary>Glass MFD Correspondence — thin FS CRS (Avalonia CRS peel v1).</summary>
+/// <summary>Glass MFD Correspondence — full CRS resolvers via GlassCore peel.</summary>
 public partial class MainWindow
 {
     readonly ObservableCollection<GlassCorrespondenceFeed.Item> _crsReverse = new();
@@ -58,7 +58,8 @@ public partial class MainWindow
     {
         if (item is null)
             return;
-        OpenCodeFile(item.FilePath);
+
+        OpenCodeFile(item.FilePath, item.LineHint);
         StatusText.Text = $"glass · crs · {item.Display}";
     }
 
@@ -66,13 +67,16 @@ public partial class MainWindow
     {
         _crsReverse.Clear();
         _crsForward.Clear();
-        var (rev, fwd) = GlassCorrespondenceFeed.Collect(_session.WorkspaceRoot, _editorPath);
-        foreach (var i in rev)
+        var snap = GlassCorrespondenceFeed.Collect(_session.WorkspaceRoot, _editorPath);
+        foreach (var i in snap.Reverse)
             _crsReverse.Add(i);
-        foreach (var i in fwd)
+        foreach (var i in snap.Forward)
             _crsForward.Add(i);
         if (CorrespondenceStatusLabel is not null)
-            CorrespondenceStatusLabel.Text =
-                $"crs · reverse {_crsReverse.Count} · forward {_crsForward.Count}";
+            CorrespondenceStatusLabel.Text = snap.StatusLine;
+        if (!string.IsNullOrWhiteSpace(snap.FeatureLine) || !string.IsNullOrWhiteSpace(snap.AdrLine))
+            StatusText.Text =
+                $"glass · crs · {snap.FeatureLine}"
+                + (string.IsNullOrWhiteSpace(snap.AdrLine) ? "" : $" · {snap.AdrLine}");
     }
 }
