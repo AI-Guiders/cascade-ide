@@ -146,6 +146,12 @@ public partial class MainWindow
             text = _problemsBuildBuf.ToString();
 
         var rows = GlassProblemsMsBuildParse.Parse(text);
+        if (!string.IsNullOrWhiteSpace(_editorPath) && CodeEditor is not null)
+        {
+            var roslyn = GlassRoslynDiagnosticsFeed.CollectForFile(_editorPath, CodeEditor.Text);
+            rows = GlassRoslynDiagnosticsFeed.MergeDistinct(rows, roslyn).ToList();
+        }
+
         _problemItems.Clear();
         foreach (var r in rows)
             _problemItems.Add(r);

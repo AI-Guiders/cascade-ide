@@ -159,6 +159,9 @@ public partial class MainWindow
 
     void MainWindow_OnPreviewKeyDown(object sender, KeyEventArgs e)
     {
+        if (_chordMelodyAwait && TryConsumeChordMelodyKeyDown(e))
+            return;
+
         if (e.Key == Key.Escape && ChordOverlay.Visibility == Visibility.Visible)
         {
             CloseCascadeChord();

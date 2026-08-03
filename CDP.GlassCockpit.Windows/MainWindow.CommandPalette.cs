@@ -121,6 +121,20 @@ public partial class MainWindow
                 return;
             }
 
+            if (glassAction == GlassMelodyGlassActions.RunWebAiPortal)
+            {
+                if (!GlassCommandPaletteCatalog.TryGetMelodyTail(PaletteQuery.Text, out var waiTail)
+                    || !GlassChordMelody.TryResolveParametricWebAi(waiTail, out var url))
+                {
+                    StatusText.Text = "glass · c:wai — need c:wai:<url>";
+                    return;
+                }
+
+                CloseCommandPalette();
+                RunWebAiPortal(url);
+                return;
+            }
+
             CloseCommandPalette();
             RunPaletteEntry(glassAction);
             return;
@@ -145,6 +159,9 @@ public partial class MainWindow
             case GlassMelodyGlassActions.RunTests:
                 SelectMfdPage("Tests");
                 TestsRun_OnClick(this, new RoutedEventArgs());
+                break;
+            case GlassMelodyGlassActions.RunWebAiPortal:
+                RunWebAiPortal(null);
                 break;
             case "open_file":
                 TryPickOpenFile();
@@ -369,6 +386,22 @@ public partial class MainWindow
                 action = glassAction,
                 start,
                 end,
+                status = StatusText.Text
+            });
+        }
+
+        if (glassAction == GlassMelodyGlassActions.RunWebAiPortal)
+        {
+            string? url = null;
+            if (!string.IsNullOrWhiteSpace(text))
+                GlassChordMelody.TryResolveParametricWebAi(text.Trim(), out url);
+            RunWebAiPortal(url);
+            return System.Text.Json.JsonSerializer.Serialize(new
+            {
+                ok = true,
+                kind = "webai",
+                action = glassAction,
+                url,
                 status = StatusText.Text
             });
         }
