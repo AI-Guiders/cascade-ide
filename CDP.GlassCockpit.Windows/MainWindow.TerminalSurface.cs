@@ -7,12 +7,12 @@ using System.Windows.Input;
 
 namespace CDP.GlassCockpit.Windows;
 
-/// <summary>Glass MFD Terminal — redirected TextBox peel (ConPTY stays Avalonia SSOT).</summary>
+/// <summary>Glass MFD Terminal — shared ConPTY session (VT control depth OPEN).</summary>
 public partial class MainWindow
 {
     const int MaxTerminalChars = 120_000;
 
-    GlassRedirectedShell? _terminalShell;
+    GlassConPtyShell? _terminalShell;
     readonly StringBuilder _terminalBuffer = new();
 
     void EnsureTerminalSession()
@@ -21,7 +21,7 @@ public partial class MainWindow
             return;
 
         _terminalShell?.Dispose();
-        _terminalShell = new GlassRedirectedShell();
+        _terminalShell = new GlassConPtyShell();
         _terminalShell.TextReceived += OnTerminalText;
         _terminalShell.Exited += code =>
             Dispatcher.BeginInvoke(() => AppendTerminalText($"\n┌ exited · {code} ┐\n"));
@@ -30,13 +30,13 @@ public partial class MainWindow
         {
             _terminalShell.Start(_session.WorkspaceRoot ?? Environment.CurrentDirectory);
             if (TerminalShellLabel is not null)
-                TerminalShellLabel.Text = $"redirected · {_terminalShell.DisplayName}";
+                TerminalShellLabel.Text = $"conpty · {_terminalShell.DisplayName}";
         }
         catch (Exception ex)
         {
             AppendTerminalText($"┌ start fail · {ex.Message} ┐\n");
             if (TerminalShellLabel is not null)
-                TerminalShellLabel.Text = "redirected · fail";
+                TerminalShellLabel.Text = "conpty · fail";
         }
     }
 
