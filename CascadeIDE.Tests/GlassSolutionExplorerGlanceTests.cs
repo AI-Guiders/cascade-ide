@@ -38,6 +38,27 @@ public class GlassSolutionExplorerGlanceTests
     }
 
     [Fact]
+    public void EnumerateProjectCsFiles_caps_at_max()
+    {
+        var dir = Path.Combine(Path.GetTempPath(), "glass-se-" + Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(dir);
+        try
+        {
+            var csproj = Path.Combine(dir, "P.csproj");
+            File.WriteAllText(csproj, "<Project Sdk=\"Microsoft.NET.Sdk\"/>");
+            for (var i = 0; i < GlassSolutionExplorerGlance.MaxCsFilesPerProject + 5; i++)
+                File.WriteAllText(Path.Combine(dir, $"F{i}.cs"), "// x");
+
+            var files = GlassSolutionExplorerGlance.EnumerateProjectCsFiles(csproj);
+            Assert.Equal(GlassSolutionExplorerGlance.MaxCsFilesPerProject, files.Count);
+        }
+        finally
+        {
+            try { Directory.Delete(dir, recursive: true); } catch { /* ignore */ }
+        }
+    }
+
+    [Fact]
     public void TryFormatFromSlnText_empty_returns_null()
     {
         Assert.Null(GlassSolutionExplorerGlance.TryFormatFromSlnText("GlobalSection(SolutionConfigurationPlatforms)"));
