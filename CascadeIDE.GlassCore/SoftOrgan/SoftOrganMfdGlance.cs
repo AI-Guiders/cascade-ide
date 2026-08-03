@@ -154,7 +154,7 @@ public static class SoftOrganMfdGlance
 
         var host = title.ToLowerInvariant() switch
         {
-            "debug_desk" => ("■ Glass spectator ListBox", "□ Avalonia DebugStack / DAP"),
+            "debug_desk" => ("■ Glass live latch ListBox", "□ Avalonia IdeDapDebugSession"),
             "review" => ("■ Glass Problems ListBox", "□ Avalonia ProblemsMfdPageView"),
             "arch" => ("■ Glass Semantic list v1", "□ Avalonia Skia map"),
             "mcp" => ("■ AiChatSettings SoftOrgan", "□ options host"),

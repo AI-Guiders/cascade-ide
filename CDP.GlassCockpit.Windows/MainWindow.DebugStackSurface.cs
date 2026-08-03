@@ -9,7 +9,7 @@ using CascadeIDE.Features.Cdp;
 
 namespace CDP.GlassCockpit.Windows;
 
-/// <summary>Glass MFD DebugStack — spectator ListBoxes from debug_desk latch (live DAP later).</summary>
+/// <summary>Glass MFD DebugStack — live spectator from debug_desk latch (DAP stopped → SoftOrgan FSW).</summary>
 public partial class MainWindow
 {
     void RefreshMfdDebugVisibility()
@@ -21,9 +21,7 @@ public partial class MainWindow
         var show = string.Equals(page, "DebugStack", StringComparison.OrdinalIgnoreCase);
         MfdDebugStackHost.Visibility = show ? Visibility.Visible : Visibility.Collapsed;
 
-        if (show
-            && DebugStackList is not null
-            && DebugStackList.Items.Count == 0)
+        if (show)
             RefreshDebugSpectator();
     }
 
@@ -57,6 +55,12 @@ public partial class MainWindow
             OpenCodeFile(file, lineNo);
     }
 
+    void OnDebugDeskLatchChanged()
+    {
+        if (IsDebugHostActive())
+            RefreshDebugSpectator();
+    }
+
     void RefreshDebugSpectator()
     {
         if (DebugStackList is null || DebugLocalsList is null)
@@ -70,8 +74,8 @@ public partial class MainWindow
         if (raw is null)
         {
             if (DebugStatusLabel is not null)
-                DebugStatusLabel.Text = "debug · spectator · no latch";
-            DebugStackList.Items.Add("(no DAP session · spectator)");
+                DebugStatusLabel.Text = "debug · live · no latch";
+            DebugStackList.Items.Add("(no DAP session · live latch)");
             return;
         }
 
@@ -102,15 +106,31 @@ public partial class MainWindow
                 }
             }
 
+            var pulse = root.TryGetProperty("pulse", out var pulseEl) ? pulseEl.GetString() : null;
+            var verdict = root.TryGetProperty("verdict", out var verdEl) ? verdEl.GetString() : null;
+            var stopped = root.TryGetProperty("stopped", out var stEl) && stEl.ValueKind == JsonValueKind.True;
+            var activeDap = root.TryGetProperty("active_dap", out var ad) && ad.ValueKind == JsonValueKind.True;
+            var bp = root.TryGetProperty("bp_count", out var bpEl) && bpEl.TryGetInt32(out var bpi) ? bpi : 0;
+
             if (frames == 0)
-                DebugStackList.Items.Add("(latch idle · no frames)");
+            {
+                if (pulse is { Length: > 0 })
+                    DebugStackList.Items.Add(pulse);
+                else
+                    DebugStackList.Items.Add(stopped
+                        ? "(stopped · frames pending enrich)"
+                        : "(latch idle · no frames)");
+            }
+
+            if (DebugLocalsList.Items.Count == 0 && verdict is { Length: > 0 })
+                DebugLocalsList.Items.Add($"verdict = {verdict}");
 
             if (DebugStatusLabel is not null)
             {
-                var active = root.TryGetProperty("active_dap", out var ad) && ad.ValueKind == JsonValueKind.True;
-                DebugStatusLabel.Text = active
-                    ? $"debug · spectator · frames {frames}"
-                    : $"debug · latch · frames {frames}";
+                var mode = frames > 0 ? "live" : "latch";
+                var stopBit = stopped ? "stopped" : "run";
+                var dapBit = activeDap ? "dap" : "idle";
+                DebugStatusLabel.Text = $"debug · {mode} · {stopBit} · {dapBit} · frames {frames} · bp={bp}";
             }
         }
         catch (Exception ex)

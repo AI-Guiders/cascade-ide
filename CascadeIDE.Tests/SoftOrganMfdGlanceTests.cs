@@ -80,9 +80,8 @@ public class SoftOrganMfdGlanceTests
         Assert.Contains("bp=2", body);
         Assert.Contains("stopped=true", body);
         Assert.Contains("active_dap=true", body);
-        Assert.Contains("DebugStack", body);
-        Assert.Contains("■ Glass spectator ListBox", body);
-        Assert.Contains("□ Avalonia DebugStack / DAP", body);
+        Assert.Contains("■ Glass live latch ListBox", body);
+        Assert.Contains("□ Avalonia IdeDapDebugSession", body);
     }
 
     [Fact]

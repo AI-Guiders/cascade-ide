@@ -26,6 +26,9 @@ public partial class MainWindow
             _softOrgans.Apply(organId, chromeHint);
             PaintSoftOrganBand();
             UpdateMfdBody();
+            if (SoftOrganLatchCatalog.Canonicalize(organId)
+                .Equals("debug_desk", StringComparison.OrdinalIgnoreCase))
+                OnDebugDeskLatchChanged();
         }, DispatcherPriority.Background);
     }
 

@@ -202,7 +202,7 @@ public partial class MainWindow
             "SemanticMap" => FormatMfdStub("SemanticMap", "Glass Skia graph host", "radial · RelatedFiles heuristic"),
             "Problems" => FormatMfdStub("Problems", "Glass ListBox host", "refresh → dotnet build parse"),
             "Tests" => FormatMfdStub("Tests", "Glass redirected log TextBox", "Avalonia TestsMfdPageView SSOT"),
-            "DebugStack" => FormatMfdStub("DebugStack", "Glass spectator host", "debug_desk latch · live DAP later"),
+            "DebugStack" => FormatMfdStub("DebugStack", "Glass live DAP latch host", "debug_desk SoftOrgan · stack/locals"),
             "Git" => FormatMfdStub("Git", "Glass porcelain+diff host", "commit/push later"),
             "RelatedFiles" => FormatMfdStub("RelatedFiles", "Glass heuristic list", "full map orchestrator later"),
             "Correspondence" => FormatMfdStub("Correspondence", "Glass CRS FS host", "full resolver later"),
