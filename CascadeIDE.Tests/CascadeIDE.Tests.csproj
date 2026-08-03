@@ -26,6 +26,7 @@
   <ItemGroup>
     <ProjectReference Include="..\CascadeIDE.csproj" />
     <ProjectReference Include="..\CascadeIDE.Contracts\CascadeIDE.Contracts.csproj" />
+    <ProjectReference Include="..\CascadeIDE.GlassCore\CascadeIDE.GlassCore.csproj" />
   </ItemGroup>
   <Target Name="CopyBuildVerifyWorker" AfterTargets="Build">
     <PropertyGroup>

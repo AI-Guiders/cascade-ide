@@ -243,7 +243,7 @@
                               <TextBlock Text="{Binding Role}" FontSize="11" FontWeight="SemiBold" Foreground="{StaticResource Glass.BubbleMeta}"/>
                               <TextBlock DockPanel.Dock="Right" Text="{Binding When}" FontSize="10" Foreground="#666" HorizontalAlignment="Right"/>
                             </DockPanel>
-                            <TextBlock Text="{Binding Body}" FontSize="13" TextWrapping="Wrap" Foreground="#E8E8E8" LineHeight="18"/>
+                            <local:GlassIntercomMarkdownBody Markdown="{Binding Body}"/>
                             <ItemsControl ItemsSource="{Binding Chips}" Margin="0,6,0,0">
                               <ItemsControl.ItemsPanel>
                                 <ItemsPanelTemplate>
