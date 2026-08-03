@@ -1,18 +1,21 @@
 #nullable enable
 
+using System.Collections.ObjectModel;
 using System.Text;
 using System.Windows;
 using System.Windows.Controls;
+using CascadeIDE.SoftOrgan;
 
 namespace CDP.GlassCockpit.Windows;
 
-/// <summary>Glass MFD Tests — redirected dotnet test TextBox peel (Avalonia TestsMfdPageView SSOT).</summary>
+/// <summary>Glass MFD Tests — redirected dotnet test log + fail ListBox + pass/fail summary.</summary>
 public partial class MainWindow
 {
     const int MaxTestChars = 200_000;
 
     GlassRedirectedTest? _testRunner;
     readonly StringBuilder _testBuffer = new();
+    readonly ObservableCollection<GlassTestOutputParse.FailRow> _testFails = new();
 
     void RefreshMfdTestsVisibility()
     {
@@ -22,6 +25,9 @@ public partial class MainWindow
         var page = (MfdPages?.SelectedItem as ListBoxItem)?.Content?.ToString();
         var show = string.Equals(page, "Tests", StringComparison.OrdinalIgnoreCase);
         MfdTestsHost.Visibility = show ? Visibility.Visible : Visibility.Collapsed;
+
+        if (show && TestsFailList is not null && !ReferenceEquals(TestsFailList.ItemsSource, _testFails))
+            TestsFailList.ItemsSource = _testFails;
 
         if (show && TestsStatusLabel is not null && _testRunner is not { IsRunning: true })
             TestsStatusLabel.Text = "redirected · idle";
@@ -62,6 +68,22 @@ public partial class MainWindow
         TestsOutput.Text = _testBuffer.ToString();
         TestsOutput.CaretIndex = TestsOutput.Text.Length;
         TestsOutput.ScrollToEnd();
+        RefreshTestParse();
+    }
+
+    void RefreshTestParse()
+    {
+        var text = _testBuffer.ToString();
+        _testFails.Clear();
+        foreach (var row in GlassTestOutputParse.ParseFails(text))
+            _testFails.Add(row);
+
+        if (TestsStatusLabel is null || _testRunner is { IsRunning: true })
+            return;
+
+        var summary = GlassTestOutputParse.ParseSummary(text);
+        if (summary.Total > 0)
+            TestsStatusLabel.Text = $"redirected · {summary.Label}";
     }
 
     internal void TestsRun_OnClick(object sender, RoutedEventArgs e)
@@ -71,6 +93,7 @@ public partial class MainWindow
 
         DisposeTestsSession();
         _testBuffer.Clear();
+        _testFails.Clear();
         if (TestsOutput is not null)
             TestsOutput.Text = "";
 
@@ -80,8 +103,14 @@ public partial class MainWindow
             Dispatcher.BeginInvoke(() =>
             {
                 AppendTestsText($"\n┌ exited · {code} ┐\n");
+                RefreshTestParse();
                 if (TestsStatusLabel is not null)
-                    TestsStatusLabel.Text = $"redirected · done · {code}";
+                {
+                    var summary = GlassTestOutputParse.ParseSummary(_testBuffer.ToString());
+                    TestsStatusLabel.Text = summary.Total > 0
+                        ? $"redirected · done · {code} · {summary.Label}"
+                        : $"redirected · done · {code}";
+                }
             });
 
         try
@@ -110,7 +139,10 @@ public partial class MainWindow
     internal void TestsClear_OnClick(object sender, RoutedEventArgs e)
     {
         _testBuffer.Clear();
+        _testFails.Clear();
         if (TestsOutput is not null)
             TestsOutput.Text = "";
+        if (TestsStatusLabel is not null)
+            TestsStatusLabel.Text = "redirected · idle";
     }
 }

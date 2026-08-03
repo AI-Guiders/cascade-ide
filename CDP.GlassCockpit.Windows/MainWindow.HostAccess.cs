@@ -2,6 +2,7 @@
 
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Documents;
 
 namespace CDP.GlassCockpit.Windows;
 
@@ -21,10 +22,12 @@ public partial class MainWindow
 
     Border? MfdBuildHost => MfdHosts?.MfdBuildHost;
     TextBlock? BuildStatusLabel => MfdHosts?.BuildStatusLabel;
+    ListBox? BuildProblemsList => MfdHosts?.BuildProblemsList;
     TextBox? BuildOutput => MfdHosts?.BuildOutput;
 
     Border? MfdTestsHost => MfdHosts?.MfdTestsHost;
     TextBlock? TestsStatusLabel => MfdHosts?.TestsStatusLabel;
+    ListBox? TestsFailList => MfdHosts?.TestsFailList;
     TextBox? TestsOutput => MfdHosts?.TestsOutput;
 
     Border? MfdGitHost => MfdHosts?.MfdGitHost;
@@ -41,6 +44,10 @@ public partial class MainWindow
     TextBlock? RelatedStatusLabel => MfdHosts?.RelatedStatusLabel;
     ListBox? RelatedList => MfdHosts?.RelatedList;
 
+    Border? MfdHybridIndexHost => MfdHosts?.MfdHybridIndexHost;
+    TextBlock? HybridIndexStatusLabel => MfdHosts?.HybridIndexStatusLabel;
+    TextBox? HybridIndexOutput => MfdHosts?.HybridIndexOutput;
+
     Border? MfdSemanticMapHost => MfdHosts?.MfdSemanticMapHost;
     TextBlock? SemanticStatusLabel => MfdHosts?.SemanticStatusLabel;
     ListBox? SemanticList => MfdHosts?.SemanticList;
@@ -53,7 +60,11 @@ public partial class MainWindow
 
     Border? MfdMarkdownHost => MfdHosts?.MfdMarkdownHost;
     TextBlock? MarkdownStatusLabel => MfdHosts?.MarkdownStatusLabel;
-    TextBox? MarkdownOutput => MfdHosts?.MarkdownOutput;
+    FlowDocumentScrollViewer? MarkdownDocumentViewer => MfdHosts?.MarkdownDocumentViewer;
+
+    Border? MfdAiChatSettingsHost => MfdHosts?.MfdAiChatSettingsHost;
+    TextBlock? AiChatSettingsStatusLabel => MfdHosts?.AiChatSettingsStatusLabel;
+    TextBox? AiChatSettingsToml => MfdHosts?.AiChatSettingsToml;
 
     Border? MfdDebugStackHost => MfdHosts?.MfdDebugStackHost;
     TextBlock? DebugStatusLabel => MfdHosts?.DebugStatusLabel;

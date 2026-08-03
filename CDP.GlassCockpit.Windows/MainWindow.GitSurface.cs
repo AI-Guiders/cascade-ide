@@ -126,6 +126,32 @@ public partial class MainWindow
         }
     }
 
+    internal void GitPush_OnClick(object sender, RoutedEventArgs e)
+    {
+        var cwd = _session.WorkspaceRoot ?? Environment.CurrentDirectory;
+        if (GitStatusLabel is not null)
+            GitStatusLabel.Text = "git · push…";
+        var r = GlassGitProcess.Run(cwd, "push");
+        if (GitOutput is not null)
+            GitOutput.Text = string.IsNullOrWhiteSpace(r.Output) ? (r.Ok ? "(pushed)" : "push failed") : r.Output;
+        if (GitStatusLabel is not null)
+            GitStatusLabel.Text = r.Ok ? "git · pushed" : "git · push fail";
+    }
+
+    internal void GitSubmodule_OnClick(object sender, RoutedEventArgs e)
+    {
+        var cwd = _session.WorkspaceRoot ?? Environment.CurrentDirectory;
+        if (GitStatusLabel is not null)
+            GitStatusLabel.Text = "git · submodule…";
+        var r = GlassGitProcess.Run(cwd, "submodule", "update", "--init", "--recursive");
+        if (GitOutput is not null)
+            GitOutput.Text = string.IsNullOrWhiteSpace(r.Output) ? (r.Ok ? "(submodule ok)" : "submodule failed") : r.Output;
+        if (GitStatusLabel is not null)
+            GitStatusLabel.Text = r.Ok ? "git · submodule ok" : "git · submodule fail";
+        if (r.Ok)
+            StartGitRefresh();
+    }
+
     internal void GitList_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
     {
         if (GitList?.SelectedItem is not GlassGitPorcelainParse.Row row || GitOutput is null)

@@ -1,18 +1,21 @@
 #nullable enable
 
+using System.Collections.ObjectModel;
 using System.Text;
 using System.Windows;
 using System.Windows.Controls;
+using CascadeIDE.SoftOrgan;
 
 namespace CDP.GlassCockpit.Windows;
 
-/// <summary>Glass MFD Build — redirected dotnet build TextBox peel (Avalonia MSBuild SSOT).</summary>
+/// <summary>Glass MFD Build — redirected dotnet build log + MSBuild problems ListBox.</summary>
 public partial class MainWindow
 {
     const int MaxBuildChars = 200_000;
 
     GlassRedirectedBuild? _buildRunner;
     readonly StringBuilder _buildBuffer = new();
+    readonly ObservableCollection<GlassProblemItem> _buildProblems = new();
 
     void RefreshMfdBuildVisibility()
     {
@@ -22,6 +25,9 @@ public partial class MainWindow
         var page = (MfdPages?.SelectedItem as ListBoxItem)?.Content?.ToString();
         var show = string.Equals(page, "Build", StringComparison.OrdinalIgnoreCase);
         MfdBuildHost.Visibility = show ? Visibility.Visible : Visibility.Collapsed;
+
+        if (show && BuildProblemsList is not null && !ReferenceEquals(BuildProblemsList.ItemsSource, _buildProblems))
+            BuildProblemsList.ItemsSource = _buildProblems;
 
         if (show && BuildStatusLabel is not null && _buildRunner is not { IsRunning: true })
             BuildStatusLabel.Text = "redirected · idle";
@@ -62,6 +68,14 @@ public partial class MainWindow
         BuildOutput.Text = _buildBuffer.ToString();
         BuildOutput.CaretIndex = BuildOutput.Text.Length;
         BuildOutput.ScrollToEnd();
+        RefreshBuildProblems();
+    }
+
+    void RefreshBuildProblems()
+    {
+        _buildProblems.Clear();
+        foreach (var row in GlassProblemsMsBuildParse.Parse(_buildBuffer.ToString()))
+            _buildProblems.Add(row);
     }
 
     internal void BuildRun_OnClick(object sender, RoutedEventArgs e)
@@ -71,6 +85,7 @@ public partial class MainWindow
 
         DisposeBuildSession();
         _buildBuffer.Clear();
+        _buildProblems.Clear();
         if (BuildOutput is not null)
             BuildOutput.Text = "";
 
@@ -80,8 +95,13 @@ public partial class MainWindow
             Dispatcher.BeginInvoke(() =>
             {
                 AppendBuildText($"\n┌ exited · {code} ┐\n");
+                RefreshBuildProblems();
                 if (BuildStatusLabel is not null)
-                    BuildStatusLabel.Text = $"redirected · done · {code}";
+                {
+                    var err = _buildProblems.Count(p => p.IsError);
+                    var warn = _buildProblems.Count - err;
+                    BuildStatusLabel.Text = $"redirected · done · {code} · {err} err · {warn} warn";
+                }
             });
 
         try
@@ -110,6 +130,7 @@ public partial class MainWindow
     internal void BuildClear_OnClick(object sender, RoutedEventArgs e)
     {
         _buildBuffer.Clear();
+        _buildProblems.Clear();
         if (BuildOutput is not null)
             BuildOutput.Text = "";
     }

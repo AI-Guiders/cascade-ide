@@ -8,18 +8,21 @@ using CascadeIDE.Intercom;
 
 namespace CDP.GlassCockpit.Windows;
 
-/// <summary>Glass Ctrl+K melody chord HUD (local catalog; not full Avalonia CascadeChord).</summary>
+/// <summary>Glass Ctrl+K AwaitMelodyTail — live PreviewKeyDown tunnel (ADR 0060).</summary>
 public partial class MainWindow
 {
-    readonly ObservableCollection<GlassChordEntry> _chordEntries = new();
+    readonly ObservableCollection<GlassChordMelodyEntry> _chordMelodyEntries = new();
     DispatcherTimer? _chordTimeout;
+    string _chordMelodyTail = "";
+    bool _chordMelodyAwait;
 
     void InitCascadeChord()
     {
-        ChordList.ItemsSource = _chordEntries;
-        ChordQuery.TextChanged += (_, _) => RefreshChordFilter();
-        ChordList.MouseDoubleClick += (_, _) => ExecuteChordSelection();
-        ChordQuery.PreviewKeyDown += ChordQuery_OnPreviewKeyDown;
+        ChordList.ItemsSource = _chordMelodyEntries;
+        ChordQuery.IsReadOnly = true;
+        ChordQuery.IsTabStop = false;
+        ChordQuery.Focusable = false;
+        ChordList.MouseDoubleClick += (_, _) => ExecuteChordMelodySelection();
         ChordList.PreviewKeyDown += ChordList_OnPreviewKeyDown;
     }
 
@@ -32,18 +35,27 @@ public partial class MainWindow
         }
 
         CloseCommandPalette();
-        ChordQuery.Text = "";
-        RefreshChordFilter();
+        BeginChordMelodyAwait();
+    }
+
+    void BeginChordMelodyAwait()
+    {
+        _chordMelodyAwait = true;
+        _chordMelodyTail = "";
+        RefreshChordMelodyUi();
         ChordOverlay.Visibility = Visibility.Visible;
-        ChordQuery.Focus();
-        Keyboard.Focus(ChordQuery);
+        Focus();
         ArmChordTimeout();
     }
 
     void CloseCascadeChord()
     {
+        _chordMelodyAwait = false;
+        _chordMelodyTail = "";
         ChordOverlay.Visibility = Visibility.Collapsed;
-        _chordEntries.Clear();
+        _chordMelodyEntries.Clear();
+        if (ChordQuery is not null)
+            ChordQuery.Text = "";
         DisarmChordTimeout();
     }
 
@@ -63,86 +75,212 @@ public partial class MainWindow
         _chordTimeout = null;
     }
 
-    void RefreshChordFilter()
+    void RefreshChordMelodyUi()
     {
-        ArmChordTimeout();
-        var hits = GlassChordCatalog.Filter(ChordQuery.Text);
-        _chordEntries.Clear();
-        foreach (var h in hits)
-            _chordEntries.Add(h);
-        ChordList.SelectedIndex = _chordEntries.Count > 0 ? 0 : -1;
+        if (!_chordMelodyAwait)
+            return;
 
-        // Unambiguous exact alias → run without Enter (ADR 0060 simple alias).
-        if (GlassChordCatalog.Exact(ChordQuery.Text) is { } exact
-            && hits.Count == 1
-            && hits[0].Alias == exact.Alias)
+        ArmChordTimeout();
+        if (ChordQuery is not null)
+            ChordQuery.Text = string.IsNullOrEmpty(_chordMelodyTail)
+                ? "мелодия (как c:)"
+                : _chordMelodyTail;
+
+        var hits = GlassChordCatalog.FilterMelodyTail(_chordMelodyTail);
+        _chordMelodyEntries.Clear();
+        foreach (var h in hits)
+            _chordMelodyEntries.Add(h);
+        ChordList.SelectedIndex = _chordMelodyEntries.Count > 0 ? 0 : -1;
+
+        if (GlassChordMelody.TryResolveExactCommand(_chordMelodyTail, out var cmdId)
+            && GlassMelodyGlassActions.TryMapCommandId(cmdId, out _))
         {
-            CloseCascadeChord();
-            RunChordAction(exact.ActionId);
+            CommitChordMelody(instant: true);
         }
     }
 
-    void ChordQuery_OnPreviewKeyDown(object sender, KeyEventArgs e)
+    bool TryConsumeChordMelodyKeyDown(KeyEventArgs e)
     {
+        if (!_chordMelodyAwait || ChordOverlay.Visibility != Visibility.Visible)
+            return false;
+
         if (e.Key == Key.Escape)
         {
             CloseCascadeChord();
             e.Handled = true;
-            return;
+            return true;
         }
 
-        if (e.Key == Key.Down && _chordEntries.Count > 0)
+        if (Keyboard.Modifiers is ModifierKeys.Control or ModifierKeys.Alt)
         {
-            ChordList.Focus();
-            ChordList.SelectedIndex = 0;
-            e.Handled = true;
-            return;
+            CloseCascadeChord();
+            return false;
         }
 
         if (e.Key == Key.Enter)
         {
-            ExecuteChordSelection();
+            CommitChordMelody(instant: false);
             e.Handled = true;
+            return true;
+        }
+
+        if (e.Key == Key.Back)
+        {
+            if (_chordMelodyTail.Length > 0)
+                _chordMelodyTail = _chordMelodyTail[..^1];
+            else
+                CloseCascadeChord();
+            RefreshChordMelodyUi();
+            e.Handled = true;
+            return true;
+        }
+
+        if (e.Key == Key.Down && _chordMelodyEntries.Count > 0)
+        {
+            ChordList.Focus();
+            ChordList.SelectedIndex = 0;
+            e.Handled = true;
+            return true;
+        }
+
+        if (!TryMapChordMelodyGlyph(e.Key, out var ch))
+        {
+            CloseCascadeChord();
+            e.Handled = true;
+            return true;
+        }
+
+        if (_chordMelodyTail.Length == 0 && ch == '/')
+        {
+            CloseCascadeChord();
+            TryRunGlassSlash("/");
+            e.Handled = true;
+            return true;
+        }
+
+        _chordMelodyTail = GlassChordMelody.NormalizeInput(_chordMelodyTail + ch);
+        RefreshChordMelodyUi();
+        e.Handled = true;
+        return true;
+    }
+
+    static bool TryMapChordMelodyGlyph(Key key, out char ch)
+    {
+        ch = '\0';
+        if (key is >= Key.A and <= Key.Z)
+        {
+            ch = (char)('a' + (key - Key.A));
+            return true;
+        }
+
+        if (key is >= Key.D0 and <= Key.D9)
+        {
+            ch = (char)('0' + (key - Key.D0));
+            return true;
+        }
+
+        if (key is >= Key.NumPad0 and <= Key.NumPad9)
+        {
+            ch = (char)('0' + (key - Key.NumPad0));
+            return true;
+        }
+
+        return key switch
+        {
+            Key.OemSemicolon => Assign(':', out ch),
+            Key.OemComma => Assign(';', out ch),
+            Key.OemPeriod => Assign('.', out ch),
+            Key.Oem2 => Assign('/', out ch),
+            Key.OemMinus => Assign('-', out ch),
+            Key.Subtract => Assign('-', out ch),
+            Key.Oem5 => Assign('_', out ch),
+            _ => false,
+        };
+
+        static bool Assign(char value, out char outCh)
+        {
+            outCh = value;
+            return true;
         }
     }
 
     void ChordList_OnPreviewKeyDown(object sender, KeyEventArgs e)
     {
-        if (e.Key == Key.Escape)
-        {
-            CloseCascadeChord();
-            e.Handled = true;
+        if (TryConsumeChordMelodyKeyDown(e))
             return;
-        }
 
         if (e.Key == Key.Enter)
         {
-            ExecuteChordSelection();
+            ExecuteChordMelodySelection();
             e.Handled = true;
         }
     }
 
-    void ExecuteChordSelection()
+    void ExecuteChordMelodySelection()
     {
-        if (ChordList.SelectedItem is not GlassChordEntry entry)
-        {
-            if (_chordEntries.Count == 0)
-                return;
-            entry = _chordEntries[0];
-        }
-
-        CloseCascadeChord();
-        RunChordAction(entry.ActionId);
+        if (ChordList.SelectedItem is GlassChordMelodyEntry entry)
+            _chordMelodyTail = entry.Alias;
+        CommitChordMelody(instant: false);
     }
 
-    void RunChordAction(string actionId)
+    void CommitChordMelody(bool instant)
     {
-        if (actionId == "palette")
+        if (!_chordMelodyAwait)
+            return;
+
+        var tail = _chordMelodyTail;
+        CloseCascadeChord();
+
+        if (GlassChordMelody.TryResolveParametricSelect(tail, out var start, out var end))
         {
-            ToggleCommandPalette();
+            SelectOpenDocumentLines(start, end);
             return;
         }
 
-        RunPaletteEntry(actionId);
+        if (GlassChordMelody.TryResolveParametricWebAi(tail, out var url))
+        {
+            RunWebAiPortal(url);
+            return;
+        }
+
+        if (GlassChordMelody.TryResolveExactCommand(tail, out var commandId)
+            || (instant && GlassIntentMelodyCatalog.FilterByTailPrefix(GlassMelodyTail.AliasPrefix(tail))
+                .FirstOrDefault(a => a.Alias == GlassMelodyTail.AliasPrefix(tail)) is { } only
+                && (commandId = only.CommandId).Length > 0))
+        {
+            if (GlassMelodyGlassActions.TryMapCommandId(commandId, out var action))
+            {
+                if (action == GlassMelodyGlassActions.RunSelectLines)
+                    return;
+                RunPaletteEntry(action);
+                return;
+            }
+        }
+
+        if (!instant && GlassMelodyGlassActions.TryMapCommandId(
+                GlassIntentMelodyCatalog.FilterByTailPrefix(GlassMelodyTail.AliasPrefix(tail))
+                    .FirstOrDefault(a => a.Alias == GlassMelodyTail.AliasPrefix(tail))?.CommandId,
+                out var mapped))
+        {
+            RunPaletteEntry(mapped);
+        }
     }
+
+    void RunWebAiPortal(string? urlPayload)
+    {
+        SelectMfdPage("WebAiPortal");
+        if (WebAiUrl is null)
+            return;
+
+        if (!string.IsNullOrWhiteSpace(urlPayload))
+        {
+            var url = urlPayload.Trim();
+            if (!url.Contains("://", StringComparison.Ordinal))
+                url = "https://" + url;
+            WebAiUrl.Text = url;
+            WebAiGo_OnClick(WebAiUrl, new RoutedEventArgs());
+        }
+    }
+
+    void RunChordAction(string actionId) => RunPaletteEntry(actionId);
 }

@@ -7,7 +7,7 @@ using CascadeIDE.SoftOrgan;
 
 namespace CDP.GlassCockpit.Windows;
 
-/// <summary>Glass MFD SolutionExplorer — flat WPF TreeView of .sln projects (Avalonia keeps full tree SSOT).</summary>
+/// <summary>Glass MFD SolutionExplorer — nested TreeView: projects + *.cs children (cap 200).</summary>
 public partial class MainWindow
 {
     void RefreshSolutionExplorerTree()
@@ -27,11 +27,26 @@ public partial class MainWindow
 
         foreach (var project in projects)
         {
+            var projectPath = GlassSolutionExplorerGlance.TryResolveProjectPath(_session.WorkspaceRoot, project);
             var item = new TreeViewItem
             {
                 Header = project.Name,
-                Tag = GlassSolutionExplorerGlance.TryResolveProjectPath(_session.WorkspaceRoot, project),
+                Tag = projectPath,
+                IsExpanded = false,
             };
+
+            if (!string.IsNullOrWhiteSpace(projectPath))
+            {
+                foreach (var csPath in GlassSolutionExplorerGlance.EnumerateProjectCsFiles(projectPath))
+                {
+                    item.Items.Add(new TreeViewItem
+                    {
+                        Header = Path.GetFileName(csPath),
+                        Tag = csPath,
+                    });
+                }
+            }
+
             MfdSolutionExplorerTree.Items.Add(item);
         }
     }

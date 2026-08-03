@@ -56,9 +56,11 @@ public partial class MainWindow
         RefreshMfdGitVisibility();
         RefreshMfdProblemsVisibility();
         RefreshMfdRelatedVisibility();
+        RefreshMfdHybridIndexVisibility();
         RefreshMfdSemanticVisibility();
         RefreshMfdCorrespondenceVisibility();
         RefreshMfdMarkdownVisibility();
+        RefreshMfdAiChatSettingsVisibility();
         RefreshMfdDebugVisibility();
         RefreshMfdWebAiVisibility();
 
@@ -110,9 +112,11 @@ public partial class MainWindow
         }
 
         if (IsRelatedHostActive()
+            || IsHybridIndexHostActive()
             || IsSemanticHostActive()
             || IsCorrespondenceHostActive()
             || IsMarkdownHostActive()
+            || IsAiChatSettingsHostActive()
             || IsDebugHostActive()
             || IsWebAiHostActive())
         {
@@ -141,6 +145,14 @@ public partial class MainWindow
             && GlassSolutionExplorerGlance.TryFormatFromWorkspaceRoot(_session.WorkspaceRoot) is { } seGlance)
         {
             MfdBody.Text = seGlance;
+            RefreshEicasHealth();
+            return;
+        }
+
+        if (string.Equals(page, "HybridIndex", StringComparison.OrdinalIgnoreCase)
+            && IsHybridIndexHostActive())
+        {
+            MfdBody.Text = "";
             RefreshEicasHealth();
             return;
         }
@@ -194,21 +206,21 @@ public partial class MainWindow
         MfdBody.Text = page switch
         {
             "Terminal" => FormatMfdStub("Terminal", "Glass redirected TextBox", "ConPTY later · go=sys"),
-            "Build" => FormatMfdStub("Build", "Glass redirected log TextBox", "parity Avalonia log MFD"),
+            "Build" => FormatMfdStub("Build", "Glass log + MSBuild ListBox", "parity Avalonia log MFD"),
             "SolutionExplorer" => FormatMfdStub(
                 "SolutionExplorer",
                 "SolutionExplorerView",
                 "no .sln · " + (_session.WorkspaceRoot ?? "?")),
             "SemanticMap" => FormatMfdStub("SemanticMap", "Glass Skia graph host", "radial · RelatedFiles heuristic"),
             "Problems" => FormatMfdStub("Problems", "Glass ListBox host", "refresh → dotnet build parse"),
-            "Tests" => FormatMfdStub("Tests", "Glass redirected log TextBox", "Avalonia TestsMfdPageView SSOT"),
+            "Tests" => FormatMfdStub("Tests", "Glass log + fail ListBox", "Avalonia TestsMfdPageView SSOT"),
             "DebugStack" => FormatMfdStub("DebugStack", "Glass live DAP latch host", "debug_desk SoftOrgan · stack/locals"),
-            "Git" => FormatMfdStub("Git", "Glass porcelain+diff host", "commit/push later"),
+            "Git" => FormatMfdStub("Git", "Glass porcelain+diff host", "stage/commit/push/submodule"),
             "RelatedFiles" => FormatMfdStub("RelatedFiles", "Glass WNM-shaped list feed", "IdeMcp orchestrator later"),
             "Correspondence" => FormatMfdStub("Correspondence", "Glass CRS FS host", "full resolver later"),
-            "MarkdownPreview" => FormatMfdStub("MarkdownPreview", "Glass Markdig plain", "rich tree later"),
+            "MarkdownPreview" => FormatMfdStub("MarkdownPreview", "Glass Markdig FlowDocument", "headings/links/code"),
             "WebAiPortal" => FormatMfdStub("WebAiPortal", "Glass WebView2", "embedded browser"),
-            "AiChatSettings" => FormatMfdStub("AiChatSettings", "options/ignite/mcp SoftOrgan", "settings.toml SSOT"),
+            "AiChatSettings" => FormatMfdStub("AiChatSettings", "Glass settings.toml host", "provider/model/MCP"),
             "WorkspaceHealth" => FormatMfdStub("WorkspaceHealth", "Glass FS status glance", "Avalonia IdeHealth SSOT"),
             "EnvironmentReadiness" => FormatMfdStub("EnvironmentReadiness", "Glass env probe glance", "Avalonia EnvReady SSOT"),
             "Events" => FormatMfdStub("Events", "Glass latch/catalog glance", "Avalonia EventsMFD SSOT"),

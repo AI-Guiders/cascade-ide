@@ -3,12 +3,13 @@
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Documents;
 using CascadeIDE.Features.Cdp;
 using Markdig;
 
 namespace CDP.GlassCockpit.Windows;
 
-/// <summary>Glass MFD MarkdownPreview — Markdig plain text (Avalonia Markdig control peel v1).</summary>
+/// <summary>Glass MFD MarkdownPreview — Markdig AST → FlowDocument rich peel.</summary>
 public partial class MainWindow
 {
     static readonly MarkdownPipeline MarkdownPipe = new MarkdownPipelineBuilder()
@@ -24,7 +25,7 @@ public partial class MainWindow
         var show = string.Equals(page, "MarkdownPreview", StringComparison.OrdinalIgnoreCase);
         MfdMarkdownHost.Visibility = show ? Visibility.Visible : Visibility.Collapsed;
 
-        if (show && MarkdownOutput is not null && string.IsNullOrEmpty(MarkdownOutput.Text))
+        if (show && MarkdownDocumentViewer is not null && MarkdownDocumentViewer.Document is null)
             RefreshMarkdownPreview();
     }
 
@@ -41,13 +42,13 @@ public partial class MainWindow
 
     void RefreshMarkdownPreview()
     {
-        if (MarkdownOutput is null)
+        if (MarkdownDocumentViewer is null)
             return;
 
         var path = ResolveMarkdownPath();
         if (path is null)
         {
-            MarkdownOutput.Text = "(no .md · open a markdown file or report latch)";
+            MarkdownDocumentViewer.Document = new FlowDocument(new Paragraph(new Run("(no .md · open a markdown file or report latch)")));
             if (MarkdownStatusLabel is not null)
                 MarkdownStatusLabel.Text = "markdown · empty";
             return;
@@ -56,13 +57,13 @@ public partial class MainWindow
         try
         {
             var raw = File.ReadAllText(path);
-            MarkdownOutput.Text = Markdown.ToPlainText(raw, MarkdownPipe);
+            MarkdownDocumentViewer.Document = GlassMarkdownFlowDocumentBuilder.Build(raw, MarkdownPipe);
             if (MarkdownStatusLabel is not null)
-                MarkdownStatusLabel.Text = $"markdown · {Path.GetFileName(path)} · Markdig plain";
+                MarkdownStatusLabel.Text = $"markdown · {Path.GetFileName(path)} · FlowDocument";
         }
         catch (Exception ex)
         {
-            MarkdownOutput.Text = ex.Message;
+            MarkdownDocumentViewer.Document = new FlowDocument(new Paragraph(new Run(ex.Message)));
             if (MarkdownStatusLabel is not null)
                 MarkdownStatusLabel.Text = "markdown · fail";
         }
