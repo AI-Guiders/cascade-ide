@@ -8,7 +8,7 @@ namespace CascadeIDE.Intercom;
 /// </summary>
 public static class CitizenDialogRequestStatus
 {
-    public sealed record View(string Id, string Status, string? Error, string StatusLine);
+    public sealed record View(string Id, string Status, string? Error, string? Peer, string StatusLine);
 
     public static View? TryPaint(string? json)
     {
@@ -22,7 +22,8 @@ public static class CitizenDialogRequestStatus
             var id = Prop(root, "id") ?? "?";
             var status = (Prop(root, "status") ?? "pending").Trim().ToLowerInvariant();
             var error = Prop(root, "error");
-            return new View(id, status, error, FormatLine(id, status, error));
+            var peer = Prop(root, "peer");
+            return new View(id, status, error, peer, FormatLine(id, status, error, peer));
         }
         catch
         {
@@ -30,14 +31,16 @@ public static class CitizenDialogRequestStatus
         }
     }
 
-    public static string FormatLine(string id, string status, string? error)
+    public static string FormatLine(string id, string status, string? error, string? peer = null)
     {
         var shortId = id.Length > 8 ? id[..8] : id;
         return status switch
         {
             "pending" => $"glass · citizen · queued {shortId} · waiting habitat bridge",
             "running" => $"glass · citizen · {shortId} · running",
-            "done" => $"glass · citizen · {shortId} · done",
+            "done" => string.IsNullOrWhiteSpace(peer)
+                ? $"glass · citizen · {shortId} · done"
+                : $"glass · citizen · {shortId} · done · {peer}",
             "error" => string.IsNullOrWhiteSpace(error)
                 ? $"glass · citizen · {shortId} · error"
                 : $"glass · citizen · {shortId} · error · {error}",

@@ -22,10 +22,22 @@ public sealed class CitizenDialogRequestStatusTests
         var done = CitizenDialogRequestStatus.TryPaint(
             """{"id":"abc123456789","status":"done"}""");
         Assert.Contains("done", done!.StatusLine, StringComparison.Ordinal);
+        Assert.Null(done.Peer);
 
         var err = CitizenDialogRequestStatus.TryPaint(
             """{"id":"abc123456789","status":"error","error":"boom"}""");
         Assert.Contains("error · boom", err!.StatusLine, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void TryPaint_done_surfaces_peer_ack_tip()
+    {
+        var done = CitizenDialogRequestStatus.TryPaint(
+            """{"id":"abc123456789","status":"done","peer":"ok · gen=1 · mcp=live · compact=no · ack=1/1 · go=plan"}""");
+        Assert.NotNull(done);
+        Assert.Contains("ack=1/1", done!.Peer!, StringComparison.Ordinal);
+        Assert.Contains("done · ok · gen=1", done.StatusLine, StringComparison.Ordinal);
+        Assert.Contains("ack=1/1", done.StatusLine, StringComparison.Ordinal);
     }
 
     [Fact]
