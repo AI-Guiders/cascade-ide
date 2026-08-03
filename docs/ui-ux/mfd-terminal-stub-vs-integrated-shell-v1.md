@@ -12,14 +12,11 @@
 ## Dual-HCI (Glass WPF)
 
 - **Operator unHOLD 2026-08-03:** full WPF hosts (design later) — dig reject «ConPTY stays Avalonia forever» cancelled for depth wave.
-- **DAL SSOT (linked into GlassCore):** `Features/Terminal/DataAcquisition/*` compiled in `CascadeIDE.GlassCore` (Compile Include + CascadeIDE Compile Remove) — `IIntegratedShellSession` · `WindowsConPtyIntegratedShellSession` · `RedirectedIntegratedShellSession` · `IntegratedShellLaunch` (byte[] DataReceived/Send/Resize). No AvaloniaTerminal refs.
-- **Avalonia UI SSOT:** `TerminalMfdPageView` + `AvaloniaTerminal.TerminalControl` + `TerminalPanelViewModel` (`Feed`/`UserInput`).
-- **Glass now (2026-08-03):** shared ConPTY factory via `GlassConPtyShell` + TextBox interim (ANSI strip). Label `conpty · {shell}`. **Depth OPEN:** WPF VT control (not TextBox) — dig reject ConPTY→TextBlock as full TTY still holds.
+- **Glass now (2026-08-04):** `EasyWindowsTerminalControl` (WT WPF VT) — Avalonia EOL, cabin takes ready WPF terminal. Launch cmdline from GlassCore `IntegratedShellLaunch`. SoftOrgan: `■ Glass VT`.
 - **Glass ConPTY peel path:**
   1. ~~Extract/link DataAcquisition → GlassCore~~ **DONE**
-  2. Glass host: ConPTY session shared — **DONE** (TextBox interim); WPF VT renderer still OPEN (EasyWindowsTerminalControl / custom grid).
-  3. SoftOrgan glance footnote → `■ Glass ConPTY` when VT ships (now: session shared · VT OPEN).
-- Dig act (2026-08-01): Glass redirected TextBox thin peel shipped as dual-HCI instrument presence.
+  2. ~~Glass WPF VT host~~ **DONE** (`EasyWindowsTerminalControl` · not TextBox)
+  3. SoftOrgan glance → `■ Glass VT` when lived dogfood.
 
 ## Что ещё не заявлено
 
@@ -34,4 +31,4 @@
 
 ## Итог одной строкой
 
-**Терминал в Cascade IDE — интерактивная shell-сессия с ANSI-рендером (AvaloniaTerminal + ConPTY);** расширения UX (вкладки, задачи) — отдельные срезы.
+**Cabin (Glass):** EasyWindowsTerminalControl VT · Avalonia EOL. **Agent-IDE Avalonia:** AvaloniaTerminal + ConPTY still in tree until agents migrate; not cabin SSOT.
