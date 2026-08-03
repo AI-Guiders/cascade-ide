@@ -3,68 +3,62 @@
 using System.Text;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Input;
+using CascadeIDE.Features.Terminal.DataAcquisition;
 
 namespace CDP.GlassCockpit.Windows;
 
-/// <summary>Glass MFD Terminal — shared ConPTY session (VT control depth OPEN).</summary>
+/// <summary>
+/// Glass MFD Terminal — EasyWindowsTerminalControl (WT WPF VT).
+/// Avalonia EOL: cabin takes ready WPF terminal; launch cmdline from GlassCore IntegratedShellLaunch.
+/// </summary>
 public partial class MainWindow
 {
-    const int MaxTerminalChars = 120_000;
-
-    GlassConPtyShell? _terminalShell;
-    readonly StringBuilder _terminalBuffer = new();
+    bool _terminalStarted;
+    string _terminalDisplayName = "?";
 
     void EnsureTerminalSession()
     {
-        if (_terminalShell is { IsRunning: true })
+        if (TerminalVt is null)
             return;
 
-        _terminalShell?.Dispose();
-        _terminalShell = new GlassConPtyShell();
-        _terminalShell.TextReceived += OnTerminalText;
-        _terminalShell.Exited += code =>
-            Dispatcher.BeginInvoke(() => AppendTerminalText($"\n┌ exited · {code} ┐\n"));
+        if (_terminalStarted)
+            return;
 
         try
         {
-            _terminalShell.Start(_session.WorkspaceRoot ?? Environment.CurrentDirectory);
+            var cwd = IntegratedShellLaunch.ResolveWorkingDirectory(
+                _session.WorkspaceRoot ?? Environment.CurrentDirectory);
+            var launch = IntegratedShellLaunch.ResolveLaunchConfiguration(cwd);
+            _terminalDisplayName = launch.DisplayName;
+            TerminalVt.StartupCommandLine = BuildStartupCommandLine(launch);
+            TerminalVt.RestartTerm();
+            _terminalStarted = true;
             if (TerminalShellLabel is not null)
-                TerminalShellLabel.Text = $"conpty · {_terminalShell.DisplayName}";
+                TerminalShellLabel.Text = $"vt · {_terminalDisplayName} · {launch.WorkingDirectory}";
         }
         catch (Exception ex)
         {
-            AppendTerminalText($"┌ start fail · {ex.Message} ┐\n");
+            _terminalStarted = false;
             if (TerminalShellLabel is not null)
-                TerminalShellLabel.Text = "conpty · fail";
+                TerminalShellLabel.Text = $"vt · fail · {ex.Message}";
         }
     }
 
     void DisposeTerminalSession()
     {
-        if (_terminalShell is null)
+        if (TerminalVt is null)
             return;
 
-        _terminalShell.TextReceived -= OnTerminalText;
-        _terminalShell.Dispose();
-        _terminalShell = null;
-    }
+        try
+        {
+            TerminalVt.DisconnectConPTYTerm();
+        }
+        catch
+        {
+            // best-effort
+        }
 
-    void OnTerminalText(string chunk) =>
-        Dispatcher.BeginInvoke(() => AppendTerminalText(chunk));
-
-    void AppendTerminalText(string chunk)
-    {
-        if (TerminalOutput is null || string.IsNullOrEmpty(chunk))
-            return;
-
-        _terminalBuffer.Append(chunk);
-        if (_terminalBuffer.Length > MaxTerminalChars)
-            _terminalBuffer.Remove(0, _terminalBuffer.Length - MaxTerminalChars);
-
-        TerminalOutput.Text = _terminalBuffer.ToString();
-        TerminalOutput.CaretIndex = TerminalOutput.Text.Length;
-        TerminalOutput.ScrollToEnd();
+        _terminalStarted = false;
     }
 
     void RefreshMfdTerminalVisibility()
@@ -90,25 +84,48 @@ public partial class MainWindow
                && MfdTerminalHost.Visibility == Visibility.Visible;
     }
 
-    internal void TerminalInput_OnKeyDown(object sender, KeyEventArgs e)
-    {
-        if (e.Key != Key.Enter || TerminalInput is null)
-            return;
-
-        e.Handled = true;
-        var line = TerminalInput.Text ?? "";
-        TerminalInput.Clear();
-        EnsureTerminalSession();
-        AppendTerminalText("> " + line + Environment.NewLine);
-        _terminalShell?.SendLine(line);
-    }
-
     internal void TerminalRestart_OnClick(object sender, RoutedEventArgs e)
     {
         DisposeTerminalSession();
-        _terminalBuffer.Clear();
-        if (TerminalOutput is not null)
-            TerminalOutput.Text = "";
         EnsureTerminalSession();
+    }
+
+    static string BuildStartupCommandLine(ShellLaunchConfiguration launch)
+    {
+        var sb = new StringBuilder();
+        QuoteArg(sb, launch.FileName);
+        foreach (var arg in launch.Arguments)
+        {
+            sb.Append(' ');
+            QuoteArg(sb, arg);
+        }
+
+        return sb.ToString();
+    }
+
+    static void QuoteArg(StringBuilder sb, string arg)
+    {
+        if (arg.Length == 0)
+        {
+            sb.Append("\"\"");
+            return;
+        }
+
+        var needsQuotes = arg.Contains(' ') || arg.Contains('\t') || arg.Contains('"');
+        if (!needsQuotes)
+        {
+            sb.Append(arg);
+            return;
+        }
+
+        sb.Append('"');
+        foreach (var ch in arg)
+        {
+            if (ch == '"')
+                sb.Append('\\');
+            sb.Append(ch);
+        }
+
+        sb.Append('"');
     }
 }

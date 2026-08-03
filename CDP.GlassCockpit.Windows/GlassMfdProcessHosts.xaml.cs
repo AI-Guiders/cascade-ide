@@ -2,7 +2,6 @@
 
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Input;
 
 namespace CDP.GlassCockpit.Windows;
 
@@ -16,7 +15,6 @@ public partial class GlassMfdProcessHosts : UserControl
     public void Wire(MainWindow host)
     {
         TerminalRestartBtn.Click += host.TerminalRestart_OnClick;
-        TerminalInput.KeyDown += host.TerminalInput_OnKeyDown;
         BuildRunBtn.Click += host.BuildRun_OnClick;
         BuildCancelBtn.Click += host.BuildCancel_OnClick;
         BuildClearBtn.Click += host.BuildClear_OnClick;

@@ -17,8 +17,7 @@ public partial class MainWindow
 
     Border? MfdTerminalHost => MfdHosts?.MfdTerminalHost;
     TextBlock? TerminalShellLabel => MfdHosts?.TerminalShellLabel;
-    TextBox? TerminalInput => MfdHosts?.TerminalInput;
-    TextBox? TerminalOutput => MfdHosts?.TerminalOutput;
+    EasyWindowsTerminalControl.EasyTerminalControl? TerminalVt => MfdHosts?.TerminalVt;
 
     Border? MfdBuildHost => MfdHosts?.MfdBuildHost;
     TextBlock? BuildStatusLabel => MfdHosts?.BuildStatusLabel;
