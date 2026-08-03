@@ -77,6 +77,7 @@ public partial class MainWindow
         foreach (var e in shown)
         {
             var chips = GlassAttachChipPeel.ResolveAgainstDisk(e.Chips, ws);
+            chips = GlassMessageCodePeel.MergeWithAttach(chips, e.Body);
             var body = chips.Count > 0
                 ? GlassAttachChipPeel.StripBracketsForDisplay(e.Body)
                 : e.Body;
