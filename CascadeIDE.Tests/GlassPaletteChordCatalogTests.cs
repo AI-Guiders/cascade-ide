@@ -89,7 +89,15 @@ public sealed class GlassPaletteChordCatalogTests
         Assert.Equal("mfd_events", GlassChordCatalog.Exact("ev")!.ActionId);
         Assert.Equal("mfd_hypotheses", GlassChordCatalog.Exact("hy")!.ActionId);
         Assert.Equal("mfd_chat", GlassChordCatalog.Exact("ic")!.ActionId);
+        Assert.Equal("mfd_problems", GlassChordCatalog.Exact("mp")!.ActionId);
+        Assert.Equal("mfd_related_files", GlassChordCatalog.Exact("rf")!.ActionId);
+        Assert.Equal("mfd_semantic_map", GlassChordCatalog.Exact("sm")!.ActionId);
+        Assert.Equal("mfd_correspondence", GlassChordCatalog.Exact("cr")!.ActionId);
+        Assert.Equal("mfd_markdown", GlassChordCatalog.Exact("md")!.ActionId);
+        Assert.Equal("mfd_debug_stack", GlassChordCatalog.Exact("ds")!.ActionId);
+        Assert.Equal("mfd_webai", GlassChordCatalog.Exact("wa")!.ActionId);
     }
+
 
     [Fact]
     public void Palette_includes_fds_attach_and_mfd_pages()

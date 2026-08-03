@@ -200,6 +200,27 @@ public partial class MainWindow
             case "mfd_git":
                 SelectMfdPage("Git");
                 break;
+            case "mfd_problems":
+                SelectMfdPage("Problems");
+                break;
+            case "mfd_related_files":
+                SelectMfdPage("RelatedFiles");
+                break;
+            case "mfd_semantic_map":
+                SelectMfdPage("SemanticMap");
+                break;
+            case "mfd_correspondence":
+                SelectMfdPage("Correspondence");
+                break;
+            case "mfd_markdown":
+                SelectMfdPage("MarkdownPreview");
+                break;
+            case "mfd_debug_stack":
+                SelectMfdPage("DebugStack");
+                break;
+            case "mfd_webai":
+                SelectMfdPage("WebAiPortal");
+                break;
             case "mfd_solution_explorer":
                 SelectMfdPage("SolutionExplorer");
                 break;
