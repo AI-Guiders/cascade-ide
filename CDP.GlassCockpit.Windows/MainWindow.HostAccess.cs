@@ -30,9 +30,36 @@ public partial class MainWindow
 
     Border? MfdGitHost => MfdHosts?.MfdGitHost;
     TextBlock? GitStatusLabel => MfdHosts?.GitStatusLabel;
+    ListBox? GitList => MfdHosts?.GitList;
     TextBox? GitOutput => MfdHosts?.GitOutput;
 
     Border? MfdProblemsHost => MfdHosts?.MfdProblemsHost;
     TextBlock? ProblemsStatusLabel => MfdHosts?.ProblemsStatusLabel;
     ListBox? ProblemsList => MfdHosts?.ProblemsList;
+
+    Border? MfdRelatedFilesHost => MfdHosts?.MfdRelatedFilesHost;
+    TextBlock? RelatedStatusLabel => MfdHosts?.RelatedStatusLabel;
+    ListBox? RelatedList => MfdHosts?.RelatedList;
+
+    Border? MfdSemanticMapHost => MfdHosts?.MfdSemanticMapHost;
+    TextBlock? SemanticStatusLabel => MfdHosts?.SemanticStatusLabel;
+    ListBox? SemanticList => MfdHosts?.SemanticList;
+
+    Border? MfdCorrespondenceHost => MfdHosts?.MfdCorrespondenceHost;
+    TextBlock? CorrespondenceStatusLabel => MfdHosts?.CorrespondenceStatusLabel;
+    ListBox? CorrespondenceReverseList => MfdHosts?.CorrespondenceReverseList;
+    ListBox? CorrespondenceForwardList => MfdHosts?.CorrespondenceForwardList;
+
+    Border? MfdMarkdownHost => MfdHosts?.MfdMarkdownHost;
+    TextBlock? MarkdownStatusLabel => MfdHosts?.MarkdownStatusLabel;
+    TextBox? MarkdownOutput => MfdHosts?.MarkdownOutput;
+
+    Border? MfdDebugStackHost => MfdHosts?.MfdDebugStackHost;
+    TextBlock? DebugStatusLabel => MfdHosts?.DebugStatusLabel;
+    ListBox? DebugStackList => MfdHosts?.DebugStackList;
+    ListBox? DebugLocalsList => MfdHosts?.DebugLocalsList;
+
+    Border? MfdWebAiHost => MfdHosts?.MfdWebAiHost;
+    TextBox? WebAiUrl => MfdHosts?.WebAiUrl;
+    TextBlock? WebAiStatusLabel => MfdHosts?.WebAiStatusLabel;
 }

@@ -55,6 +55,12 @@ public partial class MainWindow
         RefreshMfdTestsVisibility();
         RefreshMfdGitVisibility();
         RefreshMfdProblemsVisibility();
+        RefreshMfdRelatedVisibility();
+        RefreshMfdSemanticVisibility();
+        RefreshMfdCorrespondenceVisibility();
+        RefreshMfdMarkdownVisibility();
+        RefreshMfdDebugVisibility();
+        RefreshMfdWebAiVisibility();
 
         if (MfdBody is null)
             return;
@@ -97,6 +103,18 @@ public partial class MainWindow
         }
 
         if (IsProblemsHostActive())
+        {
+            MfdBody.Text = "";
+            RefreshEicasHealth();
+            return;
+        }
+
+        if (IsRelatedHostActive()
+            || IsSemanticHostActive()
+            || IsCorrespondenceHostActive()
+            || IsMarkdownHostActive()
+            || IsDebugHostActive()
+            || IsWebAiHostActive())
         {
             MfdBody.Text = "";
             RefreshEicasHealth();
@@ -175,21 +193,21 @@ public partial class MainWindow
 
         MfdBody.Text = page switch
         {
-            "Terminal" => FormatMfdStub("Terminal", "Glass redirected TextBox", "Avalonia ConPTY SSOT · go=sys"),
-            "Build" => FormatMfdStub("Build", "Glass redirected log TextBox", "Avalonia BuildMfdPageView SSOT · go=toolchain"),
+            "Terminal" => FormatMfdStub("Terminal", "Glass redirected TextBox", "ConPTY later · go=sys"),
+            "Build" => FormatMfdStub("Build", "Glass redirected log TextBox", "parity Avalonia log MFD"),
             "SolutionExplorer" => FormatMfdStub(
                 "SolutionExplorer",
                 "SolutionExplorerView",
                 "no .sln · " + (_session.WorkspaceRoot ?? "?")),
-            "SemanticMap" => FormatMfdStub("SemanticMap", "WorkspaceNavigationMapView · Skia", "arch latch when live"),
-            "Problems" => FormatMfdStub("Problems", "Glass ListBox host", "refresh → dotnet build parse · dbl-click open"),
-            "Tests" => FormatMfdStub("Tests", "Glass redirected log TextBox", "Avalonia TestsMfdPageView SSOT · go=test_desk"),
-            "DebugStack" => FormatMfdStub("DebugStack", "DebugStackMfdPageView · IdeDapDebugSession", "debug_desk latch · DAP Avalonia SSOT"),
-            "Git" => FormatMfdStub("Git", "Glass redirected status TextBox", "Avalonia GitMfdPageView SSOT"),
-            "RelatedFiles" => FormatMfdStub("RelatedFiles", "RelatedFilesMfdPageView", "refactor latch when live"),
-            "Correspondence" => FormatMfdStub("Correspondence", "CorrespondenceMfdPageView", "CRS · no SoftOrgan"),
-            "MarkdownPreview" => FormatMfdStub("MarkdownPreview", "MarkdigMarkdownPreviewRenderer", "report latch when live"),
-            "WebAiPortal" => FormatMfdStub("WebAiPortal", "WebAiPortalMfdPageView", "WebView2 peel deferred"),
+            "SemanticMap" => FormatMfdStub("SemanticMap", "Glass list host", "Skia graph later"),
+            "Problems" => FormatMfdStub("Problems", "Glass ListBox host", "refresh → dotnet build parse"),
+            "Tests" => FormatMfdStub("Tests", "Glass redirected log TextBox", "Avalonia TestsMfdPageView SSOT"),
+            "DebugStack" => FormatMfdStub("DebugStack", "Glass spectator host", "debug_desk latch · live DAP later"),
+            "Git" => FormatMfdStub("Git", "Glass porcelain+diff host", "commit/push later"),
+            "RelatedFiles" => FormatMfdStub("RelatedFiles", "Glass heuristic list", "full map orchestrator later"),
+            "Correspondence" => FormatMfdStub("Correspondence", "Glass CRS FS host", "full resolver later"),
+            "MarkdownPreview" => FormatMfdStub("MarkdownPreview", "Glass Markdig plain", "rich tree later"),
+            "WebAiPortal" => FormatMfdStub("WebAiPortal", "Glass URL chrome", "WebView2 later"),
             "AiChatSettings" => FormatMfdStub("AiChatSettings", "options/ignite/mcp SoftOrgan", "settings.toml SSOT"),
             "WorkspaceHealth" => FormatMfdStub("WorkspaceHealth", "Glass FS status glance", "Avalonia IdeHealth SSOT"),
             "EnvironmentReadiness" => FormatMfdStub("EnvironmentReadiness", "Glass env probe glance", "Avalonia EnvReady SSOT"),

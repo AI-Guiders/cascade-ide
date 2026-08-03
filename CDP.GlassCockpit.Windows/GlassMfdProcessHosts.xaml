@@ -64,20 +64,30 @@
       <DockPanel Margin="8">
         <DockPanel DockPanel.Dock="Top" Margin="0,0,0,6">
           <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
-            <Button x:Name="GitStatusBtn" Content="status" Padding="8,2" Margin="0,0,6,0"
+            <Button x:Name="GitStatusBtn" Content="refresh" Padding="8,2" Margin="0,0,6,0"
                     Background="#2A2A2A" Foreground="#CCC" BorderBrush="#3A3A3A"/>
             <Button x:Name="GitCancelBtn" Content="cancel" Padding="8,2" Margin="0,0,6,0"
                     Background="#2A2A2A" Foreground="#CCC" BorderBrush="#3A3A3A"/>
             <Button x:Name="GitClearBtn" Content="clear" Padding="8,2"
                     Background="#2A2A2A" Foreground="#CCC" BorderBrush="#3A3A3A"/>
           </StackPanel>
-          <TextBlock x:Name="GitStatusLabel" Text="redirected · idle"
+          <TextBlock x:Name="GitStatusLabel" Text="git · idle"
                      FontSize="11" Foreground="#888" VerticalAlignment="Center"/>
         </DockPanel>
-        <TextBox x:Name="GitOutput" IsReadOnly="True"
-                 AcceptsReturn="True" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto"
-                 Background="Transparent" Foreground="#CCCCCC" BorderThickness="0"
-                 FontFamily="Consolas" FontSize="12"/>
+        <Grid>
+          <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="1.1*"/>
+            <ColumnDefinition Width="8"/>
+            <ColumnDefinition Width="1.4*"/>
+          </Grid.ColumnDefinitions>
+          <ListBox x:Name="GitList" Grid.Column="0" Background="Transparent" BorderThickness="0"
+                   DisplayMemberPath="Display" FontFamily="Consolas" FontSize="12" Foreground="#DDD"/>
+          <TextBox x:Name="GitOutput" Grid.Column="2" IsReadOnly="True"
+                   AcceptsReturn="True" TextWrapping="NoWrap" VerticalScrollBarVisibility="Auto"
+                   HorizontalScrollBarVisibility="Auto"
+                   Background="Transparent" Foreground="#CCCCCC" BorderThickness="0"
+                   FontFamily="Consolas" FontSize="12"/>
+        </Grid>
       </DockPanel>
     </Border>
     <Border x:Name="MfdProblemsHost" Visibility="Collapsed" Background="#121212">
@@ -126,6 +136,112 @@
             </DataTemplate>
           </ListBox.ItemTemplate>
         </ListBox>
+      </DockPanel>
+    </Border>
+    <Border x:Name="MfdRelatedFilesHost" Visibility="Collapsed" Background="#121212">
+      <DockPanel Margin="8">
+        <DockPanel DockPanel.Dock="Top" Margin="0,0,0,6">
+          <Button x:Name="RelatedRefreshBtn" DockPanel.Dock="Right" Content="refresh" Padding="8,2"
+                  Background="#2A2A2A" Foreground="#CCC" BorderBrush="#3A3A3A"/>
+          <TextBlock x:Name="RelatedStatusLabel" Text="related · idle"
+                     FontSize="11" Foreground="#888" VerticalAlignment="Center"/>
+        </DockPanel>
+        <ListBox x:Name="RelatedList" Background="Transparent" BorderThickness="0"
+                 DisplayMemberPath="Display" FontFamily="Consolas" FontSize="12" Foreground="#DDD"/>
+      </DockPanel>
+    </Border>
+    <Border x:Name="MfdSemanticMapHost" Visibility="Collapsed" Background="#121212">
+      <DockPanel Margin="8">
+        <DockPanel DockPanel.Dock="Top" Margin="0,0,0,6">
+          <Button x:Name="SemanticRefreshBtn" DockPanel.Dock="Right" Content="refresh" Padding="8,2"
+                  Background="#2A2A2A" Foreground="#CCC" BorderBrush="#3A3A3A"/>
+          <TextBlock x:Name="SemanticStatusLabel" Text="semantic · list v1 (no Skia)"
+                     FontSize="11" Foreground="#888" VerticalAlignment="Center"/>
+        </DockPanel>
+        <ListBox x:Name="SemanticList" Background="Transparent" BorderThickness="0"
+                 DisplayMemberPath="Display" FontFamily="Consolas" FontSize="12" Foreground="#DDD"/>
+      </DockPanel>
+    </Border>
+    <Border x:Name="MfdCorrespondenceHost" Visibility="Collapsed" Background="#121212">
+      <DockPanel Margin="8">
+        <DockPanel DockPanel.Dock="Top" Margin="0,0,0,6">
+          <Button x:Name="CorrespondenceRefreshBtn" DockPanel.Dock="Right" Content="refresh" Padding="8,2"
+                  Background="#2A2A2A" Foreground="#CCC" BorderBrush="#3A3A3A"/>
+          <TextBlock x:Name="CorrespondenceStatusLabel" Text="crs · idle"
+                     FontSize="11" Foreground="#888" VerticalAlignment="Center"/>
+        </DockPanel>
+        <Grid>
+          <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="8"/>
+            <ColumnDefinition Width="*"/>
+          </Grid.ColumnDefinitions>
+          <DockPanel Grid.Column="0">
+            <TextBlock DockPanel.Dock="Top" Text="reverse · code" FontSize="11" Foreground="#888" Margin="0,0,0,4"/>
+            <ListBox x:Name="CorrespondenceReverseList" Background="Transparent" BorderThickness="0"
+                     DisplayMemberPath="Display" FontFamily="Consolas" FontSize="12" Foreground="#DDD"/>
+          </DockPanel>
+          <DockPanel Grid.Column="2">
+            <TextBlock DockPanel.Dock="Top" Text="forward · docs" FontSize="11" Foreground="#888" Margin="0,0,0,4"/>
+            <ListBox x:Name="CorrespondenceForwardList" Background="Transparent" BorderThickness="0"
+                     DisplayMemberPath="Display" FontFamily="Consolas" FontSize="12" Foreground="#DDD"/>
+          </DockPanel>
+        </Grid>
+      </DockPanel>
+    </Border>
+    <Border x:Name="MfdMarkdownHost" Visibility="Collapsed" Background="#121212">
+      <DockPanel Margin="8">
+        <DockPanel DockPanel.Dock="Top" Margin="0,0,0,6">
+          <Button x:Name="MarkdownRefreshBtn" DockPanel.Dock="Right" Content="refresh" Padding="8,2"
+                  Background="#2A2A2A" Foreground="#CCC" BorderBrush="#3A3A3A"/>
+          <TextBlock x:Name="MarkdownStatusLabel" Text="markdown · idle"
+                     FontSize="11" Foreground="#888" VerticalAlignment="Center"/>
+        </DockPanel>
+        <TextBox x:Name="MarkdownOutput" IsReadOnly="True"
+                 AcceptsReturn="True" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto"
+                 Background="Transparent" Foreground="#CCCCCC" BorderThickness="0"
+                 FontFamily="Consolas" FontSize="12"/>
+      </DockPanel>
+    </Border>
+    <Border x:Name="MfdDebugStackHost" Visibility="Collapsed" Background="#121212">
+      <DockPanel Margin="8">
+        <DockPanel DockPanel.Dock="Top" Margin="0,0,0,6">
+          <Button x:Name="DebugRefreshBtn" DockPanel.Dock="Right" Content="refresh" Padding="8,2"
+                  Background="#2A2A2A" Foreground="#CCC" BorderBrush="#3A3A3A"/>
+          <TextBlock x:Name="DebugStatusLabel" Text="debug · spectator · no session"
+                     FontSize="11" Foreground="#888" VerticalAlignment="Center"/>
+        </DockPanel>
+        <Grid>
+          <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="8"/>
+            <ColumnDefinition Width="*"/>
+          </Grid.ColumnDefinitions>
+          <DockPanel Grid.Column="0">
+            <TextBlock DockPanel.Dock="Top" Text="stack" FontSize="11" Foreground="#888" Margin="0,0,0,4"/>
+            <ListBox x:Name="DebugStackList" Background="Transparent" BorderThickness="0"
+                     FontFamily="Consolas" FontSize="12" Foreground="#DDD"/>
+          </DockPanel>
+          <DockPanel Grid.Column="2">
+            <TextBlock DockPanel.Dock="Top" Text="locals" FontSize="11" Foreground="#888" Margin="0,0,0,4"/>
+            <ListBox x:Name="DebugLocalsList" Background="Transparent" BorderThickness="0"
+                     FontFamily="Consolas" FontSize="12" Foreground="#DDD"/>
+          </DockPanel>
+        </Grid>
+      </DockPanel>
+    </Border>
+    <Border x:Name="MfdWebAiHost" Visibility="Collapsed" Background="#121212">
+      <DockPanel Margin="8">
+        <DockPanel DockPanel.Dock="Top" Margin="0,0,0,6">
+          <Button x:Name="WebAiGoBtn" DockPanel.Dock="Right" Content="go" Padding="8,2" Margin="8,0,0,0"
+                  Background="#2A2A2A" Foreground="#CCC" BorderBrush="#3A3A3A"/>
+          <TextBox x:Name="WebAiUrl" Padding="6,4"
+                   Background="#1A1A1A" Foreground="#EEE" BorderBrush="#3A3A3A"
+                   FontFamily="Consolas" FontSize="12"
+                   Text="https://chatgpt.com"/>
+        </DockPanel>
+        <TextBlock x:Name="WebAiStatusLabel" Text="webai · URL chrome v1 (WebView2 later)"
+                   FontSize="11" Foreground="#888" TextWrapping="Wrap"/>
       </DockPanel>
     </Border>
   </Grid>
