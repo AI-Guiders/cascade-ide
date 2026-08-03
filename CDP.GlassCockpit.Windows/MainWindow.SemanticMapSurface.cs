@@ -9,10 +9,11 @@ using CascadeIDE.SoftOrgan;
 
 namespace CDP.GlassCockpit.Windows;
 
-/// <summary>Glass MFD SemanticMap — Skia radial graph + list (RelatedFiles heuristic).</summary>
+/// <summary>Glass MFD SemanticMap — Skia multi-hop graph + list.</summary>
 public partial class MainWindow
 {
-    readonly ObservableCollection<GlassRelatedFilesHeuristic.Item> _semanticItems = new();
+    readonly ObservableCollection<GlassSemanticMapGraph.Node> _semanticItems = new();
+    GlassSemanticMapGraph.Graph _semanticGraph = new(null, [], []);
     bool _semanticSkiaWired;
 
     void RefreshMfdSemanticVisibility()
@@ -48,7 +49,7 @@ public partial class MainWindow
 
     internal void SemanticList_OnMouseDoubleClick(object sender, MouseButtonEventArgs e)
     {
-        if (SemanticList?.SelectedItem is not GlassRelatedFilesHeuristic.Item item)
+        if (SemanticList?.SelectedItem is not GlassSemanticMapGraph.Node item)
             return;
         OpenSemanticNode(item.FilePath);
     }
@@ -69,17 +70,23 @@ public partial class MainWindow
 
     void RefreshSemanticItems()
     {
+        _semanticGraph = GlassSemanticMapGraph.Collect(_session.WorkspaceRoot, _editorPath, maxNodes: 96);
         _semanticItems.Clear();
-        foreach (var i in GlassRelatedFilesHeuristic.Collect(_session.WorkspaceRoot, _editorPath, max: 96))
-            _semanticItems.Add(i);
+        foreach (var n in _semanticGraph.Nodes)
+            _semanticItems.Add(n);
         PushSemanticGraph();
         if (SemanticStatusLabel is not null)
-            SemanticStatusLabel.Text = $"semantic · skia {_semanticItems.Count} · click node";
+        {
+            var hops = _semanticGraph.Nodes.Count > 0
+                ? $"h{_semanticGraph.Nodes.Max(n => n.Hop)}"
+                : "h0";
+            SemanticStatusLabel.Text = $"semantic · skia {_semanticGraph.Nodes.Count} · {hops} · {_semanticGraph.Edges.Count}e";
+        }
     }
 
     void PushSemanticGraph()
     {
         EnsureSemanticSkiaWired();
-        SemanticSkia?.SetGraph(_editorPath, _semanticItems);
+        SemanticSkia?.SetGraph(_semanticGraph);
     }
 }

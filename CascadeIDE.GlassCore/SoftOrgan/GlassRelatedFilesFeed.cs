@@ -90,6 +90,9 @@ public static class GlassRelatedFilesFeed
             TryAddTestNear(dir, stem, Add);
         }
 
+        foreach (var hci in GlassRelatedFilesIdeProbe.Collect(root, editorPath, max: Math.Max(1, max - list.Count)))
+            Add(hci.FullPath, hci.Kind, hci.Rationale);
+
         if (root is not null)
         {
             foreach (var rel in new[] { "docs", "docs/adr", "README.md" })

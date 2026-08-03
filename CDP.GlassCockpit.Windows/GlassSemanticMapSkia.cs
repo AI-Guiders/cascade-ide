@@ -10,12 +10,11 @@ using SkiaSharp;
 
 namespace CDP.GlassCockpit.Windows;
 
-/// <summary>Glass MFD SemanticMap Skia graph — radial peel from RelatedFiles heuristic (no Avalonia WNM fork).</summary>
+/// <summary>Glass MFD SemanticMap Skia graph — multi-hop peel from RelatedFiles feed.</summary>
 public sealed class GlassSemanticMapSkia : FrameworkElement
 {
     readonly List<NodeHit> _hits = new();
-    IReadOnlyList<GlassRelatedFilesHeuristic.Item> _items = Array.Empty<GlassRelatedFilesHeuristic.Item>();
-    string? _focusPath;
+    GlassSemanticMapGraph.Graph _graph = new(null, [], []);
     WriteableBitmap? _wb;
 
     public event Action<string>? NodeActivated;
@@ -28,10 +27,9 @@ public sealed class GlassSemanticMapSkia : FrameworkElement
         SizeChanged += (_, _) => InvalidateVisual();
     }
 
-    public void SetGraph(string? focusPath, IReadOnlyList<GlassRelatedFilesHeuristic.Item> items)
+    public void SetGraph(GlassSemanticMapGraph.Graph graph)
     {
-        _focusPath = string.IsNullOrWhiteSpace(focusPath) ? null : focusPath;
-        _items = items;
+        _graph = graph;
         InvalidateVisual();
     }
 
@@ -95,12 +93,19 @@ public sealed class GlassSemanticMapSkia : FrameworkElement
         _hits.Clear();
         var cx = w * 0.5f;
         var cy = h * 0.5f;
-        var radius = Math.Min(w, h) * 0.36f;
+        var focusR = Math.Min(w, h) * 0.34f;
 
         using var edgePaint = new SKPaint
         {
             Color = new SKColor(0x55, 0x88, 0xAA, 0xAA),
             StrokeWidth = 1.2f,
+            IsAntialias = true,
+            Style = SKPaintStyle.Stroke,
+        };
+        using var hop2Edge = new SKPaint
+        {
+            Color = new SKColor(0x44, 0x66, 0x77, 0x88),
+            StrokeWidth = 0.9f,
             IsAntialias = true,
             Style = SKPaintStyle.Stroke,
         };
@@ -113,6 +118,12 @@ public sealed class GlassSemanticMapSkia : FrameworkElement
         using var nodeFill = new SKPaint
         {
             Color = new SKColor(0x2A, 0x2A, 0x2A),
+            IsAntialias = true,
+            Style = SKPaintStyle.Fill,
+        };
+        using var hop2Fill = new SKPaint
+        {
+            Color = new SKColor(0x22, 0x22, 0x22),
             IsAntialias = true,
             Style = SKPaintStyle.Fill,
         };
@@ -130,37 +141,69 @@ public sealed class GlassSemanticMapSkia : FrameworkElement
         };
         using var font = new SKFont(SKTypeface.FromFamilyName("Consolas", SKFontStyle.Normal), 11);
 
-        var focusLabel = _focusPath is null ? "(no focus)" : Path.GetFileName(_focusPath);
-        const float focusR = 18f;
-        canvas.DrawCircle(cx, cy, focusR, focusFill);
-        canvas.DrawCircle(cx, cy, focusR, nodeStroke);
-        canvas.DrawText(Trim(focusLabel, 22), cx - 40, cy + focusR + 14, font, textPaint);
-        if (_focusPath is not null)
-            _hits.Add(new NodeHit(_focusPath, cx, cy, focusR + 4));
+        var positions = LayoutNodes(cx, cy, focusR, w, h);
+        var focusPath = _graph.FocusPath;
+        var focusLabel = focusPath is null ? "(no focus)" : Path.GetFileName(focusPath);
+        const float focusNodeR = 18f;
+        canvas.DrawCircle(cx, cy, focusNodeR, focusFill);
+        canvas.DrawCircle(cx, cy, focusNodeR, nodeStroke);
+        canvas.DrawText(Trim(focusLabel, 22), cx - 40, cy + focusNodeR + 14, font, textPaint);
+        if (focusPath is not null)
+            _hits.Add(new NodeHit(focusPath, cx, cy, focusNodeR + 4));
 
-        var n = Math.Min(_items.Count, 48);
-        if (n == 0)
+        foreach (var edge in _graph.Edges)
         {
-            canvas.DrawText("semantic · empty — open a file / refresh", 12, 20, font, textPaint);
-            return;
+            if (!positions.TryGetValue(edge.FromPath, out var a) || !positions.TryGetValue(edge.ToPath, out var b))
+                continue;
+            var hop = _graph.Nodes.FirstOrDefault(n => string.Equals(n.FilePath, edge.ToPath, StringComparison.OrdinalIgnoreCase))?.Hop ?? 1;
+            canvas.DrawLine(a.X, a.Y, b.X, b.Y, hop >= 2 ? hop2Edge : edgePaint);
         }
 
-        for (var i = 0; i < n; i++)
+        foreach (var node in _graph.Nodes.Take(48))
         {
-            var item = _items[i];
-            var angle = (float)(-Math.PI / 2 + 2 * Math.PI * i / n);
+            if (!positions.TryGetValue(node.FilePath, out var pos))
+                continue;
+
+            var nodeR = node.Hop >= 2 ? 8f : ReasonRadius(node.Rationale);
+            var fill = node.Hop >= 2 ? hop2Fill : nodeFill;
+            canvas.DrawCircle(pos.X, pos.Y, nodeR, fill);
+            canvas.DrawCircle(pos.X, pos.Y, nodeR, nodeStroke);
+
+            var label = Trim(Path.GetFileName(node.FilePath), 18);
+            canvas.DrawText(label, pos.X + nodeR + 3, pos.Y + 4, font, textPaint);
+            _hits.Add(new NodeHit(node.FilePath, pos.X, pos.Y, nodeR + 6));
+        }
+
+        if (_graph.Nodes.Count == 0)
+            canvas.DrawText("semantic · empty — open a file / refresh", 12, 20, font, textPaint);
+    }
+
+    Dictionary<string, SKPoint> LayoutNodes(float cx, float cy, float radius, int w, int h)
+    {
+        var map = new Dictionary<string, SKPoint>(StringComparer.OrdinalIgnoreCase);
+        var hop1 = _graph.Nodes.Where(n => n.Hop == 1).ToList();
+        var hop2 = _graph.Nodes.Where(n => n.Hop >= 2).ToList();
+
+        var n1 = hop1.Count;
+        for (var i = 0; i < n1; i++)
+        {
+            var angle = (float)(-Math.PI / 2 + 2 * Math.PI * i / Math.Max(1, n1));
             var x = cx + radius * MathF.Cos(angle);
             var y = cy + radius * MathF.Sin(angle);
-            var nodeR = ReasonRadius(item.Reason);
-
-            canvas.DrawLine(cx, cy, x, y, edgePaint);
-            canvas.DrawCircle(x, y, nodeR, nodeFill);
-            canvas.DrawCircle(x, y, nodeR, nodeStroke);
-
-            var label = Trim(Path.GetFileName(item.FilePath), 18);
-            canvas.DrawText(label, x + nodeR + 3, y + 4, font, textPaint);
-            _hits.Add(new NodeHit(item.FilePath, x, y, nodeR + 6));
+            map[hop1[i].FilePath] = new SKPoint(x, y);
         }
+
+        var outer = Math.Min(w, h) * 0.44f;
+        var n2 = hop2.Count;
+        for (var i = 0; i < n2; i++)
+        {
+            var angle = (float)(-Math.PI / 2 + 2 * Math.PI * i / Math.Max(1, n2) + Math.PI / Math.Max(1, n2));
+            var x = cx + outer * MathF.Cos(angle);
+            var y = cy + outer * MathF.Sin(angle);
+            map[hop2[i].FilePath] = new SKPoint(x, y);
+        }
+
+        return map;
     }
 
     NodeHit? HitTest(float x, float y)
