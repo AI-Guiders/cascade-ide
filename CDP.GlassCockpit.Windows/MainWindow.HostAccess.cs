@@ -61,4 +61,5 @@ public partial class MainWindow
     Border? MfdWebAiHost => MfdHosts?.MfdWebAiHost;
     TextBox? WebAiUrl => MfdHosts?.WebAiUrl;
     TextBlock? WebAiStatusLabel => MfdHosts?.WebAiStatusLabel;
+    Microsoft.Web.WebView2.Wpf.WebView2? WebAiView => MfdHosts?.WebAiView;
 }

@@ -207,7 +207,7 @@ public partial class MainWindow
             "RelatedFiles" => FormatMfdStub("RelatedFiles", "Glass heuristic list", "full map orchestrator later"),
             "Correspondence" => FormatMfdStub("Correspondence", "Glass CRS FS host", "full resolver later"),
             "MarkdownPreview" => FormatMfdStub("MarkdownPreview", "Glass Markdig plain", "rich tree later"),
-            "WebAiPortal" => FormatMfdStub("WebAiPortal", "Glass URL chrome", "WebView2 later"),
+            "WebAiPortal" => FormatMfdStub("WebAiPortal", "Glass WebView2", "embedded browser"),
             "AiChatSettings" => FormatMfdStub("AiChatSettings", "options/ignite/mcp SoftOrgan", "settings.toml SSOT"),
             "WorkspaceHealth" => FormatMfdStub("WorkspaceHealth", "Glass FS status glance", "Avalonia IdeHealth SSOT"),
             "EnvironmentReadiness" => FormatMfdStub("EnvironmentReadiness", "Glass env probe glance", "Avalonia EnvReady SSOT"),

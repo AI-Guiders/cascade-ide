@@ -39,5 +39,6 @@ public partial class GlassMfdProcessHosts : UserControl
         DebugRefreshBtn.Click += host.DebugRefresh_OnClick;
         DebugStackList.MouseDoubleClick += host.DebugStack_OnMouseDoubleClick;
         WebAiGoBtn.Click += host.WebAiGo_OnClick;
+        WebAiUrl.KeyDown += host.WebAiUrl_OnKeyDown;
     }
 }

@@ -1,7 +1,8 @@
 <UserControl x:Class="CDP.GlassCockpit.Windows.GlassMfdProcessHosts"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:term="clr-namespace:EasyWindowsTerminalControl;assembly=EasyWindowsTerminalControl">
+             xmlns:term="clr-namespace:EasyWindowsTerminalControl;assembly=EasyWindowsTerminalControl"
+             xmlns:wv2="clr-namespace:Microsoft.Web.WebView2.Wpf;assembly=Microsoft.Web.WebView2.Wpf">
   <Grid>
     <Border x:Name="MfdTerminalHost" Visibility="Collapsed" Background="#121212">
       <DockPanel Margin="8">
@@ -239,8 +240,10 @@
                    FontFamily="Consolas" FontSize="12"
                    Text="https://chatgpt.com"/>
         </DockPanel>
-        <TextBlock x:Name="WebAiStatusLabel" Text="webai · URL chrome v1 (WebView2 later)"
+        <TextBlock x:Name="WebAiStatusLabel" DockPanel.Dock="Bottom" Margin="0,6,0,0"
+                   Text="webai · WebView2 · idle"
                    FontSize="11" Foreground="#888" TextWrapping="Wrap"/>
+        <wv2:WebView2 x:Name="WebAiView" DefaultBackgroundColor="#121212"/>
       </DockPanel>
     </Border>
   </Grid>
