@@ -32,7 +32,7 @@ public static class GlassCommandPaletteCatalog
         new("mfd_git", "MFD: Git", "Select MFD Git porcelain+diff host", "mfd git status scm porcelain"),
         new("mfd_problems", "MFD: Problems", "Select MFD Problems ListBox host", "mfd problems diagnostics review"),
         new("mfd_related_files", "MFD: RelatedFiles", "Select MFD RelatedFiles heuristic list", "mfd related files refactor"),
-        new("mfd_semantic_map", "MFD: SemanticMap", "Select MFD SemanticMap list host", "mfd semantic map arch"),
+        new("mfd_semantic_map", "MFD: SemanticMap", "Select MFD SemanticMap Skia graph host", "mfd semantic map arch skia"),
         new("mfd_correspondence", "MFD: Correspondence", "Select MFD Correspondence CRS FS host", "mfd correspondence crs"),
         new("mfd_markdown", "MFD: MarkdownPreview", "Select MFD MarkdownPreview Markdig plain", "mfd markdown preview markdig report"),
         new("mfd_debug_stack", "MFD: DebugStack", "Select MFD DebugStack spectator host", "mfd debug stack dap"),

@@ -199,7 +199,7 @@ public partial class MainWindow
                 "SolutionExplorer",
                 "SolutionExplorerView",
                 "no .sln · " + (_session.WorkspaceRoot ?? "?")),
-            "SemanticMap" => FormatMfdStub("SemanticMap", "Glass list host", "Skia graph later"),
+            "SemanticMap" => FormatMfdStub("SemanticMap", "Glass Skia graph host", "radial · RelatedFiles heuristic"),
             "Problems" => FormatMfdStub("Problems", "Glass ListBox host", "refresh → dotnet build parse"),
             "Tests" => FormatMfdStub("Tests", "Glass redirected log TextBox", "Avalonia TestsMfdPageView SSOT"),
             "DebugStack" => FormatMfdStub("DebugStack", "Glass spectator host", "debug_desk latch · live DAP later"),

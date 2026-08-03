@@ -43,6 +43,7 @@ public partial class MainWindow
     Border? MfdSemanticMapHost => MfdHosts?.MfdSemanticMapHost;
     TextBlock? SemanticStatusLabel => MfdHosts?.SemanticStatusLabel;
     ListBox? SemanticList => MfdHosts?.SemanticList;
+    GlassSemanticMapSkia? SemanticSkia => MfdHosts?.SemanticSkia;
 
     Border? MfdCorrespondenceHost => MfdHosts?.MfdCorrespondenceHost;
     TextBlock? CorrespondenceStatusLabel => MfdHosts?.CorrespondenceStatusLabel;
