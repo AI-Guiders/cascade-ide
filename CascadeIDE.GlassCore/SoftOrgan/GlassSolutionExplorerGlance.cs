@@ -95,6 +95,32 @@ public static partial class GlassSolutionExplorerGlance
         return sb.ToString().TrimEnd();
     }
 
+    public const int MaxCsFilesPerProject = 200;
+
+    /// <summary>Enumerate *.cs under a .csproj directory (cap <see cref="MaxCsFilesPerProject"/>).</summary>
+    public static IReadOnlyList<string> EnumerateProjectCsFiles(string? projectPath)
+    {
+        if (string.IsNullOrWhiteSpace(projectPath) || !File.Exists(projectPath))
+            return [];
+
+        try
+        {
+            var dir = Path.GetDirectoryName(projectPath);
+            if (string.IsNullOrWhiteSpace(dir) || !Directory.Exists(dir))
+                return [];
+
+            return Directory.EnumerateFiles(dir, "*.cs", SearchOption.AllDirectories)
+                .OrderBy(static p => p, StringComparer.OrdinalIgnoreCase)
+                .Take(MaxCsFilesPerProject)
+                .Select(Path.GetFullPath)
+                .ToList();
+        }
+        catch
+        {
+            return [];
+        }
+    }
+
     /// <summary>Resolve absolute project path under workspace (null if missing).</summary>
     public static string? TryResolveProjectPath(string? workspaceRoot, SlnProject project)
     {
