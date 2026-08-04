@@ -4,14 +4,20 @@ using System.Text.Json;
 
 namespace CDP.GlassCockpit.Windows;
 
-/// <summary>plan-LATEST.json → P Plan readout (TM feature/task/wall — not presentation stub).</summary>
+/// <summary>plan-LATEST.json → P Plan instrument cards (WHY + NEXT — not one text dump).</summary>
 internal static partial class LatchPaint
 {
+    /// <param name="Headline">Compat = NEXT leaf (legacy PlanTitle / situ).</param>
+    /// <param name="Detail">Compat dump for situ extract; prefer <see cref="Why"/> / <see cref="Next"/>.</param>
     public sealed record PlanView(
         string Headline,
         string Detail,
         string StatusLine,
-        bool Active);
+        bool Active,
+        string Why = "",
+        string Next = "",
+        string Course = "",
+        string? Wall = null);
 
     public static PlanView PaintPlan(string json)
     {
@@ -22,53 +28,54 @@ internal static partial class LatchPaint
             var active = root.TryGetProperty("active", out var a) && a.ValueKind is JsonValueKind.True;
             var feature = Prop(root, "feature");
             var task = Prop(root, "task");
-            var why = Prop(root, "why");
+            var whyRaw = Prop(root, "why");
             var pulse = Prop(root, "pulse") ?? Prop(root, "chrome_hint");
 
             if (!active && string.IsNullOrWhiteSpace(feature) && string.IsNullOrWhiteSpace(task)
-                && string.IsNullOrWhiteSpace(why))
+                && string.IsNullOrWhiteSpace(whyRaw))
             {
                 return new PlanView(
                     "Plan quiet",
                     "No active Task Manager leaf.",
                     "plan · quiet",
-                    false);
+                    false,
+                    Why: "No sealed course.",
+                    Next: "No active leaf.",
+                    Course: "Plan quiet");
             }
 
-            // Shared-SSOT Plan face: NEXT = leaf, WHY = sealed course goal (not Intercom dump).
+            // Shared-SSOT Q1: WHY + NEXT as separate instrument faces (not one ECAM string).
             var next = !string.IsNullOrWhiteSpace(task) ? task!.Trim()
                 : !string.IsNullOrWhiteSpace(feature) ? feature!.Trim()
                 : TruncatePlan(pulse ?? "Plan", 56);
 
-            var detail = new StringBuilder();
-            if (!string.IsNullOrWhiteSpace(why))
-                detail.Append("WHY · ").Append(why.Trim());
+            var why = !string.IsNullOrWhiteSpace(whyRaw) ? whyRaw!.Trim() : "—";
+            var course = !string.IsNullOrWhiteSpace(feature) ? feature!.Trim() : "";
+            var wall = ExtractWall(pulse);
 
-            if (!string.IsNullOrWhiteSpace(task) && !string.IsNullOrWhiteSpace(feature))
+            var detail = new StringBuilder();
+            detail.Append("WHY · ").Append(why);
+            if (!string.IsNullOrWhiteSpace(course) && !string.Equals(course, next, StringComparison.Ordinal))
             {
-                if (detail.Length > 0)
-                    detail.AppendLine();
-                detail.Append(feature.Trim());
+                detail.AppendLine();
+                detail.Append(course);
             }
 
-            var wall = ExtractWall(pulse);
             if (!string.IsNullOrWhiteSpace(wall))
             {
-                if (detail.Length > 0)
-                    detail.AppendLine();
+                detail.AppendLine();
                 detail.Append(wall);
             }
-            else if (detail.Length == 0 && !string.IsNullOrWhiteSpace(pulse) && string.IsNullOrWhiteSpace(task))
-                detail.Append(TruncatePlan(pulse!, 96));
-
-            if (detail.Length == 0)
-                detail.Append(active ? "TM active" : "TM quiet");
 
             return new PlanView(
                 next,
                 detail.ToString().TrimEnd(),
-                active ? $"plan · NEXT · {TruncatePlan(next, 24)}" : "plan · quiet",
-                active);
+                active ? $"plan · WHY+NEXT · {TruncatePlan(next, 24)}" : "plan · quiet",
+                active,
+                Why: why,
+                Next: next,
+                Course: course,
+                Wall: wall);
         }
         catch (Exception ex)
         {
@@ -76,7 +83,10 @@ internal static partial class LatchPaint
                 "Plan",
                 ex.Message,
                 $"plan · parse fail · {ex.Message}",
-                false);
+                false,
+                Why: ex.Message,
+                Next: "Plan",
+                Course: "");
         }
     }
 

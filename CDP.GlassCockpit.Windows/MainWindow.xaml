@@ -94,9 +94,13 @@
             <TextBlock x:Name="PfdZoneTitle" Text="P · Plan" FontWeight="SemiBold" FontSize="12" Foreground="{StaticResource Glass.FgTitle}"/>
           </Border>
           <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="12,10">
+            <!-- Shared-SSOT Q1: WHY + NEXT instrument cards (not one PLAN text dump). -->
             <StackPanel>
-              <uikit:GlassEcamReadout x:Name="PlanReadout" Label="PLAN" ValueText="(no solution yet)"/>
-              <!-- Keep PlanTitle/PlanMeta for latch paint; mirrored into PlanReadout. -->
+              <uikit:GlassEcamReadout x:Name="PlanWhyReadout" Label="WHY" ValueText="—" Margin="0,0,0,8"/>
+              <uikit:GlassEcamReadout x:Name="PlanNextReadout" Label="NEXT" ValueText="(no leaf)" Margin="0,0,0,8"/>
+              <uikit:GlassEcamReadout x:Name="PlanCourseReadout" Label="COURSE" ValueText="—" Margin="0,0,0,8"/>
+              <!-- Legacy single dump kept collapsed for situ cache / latch paint mirror. -->
+              <uikit:GlassEcamReadout x:Name="PlanReadout" Label="PLAN" ValueText="(no solution yet)" Visibility="Collapsed"/>
               <TextBlock x:Name="PlanTitle" Visibility="Collapsed" Text="(no solution yet)"/>
               <TextBlock x:Name="PlanMeta" Visibility="Collapsed"/>
             </StackPanel>

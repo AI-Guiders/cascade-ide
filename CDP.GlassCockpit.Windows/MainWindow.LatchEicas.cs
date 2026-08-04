@@ -48,13 +48,21 @@ public partial class MainWindow
             {
                 var raw = File.ReadAllText(path);
                 var view = LatchPaint.PaintPlan(raw);
-                PlanTitle.Text = view.Headline;
+                PlanTitle.Text = view.Next;
                 PlanMeta.Text = view.Detail;
-                PlanReadout.ValueText = view.Headline;
+                PlanWhyReadout.ValueText = view.Why;
+                PlanNextReadout.ValueText = view.Next;
+                PlanCourseReadout.ValueText = string.IsNullOrWhiteSpace(view.Course) ? "—" : view.Course;
+                PlanCourseReadout.SubText = string.IsNullOrWhiteSpace(view.Wall) ? null : view.Wall;
+                PlanCourseReadout.Visibility = string.IsNullOrWhiteSpace(view.Course) && string.IsNullOrWhiteSpace(view.Wall)
+                    ? Visibility.Collapsed
+                    : Visibility.Visible;
+                // Legacy mirror (collapsed).
+                PlanReadout.ValueText = view.Next;
                 PlanReadout.SubText = string.IsNullOrWhiteSpace(view.Detail) ? null : view.Detail;
                 // Cache leaf/why for Editor situ ribbon (Shared-SSOT Q2).
-                _planLeaf = view.Headline;
-                _planWhy = ExtractPlanWhy(view.Detail);
+                _planLeaf = view.Next;
+                _planWhy = string.IsNullOrWhiteSpace(view.Why) || view.Why == "—" ? null : view.Why;
                 RefreshEditorSituRibbon();
                 // Plan paint ≠ OneOf Prefer P — see PresentationPmOneOfPolicy.FromPlanLatch.
                 StatusText.Text = $"glass · {view.StatusLine} · {DateTime.Now:HH:mm:ss}";
@@ -64,17 +72,6 @@ public partial class MainWindow
                 StatusText.Text = $"glass · plan fail · {ex.Message}";
             }
         }, DispatcherPriority.Background);
-    }
-
-    static string? ExtractPlanWhy(string? detail)
-    {
-        if (string.IsNullOrWhiteSpace(detail))
-            return null;
-        const string prefix = "WHY · ";
-        var line = detail.Replace("\r\n", "\n").Split('\n')[0].Trim();
-        if (line.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
-            return line[prefix.Length..].Trim();
-        return null;
     }
 
     void OnAlertChanged(string path)

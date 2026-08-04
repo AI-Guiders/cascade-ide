@@ -13,14 +13,16 @@
                  Foreground="{StaticResource Glass.EcamLabel}"
                  Margin="0,0,0,2"/>
       <TextBlock x:Name="ValueBlock"
-                 FontSize="16"
+                 FontSize="14"
                  FontWeight="SemiBold"
                  FontFamily="Consolas"
+                 TextWrapping="Wrap"
                  Foreground="{StaticResource Glass.EcamValue}"/>
       <TextBlock x:Name="SubBlock"
                  FontSize="10"
                  Foreground="{StaticResource Glass.EcamSub}"
                  Margin="0,2,0,0"
+                 TextWrapping="Wrap"
                  Visibility="Collapsed"/>
     </StackPanel>
   </Border>
