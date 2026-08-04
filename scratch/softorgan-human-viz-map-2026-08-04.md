@@ -16,7 +16,7 @@
 | build / test | Build/Tests | log hosts | keep | ok |
 | debug | DebugStack | DAP host | keep | ok |
 | hybrid_index | HybridIndex | **cards + Skia scope map** | index map instrument | ok (2026-08-04) |
-| correspondence | Correspondence | FS list | thread **timeline** | gap |
+| correspondence | Correspondence | **cards + thread timeline** | keep timeline instrument | ok (2026-08-04) |
 | markdown / md_author | MarkdownPreview | FlowDocument | keep preview | ok-ish |
 | browser | WebAiPortal | WebView2 | keep | ok |
 | fds / shared | FlightDataStorage | **card deck** | PLAN/SHARE/PRESSURE/WAKE instrument cards | ok (2026-08-04) |
@@ -31,6 +31,7 @@
 - **Problems severity board** — ERR/WARN/ALL cards + jump list — dogfood PNG 2026-08-04
 - **FDS card deck** — PLAN/SHARE/PRESSURE/WAKE instrument cards — dogfood PNG 2026-08-04
 - **HybridIndex map** — HCI/DOCS/FRESH cards + Skia scope map — dogfood PNG 2026-08-04
+- **Correspondence thread timeline** — CRS/FOCUS/FEATURE/ADR/REV/FWD cards + ◀◆▶ rail — dogfood PNG 2026-08-04
 
 ## Do not
 - Mark text ribbon Done

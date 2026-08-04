@@ -13,6 +13,7 @@
 - Problems severity board: `MainWindow.ProblemsSurface.cs` · ERR/WARN/ALL cards + jump list
 - FDS card deck: `MainWindow.GlanceCardsSurface.cs` · `GlassGlanceCards.BuildFds` · UniformGrid instrument cards
 - HybridIndex map: `MainWindow.HybridIndexSurface.cs` · HCI cards + `HybridSkia` scope map
+- Correspondence timeline: `MainWindow.CorrespondenceSurface.cs` · `GlassCorrespondenceFeed.BuildInstrument|BuildTimeline`
 - Capture: `tools/Capture-Window.ps1` · title `P/M` or `M · MFD host`
 
 ## Antipatterns
@@ -21,6 +22,7 @@
 - SoftFL / Meta / board-hygiene / inventory mill as work under sealed course.
 
 ## last_ship
+- 2026-08-04 · Correspondence CRS cards + thread timeline · PNG `scratch/correspondence-timeline-20260804.png`
 - 2026-08-04 · HybridIndex HCI cards + Skia scope map · PNG `scratch/hybridindex-map-20260804.png`
 - 2026-08-04 · FDS card deck PLAN/SHARE/PRESSURE/WAKE · PNG `scratch/fds-card-deck-20260804.png`
 - 2026-08-04 · Problems severity board ERR/WARN/ALL · PNG `scratch/problems-severity-board-20260804.png`
