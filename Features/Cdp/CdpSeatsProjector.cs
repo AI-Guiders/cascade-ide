@@ -6,9 +6,8 @@ using CascadeIDE.ViewModels;
 namespace CascadeIDE.Features.Cdp;
 
 /// <summary>
-/// Agent desk seats → cabin tool map on glass.
-/// Watches seats-LATEST.json; applies mappable mfd_page via
-/// <see cref="MainWindowViewModel.ApplyPresentationGlassPatch"/>.
+/// Agent desk seats → cabin SoftOrgan chrome tip on glass.
+/// Watches seats-LATEST.json; does <b>not</b> flip MFD page (intent wire only).
 /// </summary>
 internal sealed class CdpSeatsProjector : IDisposable
 {
@@ -98,10 +97,7 @@ internal sealed class CdpSeatsProjector : IDisposable
             _lastFingerprint = fingerprint;
         }
 
-        // Packing: apply mappable MFD and/or quiet chrome hint (desk-only organs).
-        if (!string.IsNullOrWhiteSpace(doc.MfdPage))
-            _vm.ApplyPresentationGlassPatch(mfdPage: doc.MfdPage);
-
+        // SoftOrgan seats → chrome only. MFD page is intent wire (presentation/chord/land/citizen), not desk pin.
         _vm.ApplyCabinOrganChromeHint(doc.ChromeHint);
     }
 

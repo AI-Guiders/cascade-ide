@@ -21,28 +21,18 @@ public class PresentationPmOneOfPolicyTests
     }
 
     [Fact]
-    public void SeatsMaySelectMfd_blocks_PF_republish_when_sticky_differs()
+    public void SeatsMaySelectMfd_never_auto_switches()
     {
         Assert.False(PresentationPmOneOfPolicy.SeatsMaySelectMfd(
-            stickyMfdPage: "Editor",
+            stickyMfdPage: null,
             seatsMfdPage: "WebAiPortal",
-            seatsMOrganChanged: false));
-    }
-
-    [Fact]
-    public void SeatsMaySelectMfd_allows_when_M_organ_changed()
-    {
-        Assert.True(PresentationPmOneOfPolicy.SeatsMaySelectMfd(
+            seatsMOrganChanged: true));
+        Assert.False(PresentationPmOneOfPolicy.SeatsMaySelectMfd(
             stickyMfdPage: "Editor",
             seatsMfdPage: "Terminal",
             seatsMOrganChanged: true));
-    }
-
-    [Fact]
-    public void SeatsMaySelectMfd_allows_same_as_sticky()
-    {
-        Assert.True(PresentationPmOneOfPolicy.SeatsMaySelectMfd(
-            stickyMfdPage: "Editor",
+        Assert.False(PresentationPmOneOfPolicy.SeatsMaySelectMfd(
+            stickyMfdPage: null,
             seatsMfdPage: "Editor",
             seatsMOrganChanged: false));
     }
