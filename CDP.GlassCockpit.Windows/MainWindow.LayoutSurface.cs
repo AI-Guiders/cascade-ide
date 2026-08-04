@@ -14,11 +14,32 @@ public partial class MainWindow
     {
         WpfMainGridColumns.Apply(MainGrid, _session.Layout.ColumnDefinitions);
         TopologyBadge.Text = _session.Layout.Topology;
-        ChromeHintChip.Text = "CFG";
+        PaintCfgChip();
         ChromeHintChip.Tip =
-            $"settings.toml · {_session.Settings.Workspace.PrimaryWorkSurface} · tier={_session.Settings.Display.Presentation.Tier}" +
+            $"click = UI scale · settings.toml · {_session.Settings.Workspace.PrimaryWorkSurface} · tier={_session.Settings.Display.Presentation.Tier}" +
             (_session.Layout.ParseOk ? "" : $" · parse fail: {_session.Layout.ParseError}");
         SyncHostWindows();
+    }
+
+    void InitUiScale()
+    {
+        var scale = GlassUiScale.Load();
+        GlassUiScale.Apply(ScaleRoot, scale);
+        PaintCfgChip();
+    }
+
+    void PaintCfgChip()
+    {
+        ChromeHintChip.Text = GlassUiScale.ChipLabel(GlassUiScale.Current);
+    }
+
+    void ChromeHintChip_OnClick(object sender, System.Windows.Input.MouseButtonEventArgs e)
+    {
+        var scale = GlassUiScale.CycleNext();
+        GlassUiScale.Apply(ScaleRoot, scale);
+        PaintCfgChip();
+        StatusText.Text = $"glass · ui scale {scale.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture)}×";
+        e.Handled = true;
     }
 
     void SyncHostWindows()

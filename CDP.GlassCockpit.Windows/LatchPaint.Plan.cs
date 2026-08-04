@@ -75,11 +75,64 @@ internal static partial class LatchPaint
         CascadeIDE.SoftOrgan.GlassAutoiWakeFeed.IsNoise(body, name, kind, roleLabel);
 
     /// <summary>Normalize newlines for Intercom display (Autoi filtered out before paint).</summary>
+    /// <summary>Human Intercom: drop @intent/@event/@frame and peer-wire tips; keep prose.</summary>
     public static string CompactIntercomBody(string body)
     {
         if (string.IsNullOrWhiteSpace(body))
             return body;
-        return body.Replace("\r\n", "\n");
+
+        var sb = new System.Text.StringBuilder();
+        var blankRun = 0;
+        foreach (var raw in body.Replace("\r\n", "\n").Split('\n'))
+        {
+            var line = raw.TrimEnd();
+            var t = line.TrimStart();
+            if (t.Length == 0)
+            {
+                if (sb.Length == 0 || blankRun > 0)
+                    continue;
+                blankRun++;
+                sb.Append('\n');
+                continue;
+            }
+
+            blankRun = 0;
+            if (IsIntercomWireLine(t))
+                continue;
+
+            if (sb.Length > 0)
+                sb.Append('\n');
+            sb.Append(line);
+        }
+
+        return sb.ToString().Trim();
+    }
+
+    static bool IsIntercomWireLine(string t)
+    {
+        if (t.StartsWith("@intent", StringComparison.OrdinalIgnoreCase)
+            || t.StartsWith("@event", StringComparison.OrdinalIgnoreCase)
+            || t.StartsWith("@frame", StringComparison.OrdinalIgnoreCase)
+            || t.StartsWith("@pulse", StringComparison.OrdinalIgnoreCase))
+            return true;
+
+        if (t.StartsWith("ok · gen=", StringComparison.OrdinalIgnoreCase))
+            return true;
+        if (t.Contains(" · mcp=live · ", StringComparison.Ordinal)
+            && t.Contains("ack=", StringComparison.Ordinal))
+            return true;
+
+        // @event table rows
+        if (t.StartsWith("kind", StringComparison.OrdinalIgnoreCase) && t.Contains('|'))
+            return true;
+        if (t.StartsWith("id", StringComparison.OrdinalIgnoreCase) && t.Contains('|'))
+            return true;
+        if (t.StartsWith("ack", StringComparison.OrdinalIgnoreCase) && t.Contains('|'))
+            return true;
+        if (t.StartsWith("pulse", StringComparison.OrdinalIgnoreCase) && t.Contains('|'))
+            return true;
+
+        return false;
     }
 
     public static bool LooksLikeAutoiWake(string? body) =>

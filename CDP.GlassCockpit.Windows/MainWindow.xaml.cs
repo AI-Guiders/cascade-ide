@@ -19,6 +19,7 @@ public partial class MainWindow : Window
         _hosts = new GlassHostWindows(this);
 
         _session = new GlassSession();
+        InitUiScale();
         ApplyLayoutFromSession();
         ApplyPrimaryWorkSurface();
 
