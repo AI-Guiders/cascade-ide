@@ -230,4 +230,31 @@ public sealed class PresentationParserTests
         Assert.False(r.IsSuccess);
         Assert.NotNull(r.Error);
     }
+
+    [Fact]
+    public void OneOf_Pm_Forward_Parses_With_Compose()
+    {
+        var r = PresentationParser.Parse("(P/M)(F)", Default);
+        Assert.True(r.IsSuccess, r.Error);
+        Assert.Equal(2, r.Screens.Count);
+        Assert.Equal(PresentationZoneCompose.OneOf, r.ScreenComposes[0]);
+        Assert.Equal(PresentationZoneCompose.Split, r.ScreenComposes[1]);
+        Assert.True(PresentationLayoutAnalyzer.IsPmOneOfForwardTwoScreenPreset(r.Screens, r.ScreenComposes));
+        Assert.False(PresentationLayoutAnalyzer.IsPmPlusForwardTwoScreenPreset(r.Screens, r.ScreenComposes));
+    }
+
+    [Fact]
+    public void Mixed_Split_And_OneOf_In_Same_Group_Fails()
+    {
+        var r = PresentationParser.Parse("(P+M/F)", Default);
+        Assert.False(r.IsSuccess);
+    }
+
+    [Fact]
+    public void OneOf_Rejects_Weights()
+    {
+        var r = PresentationParser.Parse("(0.3P/0.7M)(F)", Default);
+        Assert.False(r.IsSuccess);
+        Assert.Contains("OneOf", r.Error!, StringComparison.Ordinal);
+    }
 }

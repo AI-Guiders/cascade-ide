@@ -48,7 +48,16 @@ public static class PresentationLayoutAnalyzer
         IsPfdForwardCombinedOnFirstScreen(screens)
         || IsTripleOneAnchorPerZonePreset(screens)
         || IsPmPlusForwardTwoScreenPreset(screens)
+        || IsPmOneOfForwardTwoScreenPreset(screens)
         || IsForwardMfdTwoScreenPreset(screens);
+
+    public static bool ShouldMaximizeMainWindowAtStartup(PresentationParseResult parse) =>
+        parse.IsSuccess
+        && (IsPfdForwardCombinedOnFirstScreen(parse.Screens)
+            || IsTripleOneAnchorPerZonePreset(parse.Screens)
+            || IsPmPlusForwardTwoScreenPreset(parse.Screens, parse.ScreenComposes)
+            || IsPmOneOfForwardTwoScreenPreset(parse.Screens, parse.ScreenComposes)
+            || IsForwardMfdTwoScreenPreset(parse.Screens));
 
     /// <summary>
     /// Два дисплея: на одном — только Forward, на другом — только MFD.
@@ -66,18 +75,36 @@ public static class PresentationLayoutAnalyzer
     }
 
     /// <summary>
-    /// Два дисплея: на одном — только Forward, на другом — только PFD+MFD (без лобового), с весами <c>xP+yM</c>.
-    /// Симметрично <c>(F)(xP+yM)</c> и <c>(xP+yM)(F)</c> (ADR 0017).
+    /// Два дисплея: на одном — только Forward, на другом — только PFD+MFD (без лобового), сплит <c>xP+yM</c>.
+    /// Симметрично <c>(F)(xP+yM)</c> и <c>(xP+yM)(F)</c> (ADR 0017). Not OneOf <c>P/M</c>.
     /// </summary>
-    public static bool IsPmPlusForwardTwoScreenPreset(IReadOnlyList<IReadOnlyList<PresentationAnchorSlot>> screens)
+    public static bool IsPmPlusForwardTwoScreenPreset(
+        IReadOnlyList<IReadOnlyList<PresentationAnchorSlot>> screens,
+        IReadOnlyList<PresentationZoneCompose>? composes = null)
     {
         if (screens.Count != 2)
             return false;
 
         var a = screens[0];
         var b = screens[1];
-        return IsPmCombinedScreen(a) && IsForwardOnlyScreen(b)
-            || IsForwardOnlyScreen(a) && IsPmCombinedScreen(b);
+        return IsPmSplitCombinedScreen(a, ComposeAt(composes, 0)) && IsForwardOnlyScreen(b)
+            || IsForwardOnlyScreen(a) && IsPmSplitCombinedScreen(b, ComposeAt(composes, 1));
+    }
+
+    /// <summary>
+    /// Два дисплея: Forward + OneOf <c>P/M</c> (full TopLevel XOR). Sym <c>(P/M)(F)</c> / <c>(F)(P/M)</c>.
+    /// </summary>
+    public static bool IsPmOneOfForwardTwoScreenPreset(
+        IReadOnlyList<IReadOnlyList<PresentationAnchorSlot>> screens,
+        IReadOnlyList<PresentationZoneCompose>? composes = null)
+    {
+        if (screens.Count != 2 || composes is null)
+            return false;
+
+        var a = screens[0];
+        var b = screens[1];
+        return IsPmOneOfCombinedScreen(a, ComposeAt(composes, 0)) && IsForwardOnlyScreen(b)
+            || IsForwardOnlyScreen(a) && IsPmOneOfCombinedScreen(b, ComposeAt(composes, 1));
     }
 
     /// <summary>
@@ -96,22 +123,77 @@ public static class PresentationLayoutAnalyzer
         return TryGetSingleAnchorScreenIndex(screens, PresentationAnchorKind.Forward, out index);
     }
 
-    /// <summary>Индекс экрана с объединённым <c>P+M</c> для окна-хоста сплита (симметрично <c>(F)</c>).</summary>
-    public static bool TryGetPmSplitHostPresentationScreenIndex(
-        IReadOnlyList<IReadOnlyList<PresentationAnchorSlot>> screens,
+    /// <summary>Parse-aware: OneOf <c>P/M</c> needs <see cref="PresentationParseResult.ScreenComposes"/>.</summary>
+    public static bool TryGetMainWindowPresentationScreenIndex(
+        PresentationParseResult parse,
         out int index)
     {
         index = -1;
-        if (!IsPmPlusForwardTwoScreenPreset(screens))
+        if (!parse.IsSuccess || parse.Screens.Count == 0)
             return false;
 
-        if (IsPmCombinedScreen(screens[0]))
+        if (IsPmPlusForwardTwoScreenPreset(parse.Screens, parse.ScreenComposes)
+            || IsPmOneOfForwardTwoScreenPreset(parse.Screens, parse.ScreenComposes)
+            || IsForwardMfdTwoScreenPreset(parse.Screens))
+        {
+            if (IsForwardOnlyScreen(parse.Screens[0]))
+            {
+                index = 0;
+                return true;
+            }
+
+            if (parse.Screens.Count > 1 && IsForwardOnlyScreen(parse.Screens[1]))
+            {
+                index = 1;
+                return true;
+            }
+        }
+
+        return TryGetSingleAnchorScreenIndex(parse.Screens, PresentationAnchorKind.Forward, out index);
+    }
+
+    /// <summary>Индекс экрана с объединённым <c>P+M</c> для окна-хоста сплита (симметрично <c>(F)</c>).</summary>
+    public static bool TryGetPmSplitHostPresentationScreenIndex(
+        IReadOnlyList<IReadOnlyList<PresentationAnchorSlot>> screens,
+        out int index,
+        IReadOnlyList<PresentationZoneCompose>? composes = null)
+    {
+        index = -1;
+        if (!IsPmPlusForwardTwoScreenPreset(screens, composes))
+            return false;
+
+        if (IsPmSplitCombinedScreen(screens[0], ComposeAt(composes, 0)))
         {
             index = 0;
             return true;
         }
 
-        if (IsPmCombinedScreen(screens[1]))
+        if (IsPmSplitCombinedScreen(screens[1], ComposeAt(composes, 1)))
+        {
+            index = 1;
+            return true;
+        }
+
+        return false;
+    }
+
+    /// <summary>Индекс экрана OneOf <c>P/M</c> host (симметрично <c>(F)</c>).</summary>
+    public static bool TryGetPmOneOfHostPresentationScreenIndex(
+        IReadOnlyList<IReadOnlyList<PresentationAnchorSlot>> screens,
+        IReadOnlyList<PresentationZoneCompose> composes,
+        out int index)
+    {
+        index = -1;
+        if (!IsPmOneOfForwardTwoScreenPreset(screens, composes))
+            return false;
+
+        if (IsPmOneOfCombinedScreen(screens[0], ComposeAt(composes, 0)))
+        {
+            index = 0;
+            return true;
+        }
+
+        if (IsPmOneOfCombinedScreen(screens[1], ComposeAt(composes, 1)))
         {
             index = 1;
             return true;
@@ -127,7 +209,7 @@ public static class PresentationLayoutAnalyzer
     {
         if (!parse.IsSuccess || parse.Screens.Count == 0)
             return 0;
-        return TryGetMainWindowPresentationScreenIndex(parse.Screens, out var idx) ? idx : 0;
+        return TryGetMainWindowPresentationScreenIndex(parse, out var idx) ? idx : 0;
     }
 
     private static bool IsForwardOnlyScreen(IReadOnlyList<PresentationAnchorSlot> screen) =>
@@ -138,6 +220,7 @@ public static class PresentationLayoutAnalyzer
         out int index)
     {
         index = -1;
+        // Screens-only path cannot see OneOf compose — use TryGetMainWindowPresentationScreenIndex(parse) for P/M.
         if (IsPmPlusForwardTwoScreenPreset(screens) || IsForwardMfdTwoScreenPreset(screens))
         {
             if (IsForwardOnlyScreen(screens[0]))
@@ -179,11 +262,30 @@ public static class PresentationLayoutAnalyzer
         return false;
     }
 
-    /// <summary>На экране есть и PFD, и MFD, и нет лобового (одна группа <c>xP+yM</c>).</summary>
-    private static bool IsPmCombinedScreen(IReadOnlyList<PresentationAnchorSlot> screen) =>
-        ContainsAnchor(screen, PresentationAnchorKind.Pfd)
+    /// <summary>На экране есть и PFD, и MFD, и нет лобового — сплит <c>xP+yM</c>.</summary>
+    private static bool IsPmSplitCombinedScreen(
+        IReadOnlyList<PresentationAnchorSlot> screen,
+        PresentationZoneCompose compose) =>
+        compose == PresentationZoneCompose.Split
+        && ContainsAnchor(screen, PresentationAnchorKind.Pfd)
         && ContainsAnchor(screen, PresentationAnchorKind.Mfd)
         && !ContainsAnchor(screen, PresentationAnchorKind.Forward);
+
+    /// <summary>На экране PFD+MFD без F — OneOf <c>P/M</c>.</summary>
+    private static bool IsPmOneOfCombinedScreen(
+        IReadOnlyList<PresentationAnchorSlot> screen,
+        PresentationZoneCompose compose) =>
+        compose == PresentationZoneCompose.OneOf
+        && ContainsAnchor(screen, PresentationAnchorKind.Pfd)
+        && ContainsAnchor(screen, PresentationAnchorKind.Mfd)
+        && !ContainsAnchor(screen, PresentationAnchorKind.Forward);
+
+    static PresentationZoneCompose ComposeAt(IReadOnlyList<PresentationZoneCompose>? composes, int index)
+    {
+        if (composes is null || (uint)index >= (uint)composes.Count)
+            return PresentationZoneCompose.Split;
+        return composes[index];
+    }
 
     /// <summary>Три дисплея: по одному якорю — <c>(PFD) (Forward) (MFD)</c> в этом порядке (ADR 0017).</summary>
     public static bool IsTriplePfdForwardMfdPreset(IReadOnlyList<IReadOnlyList<PresentationAnchorSlot>> screens)

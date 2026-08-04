@@ -81,6 +81,7 @@
     <Compile Remove="Services\Presentation\PresentationParser.cs" />
     <Compile Remove="Services\Presentation\PresentationTopologyResolver.cs" />
     <Compile Remove="Services\Presentation\PresentationZoneBound.cs" />
+    <Compile Remove="Services\Presentation\PresentationZoneCompose.cs" />
     <Compile Remove="Services\Presentation\PresentationZoneWeights.cs" />
     <Compile Remove="Services\Presentation\CompactIdeLayoutMetrics.cs" />
     <Compile Remove="Services\Presentation\PresentationCompactMainGridLayoutBuilder.cs" />

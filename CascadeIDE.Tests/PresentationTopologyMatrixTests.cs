@@ -173,6 +173,39 @@ public static class PresentationTopologyCatalog
                 MainGridAtStartup: "0,4,*,4,0",
                 PfdInMainAtStartup: false,
                 MfdInMainAtStartup: false),
+
+            // --- два экрана: OneOf P/M + F ---
+            new(
+                "(P/M)(F)",
+                MainScreen: 1,
+                MfdHost: false,
+                MfdHostScreen: null,
+                PfdHost: false,
+                PfdHostScreen: null,
+                PmSplitHost: false,
+                PmSplitScreen: null,
+                MaximizeAtStartup: true,
+                MainGridAtStartup: "0,4,*,4,0",
+                PfdInMainAtStartup: false,
+                MfdInMainAtStartup: false,
+                PmOneOfHost: true,
+                PmOneOfScreen: 0),
+
+            new(
+                "(F)(P/M)",
+                MainScreen: 0,
+                MfdHost: false,
+                MfdHostScreen: null,
+                PfdHost: false,
+                PfdHostScreen: null,
+                PmSplitHost: false,
+                PmSplitScreen: null,
+                MaximizeAtStartup: true,
+                MainGridAtStartup: "0,4,*,4,0",
+                PfdInMainAtStartup: false,
+                MfdInMainAtStartup: false,
+                PmOneOfHost: true,
+                PmOneOfScreen: 1),
         };
 
         foreach (var line in TripleLines)
@@ -226,7 +259,9 @@ public static class PresentationTopologyCatalog
         bool MaximizeAtStartup,
         string MainGridAtStartup,
         bool PfdInMainAtStartup,
-        bool MfdInMainAtStartup);
+        bool MfdInMainAtStartup,
+        bool PmOneOfHost = false,
+        int? PmOneOfScreen = null);
 }
 
 public sealed class PresentationTopologyMatrixTests
@@ -253,6 +288,7 @@ public sealed class PresentationTopologyMatrixTests
         Assert.Equal(expected.MfdHost, flags.MfdHostTopology);
         Assert.Equal(expected.PfdHost, flags.PfdHostTopology);
         Assert.Equal(expected.PmSplitHost, flags.PmHostTopology);
+        Assert.Equal(expected.PmOneOfHost, flags.PmOneOfHostTopology);
     }
 
     [Theory]
@@ -298,13 +334,29 @@ public sealed class PresentationTopologyMatrixTests
         if (expected.PmSplitScreen is int pmIdx)
         {
             Assert.True(
-                PresentationLayoutAnalyzer.TryGetPmSplitHostPresentationScreenIndex(parse.Screens, out var actual),
+                PresentationLayoutAnalyzer.TryGetPmSplitHostPresentationScreenIndex(
+                    parse.Screens, out var actual, parse.ScreenComposes),
                 expected.Line);
             Assert.Equal(pmIdx, actual);
         }
         else
         {
-            Assert.False(PresentationLayoutAnalyzer.TryGetPmSplitHostPresentationScreenIndex(parse.Screens, out _));
+            Assert.False(PresentationLayoutAnalyzer.TryGetPmSplitHostPresentationScreenIndex(
+                parse.Screens, out _, parse.ScreenComposes));
+        }
+
+        if (expected.PmOneOfScreen is int oneOfIdx)
+        {
+            Assert.True(
+                PresentationLayoutAnalyzer.TryGetPmOneOfHostPresentationScreenIndex(
+                    parse.Screens, parse.ScreenComposes, out var actual),
+                expected.Line);
+            Assert.Equal(oneOfIdx, actual);
+        }
+        else
+        {
+            Assert.False(PresentationLayoutAnalyzer.TryGetPmOneOfHostPresentationScreenIndex(
+                parse.Screens, parse.ScreenComposes, out _));
         }
     }
 
@@ -315,7 +367,7 @@ public sealed class PresentationTopologyMatrixTests
         var parse = PresentationParser.Parse(expected.Line, PresentationTopologyCatalog.DefaultGrammar);
         Assert.Equal(
             expected.MaximizeAtStartup,
-            PresentationLayoutAnalyzer.ShouldMaximizeMainWindowAtStartup(parse.Screens));
+            PresentationLayoutAnalyzer.ShouldMaximizeMainWindowAtStartup(parse));
     }
 
     [Theory]

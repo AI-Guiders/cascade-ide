@@ -7,12 +7,16 @@ namespace CascadeIDE.Services.Presentation;
 /// <summary>
 /// Внутренняя грамматика одного экрана <c>( … )</c> через <see cref="Eto.Parse"/> (Fluent API, семантика как в EBNF ADR 0017).
 /// Внешний уровень (несколько <c>(screen)</c>, разделители между экранами) — по-прежнему в <see cref="PresentationParser"/>.
+/// Join: <see cref="PresentationGrammarTokens.ZoneSeparator"/> (split) или hardwired <c>/</c> (OneOf) when distinct.
 /// </summary>
 internal static class PresentationInnerEtoGrammar
 {
     private static readonly ConcurrentDictionary<PresentationGrammarTokens, Grammar> Cache = new();
 
-    /// <summary>Собирает грамматику «якорь с опциональным весом», повторённую через <see cref="PresentationGrammarTokens.ZoneSeparator"/>.</summary>
+    /// <summary>Hardwired OneOf join (topology-oneof-slash-v0). Not overridable via TOML.</summary>
+    public const string OneOfSeparator = "/";
+
+    /// <summary>Собирает грамматику «якорь с опциональным весом», повторённую через split или OneOf join.</summary>
     public static Grammar GetOrCreate(PresentationGrammarTokens grammar)
     {
         return Cache.GetOrAdd(grammar, Build);
@@ -20,7 +24,7 @@ internal static class PresentationInnerEtoGrammar
 
     private static Grammar Build(PresentationGrammarTokens g)
     {
-        var zoneSep = Terminals.Literal(g.ZoneSeparator);
+        var joinSep = BuildJoinSeparator(g);
         var anchor = BuildAnchorChoice(g).Named("anchor");
 
         var digit = Terminals.Digit;
@@ -30,7 +34,7 @@ internal static class PresentationInnerEtoGrammar
 
         var weighted = weight.Optional().Then(anchor).Named("slot");
 
-        var inner = weighted.Then(new RepeatParser(zoneSep.Then(weighted), 0));
+        var inner = weighted.Then(new RepeatParser(joinSep.Then(weighted), 0));
 
         var rule = inner.Then(Terminals.End);
         // Без CharacterSetAlternations: иначе Eto.Parse 1.6.0 схлопывает P|F|M в один CharSet и падает в CharSetTerminal.Test.
@@ -40,6 +44,14 @@ internal static class PresentationInnerEtoGrammar
             EnableMatchEvents = false,
             Optimizations = GrammarOptimizations.All & ~GrammarOptimizations.CharacterSetAlternations,
         };
+    }
+
+    static Parser BuildJoinSeparator(PresentationGrammarTokens g)
+    {
+        var split = Terminals.Literal(g.ZoneSeparator);
+        if (string.Equals(g.ZoneSeparator, OneOfSeparator, StringComparison.Ordinal))
+            return split;
+        return split.Or(Terminals.Literal(OneOfSeparator));
     }
 
     /// <summary>Длинные литералы первыми, затем односимвольные (как <see cref="PresentationParser"/>).</summary>

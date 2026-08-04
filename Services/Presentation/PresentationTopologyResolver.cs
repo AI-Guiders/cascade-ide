@@ -1,13 +1,14 @@
 namespace CascadeIDE.Services.Presentation;
 
 /// <summary>
-/// Снимок флагов пресета <c>presentation</c> — единый источник для VM и тестов (ADR 0017).
+/// Снимок флагов пресета <c>presentation</c> — единый источник для VM и тестов (ADR 0017 · topology-oneof-slash-v0).
 /// </summary>
 public readonly record struct PresentationTopologyFlags(
     bool DedicatedMfdSecondScreen,
     bool TripleOneAnchorPerZone,
     bool ForwardMfdTwoScreen,
-    bool PmForwardTwoScreen)
+    bool PmForwardTwoScreen,
+    bool PmOneOfForwardTwoScreen)
 {
     /// <summary>Нужен <see cref="Views.MfdHostWindow"/> (второй TopLevel с MFD).</summary>
     public bool MfdHostTopology =>
@@ -16,8 +17,11 @@ public readonly record struct PresentationTopologyFlags(
     /// <summary>Нужен <see cref="Views.PfdHostWindow"/> (тройной пресет по одному якорю на экран).</summary>
     public bool PfdHostTopology => TripleOneAnchorPerZone;
 
-    /// <summary>Нужен <see cref="Views.PmSplitHostWindow"/>.</summary>
+    /// <summary>Нужен PM split host (<c>P+M</c> columns).</summary>
     public bool PmHostTopology => PmForwardTwoScreen;
+
+    /// <summary>Нужен PM OneOf host (<c>P/M</c> XOR full zone).</summary>
+    public bool PmOneOfHostTopology => PmOneOfForwardTwoScreen;
 }
 
 /// <summary>Разбор строки <c>presentation</c> в флаги хостов и кадр <c>MainGrid</c>.</summary>
@@ -28,16 +32,22 @@ public static class PresentationTopologyResolver
         if (!parse.IsSuccess || parse.Screens.Count == 0)
             return default;
 
-        return ResolveFlags(parse.Screens);
+        return ResolveFlags(parse.Screens, parse.ScreenComposes);
     }
 
     public static PresentationTopologyFlags ResolveFlags(
         IReadOnlyList<IReadOnlyList<PresentationAnchorSlot>> screens) =>
+        ResolveFlags(screens, composes: null);
+
+    public static PresentationTopologyFlags ResolveFlags(
+        IReadOnlyList<IReadOnlyList<PresentationAnchorSlot>> screens,
+        IReadOnlyList<PresentationZoneCompose>? composes) =>
         new(
             PresentationLayoutAnalyzer.IsDedicatedMfdSecondScreenPreset(screens),
             PresentationLayoutAnalyzer.IsTripleOneAnchorPerZonePreset(screens),
             PresentationLayoutAnalyzer.IsForwardMfdTwoScreenPreset(screens),
-            PresentationLayoutAnalyzer.IsPmPlusForwardTwoScreenPreset(screens));
+            PresentationLayoutAnalyzer.IsPmPlusForwardTwoScreenPreset(screens, composes),
+            PresentationLayoutAnalyzer.IsPmOneOfForwardTwoScreenPreset(screens, composes));
 
     /// <summary>
     /// Кадр колонок главного окна при типичном старте: хосты PFD/MFD открыты и подавляют свои колонки в main.

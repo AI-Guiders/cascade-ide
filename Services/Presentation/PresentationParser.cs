@@ -2,7 +2,7 @@ using System.Globalization;
 
 namespace CascadeIDE.Services.Presentation;
 
-/// <summary>Парсер строки <c>presentation</c> / <c>zone_screen_layout</c> (EBNF — ADR 0017). Внутри одного экрана <c>(…)</c> — <see cref="PresentationInnerEtoGrammar"/> (Eto.Parse); перед разбором содержимое скобок нормализуется: все символы <see cref="char.IsWhiteSpace(char)"/> удаляются (удобочитаемые пробелы вокруг <c>+</c> и т.д.). Литералы якорей задаются в TOML (<see cref="PresentationGrammarTokens"/>).</summary>
+/// <summary>Парсер строки <c>presentation</c> / <c>zone_screen_layout</c> (EBNF — ADR 0017). Внутри одного экрана <c>(…)</c> — <see cref="PresentationInnerEtoGrammar"/> (Eto.Parse); перед разбором содержимое скобок нормализуется: все символы <see cref="char.IsWhiteSpace(char)"/> удаляются (удобочитаемые пробелы вокруг <c>+</c>/<c>/</c> и т.д.). Литералы якорей задаются в TOML (<see cref="PresentationGrammarTokens"/>). Join: <c>+</c> (zone_separator) = Split; hardwired <c>/</c> = OneOf.</summary>
 public static class PresentationParser
 {
     private const double WeightSumTolerance = 1e-6;
@@ -15,6 +15,7 @@ public static class PresentationParser
 
         var text = presentation.Trim();
         var screens = new List<IReadOnlyList<PresentationAnchorSlot>>();
+        var composes = new List<PresentationZoneCompose>();
         var i = 0;
         SkipScreenSeparators(text, grammar.ScreenSeparator, ref i);
 
@@ -42,11 +43,12 @@ public static class PresentationParser
                 return PresentationParseResult.Fail(err);
 
             screens.Add(anchors.Value);
+            composes.Add(anchors.Compose);
 
             SkipScreenSeparators(text, grammar.ScreenSeparator, ref i);
         }
 
-        return PresentationParseResult.Ok(screens);
+        return PresentationParseResult.Ok(screens, composes);
     }
 
     private static void SkipScreenSeparators(string text, string separator, ref int i)
@@ -69,28 +71,36 @@ public static class PresentationParser
         }
     }
 
-    private static (List<PresentationAnchorSlot> Value, string? Error) ParseAnchorsInner(ReadOnlySpan<char> inner, PresentationGrammarTokens grammar)
+    private static (List<PresentationAnchorSlot> Value, PresentationZoneCompose Compose, string? Error) ParseAnchorsInner(
+        ReadOnlySpan<char> inner,
+        PresentationGrammarTokens grammar)
     {
         var list = new List<PresentationAnchorSlot>();
         var s = CollapseInnerWhitespace(inner);
         if (s.Length == 0)
-            return (list, "Пустой список якорей внутри границ экрана.");
+            return (list, PresentationZoneCompose.Split, "Пустой список якорей внутри границ экрана.");
 
         var innerGrammar = PresentationInnerEtoGrammar.GetOrCreate(grammar);
         var eto = innerGrammar.Match(s);
         if (!eto.Success)
         {
-            return (list, "Неверная последовательность якорей или разделителей внутри экрана.");
+            return (list, PresentationZoneCompose.Split, "Неверная последовательность якорей или разделителей внутри экрана.");
         }
 
         var sSpan = s.AsSpan();
         var i = 0;
+        PresentationZoneCompose? compose = null;
         while (i < sSpan.Length)
         {
             if (list.Count > 0)
             {
-                if (!TrySkipZoneSeparator(sSpan, grammar, ref i))
-                    return (list, $"Ожидался разделитель якорей на позиции {i}.");
+                if (!TrySkipJoinSeparator(sSpan, grammar, ref i, out var join))
+                    return (list, PresentationZoneCompose.Split, $"Ожидался разделитель якорей на позиции {i}.");
+
+                if (compose is null)
+                    compose = join;
+                else if (compose != join)
+                    return (list, PresentationZoneCompose.Split, "Смешение '+' (split) и '/' (OneOf) в одной группе недопустимо.");
             }
 
             double? weight = null;
@@ -98,15 +108,16 @@ public static class PresentationParser
                 weight = w;
 
             if (!TryConsumeAnchorToken(sSpan, grammar, ref i, out var kind))
-                return (list, $"Неизвестный якорь на позиции {i}.");
+                return (list, PresentationZoneCompose.Split, $"Неизвестный якорь на позиции {i}.");
 
             list.Add(new PresentationAnchorSlot(kind, weight));
         }
 
-        if (ValidateScreenWeights(list) is { } err)
-            return (list, err);
+        var resolved = compose ?? PresentationZoneCompose.Split;
+        if (ValidateScreenWeights(list, resolved) is { } err)
+            return (list, resolved, err);
 
-        return (list, null);
+        return (list, resolved, null);
     }
 
     /// <summary>Удаляет все пробельные символы внутри одного экрана <c>(…)</c> (после <see cref="ReadOnlySpan{T}.Trim()"/>).</summary>
@@ -137,10 +148,21 @@ public static class PresentationParser
         });
     }
 
-    private static string? ValidateScreenWeights(List<PresentationAnchorSlot> list)
+    private static string? ValidateScreenWeights(List<PresentationAnchorSlot> list, PresentationZoneCompose compose)
     {
         if (list.Count == 0)
             return null;
+
+        if (compose == PresentationZoneCompose.OneOf)
+        {
+            for (var i = 0; i < list.Count; i++)
+            {
+                if (list[i].Weight is not null)
+                    return "OneOf ('/') не допускает коэффициенты — зона полная.";
+            }
+
+            return null;
+        }
 
         if (list.Count == 1)
             return list[0].Weight is not null
@@ -216,11 +238,26 @@ public static class PresentationParser
         return true;
     }
 
-    private static bool TrySkipZoneSeparator(ReadOnlySpan<char> s, PresentationGrammarTokens g, ref int i)
+    private static bool TrySkipJoinSeparator(
+        ReadOnlySpan<char> s,
+        PresentationGrammarTokens g,
+        ref int i,
+        out PresentationZoneCompose compose)
     {
+        compose = PresentationZoneCompose.Split;
         if (g.ZoneSeparator.Length > 0 && RemainingStartsWith(s, i, g.ZoneSeparator))
         {
+            // When zone_separator is itself "/", treat as Split only (OneOf hardwire unavailable).
+            compose = PresentationZoneCompose.Split;
             i += g.ZoneSeparator.Length;
+            return true;
+        }
+
+        if (!string.Equals(g.ZoneSeparator, PresentationInnerEtoGrammar.OneOfSeparator, StringComparison.Ordinal)
+            && RemainingStartsWith(s, i, PresentationInnerEtoGrammar.OneOfSeparator))
+        {
+            compose = PresentationZoneCompose.OneOf;
+            i += PresentationInnerEtoGrammar.OneOfSeparator.Length;
             return true;
         }
 
