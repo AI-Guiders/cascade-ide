@@ -264,7 +264,7 @@
 | [0180](0180-agent-shell-habitat-tabs-scene.md) | **Agent shell habitat:** `cdp_shell_*` tabs/history/scene (+ background long-run) | Accepted |
 | [0181](0181-mcp-imagecontent-agent-vision-opt-in.md) | **MCP ImageContent → agent vision:** opt-in `vision=true`; host consumer gap (Cursor dogfood) | Proposed |
 | [0182](0182-restore-previous-desk-dual-instance.md) | **Restore Previous desk:** `cdp_restore` after MCP kill (dual-instance); not LLM chat | Accepted · Implemented |
-| [0183](0183-cockpit-intercom-chat-continuity.md) | **Cockpit Intercom + chat continuity:** quiet card, toggle, workline statuses; CIDE (parked) | Proposed |
+| [0183](0183-cockpit-intercom-chat-continuity.md) | **Cockpit Intercom + chat continuity:** quiet card, toggle, workline statuses; extended by [0203](0203-intercom-ccc-citizen-multi-session-continuity.md) / CDP-ADR-0030 | Proposed |
 | [0184](0184-harness-channel-mute-earplugs-cockpit.md) | **Harness channel mute («беруши»):** MCP / Intercom mute из кокпита; IDE-native DM | Proposed |
 | [0185](0185-life-thread-delayed-self-wake.md) | **Life thread:** `SendToLifeThread` delayed self-wake / harness enqueue completion | Proposed |
 | [0186](0186-anchor-families-navigation.md) | **Anchor families:** `Family:code|xml|navigation`; land composition; no Deep-Link | Accepted · Implemented |
@@ -281,6 +281,10 @@
 | [0197](0197-cdp-mcp-cockpit-wire-parity-vs-cide.md) | **cdp-mcp wire parity vs CIDE** (DAL gap; peels) | Accepted |
 | [0198](0198-toolchain-ensure-vs-lsp.md) | **Toolchain ensure** vs LSP (any id; DAL-adjacent) | Accepted |
 | [0199](0199-dual-agent-process-profile-isolation.md) | **Dual-agent** isolation (client roots primary; `CDP_PROFILE` override) | Accepted |
+| [0200](0200-cdpcope-architecture-analyzers-desk-wire.md) | **CDPCope** architecture analyzers / desk wire | Accepted |
+| [0201](0201-recall-gate-pressure-cockpit.md) | **Recall gate** pressure cockpit | Accepted |
+| [0202](0202-citizen-guest-isolation-and-ai-keys-foundation.md) | **Citizen/guest isolation + AI keys** (pointers to CDP-ADR-0025/0026) | Accepted |
+| [0203](0203-intercom-ccc-citizen-multi-session-continuity.md) | **Intercom CCC + Citizen multi-session continuity** (SSOT: CDP-ADR-0030; extends 0183) | Proposed |
 
 ## Сборка в один документ (HTML, TXT, PDF)
 

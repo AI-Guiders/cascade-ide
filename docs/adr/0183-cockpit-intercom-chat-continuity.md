@@ -25,6 +25,7 @@
 | [0166](0166-agent-centric-harness-model-comfort-and-pay-per-token-economics.md) | Stakeholder; comfort |
 | [0177](0177-harness-mcp-presence-signal.md) | Online → можно предложить restore desk+card |
 | [0127](0127-intercom-spine-and-topic-tabs-chrome-navigation.md) | Spine/tabs chrome (человек); здесь — агентский срез в cockpit |
+| [0203](0203-intercom-ccc-citizen-multi-session-continuity.md) · [CDP-ADR-0030](../../cdp-mcp/docs/adr/CDP-ADR-0030-citizen-multi-session-continuity.md) | **Расширение (2026-08-05):** Intercom CCC + Citizen multi-session / one mind · N seats; testbed ≠ Cursor |
 
 ---
 
