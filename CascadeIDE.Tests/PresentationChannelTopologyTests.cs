@@ -40,14 +40,13 @@ public class PresentationChannelTopologyTests
     }
 
     [Fact]
-    public void P_F_M_Are_Meta_Not_Channels()
+    public void Scan_Stays_Channels_Stack_Defaults()
     {
-        Assert.Equal(PresentationChannelId.Sit, PresentationChannelTopology.ChannelForMeta(PresentationZoneMeta.P));
-        Assert.Equal(PresentationChannelId.Work, PresentationChannelTopology.ChannelForMeta(PresentationZoneMeta.F));
-        Assert.Equal(PresentationChannelId.World, PresentationChannelTopology.ChannelForMeta(PresentationZoneMeta.M));
-        Assert.Equal(PresentationZoneMeta.P, PresentationChannelTopology.MetaForChannel(PresentationChannelId.Sit));
-        Assert.Equal(PresentationZoneMeta.P, PresentationChannelTopology.MetaForChannel(PresentationChannelId.Report));
-        Assert.Null(PresentationChannelTopology.MetaForChannel(PresentationChannelId.Alert));
+        Assert.Equal(PresentationChannelId.Sit, PresentationChannelTopology.DefaultChannelOnScan(PresentationZoneMeta.P));
+        Assert.Equal(PresentationChannelId.Work, PresentationChannelTopology.DefaultChannelOnScan(PresentationZoneMeta.F));
+        Assert.Equal(PresentationChannelId.World, PresentationChannelTopology.DefaultChannelOnScan(PresentationZoneMeta.M));
+        Assert.Equal(PresentationZoneMeta.F, PresentationChannelTopology.DefaultScanForChannel(PresentationChannelId.Work));
+        Assert.Null(PresentationChannelTopology.DefaultScanForChannel(PresentationChannelId.Alert));
     }
 
     [Fact]

@@ -2,8 +2,8 @@
 namespace CascadeIDE.Services.Presentation;
 
 /// <summary>
-/// ADR 0193 attention channel — first-class packing identity for topology OneOf (v1).
-/// P|F|M are <see cref="PresentationZoneMeta"/> only (paint/remount hints).
+/// ADR 0193 channel — function in a stack on a Scan Pattern slot (Boeing ND analogy).
+/// P|F|M remain scan geography; channels mount on them (topology-oneof-slash-v1).
 /// </summary>
 public enum PresentationChannelId
 {
@@ -15,9 +15,7 @@ public enum PresentationChannelId
     Alert,
 }
 
-/// <summary>
-/// Legacy zone tag on a channel face — meta only, not window/OneOf identity.
-/// </summary>
+/// <summary>Scan Pattern anchor (geography). Not a channel id.</summary>
 public enum PresentationZoneMeta
 {
     P,
@@ -26,7 +24,8 @@ public enum PresentationZoneMeta
 }
 
 /// <summary>
-/// Channel ↔ P|F|M meta map + OneOf prefer (topology-oneof-slash-v1).
+/// Channel stacks on Scan Pattern + compat wire helpers (topology-oneof-slash-v1).
+/// Surface wire e.g. (intercom)(sit/world/alert) → F=intercom stack, P/M=OneOf channel stack.
 /// </summary>
 public static class PresentationChannelTopology
 {
@@ -37,18 +36,27 @@ public static class PresentationChannelTopology
     public const string World = "world";
     public const string Alert = "alert";
 
-    /// <summary>Meta token → default channel face (report→sit face, probe→world face).</summary>
-    public static PresentationChannelId ChannelForMeta(PresentationZoneMeta meta) =>
-        meta switch
+    /// <summary>
+    /// Default channel that historically painted on this scan seat (compat).
+    /// Stacks may put other channels on the same seat (ND-style).
+    /// </summary>
+    public static PresentationChannelId DefaultChannelOnScan(PresentationZoneMeta scan) =>
+        scan switch
         {
             PresentationZoneMeta.P => PresentationChannelId.Sit,
             PresentationZoneMeta.F => PresentationChannelId.Work,
             PresentationZoneMeta.M => PresentationChannelId.World,
-            _ => throw new ArgumentOutOfRangeException(nameof(meta), meta, null),
+            _ => throw new ArgumentOutOfRangeException(nameof(scan), scan, null),
         };
 
-    /// <summary>Optional meta glyph for a channel face (alert has none).</summary>
-    public static PresentationZoneMeta? MetaForChannel(PresentationChannelId channel) =>
+    /// <summary>Obsolete name — <see cref="DefaultChannelOnScan"/>.</summary>
+    public static PresentationChannelId ChannelForMeta(PresentationZoneMeta meta) =>
+        DefaultChannelOnScan(meta);
+
+    /// <summary>
+    /// Default scan seat for a channel when packing does not override (alert → none / chrome).
+    /// </summary>
+    public static PresentationZoneMeta? DefaultScanForChannel(PresentationChannelId channel) =>
         channel switch
         {
             PresentationChannelId.Sit or PresentationChannelId.Report => PresentationZoneMeta.P,
@@ -57,6 +65,10 @@ public static class PresentationChannelTopology
             PresentationChannelId.Alert => null,
             _ => null,
         };
+
+    /// <summary>Obsolete name — <see cref="DefaultScanForChannel"/>.</summary>
+    public static PresentationZoneMeta? MetaForChannel(PresentationChannelId channel) =>
+        DefaultScanForChannel(channel);
 
     public static PresentationChannelId? TryParseChannel(string? id) =>
         id?.Trim().ToLowerInvariant() switch
@@ -156,7 +168,7 @@ public static class PresentationChannelTopology
 }
 
 /// <summary>Obsolete name — use <see cref="PresentationChannelTopology"/>.</summary>
-[Obsolete("Use PresentationChannelTopology — channels first, P/F/M are meta.")]
+[Obsolete("Use PresentationChannelTopology — Scan Pattern + channel stacks (ND).")]
 public static class PresentationOneOfChannelPolicy
 {
     public const string Sit = PresentationChannelTopology.Sit;
