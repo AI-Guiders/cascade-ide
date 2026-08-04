@@ -245,8 +245,10 @@ public partial class MainWindow
         string Role,
         string Body,
         string When,
-        IReadOnlyList<CascadeIDE.Intercom.GlassAttachChip>? Chips = null)
+        IReadOnlyList<CascadeIDE.Intercom.GlassAttachChip>? Chips = null,
+        IReadOnlyList<CascadeIDE.SoftOrgan.GlassGlanceChip>? Pointers = null)
     {
         public bool HasChips => Chips is { Count: > 0 };
+        public bool HasPointers => Pointers is { Count: > 0 };
     }
 }

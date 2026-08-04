@@ -284,6 +284,28 @@
                               <TextBlock DockPanel.Dock="Right" Text="{Binding When}" FontSize="10" Foreground="#666" HorizontalAlignment="Right"/>
                             </DockPanel>
                             <local:GlassIntercomMarkdownBody Markdown="{Binding Body}"/>
+                            <ItemsControl ItemsSource="{Binding Pointers}" Margin="0,6,0,0">
+                              <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                  <WrapPanel Orientation="Horizontal"/>
+                                </ItemsPanelTemplate>
+                              </ItemsControl.ItemsPanel>
+                              <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                  <!-- Radio instrument pointer (I6) — not SA prose wall -->
+                                  <Border Margin="0,0,8,4" Padding="10,8" MinWidth="160" CornerRadius="4"
+                                          Background="#12201C" BorderBrush="#3D8F6A" BorderThickness="1"
+                                          ToolTip="Radio · look at instrument">
+                                    <StackPanel>
+                                      <TextBlock Text="{Binding Label}" FontSize="10" Foreground="#7AA892"/>
+                                      <TextBlock Text="{Binding Value}" FontSize="13" FontWeight="SemiBold"
+                                                 FontFamily="Consolas" Foreground="#B8F0D0" TextWrapping="Wrap"
+                                                 Margin="0,2,0,0"/>
+                                    </StackPanel>
+                                  </Border>
+                                </DataTemplate>
+                              </ItemsControl.ItemTemplate>
+                            </ItemsControl>
                             <ItemsControl ItemsSource="{Binding Chips}" Margin="0,6,0,0">
                               <ItemsControl.ItemsPanel>
                                 <ItemsPanelTemplate>

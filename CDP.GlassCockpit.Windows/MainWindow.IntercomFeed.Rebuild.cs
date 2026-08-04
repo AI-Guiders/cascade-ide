@@ -87,9 +87,14 @@ public partial class MainWindow
                 ? GlassAttachChipPeel.StripBracketsForDisplay(e.Body)
                 : e.Body;
             body = LatchPaint.CompactIntercomBody(body);
+            var radio = CascadeIDE.Intercom.GlassRadioPointer.FromBody(body);
+            body = radio.Body;
+            var pointers = radio.Pointers.Count > 0 ? radio.Pointers : null;
             if (string.IsNullOrWhiteSpace(body) && chips.Count > 0)
                 body = "(attach)";
-            _feed.Add(new ChatBubble(e.RoleLabel, body, e.WhenLabel, chips));
+            if (string.IsNullOrWhiteSpace(body) && pointers is { Count: > 0 })
+                body = "(radio)";
+            _feed.Add(new ChatBubble(e.RoleLabel, body, e.WhenLabel, chips, pointers));
         }
 
         while (_feed.Count > 81)
