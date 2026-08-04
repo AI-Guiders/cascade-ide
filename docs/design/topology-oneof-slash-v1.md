@@ -41,7 +41,13 @@ Compat legacy `(F)(P/M)` / `(P/M)(F)` = old **meta glyphs** for the same geograp
 sit · work · probe · report · world · alert — functions that **mount on** P/F/M slots.  
 Example: alert may ride chrome/EICAS *and* appear in a P/M OneOf stack when operator packs it there — scan seat unchanged, function expanded (ND analogy).
 
-## DoD
+## Surface wire (shipped)
+
+`PresentationSurfaceWire.Parse("(intercom)(sit/world/alert)")` → slots:
+- window0 **F** stack=`intercom`
+- window1 **PmOneOf** stack=`sit/world/alert` (P/M geography, channel OneOf)
+
+Three groups `(intercom)(sit)(world)` → full Scan **F,P,M**. Legacy `(F)(P/M)` via `FromLegacyMetaWire`.
 
 1. Describe packing as: slot → (scan role F|P|M, channel stack[], active channel).
 2. Glass remount: active **channel** in stack; scan role picks which TopLevel/zone geography.
