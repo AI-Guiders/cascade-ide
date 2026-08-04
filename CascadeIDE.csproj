@@ -80,6 +80,7 @@
     <Compile Remove="Services\Presentation\PresentationParseResult.cs" />
     <Compile Remove="Services\Presentation\PresentationParser.cs" />
     <Compile Remove="Services\Presentation\PresentationTopologyResolver.cs" />
+    <Compile Remove="Services\Presentation\PresentationSurfaceWire.cs" />
     <Compile Remove="Services\Presentation\PresentationZoneBound.cs" />
     <Compile Remove="Services\Presentation\PresentationZoneCompose.cs" />
     <Compile Remove="Services\Presentation\PresentationZoneWeights.cs" />

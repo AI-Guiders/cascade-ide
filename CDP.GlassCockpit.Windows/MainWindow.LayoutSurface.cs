@@ -46,7 +46,7 @@ public partial class MainWindow
     {
         if (!_hostsReady)
             return;
-        _hosts.Sync(_session.Layout.Flags);
+        _hosts.Sync(_session.Layout.Flags, _session.Layout.SurfacePack);
     }
 
     void ApplyPrimaryWorkSurface()

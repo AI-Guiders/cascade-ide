@@ -276,9 +276,9 @@ public partial class MainWindow
                 break;
             case "toggle_pm_oneof_role":
                 if (_hosts.TogglePmOneOfRole())
-                    StatusText.Text = $"glass · OneOf · {_hosts.PmOneOfActiveKind} · {DateTime.Now:HH:mm:ss}";
+                    StatusText.Text = $"glass · OneOf · {_hosts.PmOneOfActiveSurface} · {DateTime.Now:HH:mm:ss}";
                 else
-                    StatusText.Text = "glass · OneOf host not active (need topology (P/M)(F))";
+                    StatusText.Text = "glass · OneOf host not active (need F + P/M channel stack)";
                 break;
             default:
                 StatusText.Text = $"glass · palette · unknown {id}";

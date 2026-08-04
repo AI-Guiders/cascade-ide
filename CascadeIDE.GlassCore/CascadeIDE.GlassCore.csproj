@@ -51,6 +51,7 @@
     <Compile Include="..\Services\Presentation\PresentationParser.cs" Link="Presentation\PresentationParser.cs" />
     
     <Compile Include="..\Services\Presentation\PresentationTopologyResolver.cs" Link="Presentation\PresentationTopologyResolver.cs" />
+    <Compile Include="..\Services\Presentation\PresentationSurfaceWire.cs" Link="Presentation\PresentationSurfaceWire.cs" />
     <Compile Include="..\Services\Presentation\PresentationZoneBound.cs" Link="Presentation\PresentationZoneBound.cs" />
     <Compile Include="..\Services\Presentation\PresentationZoneCompose.cs" Link="Presentation\PresentationZoneCompose.cs" />
     <Compile Include="..\Services\Presentation\PresentationZoneWeights.cs" Link="Presentation\PresentationZoneWeights.cs" />
