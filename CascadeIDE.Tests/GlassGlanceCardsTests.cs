@@ -86,6 +86,32 @@ public sealed class GlassGlanceCardsTests
     }
 
     [Fact]
+    public void BuildEditorSitu_projects_why_file_instrument_cards()
+    {
+        var face = new GlassEditorSituRibbon.Face(
+            Why: "leaf · why-file",
+            Blast: "A · B",
+            BlastNames: ["A.cs", "B.cs"],
+            RoleInGraph: "IN-MAP · 3n/2e",
+            HopNodes: 3,
+            HopEdges: 2,
+            Orphan: false,
+            DiffIntent: "+2 −1",
+            Diff: null,
+            AppliesOnLocus: "E0 W1",
+            Applies: null);
+
+        var chips = GlassGlanceCards.BuildEditorSitu(face);
+
+        Assert.Equal(new GlassGlanceChip("LEVEL", "SITU", "ok"), chips[0]);
+        Assert.Contains(new GlassGlanceChip("WHY", "leaf · why-file", "ok"), chips);
+        Assert.Contains(new GlassGlanceChip("BLAST", "A.cs · B.cs", "ok"), chips);
+        Assert.Contains(new GlassGlanceChip("ROLE", "IN-MAP · 3n/2e", "ok"), chips);
+        Assert.Contains(new GlassGlanceChip("DIFF", "+2 −1", "warn"), chips);
+        Assert.Contains(new GlassGlanceChip("APPLIES", "E0 W1", "ok"), chips);
+    }
+
+    [Fact]
     public void BuildChat_projects_presence_seats()
     {
         var chips = GlassGlanceCards.BuildChat(new GlassGlanceCards.ChatPresenceStatus("composing", "idle"));

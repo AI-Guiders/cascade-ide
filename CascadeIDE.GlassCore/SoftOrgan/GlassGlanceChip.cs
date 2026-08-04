@@ -90,6 +90,31 @@ public static class GlassGlanceCards
         ];
     }
 
+    public static IReadOnlyList<GlassGlanceChip> BuildEditorSitu(GlassEditorSituRibbon.Face face)
+    {
+        static string V(string? s) => string.IsNullOrWhiteSpace(s) ? "—" : Trunc(s!, 28);
+        static string ToneFilled(string? s, string filled) => string.IsNullOrWhiteSpace(s) ? "idle" : filled;
+
+        var blast = face.BlastNames.Count > 0
+            ? Trunc(string.Join(" · ", face.BlastNames.Take(2)), 28)
+            : V(face.Blast);
+        var roleTone = face.Orphan ? "warn" : ToneFilled(face.RoleInGraph, "ok");
+        var appliesHasError = !string.IsNullOrWhiteSpace(face.AppliesOnLocus)
+            && face.AppliesOnLocus.Contains('E', StringComparison.Ordinal)
+            && !face.AppliesOnLocus.Contains("E0", StringComparison.Ordinal);
+        var appliesTone = appliesHasError ? "bad" : ToneFilled(face.AppliesOnLocus, "ok");
+
+        return
+        [
+            new("LEVEL", face.HasAny ? "SITU" : "EMPTY", face.HasAny ? "ok" : "idle"),
+            new("WHY", V(face.Why), ToneFilled(face.Why, "ok")),
+            new("BLAST", blast, blast == "—" ? "idle" : "ok"),
+            new("ROLE", V(face.RoleInGraph), roleTone),
+            new("DIFF", V(face.DiffIntent), ToneFilled(face.DiffIntent, "warn")),
+            new("APPLIES", V(face.AppliesOnLocus), appliesTone),
+        ];
+    }
+
     public readonly record struct ChatPresenceStatus(string Pf, string Pm);
 
     public static IReadOnlyList<GlassGlanceChip> BuildChat(ChatPresenceStatus status)

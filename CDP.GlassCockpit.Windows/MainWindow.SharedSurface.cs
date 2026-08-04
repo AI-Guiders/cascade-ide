@@ -2,6 +2,8 @@
 
 using System.IO;
 using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Threading;
 using CascadeIDE.SoftOrgan;
 
@@ -56,16 +58,14 @@ public partial class MainWindow
 
     void RefreshEditorSituRibbon()
     {
-        if (EditorSituPanel is null || FileWhyReadout is null || FileBlastReadout is null || FileRoleReadout is null || FileDiffReadout is null || FileAppliesReadout is null)
+        if (EditorSituPanel is null || EditorSituCardsPanel is null)
             return;
 
         if (string.IsNullOrWhiteSpace(_editorPath))
         {
-            FileWhyReadout.ValueText = "—";
-            FileBlastReadout.ValueText = "—";
-            FileRoleReadout.ValueText = "—";
-            FileDiffReadout.ValueText = "—";
-            FileAppliesReadout.ValueText = "—";
+            EditorSituCardsPanel.Items.Clear();
+            if (EditorSituStatusLabel is not null)
+                EditorSituStatusLabel.Text = "situ · empty";
             EditorSituPanel.Visibility = Visibility.Collapsed;
             _diffHunkRenderer?.Apply(null);
             _appliesTintRenderer?.Apply(null);
@@ -81,11 +81,19 @@ public partial class MainWindow
             blastMax: 3,
             sourceText: CodeEditor?.Text);
 
-        FileWhyReadout.ValueText = string.IsNullOrWhiteSpace(face.Why) ? "—" : face.Why;
-        FileBlastReadout.ValueText = string.IsNullOrWhiteSpace(face.Blast) ? "—" : face.Blast;
-        FileRoleReadout.ValueText = string.IsNullOrWhiteSpace(face.RoleInGraph) ? "—" : face.RoleInGraph;
-        FileDiffReadout.ValueText = string.IsNullOrWhiteSpace(face.DiffIntent) ? "—" : face.DiffIntent;
-        FileAppliesReadout.ValueText = string.IsNullOrWhiteSpace(face.AppliesOnLocus) ? "—" : face.AppliesOnLocus;
+        var chips = GlassGlanceCards.BuildEditorSitu(face);
+        var factory = new FrameworkElementFactory(typeof(UniformGrid));
+        factory.SetValue(UniformGrid.ColumnsProperty, 3);
+        EditorSituCardsPanel.ItemsPanel = new ItemsPanelTemplate(factory);
+        EditorSituCardsPanel.Items.Clear();
+        foreach (var chip in chips)
+            EditorSituCardsPanel.Items.Add(CreateDeckCard(chip));
+
+        if (EditorSituStatusLabel is not null)
+            EditorSituStatusLabel.Text = face.HasAny
+                ? $"situ · card deck · {chips.Count} · {chips[0].Value}"
+                : "situ · empty";
+
         EditorSituPanel.Visibility = face.HasAny
             ? Visibility.Visible
             : Visibility.Collapsed;
