@@ -69,6 +69,13 @@ public partial class MainWindow
                     return;
                 }
 
+                // Autoi wake → SoftOrgan tip / StatusText (ignite-wake latch), not Intercom chat.
+                if (LatchPaint.IsAutoiWakeFeedNoise(view.Body, view.Name, view.Kind, view.RoleLabel))
+                {
+                    StatusText.Text = $"glass · {view.StatusLine} · tip only · {DateTime.Now:HH:mm:ss}";
+                    return;
+                }
+
                 TryJournalFromView(view);
                 var wasPinned = CascadeIDE.Intercom.GlassIntercomFeedScroll.IsPinnedToEnd(
                     FeedScroll.VerticalOffset,

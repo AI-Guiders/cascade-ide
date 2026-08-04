@@ -21,7 +21,9 @@ public partial class MainWindow
             FeedScroll.ViewportHeight);
         var priorOffset = FeedScroll.VerticalOffset;
 
-        var entries = GlassIntercomJournal.LoadTail(TopicClusterTail);
+        var entries = GlassIntercomJournal.LoadTail(TopicClusterTail)
+            .Where(e => !LatchPaint.IsAutoiWakeFeedNoise(e.Body, roleLabel: e.RoleLabel))
+            .ToList();
         foreach (var e in entries)
         {
             if (e.Id.Length > 0)
@@ -76,6 +78,9 @@ public partial class MainWindow
         var ws = _session.WorkspaceRoot;
         foreach (var e in shown)
         {
+            if (LatchPaint.IsAutoiWakeFeedNoise(e.Body, roleLabel: e.RoleLabel))
+                continue;
+
             var chips = GlassAttachChipPeel.ResolveAgainstDisk(e.Chips, ws);
             chips = GlassMessageCodePeel.MergeWithAttach(chips, e.Body);
             var body = chips.Count > 0

@@ -1,0 +1,30 @@
+#nullable enable
+
+using CascadeIDE.SoftOrgan;
+using Xunit;
+
+namespace CascadeIDE.Tests;
+
+public sealed class GlassAutoiWakeFeedNoiseTests
+{
+    const string Charge =
+        "Resume the current authorized local development task from Task Manager. Habitat=CDP.\n"
+        + "---\nIf you feel completely lost / thread amnesia: compaction likely happened.\n"
+        + "cdp_pressure op=recall";
+
+    [Fact]
+    public void Body_charge_is_feed_noise() =>
+        Assert.True(GlassAutoiWakeFeed.IsNoise(Charge));
+
+    [Fact]
+    public void AutoI_name_is_feed_noise_even_without_body_markers() =>
+        Assert.True(GlassAutoiWakeFeed.IsNoise("timer fired", name: "AutoI", kind: "guest"));
+
+    [Fact]
+    public void Wake_kind_is_feed_noise() =>
+        Assert.True(GlassAutoiWakeFeed.IsNoise("short", kind: "wake"));
+
+    [Fact]
+    public void Ordinary_guest_chat_is_not_noise() =>
+        Assert.False(GlassAutoiWakeFeed.IsNoise("shipped tint", name: "Кир", kind: "guest"));
+}

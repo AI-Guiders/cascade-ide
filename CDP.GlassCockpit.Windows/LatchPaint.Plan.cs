@@ -66,29 +66,24 @@ internal static partial class LatchPaint
         }
     }
 
-    /// <summary>Autoi wake charge → one-line session chip (not chat wall).</summary>
+    /// <summary>Autoi wake belongs on SoftOrgan tip / StatusText — not Intercom chat.</summary>
+    public static bool IsAutoiWakeFeedNoise(
+        string? body,
+        string? name = null,
+        string? kind = null,
+        string? roleLabel = null) =>
+        CascadeIDE.SoftOrgan.GlassAutoiWakeFeed.IsNoise(body, name, kind, roleLabel);
+
+    /// <summary>Normalize newlines for Intercom display (Autoi filtered out before paint).</summary>
     public static string CompactIntercomBody(string body)
     {
         if (string.IsNullOrWhiteSpace(body))
             return body;
-
-        if (!LooksLikeAutoiWake(body))
-            return body.Replace("\r\n", "\n");
-
-        return "Autoi wake · resume TM leaf · Habitat=CDP\n(full charge → pressure · recall)";
+        return body.Replace("\r\n", "\n");
     }
 
-    public static bool LooksLikeAutoiWake(string body)
-    {
-        if (string.IsNullOrWhiteSpace(body))
-            return false;
-
-        return body.Contains("Resume the current authorized local development task", StringComparison.Ordinal)
-               || body.Contains("If you feel completely lost / thread amnesia", StringComparison.Ordinal)
-               || (body.Contains("Habitat=CDP", StringComparison.Ordinal)
-                   && body.Contains("cdp_pressure", StringComparison.OrdinalIgnoreCase)
-                   && body.Contains("op=recall", StringComparison.OrdinalIgnoreCase));
-    }
+    public static bool LooksLikeAutoiWake(string? body) =>
+        CascadeIDE.SoftOrgan.GlassAutoiWakeFeed.LooksLikeCharge(body);
 
     static string? ExtractWall(string? pulse)
     {
