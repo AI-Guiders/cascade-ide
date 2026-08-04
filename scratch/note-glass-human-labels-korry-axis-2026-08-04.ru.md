@@ -4,6 +4,9 @@
 
 **Thread:** discussion-only · Autoi halt while partner talks. Not ship yet.
 
+## Analyze us
+Бери лучшее у людей (glance, craft, Korry caption+strip, Dark Cockpit). Худшее само прилипнет (jargon-chrome, Trunc rebus, seeming, vintage cargo-cult). Не «умнее людей» — отбор.
+
 ## Ось
 - Human face = слово/фраза «что и зачем».
 - Диалог может держать жаргон; продукт — нет как единственный ярлык.
