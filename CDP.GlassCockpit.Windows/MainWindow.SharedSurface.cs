@@ -56,13 +56,14 @@ public partial class MainWindow
 
     void RefreshEditorSituRibbon()
     {
-        if (EditorSituPanel is null || FileWhyReadout is null || FileBlastReadout is null)
+        if (EditorSituPanel is null || FileWhyReadout is null || FileBlastReadout is null || FileRoleReadout is null)
             return;
 
         if (string.IsNullOrWhiteSpace(_editorPath))
         {
             FileWhyReadout.ValueText = "—";
             FileBlastReadout.ValueText = "—";
+            FileRoleReadout.ValueText = "—";
             EditorSituPanel.Visibility = Visibility.Collapsed;
             return;
         }
@@ -76,6 +77,7 @@ public partial class MainWindow
 
         FileWhyReadout.ValueText = string.IsNullOrWhiteSpace(face.Why) ? "—" : face.Why;
         FileBlastReadout.ValueText = string.IsNullOrWhiteSpace(face.Blast) ? "—" : face.Blast;
+        FileRoleReadout.ValueText = string.IsNullOrWhiteSpace(face.RoleInGraph) ? "—" : face.RoleInGraph;
         EditorSituPanel.Visibility = face.HasAny
             ? Visibility.Visible
             : Visibility.Collapsed;

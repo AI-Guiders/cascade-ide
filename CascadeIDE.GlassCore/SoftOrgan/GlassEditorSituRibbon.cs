@@ -11,10 +11,16 @@ public static class GlassEditorSituRibbon
     public sealed record Face(
         string Why,
         string Blast,
-        IReadOnlyList<string> BlastNames)
+        IReadOnlyList<string> BlastNames,
+        string RoleInGraph,
+        int HopNodes,
+        int HopEdges,
+        bool Orphan)
     {
         public bool HasAny =>
-            !string.IsNullOrWhiteSpace(Why) || !string.IsNullOrWhiteSpace(Blast);
+            !string.IsNullOrWhiteSpace(Why)
+            || !string.IsNullOrWhiteSpace(Blast)
+            || !string.IsNullOrWhiteSpace(RoleInGraph);
     }
 
     public static Face Build(
@@ -25,7 +31,7 @@ public static class GlassEditorSituRibbon
         int blastMax = 3)
     {
         if (string.IsNullOrWhiteSpace(editorPath))
-            return new Face("", "", []);
+            return new Face("", "", [], "", 0, 0, Orphan: true);
 
         var whyBits = new List<string>(2);
         if (!string.IsNullOrWhiteSpace(leaf))
@@ -42,7 +48,18 @@ public static class GlassEditorSituRibbon
             .ToList();
         var blastLine = names.Count > 0 ? string.Join(" · ", names) : "";
 
-        return new Face(whyLine, blastLine, names);
+        var graph = GlassSemanticMapGraph.Collect(workspaceRoot, editorPath, maxNodes: 48, maxHop: 2);
+        var hopNames = graph.Nodes
+            .Take(blastMax)
+            .Select(n => $"h{n.Hop}:{Path.GetFileName(n.FilePath)}")
+            .Where(s => !string.IsNullOrWhiteSpace(s))
+            .ToList();
+        var orphan = graph.Nodes.Count == 0;
+        var roleLine = orphan
+            ? "ORPHAN · 0 hops"
+            : $"focus · {graph.Nodes.Count}n/{graph.Edges.Count}e · " + string.Join(" · ", hopNames);
+
+        return new Face(whyLine, blastLine, names, Truncate(roleLine, 96), graph.Nodes.Count, graph.Edges.Count, orphan);
     }
 
     /// <summary>Compat dump (tests / legacy). Prefer <see cref="Build"/> for instruments.</summary>
@@ -57,11 +74,13 @@ public static class GlassEditorSituRibbon
         if (!face.HasAny)
             return string.Empty;
 
-        var parts = new List<string>(2);
+        var parts = new List<string>(3);
         if (!string.IsNullOrWhiteSpace(face.Why))
             parts.Add("WHY · " + face.Why);
         if (!string.IsNullOrWhiteSpace(face.Blast))
             parts.Add("BLAST · " + face.Blast);
+        if (!string.IsNullOrWhiteSpace(face.RoleInGraph))
+            parts.Add("ROLE · " + face.RoleInGraph);
         return string.Join("  |  ", parts);
     }
 

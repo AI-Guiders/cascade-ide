@@ -29,6 +29,9 @@ public sealed class GlassEditorSituRibbonTests
             Assert.Contains("Glass Done", face.Why, StringComparison.Ordinal);
             Assert.Contains("Foo.xaml", face.Blast, StringComparison.Ordinal);
             Assert.Contains("Foo.xaml", face.BlastNames);
+            Assert.False(face.Orphan);
+            Assert.True(face.HopNodes >= 1);
+            Assert.Contains("focus ·", face.RoleInGraph, StringComparison.Ordinal);
 
             var line = GlassEditorSituRibbon.Format(
                 a,
@@ -39,6 +42,7 @@ public sealed class GlassEditorSituRibbonTests
 
             Assert.Contains("WHY ·", line, StringComparison.Ordinal);
             Assert.Contains("BLAST ·", line, StringComparison.Ordinal);
+            Assert.Contains("ROLE ·", line, StringComparison.Ordinal);
         }
         finally
         {
