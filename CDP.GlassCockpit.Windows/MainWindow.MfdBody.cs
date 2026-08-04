@@ -14,6 +14,9 @@ public partial class MainWindow
         if (string.IsNullOrWhiteSpace(page) || MfdPages is null)
             return;
 
+        if (CascadeIDE.GlassCore.Presentation.PresentationPmOneOfPolicy.FromMfdPage(page) is { } oneOf)
+            _hosts.PreferPmOneOf(oneOf);
+
         foreach (var item in MfdPages.Items)
         {
             if (item is ListBoxItem lbi &&

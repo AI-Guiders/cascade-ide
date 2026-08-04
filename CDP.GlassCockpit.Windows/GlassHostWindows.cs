@@ -1,12 +1,13 @@
 #nullable enable
 using System.Windows;
 using System.Windows.Controls;
+using CascadeIDE.GlassCore.Presentation;
 using CascadeIDE.Services.Presentation;
 
 namespace CDP.GlassCockpit.Windows;
 
 /// <summary>
-/// Secondary TopLevels for multi-screen presentation topologies (()()() / (P)(F)(M) / (P+F)(M) …).
+/// Secondary TopLevels for multi-screen presentation topologies (()()() / (P)(F)(M) / (P+F)(M) / (P/M)(F) …).
 /// Reuses GlassCore <see cref="PresentationTopologyFlags"/> — same rules as Avalonia CIDE hosts.
 /// </summary>
 internal sealed class GlassHostWindows : IDisposable
@@ -15,9 +16,15 @@ internal sealed class GlassHostWindows : IDisposable
     ZoneHostWindow? _pfdHost;
     ZoneHostWindow? _mfdHost;
     ZoneHostWindow? _pmHost;
+    ZoneHostWindow? _pmOneOfHost;
+    PresentationAnchorKind _pmOneOfActive = PresentationAnchorKind.Pfd;
     bool _syncing;
 
     public GlassHostWindows(MainWindow main) => _main = main;
+
+    public bool IsPmOneOfActive => _pmOneOfHost is { IsVisible: true };
+
+    public PresentationAnchorKind PmOneOfActiveKind => _pmOneOfActive;
 
     /// <summary>TopLevels for agent_surface layout Sense (roles match contract).</summary>
     public IReadOnlyList<(string Role, Window Window)> EnumerateRoleWindows()
@@ -29,6 +36,8 @@ internal sealed class GlassHostWindows : IDisposable
             list.Add(("mfd_host", _mfdHost));
         if (_pmHost is { IsVisible: true })
             list.Add(("pm_host", _pmHost));
+        if (_pmOneOfHost is { IsVisible: true })
+            list.Add(("pm_oneof_host", _pmOneOfHost));
         return list;
     }
 
@@ -44,14 +53,22 @@ internal sealed class GlassHostWindows : IDisposable
             else
                 ClosePfdHost();
 
-            if (flags.PmHostTopology)
+            if (flags.PmOneOfHostTopology)
             {
+                ClosePmHost();
+                CloseMfdHost();
+                EnsurePmOneOfHost();
+            }
+            else if (flags.PmHostTopology)
+            {
+                ClosePmOneOfHost();
                 EnsurePmHost();
                 CloseMfdHost(); // PM host owns M; dedicated Mfd host not simultaneous
             }
             else
             {
                 ClosePmHost();
+                ClosePmOneOfHost();
                 if (flags.MfdHostTopology)
                     EnsureMfdHost();
                 else
@@ -62,6 +79,28 @@ internal sealed class GlassHostWindows : IDisposable
         {
             _syncing = false;
         }
+    }
+
+    /// <summary>Chord: toggle OneOf active member P↔M.</summary>
+    public bool TogglePmOneOfRole()
+    {
+        if (!IsPmOneOfActive)
+            return false;
+        PreferPmOneOf(PresentationPmOneOfPolicy.Toggle(_pmOneOfActive));
+        return true;
+    }
+
+    /// <summary>Auto-switch / chord: show P or M full in OneOf host.</summary>
+    public void PreferPmOneOf(PresentationAnchorKind kind)
+    {
+        if (kind is not (PresentationAnchorKind.Pfd or PresentationAnchorKind.Mfd))
+            return;
+        if (!IsPmOneOfActive && _pmOneOfHost is null)
+            return;
+        if (_pmOneOfActive == kind && IsPmOneOfActive)
+            return;
+        _pmOneOfActive = kind;
+        RemountPmOneOfActive();
     }
 
     void EnsurePfdHost()
@@ -157,6 +196,73 @@ internal sealed class GlassHostWindows : IDisposable
         _pmHost.Show();
     }
 
+    void EnsurePmOneOfHost()
+    {
+        if (_pmOneOfHost is { IsVisible: true })
+        {
+            RemountPmOneOfActive();
+            _pmOneOfHost.Activate();
+            return;
+        }
+
+        DetachFromMain(_main.PfdZone);
+        DetachFromMain(_main.MfdZone);
+        // Park inactive zone off-main in a hidden panel so restore is symmetric.
+        EnsureOneOfPark();
+
+        _pmOneOfHost = NewHost(
+            OneOfTitle(_pmOneOfActive),
+            "topology · PmOneOf · (P/M)(F)");
+        var host = _pmOneOfHost;
+        host.Closed += (_, _) =>
+        {
+            if (!ReferenceEquals(_pmOneOfHost, host))
+                return;
+            _ = host.Dismount();
+            DetachFromParent(_main.PfdZone);
+            DetachFromParent(_main.MfdZone);
+            RestoreToMain(_main.PfdZone, column: 0);
+            RestoreToMain(_main.MfdZone, column: 4);
+            _oneOfPark = null;
+            _pmOneOfHost = null;
+        };
+
+        RemountPmOneOfActive();
+        PlaceSatellite(_pmOneOfHost, screenHint: 1);
+        _pmOneOfHost.Show();
+    }
+
+    Panel? _oneOfPark;
+
+    void EnsureOneOfPark()
+    {
+        _oneOfPark ??= new Grid { Visibility = Visibility.Collapsed };
+    }
+
+    void RemountPmOneOfActive()
+    {
+        if (_pmOneOfHost is null)
+            return;
+
+        EnsureOneOfPark();
+        var active = _pmOneOfActive == PresentationAnchorKind.Mfd ? _main.MfdZone : _main.PfdZone;
+        var idle = _pmOneOfActive == PresentationAnchorKind.Mfd ? _main.PfdZone : _main.MfdZone;
+
+        DetachFromParent(active);
+        DetachFromParent(idle);
+        _oneOfPark!.Children.Clear();
+        _oneOfPark.Children.Add(idle);
+
+        _pmOneOfHost.Mount(active);
+        _pmOneOfHost.Title = OneOfTitle(_pmOneOfActive);
+        _pmOneOfHost.SetBadge($"topology · PmOneOf · (P/M)(F) · {_pmOneOfActive}");
+    }
+
+    static string OneOfTitle(PresentationAnchorKind kind) =>
+        kind == PresentationAnchorKind.Mfd
+            ? "P/M · M active · OneOf host"
+            : "P/M · P active · OneOf host";
+
     void ClosePfdHost() => CloseHost(ref _pfdHost, restoreColumn: 0);
     void CloseMfdHost() => CloseHost(ref _mfdHost, restoreColumn: 4);
 
@@ -165,6 +271,14 @@ internal sealed class GlassHostWindows : IDisposable
         if (_pmHost is null)
             return;
         try { _pmHost.Close(); }
+        catch { /* disposed */ }
+    }
+
+    void ClosePmOneOfHost()
+    {
+        if (_pmOneOfHost is null)
+            return;
+        try { _pmOneOfHost.Close(); }
         catch { /* disposed */ }
     }
 
@@ -240,6 +354,7 @@ internal sealed class GlassHostWindows : IDisposable
 
     public void Dispose()
     {
+        ClosePmOneOfHost();
         ClosePmHost();
         ClosePfdHost();
         CloseMfdHost();

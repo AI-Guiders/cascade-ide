@@ -271,6 +271,12 @@ public partial class MainWindow
             case "mfd_chat":
                 SelectMfdPage("Chat");
                 break;
+            case "toggle_pm_oneof_role":
+                if (_hosts.TogglePmOneOfRole())
+                    StatusText.Text = $"glass · OneOf · {_hosts.PmOneOfActiveKind} · {DateTime.Now:HH:mm:ss}";
+                else
+                    StatusText.Text = "glass · OneOf host not active (need topology (P/M)(F))";
+                break;
             default:
                 StatusText.Text = $"glass · palette · unknown {id}";
                 break;

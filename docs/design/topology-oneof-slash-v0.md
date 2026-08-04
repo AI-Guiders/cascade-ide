@@ -21,6 +21,8 @@ Verbose alias (docs only, optional parser later): `OneOf(P,M)` ≡ `P/M`. Prefer
 - `(P+M)(F)` — left TopLevel **split** P‖M (today’s PM host).
 - `(P/M)(F)` — left TopLevel **full**; shows either P or M, not both at once; F remains its own TopLevel.
 
-## Out of scope (this stamp)
+## Out of scope → now shipping
 
-Parser / host / chord ids / auto-switch policy — product leaf under Glass Done, not invent theater until leaf focused.
+Parser `/` · flags `PmOneOfHostTopology` · Glass `pm_oneof_host` · chord `po` / `toggle_pm_oneof_role` · auto-switch (seats/MFD→M, plan latch→P).
+
+Avalonia CIDE PmOneOf host parity — follow-up if needed.

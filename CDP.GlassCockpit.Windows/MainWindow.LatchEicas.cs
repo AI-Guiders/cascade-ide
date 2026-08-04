@@ -56,6 +56,7 @@ public partial class MainWindow
                 _planLeaf = view.Headline;
                 _planWhy = ExtractPlanWhy(view.Detail);
                 RefreshEditorSituRibbon();
+                _hosts.PreferPmOneOf(CascadeIDE.GlassCore.Presentation.PresentationPmOneOfPolicy.FromPlanLatch());
                 StatusText.Text = $"glass · {view.StatusLine} · {DateTime.Now:HH:mm:ss}";
             }
             catch (Exception ex)

@@ -48,6 +48,7 @@ public static class GlassCommandPaletteCatalog
         new("mfd_events", "MFD: Events", "Events / latch catalog glance", "mfd events latch"),
         new("mfd_hypotheses", "MFD: Hypotheses", "Debug hypotheses glance", "mfd hypotheses debug"),
         new("mfd_chat", "MFD: Chat", "Intercom presence MFD glance", "mfd chat intercom presence"),
+        new("toggle_pm_oneof_role", "OneOf P/M toggle", "Toggle P↔M on (P/M)(F) OneOf host", "oneof pm topology toggle slash"),
     ];
 
     /// <summary>CIDE Command Melody prefix <c>c:</c> (ADR 0060) — Glass discoverability peel.</summary>

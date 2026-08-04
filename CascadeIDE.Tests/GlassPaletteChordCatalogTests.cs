@@ -89,6 +89,7 @@ public sealed class GlassPaletteChordCatalogTests
         Assert.Equal("mfd_events", GlassChordCatalog.Exact("ev")!.ActionId);
         Assert.Equal("mfd_hypotheses", GlassChordCatalog.Exact("hy")!.ActionId);
         Assert.Equal("mfd_chat", GlassChordCatalog.Exact("ic")!.ActionId);
+        Assert.Equal("toggle_pm_oneof_role", GlassChordCatalog.Exact("po")!.ActionId);
         Assert.Equal("mfd_problems", GlassChordCatalog.Exact("mp")!.ActionId);
         Assert.Equal("mfd_related_files", GlassChordCatalog.Exact("rf")!.ActionId);
         Assert.Equal("mfd_semantic_map", GlassChordCatalog.Exact("sm")!.ActionId);

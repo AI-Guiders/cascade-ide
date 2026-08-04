@@ -41,6 +41,7 @@ public static class GlassChordCatalog
         new("hy", "MFD Hypotheses", "mfd_hypotheses", "Debug hypotheses glance"),
         new("ic", "MFD Chat", "mfd_chat", "Intercom presence MFD glance"),
         new("pq", "Command palette", "palette", "Open Ctrl+Q palette"),
+        new("po", "OneOf P/M toggle", "toggle_pm_oneof_role", "Toggle P↔M on (P/M)(F) OneOf host"),
     ];
 
     public static string Normalize(string? raw)
