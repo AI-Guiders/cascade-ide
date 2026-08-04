@@ -133,6 +133,10 @@ internal static partial class LatchPaint
         if (string.IsNullOrWhiteSpace(body))
             return body;
 
+        // Citizen/@frame desk SA walls already in journal — collapse to Radio face on rebuild.
+        if (LooksLikeSaInstrumentWall(body))
+            return "Citizen · SA collapsed\n→ PFD.NEXT\ndelta → Plan · see PFD.NEXT";
+
         var sb = new System.Text.StringBuilder();
         var blankRun = 0;
         foreach (var raw in body.Replace("\r\n", "\n").Split('\n'))
@@ -160,6 +164,23 @@ internal static partial class LatchPaint
         return sb.ToString().Trim();
     }
 
+    public static bool LooksLikeSaInstrumentWall(string? body)
+    {
+        if (string.IsNullOrWhiteSpace(body))
+            return false;
+
+        var t = body;
+        if (t.Contains("truncated habitat wake", StringComparison.OrdinalIgnoreCase))
+            return true;
+        if (t.Contains("`tm |", StringComparison.OrdinalIgnoreCase)
+            && t.Contains("`board |", StringComparison.OrdinalIgnoreCase))
+            return true;
+        if (t.Contains("board | P:", StringComparison.OrdinalIgnoreCase)
+            && t.Contains("`peer |", StringComparison.OrdinalIgnoreCase))
+            return true;
+        return false;
+    }
+
     static bool IsIntercomWireLine(string t)
     {
         if (t.StartsWith("@intent", StringComparison.OrdinalIgnoreCase)
@@ -174,6 +195,10 @@ internal static partial class LatchPaint
             && t.Contains("ack=", StringComparison.Ordinal))
             return true;
 
+        // @frame desk SA instrument bullets (Citizen wall residual on Glass).
+        if (IsSaInstrumentLine(t))
+            return true;
+
         // @event table rows
         if (t.StartsWith("kind", StringComparison.OrdinalIgnoreCase) && t.Contains('|'))
             return true;
@@ -185,6 +210,29 @@ internal static partial class LatchPaint
             return true;
 
         return false;
+    }
+
+    static bool IsSaInstrumentLine(string t)
+    {
+        var s = t.TrimStart('-', '*', ' ', '`');
+        if (s.StartsWith("tm |", StringComparison.OrdinalIgnoreCase)
+            || s.StartsWith("board |", StringComparison.OrdinalIgnoreCase)
+            || s.StartsWith("peer |", StringComparison.OrdinalIgnoreCase)
+            || s.StartsWith("dialog |", StringComparison.OrdinalIgnoreCase)
+            || s.StartsWith("sticky |", StringComparison.OrdinalIgnoreCase)
+            || s.StartsWith("presence |", StringComparison.OrdinalIgnoreCase)
+            || s.StartsWith("cost |", StringComparison.OrdinalIgnoreCase)
+            || s.StartsWith("sa |", StringComparison.OrdinalIgnoreCase))
+            return true;
+
+        return t.Contains("`tm |", StringComparison.OrdinalIgnoreCase)
+            || t.Contains("`board |", StringComparison.OrdinalIgnoreCase)
+            || t.Contains("`peer |", StringComparison.OrdinalIgnoreCase)
+            || t.Contains("`dialog |", StringComparison.OrdinalIgnoreCase)
+            || t.Contains("`presence |", StringComparison.OrdinalIgnoreCase)
+            || t.Contains("`sticky |", StringComparison.OrdinalIgnoreCase)
+            || t.Contains("`cost |", StringComparison.OrdinalIgnoreCase)
+            || t.Contains("`sa |", StringComparison.OrdinalIgnoreCase);
     }
 
     public static bool LooksLikeAutoiWake(string? body) =>
