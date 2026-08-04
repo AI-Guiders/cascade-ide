@@ -220,6 +220,9 @@ public partial class MainWindow
             case "mfd_fds":
                 SelectMfdPage("FlightDataStorage", sticky: true);
                 break;
+            case "mfd_domain_board":
+                SelectMfdPage("DomainBoard", sticky: true);
+                break;
             case "mfd_build":
                 SelectMfdPage("Build", sticky: true);
                 break;

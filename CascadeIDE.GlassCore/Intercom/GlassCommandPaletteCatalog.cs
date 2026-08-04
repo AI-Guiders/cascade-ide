@@ -31,6 +31,7 @@ public static class GlassCommandPaletteCatalog
         new("mfd_editor", "MFD: Editor", "Select MFD Editor page", "mfd editor"),
         new("mfd_terminal", "MFD: Terminal", "Select MFD Terminal page", "mfd terminal"),
         new("mfd_fds", "MFD: Flight Data Storage", "Partner shelf — plans/reports/pressure", "mfd fds flight data storage shelf"),
+        new("mfd_domain_board", "MFD: DomainBoard", "SoftOrgan domain cards instrument (.cdp/domain)", "mfd domain board ownership cards rules learn"),
         new("mfd_build", "MFD: Build", "Select MFD Build redirected log", "mfd build"),
         new("mfd_tests", "MFD: Tests", "Select MFD Tests redirected log", "mfd tests"),
         new("mfd_git", "MFD: Git", "Select MFD Git porcelain+diff host", "mfd git status scm porcelain"),

@@ -38,6 +38,7 @@ public static class SoftOrganMfdGlance
             "SemanticMap" => "arch",
             "AiChatSettings" => "mcp",
             "MarkdownPreview" => "report",
+            "DomainBoard" or "Domain" => "domain",
             "RelatedFiles" => "refactor",
             _ => null
         };

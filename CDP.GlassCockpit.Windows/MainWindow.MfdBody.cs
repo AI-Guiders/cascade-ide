@@ -219,6 +219,14 @@ public partial class MainWindow
             return;
         }
 
+        if (string.Equals(page, "DomainBoard", StringComparison.OrdinalIgnoreCase)
+            || string.Equals(page, "Domain", StringComparison.OrdinalIgnoreCase))
+        {
+            MfdBody.Text = FormatMfdStub("DomainBoard", "domain card deck · .cdp/domain", "SoftOrgan ownership instrument");
+            RefreshEicasHealth();
+            return;
+        }
+
         MfdBody.Text = page switch
         {
             "Terminal" => FormatMfdStub("Terminal", "Glass redirected TextBox", "ConPTY later · go=sys"),
@@ -244,6 +252,7 @@ public partial class MainWindow
             "Editor" => FormatMfdStub("Editor", "on Forward", "primary_work_surface=editor"),
             "Chat" => GlassIntercomPresence.FormatChatMfdGlance(),
             "FlightDataStorage" or "Fds" => FormatMfdStub("FlightDataStorage", "FDS card deck · PLAN/SHARE/PRESSURE/WAKE", "Shared-SSOT shelf instrument"),
+            "DomainBoard" or "Domain" => FormatMfdStub("DomainBoard", "domain card deck · .cdp/domain", "SoftOrgan ownership instrument"),
             _ => FormatMfdStub(page, "instrument peel later", "CabinGlass may select")
         };
         RefreshEicasHealth();

@@ -354,6 +354,7 @@
             <ListBoxItem Content="WebAiPortal"/>
             <ListBoxItem Content="AiChatSettings"/>
             <ListBoxItem Content="FlightDataStorage"/>
+            <ListBoxItem Content="DomainBoard"/>
             <ListBoxItem Content="WorkspaceHealth"/>
             <ListBoxItem Content="EnvironmentReadiness"/>
             <ListBoxItem Content="Events"/>

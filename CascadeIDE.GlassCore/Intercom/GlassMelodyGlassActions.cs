@@ -52,6 +52,7 @@ public static class GlassMelodyGlassActions
             ["glass.slash_letter"] = "slash_letter",
             ["glass.slash_citizen"] = "slash_citizen",
             ["glass.mfd_fds"] = "mfd_fds",
+            ["glass.mfd_domain_board"] = "mfd_domain_board",
             ["glass.mfd_workspace_health"] = "mfd_workspace_health",
             ["glass.mfd_events"] = "mfd_events",
             ["glass.mfd_hypotheses"] = "mfd_hypotheses",

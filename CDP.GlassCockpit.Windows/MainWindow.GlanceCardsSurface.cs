@@ -42,12 +42,15 @@ public partial class MainWindow
             "EnvironmentReadiness" => GlassGlanceCards.BuildEnvironment(GlassEnvironmentReadinessGlance.ProbeCurrentProcess()),
             "Hypotheses" when GlassHypothesesGlance.TryProbe(_session.WorkspaceRoot) is { } status => GlassGlanceCards.BuildHypotheses(status),
             "FlightDataStorage" or "Fds" => GlassGlanceCards.BuildFds(GlassFdsGlance.Probe(_session.WorkspaceRoot)),
+            "DomainBoard" or "Domain" => GlassGlanceCards.BuildDomain(
+                GlassDomainBoardGlance.TryProbe(_session.WorkspaceRoot)
+                ?? new GlassDomainBoardGlance.Snapshot(0, false, null, 0, false, null, [], "domain · unavailable")),
             "Chat" => GlassGlanceCards.BuildChat(GlassIntercomPresence.ProbeChatMfd()),
             _ => [],
         };
 
-        var fdsDeck = page is "FlightDataStorage" or "Fds";
-        if (fdsDeck)
+        var deck = page is "FlightDataStorage" or "Fds" or "DomainBoard" or "Domain";
+        if (deck)
         {
             var factory = new FrameworkElementFactory(typeof(UniformGrid));
             factory.SetValue(UniformGrid.ColumnsProperty, 3);
@@ -60,21 +63,23 @@ public partial class MainWindow
 
         GlanceCardsPanel.Items.Clear();
         foreach (var chip in chips)
-            GlanceCardsPanel.Items.Add(fdsDeck ? CreateDeckCard(chip) : CreateGlanceChip(chip));
+            GlanceCardsPanel.Items.Add(deck ? CreateDeckCard(chip) : CreateGlanceChip(chip));
 
         if (GlanceCardsStatusLabel is not null)
         {
             GlanceCardsStatusLabel.Text = chips.Count == 0
                 ? "glance · unavailable"
-                : fdsDeck
-                    ? $"fds · card deck · {chips.Count} · {chips[0].Value}"
-                    : $"{page} · {chips[0].Value}";
+                : page is "DomainBoard" or "Domain"
+                    ? $"domain · card deck · {chips.Count} · {chips[0].Value}"
+                    : deck
+                        ? $"fds · card deck · {chips.Count} · {chips[0].Value}"
+                        : $"{page} · {chips[0].Value}";
         }
     }
 
     static bool IsGlancePage(string page) =>
         page is "Events" or "WorkspaceHealth" or "EnvironmentReadiness" or "Hypotheses"
-            or "FlightDataStorage" or "Fds" or "Chat";
+            or "FlightDataStorage" or "Fds" or "DomainBoard" or "Domain" or "Chat";
 
     static Border CreateGlanceChip(GlassGlanceChip chip)
     {

@@ -106,6 +106,9 @@ public static class GlassGlanceCards
         ];
     }
 
+    public static IReadOnlyList<GlassGlanceChip> BuildDomain(GlassDomainBoardGlance.Snapshot snap) =>
+        GlassDomainBoardGlance.BuildInstrument(snap);
+
     static GlassGlanceChip ToChip(GlassEnvironmentReadinessGlance.EnvProbeRow row) =>
         new(row.Name, string.IsNullOrWhiteSpace(row.Detail) ? row.State : $"{row.State} · {row.Detail}", row.State switch
         {
