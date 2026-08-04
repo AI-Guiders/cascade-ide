@@ -18,6 +18,8 @@ public partial class ZoneHostWindow : Window
         HostSlot.Content = content;
     }
 
+    public bool HasMountedContent => HostSlot.Content is not null;
+
     public UIElement? Dismount()
     {
         if (HostSlot.Content is not UIElement el)

@@ -60,31 +60,36 @@ internal sealed class GlassHostWindows : IDisposable
                 SetPmOneOfStack(pmSlot.Stack, pmSlot.Active);
             }
 
-            if (flags.PfdHostTopology)
-                EnsurePfdHost();
-            else
-                ClosePfdHost();
+            // Tear down hosts we do not want first so zones return to main before remount.
+            // Prior bug: EnsurePfdHost ran while OneOf still held/parked PfdZone → empty P host.
+            var wantOneOf = flags.PmOneOfHostTopology || flags.OneOfHostTopology;
+            var wantPm = flags.PmHostTopology;
+            var wantPfd = flags.PfdHostTopology;
+            var wantMfd = flags.MfdHostTopology && !wantOneOf && !wantPm;
 
-            if (flags.PmOneOfHostTopology || flags.OneOfHostTopology)
-            {
+            if (!wantOneOf)
+                ClosePmOneOfHost();
+            if (!wantPm)
                 ClosePmHost();
+            if (!wantPfd)
+                ClosePfdHost();
+            if (!wantMfd)
                 CloseMfdHost();
+
+            if (wantOneOf)
+            {
                 EnsurePmOneOfHost();
             }
-            else if (flags.PmHostTopology)
+            else if (wantPm)
             {
-                ClosePmOneOfHost();
                 EnsurePmHost();
-                CloseMfdHost(); // PM host owns M; dedicated Mfd host not simultaneous
             }
             else
             {
-                ClosePmHost();
-                ClosePmOneOfHost();
-                if (flags.MfdHostTopology)
+                if (wantPfd)
+                    EnsurePfdHost();
+                if (wantMfd)
                     EnsureMfdHost();
-                else
-                    CloseMfdHost();
             }
         }
         finally
@@ -156,13 +161,20 @@ internal sealed class GlassHostWindows : IDisposable
 
     void EnsurePfdHost()
     {
+        var zone = _main.PfdZone;
         if (_pfdHost is { IsVisible: true })
         {
+            // Remount if prior Sync left an empty shell (OneOf still held the zone).
+            if (!_pfdHost.HasMountedContent)
+            {
+                DetachFromParent(zone);
+                _pfdHost.Mount(zone);
+            }
+
             _pfdHost.Activate();
             return;
         }
 
-        var zone = _main.PfdZone;
         DetachFromMain(zone);
         _pfdHost = NewHost("P · PFD host", "topology · PfdHost · (P)…");
         var pfd = _pfdHost;
