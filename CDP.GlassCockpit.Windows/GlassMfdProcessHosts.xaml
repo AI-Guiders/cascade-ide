@@ -118,12 +118,39 @@
             <ColumnDefinition Width="1.4*"/>
           </Grid.ColumnDefinitions>
           <ListBox x:Name="GitList" Grid.Column="0" Background="Transparent" BorderThickness="0"
-                   DisplayMemberPath="Display" FontFamily="Consolas" FontSize="12" Foreground="#DDD"/>
-          <TextBox x:Name="GitOutput" Grid.Column="2" IsReadOnly="True"
-                   AcceptsReturn="True" TextWrapping="NoWrap" VerticalScrollBarVisibility="Auto"
-                   HorizontalScrollBarVisibility="Auto"
-                   Background="Transparent" Foreground="#CCCCCC" BorderThickness="0"
-                   FontFamily="Consolas" FontSize="12"/>
+                   FontFamily="Consolas" FontSize="12" Foreground="#DDD"
+                   ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+            <ListBox.ItemTemplate>
+              <DataTemplate>
+                <TextBlock Text="{Binding Display}" FontFamily="Consolas" FontSize="12" Margin="0,1">
+                  <TextBlock.Style>
+                    <Style TargetType="TextBlock">
+                      <Setter Property="Foreground" Value="#B0B0B0"/>
+                      <Style.Triggers>
+                        <DataTrigger Binding="{Binding Tone}" Value="change">
+                          <Setter Property="Foreground" Value="#C8B87C"/>
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding Tone}" Value="add">
+                          <Setter Property="Foreground" Value="#7CB87C"/>
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding Tone}" Value="delete">
+                          <Setter Property="Foreground" Value="#C87C7C"/>
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding Tone}" Value="untracked">
+                          <Setter Property="Foreground" Value="#7C9CB8"/>
+                        </DataTrigger>
+                      </Style.Triggers>
+                    </Style>
+                  </TextBlock.Style>
+                </TextBlock>
+              </DataTemplate>
+            </ListBox.ItemTemplate>
+          </ListBox>
+          <FlowDocumentScrollViewer x:Name="GitDiffViewer" Grid.Column="2"
+                                    VerticalScrollBarVisibility="Auto"
+                                    HorizontalScrollBarVisibility="Auto"
+                                    IsToolBarVisible="False"
+                                    Background="Transparent" BorderThickness="0"/>
         </Grid>
       </DockPanel>
     </Border>

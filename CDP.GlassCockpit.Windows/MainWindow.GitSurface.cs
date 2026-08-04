@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.Text;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Documents;
 using System.Windows.Threading;
 using CascadeIDE.SoftOrgan;
 
@@ -43,6 +44,13 @@ public partial class MainWindow
                && MfdGitHost.Visibility == Visibility.Visible;
     }
 
+    void SetGitOutput(string? text)
+    {
+        if (GitDiffViewer is null)
+            return;
+        GitDiffViewer.Document = GlassGitDiffFlowDocument.Build(text);
+    }
+
     internal void GitStatus_OnClick(object sender, RoutedEventArgs e) => StartGitRefresh();
 
     internal void GitCancel_OnClick(object sender, RoutedEventArgs e) => CancelGitProc();
@@ -51,8 +59,8 @@ public partial class MainWindow
     {
         CancelGitProc();
         _gitRows.Clear();
-        if (GitOutput is not null)
-            GitOutput.Text = "";
+        if (GitDiffViewer is not null)
+            SetGitOutput("");
         if (GitStatusLabel is not null)
             GitStatusLabel.Text = "git · idle";
     }
@@ -68,8 +76,8 @@ public partial class MainWindow
 
         var cwd = _session.WorkspaceRoot ?? Environment.CurrentDirectory;
         var r = GlassGitProcess.Run(cwd, "add", "--", row.Path);
-        if (GitOutput is not null && !string.IsNullOrWhiteSpace(r.Output))
-            GitOutput.Text = r.Output;
+        if (!string.IsNullOrWhiteSpace(r.Output))
+            SetGitOutput(r.Output);
         if (GitStatusLabel is not null)
             GitStatusLabel.Text = r.Ok ? $"git · staged · {row.Path}" : "git · stage fail";
         if (r.Ok)
@@ -94,8 +102,8 @@ public partial class MainWindow
 
         var cwd = _session.WorkspaceRoot ?? Environment.CurrentDirectory;
         var r = GlassGitProcess.Run(cwd, "restore", "--staged", "--", row.Path);
-        if (GitOutput is not null && !string.IsNullOrWhiteSpace(r.Output))
-            GitOutput.Text = r.Output;
+        if (!string.IsNullOrWhiteSpace(r.Output))
+            SetGitOutput(r.Output);
         if (GitStatusLabel is not null)
             GitStatusLabel.Text = r.Ok ? $"git · unstaged · {row.Path}" : "git · unstage fail";
         if (r.Ok)
@@ -114,8 +122,7 @@ public partial class MainWindow
 
         var cwd = _session.WorkspaceRoot ?? Environment.CurrentDirectory;
         var r = GlassGitProcess.Run(cwd, "commit", "-m", msg);
-        if (GitOutput is not null)
-            GitOutput.Text = string.IsNullOrWhiteSpace(r.Output) ? (r.Ok ? "(committed)" : "commit failed") : r.Output;
+        SetGitOutput(string.IsNullOrWhiteSpace(r.Output) ? (r.Ok ? "(committed)" : "commit failed") : r.Output);
         if (GitStatusLabel is not null)
             GitStatusLabel.Text = r.Ok ? "git · committed" : "git · commit fail";
         if (r.Ok)
@@ -132,8 +139,7 @@ public partial class MainWindow
         if (GitStatusLabel is not null)
             GitStatusLabel.Text = "git · push…";
         var r = GlassGitProcess.Run(cwd, "push");
-        if (GitOutput is not null)
-            GitOutput.Text = string.IsNullOrWhiteSpace(r.Output) ? (r.Ok ? "(pushed)" : "push failed") : r.Output;
+        SetGitOutput(string.IsNullOrWhiteSpace(r.Output) ? (r.Ok ? "(pushed)" : "push failed") : r.Output);
         if (GitStatusLabel is not null)
             GitStatusLabel.Text = r.Ok ? "git · pushed" : "git · push fail";
     }
@@ -144,8 +150,7 @@ public partial class MainWindow
         if (GitStatusLabel is not null)
             GitStatusLabel.Text = "git · submodule…";
         var r = GlassGitProcess.Run(cwd, "submodule", "update", "--init", "--recursive");
-        if (GitOutput is not null)
-            GitOutput.Text = string.IsNullOrWhiteSpace(r.Output) ? (r.Ok ? "(submodule ok)" : "submodule failed") : r.Output;
+        SetGitOutput(string.IsNullOrWhiteSpace(r.Output) ? (r.Ok ? "(submodule ok)" : "submodule failed") : r.Output);
         if (GitStatusLabel is not null)
             GitStatusLabel.Text = r.Ok ? "git · submodule ok" : "git · submodule fail";
         if (r.Ok)
@@ -154,7 +159,7 @@ public partial class MainWindow
 
     internal void GitList_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
     {
-        if (GitList?.SelectedItem is not GlassGitPorcelainParse.Row row || GitOutput is null)
+        if (GitList?.SelectedItem is not GlassGitPorcelainParse.Row row || GitDiffViewer is null)
             return;
 
         var cwd = _session.WorkspaceRoot ?? Environment.CurrentDirectory;
@@ -176,19 +181,19 @@ public partial class MainWindow
             using var p = Process.Start(psi);
             if (p is null)
             {
-                GitOutput.Text = "git diff failed to start";
+                SetGitOutput("git diff failed to start");
                 return;
             }
 
             var text = p.StandardOutput.ReadToEnd() + p.StandardError.ReadToEnd();
             p.WaitForExit(20_000);
-            GitOutput.Text = string.IsNullOrWhiteSpace(text) ? "(no diff)" : text;
+            SetGitOutput(string.IsNullOrWhiteSpace(text) ? "(no diff)" : text);
             if (GitStatusLabel is not null)
                 GitStatusLabel.Text = $"git · diff · {row.Display}";
         }
         catch (Exception ex)
         {
-            GitOutput.Text = ex.Message;
+            SetGitOutput(ex.Message);
         }
     }
 
@@ -199,8 +204,7 @@ public partial class MainWindow
 
         CancelGitProc();
         _gitRows.Clear();
-        if (GitOutput is not null)
-            GitOutput.Text = "";
+        SetGitOutput("");
         _gitBusy = true;
         if (GitStatusLabel is not null)
             GitStatusLabel.Text = "git · porcelain…";
@@ -264,8 +268,7 @@ public partial class MainWindow
             _gitBusy = false;
             if (GitStatusLabel is not null)
                 GitStatusLabel.Text = "git · fail";
-            if (GitOutput is not null)
-                GitOutput.Text = ex.Message;
+            SetGitOutput(ex.Message);
         }
     }
 

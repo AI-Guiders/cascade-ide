@@ -33,7 +33,7 @@ public partial class MainWindow
     Border? MfdGitHost => MfdHosts?.MfdGitHost;
     TextBlock? GitStatusLabel => MfdHosts?.GitStatusLabel;
     ListBox? GitList => MfdHosts?.GitList;
-    TextBox? GitOutput => MfdHosts?.GitOutput;
+    FlowDocumentScrollViewer? GitDiffViewer => MfdHosts?.GitDiffViewer;
     TextBox? GitCommitMessage => MfdHosts?.GitCommitMessage;
 
     Border? MfdProblemsHost => MfdHosts?.MfdProblemsHost;
