@@ -28,6 +28,8 @@
 - DomainBoard `glance · unavailable` with empty WorkspaceRoot = seeming (climb / latch-only must paint).
 
 ## last_ship
+- 2026-08-05 · Topology 3-window dedicated dogfood `(intercom)(sit)(world)` · OneOf→Triple Sync fix (close hosts before EnsurePfd) · P Plan WHY/NEXT live · evidence `tmp-glass-shots/topology-3win-{forward,pfd,mfd}-fixed-20260805.png`
+- 2026-08-05 · presentation latch merge live dogfood · mfd_page=Events alone kept topology `(intercom)(sit/world/alert)` · title `sit/world/alert · alert active · OneOf host` · evidence `tmp-glass-shots/latch-merge-alert-oneof-20260805.png` · cdp-mcp `67d03f0` hard-self 21:40Z
 - 2026-08-05 · Topology OneOf v1 dogfood 2-window channel switch sit→world · titles `sit/world/alert · sit|world active · OneOf host` · evidence `tmp-glass-shots/topology-oneof-sit-active-20260805.png` + `topology-oneof-world-active-20260805.png` · latch merge fix cdp-mcp (mfd_page alone must not wipe topology)
 - 2026-08-04 · Dig WHY+NEXT Glass face LIVE · WHY=sealed course · NEXT=TM leaf · COURSE=Shared-SSOT · evidence `tmp-glass-shots/window-20260804-plan-why-next-live.png` (title `P · PFD host`) · dig note `scratch/dig-why-next-glass-face-20260804.md`
 - 2026-08-04 · Applies-on-locus live dogfood · semantic Roslyn Collect + CLEAN tone fix · APPLIES=`E1 W0 · problems on MFD` · tint L6 · evidence `tmp-glass-shots/window-20260804-applies-semantic.png` (title `M · MFD host`)
