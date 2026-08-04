@@ -25,8 +25,9 @@ internal static partial class GlassIntercomSend
 
     /// <summary>
     /// Publish human→PF. Body may include leading <c>@PF</c> (stripped). Empty → null.
+    /// Also mirrors body onto IdeShare operator inbox (<c>share from=operator</c>).
     /// </summary>
-    public static Sent? TrySend(string? raw)
+    public static Sent? TrySend(string? raw, string? workspaceRoot = null)
     {
         if (string.IsNullOrWhiteSpace(raw))
             return null;
@@ -65,6 +66,7 @@ internal static partial class GlassIntercomSend
             File.WriteAllText(tmp, json);
             File.Move(tmp, path, overwrite: true);
             GlassIntercomJournal.Append(id, "pm", "pf", body, "human", doc.StampedUtc, name, kind);
+            _ = GlassOperatorShareShelf.TryPut(body, workspaceRoot, id);
             return new Sent(id, body, LatchPaint.FormatIntercomRole("pm", "pf", name, kind));
         }
         catch

@@ -171,6 +171,7 @@
     <!-- Peel7–9 + peel12: live in GlassCore (single compile) -->
     <Compile Remove="Features\Settings\DataAcquisition\SettingsDefaultsPaths.cs" />
     <Compile Remove="Features\Cdp\CdpHabitatPaths.cs" />
+    <Compile Remove="Features\Cdp\GlassOperatorShareShelf.cs" />
     <Compile Remove="Features\Cdp\CdpLatchIo.cs" />
     <!-- Peel14 typed settings / SettingsService (in GlassCore). -->
     <Compile Remove="Services\SettingsEnvResolver.cs" />

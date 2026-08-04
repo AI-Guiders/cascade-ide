@@ -8,12 +8,14 @@
 ## Entry
 - Parser: `CascadeIDE.GlassCore/Intercom/IntercomMarkdown.cs`
 - WPF: `CDP.GlassCockpit.Windows/GlassIntercomMarkdownBody.cs` → `MainWindow.xaml` feed template
-- Tests: `CascadeIDE.Tests/IntercomMarkdownTests.cs`
+- Human send: `GlassIntercomSend` → voice latch + journal + `GlassOperatorShareShelf` (IdeShare operator inbox)
+- Tests: `CascadeIDE.Tests/IntercomMarkdownTests.cs` · `GlassOperatorShareShelfTests.cs`
 
 ## Antipatterns
 - Reparenting a still-parented WPF child into `Content` (crash: logical child already set).
 - Forking Markdig preview host into Glass feed for "normal MD".
 - Silent Cursor Write past PathMutateGate for these files.
+- Human Intercom send that only latches PF without writing `.cdp/share` — agent cannot `share from=operator`.
 
 ## last_ship
-- 2026-08-03 · Glass Intercom MD subset live dogfood · commits `02425a61` + follow-up Glass UI
+- 2026-08-04 · share-to-model human→agent shelf · `GlassOperatorShareShelf` + Intercom send mirror · PNG Intercom/near-black/CFG

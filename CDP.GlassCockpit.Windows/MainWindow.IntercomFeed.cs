@@ -219,7 +219,7 @@ public partial class MainWindow
         if (TryRunGlassSlash(raw))
             return;
 
-        var sent = GlassIntercomSend.TrySend(raw);
+        var sent = GlassIntercomSend.TrySend(raw, _session.WorkspaceRoot);
         if (sent is null)
         {
             StatusText.Text = "glass · intercom · empty — nothing sent";

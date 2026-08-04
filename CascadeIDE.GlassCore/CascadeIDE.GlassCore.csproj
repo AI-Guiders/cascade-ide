@@ -143,6 +143,7 @@
     <Compile Include="..\Features\Settings\DataAcquisition\SettingsDefaultsPaths.cs" Link="Features\Settings\DataAcquisition\SettingsDefaultsPaths.cs" />
     <!-- Peel8: cdp-mcp latch state root + named LATEST paths (watchers stay host). -->
     <Compile Include="..\Features\Cdp\CdpHabitatPaths.cs" Link="Features\Cdp\CdpHabitatPaths.cs" />
+    <Compile Include="..\Features\Cdp\GlassOperatorShareShelf.cs" Link="Features\Cdp\GlassOperatorShareShelf.cs" />
     <!-- Peel9: latch settle + safe text read (Avalonia PostApply stays host CdpLatchFs). -->
     <Compile Include="..\Features\Cdp\CdpLatchIo.cs" Link="Features\Cdp\CdpLatchIo.cs" />
     <!-- Peel14: typed CascadeIdeSettings + SettingsService (Avalonia-free SSOT loader). -->
