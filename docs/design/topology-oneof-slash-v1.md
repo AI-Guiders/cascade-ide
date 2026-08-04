@@ -5,15 +5,17 @@
 
 ## Hard steer
 
-- **Scan Pattern P | F | M stays.** Attention geography does not go away.
-- **Channels are a stack of functions on those anchors** — same idea as Boeing **ND**: one display, several roles (MFD / ECL / …) without inventing a fourth scan seat.
-- Wire names **surfaces** (`intercom`, `editor`, `sit`, `world`, `alert`…). Assignment to P/F/M is **where that stack sits in the scan**, not «P/F/M disappeared».
+- **Scan Pattern P | F | M stays** as convenient **attention labels** (geography of glance / intent).
+- **«Meta» means:** P/F/M name the *scan seat*, not a physical monitor. That naming **detaches Scan Pattern from physical topology** (2 vs 3 windows, OneOf packing). Physical packing is separate — `/` and window count.
+- **Channels are a stack of functions on those scan seats** — Boeing **ND** analogy: one display geography, several roles, without inventing a fourth scan seat.
+- Wire may name **surfaces** (`intercom`, `editor`, `sit`, `world`, `alert`…). Assignment to P/F/M is which **scan label** that stack rides — not «which HDMI».
 
 ## Wrong swings (do not repeat)
 
 1. «OneOf = any pair of P|F|M as ontology» — treats anchors as the packed *content*.
 2. «P/F/M nobody / only channel ids, no scan» — throws away Scan Pattern.
-3. Right: **anchors = scan geography**; **channels/surfaces = stack on a geographic slot**; `/` = XOR inside one stack/slot.
+3. «Meta = P/F/M are paint hints only / not scan» — wrong sense of meta; meta = scan labels unbound from physical screens.
+4. Right: **P/F/M = Scan Pattern labels (abstract)**; **physical topology** = 2|3 windows + `/`; **channels** = function stacks on scan seats.
 
 ## Wire → Scan
 
