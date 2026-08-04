@@ -102,9 +102,8 @@ public static class GlassGlanceCards
         var hops = face.HopLine;
         var hopsTone = string.IsNullOrWhiteSpace(hops) ? "idle" : "ok";
         var lookTone = ToneFilled(face.LookMap, "meta");
-        var appliesHasError = !string.IsNullOrWhiteSpace(face.AppliesOnLocus)
-            && face.AppliesOnLocus.Contains('E', StringComparison.Ordinal)
-            && !face.AppliesOnLocus.Contains("E0", StringComparison.Ordinal);
+        // Prefer structured Face; "CLEAN" must not paint bad (legacy Contains('E') false positive).
+        var appliesHasError = face.Applies is { Errors: > 0 };
         var appliesTone = appliesHasError ? "bad" : ToneFilled(face.AppliesOnLocus, "ok");
 
         return

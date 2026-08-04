@@ -48,6 +48,21 @@ public sealed class GlassRoslynDiagnosticsFeedTests
         Assert.NotEmpty(rows);
         Assert.All(rows, r => Assert.Contains(r.Severity, new[] { "error", "warning" }));
     }
+
+    [Fact]
+    public void CollectForFile_semantic_type_error()
+    {
+        var path = Path.Combine(Path.GetTempPath(), "glass-roslyn-sem-" + Guid.NewGuid().ToString("N") + ".cs");
+        var rows = GlassRoslynDiagnosticsFeed.CollectForFile(
+            path,
+            """
+            class Dogfood
+            {
+                void Broken() { int x = "not-an-int"; }
+            }
+            """);
+        Assert.Contains(rows, r => r.IsError && r.Line == 3);
+    }
 }
 
 public sealed class GlassHybridIndexStatusProbeTests

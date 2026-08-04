@@ -6,9 +6,11 @@ using Microsoft.CodeAnalysis.Text;
 
 namespace CascadeIDE.SoftOrgan;
 
-/// <summary>Lexer/syntax Roslyn diagnostics for open editor (MSBuild semantic stays in build output).</summary>
+/// <summary>Syntax + lightweight semantic Roslyn diagnostics for open editor (MSBuild stays in build output).</summary>
 public static class GlassRoslynDiagnosticsFeed
 {
+    static readonly Lazy<IReadOnlyList<MetadataReference>> BasicRefs = new(LoadBasicReferences);
+
     public static IReadOnlyList<GlassProblemItem> CollectForFile(string? filePath, string? sourceText)
     {
         if (string.IsNullOrWhiteSpace(filePath)
@@ -21,14 +23,21 @@ public static class GlassRoslynDiagnosticsFeed
             var tree = CSharpSyntaxTree.ParseText(
                 SourceText.From(sourceText),
                 path: filePath);
+            var compilation = CSharpCompilation.Create(
+                "glass-applies-locus",
+                [tree],
+                BasicRefs.Value,
+                new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
+
             var rows = new List<GlassProblemItem>();
-            foreach (var d in tree.GetDiagnostics())
+            foreach (var d in tree.GetDiagnostics().Concat(compilation.GetDiagnostics()))
             {
                 if (d.Severity is not (DiagnosticSeverity.Error or DiagnosticSeverity.Warning))
                     continue;
 
-                var line = d.Location.GetLineSpan().StartLinePosition.Line + 1;
-                var col = d.Location.GetLineSpan().StartLinePosition.Character + 1;
+                var span = d.Location.GetLineSpan();
+                var line = span.StartLinePosition.Line + 1;
+                var col = span.StartLinePosition.Character + 1;
                 var sev = d.Severity == DiagnosticSeverity.Error ? "error" : "warning";
                 rows.Add(new GlassProblemItem(
                     filePath,
@@ -41,7 +50,7 @@ public static class GlassRoslynDiagnosticsFeed
                     break;
             }
 
-            return rows;
+            return Dedup(rows);
         }
         catch
         {
@@ -64,5 +73,31 @@ public static class GlassRoslynDiagnosticsFeed
         }
 
         return merged;
+    }
+
+    static IReadOnlyList<GlassProblemItem> Dedup(IReadOnlyList<GlassProblemItem> rows) =>
+        MergeDistinct(rows, []);
+
+    static IReadOnlyList<MetadataReference> LoadBasicReferences()
+    {
+        var list = new List<MetadataReference>(4);
+        void Add(Type t)
+        {
+            try
+            {
+                var loc = t.Assembly.Location;
+                if (!string.IsNullOrWhiteSpace(loc))
+                    list.Add(MetadataReference.CreateFromFile(loc));
+            }
+            catch
+            {
+                /* skip */
+            }
+        }
+
+        Add(typeof(object));
+        Add(typeof(Enumerable));
+        Add(typeof(Uri));
+        return list;
     }
 }
