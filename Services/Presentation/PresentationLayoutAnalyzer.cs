@@ -56,7 +56,7 @@ public static class PresentationLayoutAnalyzer
         && (IsPfdForwardCombinedOnFirstScreen(parse.Screens)
             || IsTripleOneAnchorPerZonePreset(parse.Screens)
             || IsPmPlusForwardTwoScreenPreset(parse.Screens, parse.ScreenComposes)
-            || IsPmOneOfForwardTwoScreenPreset(parse.Screens, parse.ScreenComposes)
+            || IsOneOfPlusDedicatedTwoScreenPreset(parse.Screens, parse.ScreenComposes)
             || IsForwardMfdTwoScreenPreset(parse.Screens));
 
     /// <summary>
@@ -93,18 +93,65 @@ public static class PresentationLayoutAnalyzer
 
     /// <summary>
     /// Два дисплея: Forward + OneOf <c>P/M</c> (full TopLevel XOR). Sym <c>(P/M)(F)</c> / <c>(F)(P/M)</c>.
+    /// Subset of <see cref="IsOneOfPlusDedicatedTwoScreenPreset"/> (topology-oneof-slash-v1).
     /// </summary>
     public static bool IsPmOneOfForwardTwoScreenPreset(
         IReadOnlyList<IReadOnlyList<PresentationAnchorSlot>> screens,
-        IReadOnlyList<PresentationZoneCompose>? composes = null)
+        IReadOnlyList<PresentationZoneCompose>? composes = null) =>
+        TryDescribeOneOfPlusDedicatedTwoScreen(screens, composes, out var d, out var a, out var b, out _, out _)
+        && d == PresentationAnchorKind.Forward
+        && IsUnorderedPair(a, b, PresentationAnchorKind.Pfd, PresentationAnchorKind.Mfd);
+
+    /// <summary>
+    /// Два дисплея: один dedicated-якорь + OneOf двух остальных (полный набор P|F|M).
+    /// Examples: <c>(F)(P/M)</c> · <c>(P)(F/M)</c> · <c>(M)(P/F)</c> (+ sym). topology-oneof-slash-v1.
+    /// </summary>
+    public static bool IsOneOfPlusDedicatedTwoScreenPreset(
+        IReadOnlyList<IReadOnlyList<PresentationAnchorSlot>> screens,
+        IReadOnlyList<PresentationZoneCompose>? composes = null) =>
+        TryDescribeOneOfPlusDedicatedTwoScreen(screens, composes, out _, out _, out _, out _, out _);
+
+    /// <summary>
+    /// Describe 2-screen OneOf packing: dedicated singleton + OneOf pair covering {P,F,M}.
+    /// </summary>
+    public static bool TryDescribeOneOfPlusDedicatedTwoScreen(
+        IReadOnlyList<IReadOnlyList<PresentationAnchorSlot>> screens,
+        IReadOnlyList<PresentationZoneCompose>? composes,
+        out PresentationAnchorKind dedicated,
+        out PresentationAnchorKind oneOfA,
+        out PresentationAnchorKind oneOfB,
+        out int dedicatedScreen,
+        out int oneOfScreen)
     {
+        dedicated = default;
+        oneOfA = default;
+        oneOfB = default;
+        dedicatedScreen = -1;
+        oneOfScreen = -1;
         if (screens.Count != 2 || composes is null)
             return false;
 
-        var a = screens[0];
-        var b = screens[1];
-        return IsPmOneOfCombinedScreen(a, ComposeAt(composes, 0)) && IsForwardOnlyScreen(b)
-            || IsForwardOnlyScreen(a) && IsPmOneOfCombinedScreen(b, ComposeAt(composes, 1));
+        for (var i = 0; i < 2; i++)
+        {
+            var j = 1 - i;
+            if (!TryGetOneOfPair(screens[i], ComposeAt(composes, i), out var a, out var b))
+                continue;
+            if (SingleAnchorKind(screens[j]) is not { } ded)
+                continue;
+            if (ded == a || ded == b)
+                continue;
+            if (!HasAllZoneKinds(ded, a, b))
+                continue;
+
+            dedicated = ded;
+            oneOfA = a;
+            oneOfB = b;
+            oneOfScreen = i;
+            dedicatedScreen = j;
+            return true;
+        }
+
+        return false;
     }
 
     /// <summary>
@@ -133,20 +180,12 @@ public static class PresentationLayoutAnalyzer
             return false;
 
         if (IsPmPlusForwardTwoScreenPreset(parse.Screens, parse.ScreenComposes)
-            || IsPmOneOfForwardTwoScreenPreset(parse.Screens, parse.ScreenComposes)
+            || IsOneOfPlusDedicatedTwoScreenPreset(parse.Screens, parse.ScreenComposes)
             || IsForwardMfdTwoScreenPreset(parse.Screens))
         {
-            if (IsForwardOnlyScreen(parse.Screens[0]))
-            {
-                index = 0;
+            // Main = screen that carries Forward (dedicated F, or OneOf that includes F).
+            if (TryGetScreenIndexContaining(parse.Screens, PresentationAnchorKind.Forward, out index))
                 return true;
-            }
-
-            if (parse.Screens.Count > 1 && IsForwardOnlyScreen(parse.Screens[1]))
-            {
-                index = 1;
-                return true;
-            }
         }
 
         return TryGetSingleAnchorScreenIndex(parse.Screens, PresentationAnchorKind.Forward, out index);
@@ -177,29 +216,25 @@ public static class PresentationLayoutAnalyzer
         return false;
     }
 
-    /// <summary>Индекс экрана OneOf <c>P/M</c> host (симметрично <c>(F)</c>).</summary>
+    /// <summary>Индекс экрана OneOf <c>P/M</c> host (симметрично <c>(F)</c>). Compat alias of OneOf host screen.</summary>
     public static bool TryGetPmOneOfHostPresentationScreenIndex(
+        IReadOnlyList<IReadOnlyList<PresentationAnchorSlot>> screens,
+        IReadOnlyList<PresentationZoneCompose> composes,
+        out int index) =>
+        TryGetOneOfHostPresentationScreenIndex(screens, composes, out index)
+        && IsPmOneOfForwardTwoScreenPreset(screens, composes);
+
+    /// <summary>Индекс экрана generic OneOf host (any pair + dedicated). topology-oneof-slash-v1.</summary>
+    public static bool TryGetOneOfHostPresentationScreenIndex(
         IReadOnlyList<IReadOnlyList<PresentationAnchorSlot>> screens,
         IReadOnlyList<PresentationZoneCompose> composes,
         out int index)
     {
         index = -1;
-        if (!IsPmOneOfForwardTwoScreenPreset(screens, composes))
+        if (!TryDescribeOneOfPlusDedicatedTwoScreen(screens, composes, out _, out _, out _, out _, out var oneOfScreen))
             return false;
-
-        if (IsPmOneOfCombinedScreen(screens[0], ComposeAt(composes, 0)))
-        {
-            index = 0;
-            return true;
-        }
-
-        if (IsPmOneOfCombinedScreen(screens[1], ComposeAt(composes, 1)))
-        {
-            index = 1;
-            return true;
-        }
-
-        return false;
+        index = oneOfScreen;
+        return true;
     }
 
     /// <summary>
@@ -271,14 +306,48 @@ public static class PresentationLayoutAnalyzer
         && ContainsAnchor(screen, PresentationAnchorKind.Mfd)
         && !ContainsAnchor(screen, PresentationAnchorKind.Forward);
 
-    /// <summary>На экране PFD+MFD без F — OneOf <c>P/M</c>.</summary>
-    private static bool IsPmOneOfCombinedScreen(
+    /// <summary>OneOf group with exactly two distinct anchors (no weights).</summary>
+    static bool TryGetOneOfPair(
         IReadOnlyList<PresentationAnchorSlot> screen,
-        PresentationZoneCompose compose) =>
-        compose == PresentationZoneCompose.OneOf
-        && ContainsAnchor(screen, PresentationAnchorKind.Pfd)
-        && ContainsAnchor(screen, PresentationAnchorKind.Mfd)
-        && !ContainsAnchor(screen, PresentationAnchorKind.Forward);
+        PresentationZoneCompose compose,
+        out PresentationAnchorKind a,
+        out PresentationAnchorKind b)
+    {
+        a = default;
+        b = default;
+        if (compose != PresentationZoneCompose.OneOf || screen.Count != 2)
+            return false;
+        if (screen[0].Weight is not null || screen[1].Weight is not null)
+            return false;
+        a = screen[0].Kind;
+        b = screen[1].Kind;
+        return a != b;
+    }
+
+    static bool IsUnorderedPair(
+        PresentationAnchorKind a,
+        PresentationAnchorKind b,
+        PresentationAnchorKind x,
+        PresentationAnchorKind y) =>
+        a == x && b == y || a == y && b == x;
+
+    static bool TryGetScreenIndexContaining(
+        IReadOnlyList<IReadOnlyList<PresentationAnchorSlot>> screens,
+        PresentationAnchorKind kind,
+        out int index)
+    {
+        for (var i = 0; i < screens.Count; i++)
+        {
+            if (ContainsAnchor(screens[i], kind))
+            {
+                index = i;
+                return true;
+            }
+        }
+
+        index = -1;
+        return false;
+    }
 
     static PresentationZoneCompose ComposeAt(IReadOnlyList<PresentationZoneCompose>? composes, int index)
     {

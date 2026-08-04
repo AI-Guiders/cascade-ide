@@ -8,7 +8,8 @@ public readonly record struct PresentationTopologyFlags(
     bool TripleOneAnchorPerZone,
     bool ForwardMfdTwoScreen,
     bool PmForwardTwoScreen,
-    bool PmOneOfForwardTwoScreen)
+    bool PmOneOfForwardTwoScreen,
+    bool OneOfPlusDedicatedTwoScreen)
 {
     /// <summary>Нужен <see cref="Views.MfdHostWindow"/> (второй TopLevel с MFD).</summary>
     public bool MfdHostTopology =>
@@ -20,8 +21,11 @@ public readonly record struct PresentationTopologyFlags(
     /// <summary>Нужен PM split host (<c>P+M</c> columns).</summary>
     public bool PmHostTopology => PmForwardTwoScreen;
 
-    /// <summary>Нужен PM OneOf host (<c>P/M</c> XOR full zone).</summary>
+    /// <summary>Нужен PM OneOf host (<c>P/M</c> XOR full zone) — v0 compat subset.</summary>
     public bool PmOneOfHostTopology => PmOneOfForwardTwoScreen;
+
+    /// <summary>Нужен generic OneOf host (any pair + dedicated) — topology-oneof-slash-v1.</summary>
+    public bool OneOfHostTopology => OneOfPlusDedicatedTwoScreen;
 }
 
 /// <summary>Разбор строки <c>presentation</c> в флаги хостов и кадр <c>MainGrid</c>.</summary>
@@ -47,7 +51,8 @@ public static class PresentationTopologyResolver
             PresentationLayoutAnalyzer.IsTripleOneAnchorPerZonePreset(screens),
             PresentationLayoutAnalyzer.IsForwardMfdTwoScreenPreset(screens),
             PresentationLayoutAnalyzer.IsPmPlusForwardTwoScreenPreset(screens, composes),
-            PresentationLayoutAnalyzer.IsPmOneOfForwardTwoScreenPreset(screens, composes));
+            PresentationLayoutAnalyzer.IsPmOneOfForwardTwoScreenPreset(screens, composes),
+            PresentationLayoutAnalyzer.IsOneOfPlusDedicatedTwoScreenPreset(screens, composes));
 
     /// <summary>
     /// Кадр колонок главного окна при типичном старте: хосты PFD/MFD открыты и подавляют свои колонки в main.
