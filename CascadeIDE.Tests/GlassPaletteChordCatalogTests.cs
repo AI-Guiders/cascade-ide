@@ -176,6 +176,20 @@ public sealed class GlassPaletteChordCatalogTests
                     && ias == "slash_attach");
         Assert.True(GlassMelodyGlassActions.TryMapCommandId("intercom.attach_scope", out var isc)
                     && isc == "slash_attach");
+        Assert.True(GlassMelodyGlassActions.TryMapCommandId("chat_select_next_thread", out var tn)
+                    && tn == "topic_next");
+        Assert.True(GlassMelodyGlassActions.TryMapCommandId("chat_select_prev_thread", out var tp)
+                    && tp == "topic_prev");
+        Assert.True(GlassMelodyGlassActions.TryMapCommandId("chat_show_thread_overview", out var to)
+                    && to == "topics_all");
+        Assert.True(GlassMelodyGlassActions.TryMapCommandId("chat_open_selected_thread", out var ot)
+                    && ot == "slash_open");
+        Assert.True(GlassMelodyGlassActions.TryMapCommandId("chat_select_next_message", out var mn)
+                    && mn == "feed_page_down");
+        Assert.True(GlassMelodyGlassActions.TryMapCommandId("chat_select_prev_message", out var mp)
+                    && mp == "feed_page_up");
+        Assert.Contains(GlassCommandPaletteCatalog.Filter("topic next"), e => e.Id == "topic_next");
+        Assert.Contains(GlassCommandPaletteCatalog.Filter("feed page"), e => e.Id == "feed_page_down");
         Assert.Contains(GlassIntentMelodyCatalog.All(), a => a.Alias == "of");
         Assert.Contains(GlassIntentMelodyCatalog.All(), a => a.Alias == "fe");
         Assert.True(GlassMelodyGlassActions.TryMapCommandId("save_document", out var sf)

@@ -199,6 +199,18 @@ public partial class MainWindow
             case "topics_all":
                 TopicAllBtn_OnClick(TopicAllBtn, new RoutedEventArgs());
                 break;
+            case "topic_next":
+                SelectIntercomTopicNext();
+                break;
+            case "topic_prev":
+                SelectIntercomTopicPrev();
+                break;
+            case "feed_page_down":
+                PageIntercomFeed(+1);
+                break;
+            case "feed_page_up":
+                PageIntercomFeed(-1);
+                break;
             case "mfd_editor":
                 SelectMfdPage("Editor");
                 break;

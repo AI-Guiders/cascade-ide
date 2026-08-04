@@ -159,10 +159,61 @@ public partial class MainWindow
     {
         if (sender is not Button { Tag: string id } || id.Length == 0)
             return;
+        ApplyIntercomTopicSelection(id);
+    }
+
+    void SelectIntercomTopicNext()
+    {
+        var ids = _topics.Select(t => t.Id).ToArray();
+        var next = CascadeIDE.Intercom.GlassIntercomTopicNav.Next(_selectedTopicId, ids);
+        if (next is null || next.Length == 0)
+        {
+            StatusText.Text = "glass · topic next · empty";
+            return;
+        }
+
+        ApplyIntercomTopicSelection(next);
+        StatusText.Text = $"glass · topic next · {ShortTopicLabel(next)}";
+    }
+
+    void SelectIntercomTopicPrev()
+    {
+        var ids = _topics.Select(t => t.Id).ToArray();
+        var prev = CascadeIDE.Intercom.GlassIntercomTopicNav.Prev(_selectedTopicId, ids);
+        if (prev is null || prev.Length == 0)
+        {
+            StatusText.Text = "glass · topic prev · empty";
+            return;
+        }
+
+        ApplyIntercomTopicSelection(prev);
+        StatusText.Text = $"glass · topic prev · {ShortTopicLabel(prev)}";
+    }
+
+    void ApplyIntercomTopicSelection(string id)
+    {
         _selectedTopicId = id;
         var card = _topics.FirstOrDefault(t =>
             string.Equals(t.Id, id, StringComparison.OrdinalIgnoreCase));
         _selectedTopicEntryIds = card?.EntryIds.ToArray() ?? [id];
         RebuildIntercomFeedFromJournal(stickEnd: true);
+    }
+
+    static string ShortTopicLabel(string id) =>
+        id.Length <= 28 ? id : id[..25] + "…";
+
+    void PageIntercomFeed(int direction)
+    {
+        var step = Math.Max(48, FeedScroll.ViewportHeight * 0.85);
+        var target = FeedScroll.VerticalOffset + direction * step;
+        if (target < 0)
+            target = 0;
+        var max = Math.Max(0, FeedScroll.ExtentHeight - FeedScroll.ViewportHeight);
+        if (target > max)
+            target = max;
+        FeedScroll.ScrollToVerticalOffset(target);
+        StatusText.Text = direction > 0
+            ? "glass · feed page ↓"
+            : "glass · feed page ↑";
     }
 }
