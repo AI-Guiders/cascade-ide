@@ -100,6 +100,10 @@ public partial class MainWindow
 
     void PaintIntercomHud(GlassIntercomHud.Snapshot snap)
     {
+        AutoiKorryBtn.Content = snap.AutoiLabel;
+        AutoiKorryBtn.ToolTip = snap.Mode is "talk" or "halt"
+            ? $"Partner dialog · Autoi OFF ({snap.Mode})"
+            : "AutoIgnition · 2-state";
         PaintKorry(AutoiKorryBtn, snap.Autoi);
         PaintKorry(HildKorryBtn, snap.Hild);
         PaintKorry(VadKorryBtn, snap.Vad, enabled: false);

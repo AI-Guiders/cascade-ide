@@ -18,10 +18,13 @@ public static class GlassIntercomHud
         bool Vad,
         string HdgCrs,
         bool ContinuityActive,
-        string? Pulse);
+        string? Pulse,
+        bool AwaitPartner,
+        string Mode,
+        string AutoiLabel);
 
     public static Snapshot Empty { get; } =
-        new(false, false, false, "HDG/CRS · —", false, null);
+        new(false, false, false, "HDG/CRS · —", false, null, false, "fly", "AUTOI");
 
     public static Snapshot ParseIgniteJson(string? raw)
     {
@@ -39,19 +42,52 @@ public static class GlassIntercomHud
                 && !string.Equals(schema, IgniteSchema, StringComparison.OrdinalIgnoreCase))
                 return Empty;
 
-            var autoi = TryGetBool(root, "autonomous") ?? TryGetBool(root, "autoi") ?? false;
+            var autonomous = TryGetBool(root, "autonomous") ?? TryGetBool(root, "autoi") ?? false;
             var hild = TryGetBool(root, "hild") ?? false;
             var vad = TryGetBool(root, "vad") ?? false;
             var active = TryGetBool(root, "active") ?? false;
+            var awaitPartner = TryGetBool(root, "await_partner") ?? false;
+            var awaitingCount = TryGetInt(root, "awaiting_count") ?? 0;
+            var mode = NormalizeMode(TryGetString(root, "mode"), awaitPartner || awaitingCount > 0);
+            if (mode is "talk" or "halt")
+                awaitPartner = true;
+            // Talk/halt: Autoi Korry OFF even if autonomous latch still true (soft await).
+            var autoi = autonomous && !awaitPartner;
             var pulse = TryGetString(root, "pulse") ?? TryGetString(root, "chrome_hint");
             var course = TryGetString(root, "course");
-            return new Snapshot(autoi, hild, vad, FormatHdgCrs(course), active, pulse);
+            var hdg = mode is "talk" or "halt"
+                ? FormatTalkHdg(mode)
+                : FormatHdgCrs(course);
+            var label = mode switch
+            {
+                "talk" => "TALK",
+                "halt" => "HALT",
+                _ => "AUTOI"
+            };
+            return new Snapshot(autoi, hild, vad, hdg, active, pulse, awaitPartner, mode, label);
         }
         catch
         {
             return Empty;
         }
     }
+
+    public static string NormalizeMode(string? mode, bool awaitPartner)
+    {
+        if (!string.IsNullOrWhiteSpace(mode))
+        {
+            var m = mode.Trim().ToLowerInvariant();
+            if (m is "fly" or "talk" or "halt")
+                return m;
+        }
+
+        return awaitPartner ? "talk" : "fly";
+    }
+
+    public static string FormatTalkHdg(string mode) =>
+        mode.Equals("halt", StringComparison.OrdinalIgnoreCase)
+            ? "HDG/CRS · HALT · Autoi OFF"
+            : "HDG/CRS · TALK · Autoi OFF";
 
     public static string FormatHdgCrs(string? courseOrBody)
     {
@@ -113,6 +149,13 @@ public static class GlassIntercomHud
             JsonValueKind.False => false,
             _ => null
         };
+    }
+
+    static int? TryGetInt(JsonElement root, string name)
+    {
+        if (!root.TryGetProperty(name, out var el))
+            return null;
+        return el.ValueKind == JsonValueKind.Number && el.TryGetInt32(out var n) ? n : null;
     }
 
     static string? TryGetString(JsonElement root, string name)
