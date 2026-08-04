@@ -27,6 +27,10 @@ public static class CdpHabitatPaths
     public const string CitizenDialogRequestLatchFileName = "citizen-dialog-request-LATEST.json";
     /// <summary>Last AutoI wake charge (composer|habitat) — Glass Autoi consumer.</summary>
     public const string IgniteWakeLatchFileName = "ignite-wake-LATEST.json";
+    /// <summary>AutoIgnition continuity chrome (autonomous/hild/course for Intercom HUD).</summary>
+    public const string IgniteLatchFileName = "ignite-LATEST.json";
+    /// <summary>Glass Intercom HUD → habitat AutoI/HILD toggle request.</summary>
+    public const string IgniteCmdLatchFileName = "ignite-cmd-LATEST.json";
     /// <summary>Task Manager plan pulse — Glass P Plan readout.</summary>
     public const string PlanLatchFileName = "plan-LATEST.json";
 
@@ -59,6 +63,10 @@ public static class CdpHabitatPaths
     public static string CitizenDialogRequestLatchPath => GetLatchPath(CitizenDialogRequestLatchFileName);
 
     public static string IgniteWakeLatchPath => GetLatchPath(IgniteWakeLatchFileName);
+
+    public static string IgniteLatchPath => GetLatchPath(IgniteLatchFileName);
+
+    public static string IgniteCmdLatchPath => GetLatchPath(IgniteCmdLatchFileName);
 
     /// <summary>Ensure state root exists; returns <see cref="StateRoot"/>.</summary>
     public static string EnsureStateRoot()

@@ -10,6 +10,20 @@
     <Setter Property="FontFamily" Value="Segoe UI"/>
     <Setter Property="FontSize" Value="12"/>
   </Style>
+  <!-- Flat aircraft Korry (2-state lit/dim) — not ERS volume deck -->
+  <Style x:Key="KorryBtn" TargetType="Button" BasedOn="{StaticResource ChromeBtn}">
+    <Setter Property="Padding" Value="8,2"/>
+    <Setter Property="Margin" Value="0,0,6,0"/>
+    <Setter Property="FontSize" Value="10"/>
+    <Setter Property="FontWeight" Value="SemiBold"/>
+    <Setter Property="FontFamily" Value="Consolas"/>
+    <Setter Property="MinWidth" Value="52"/>
+    <Setter Property="Height" Value="22"/>
+    <Setter Property="Background" Value="#222"/>
+    <Setter Property="Foreground" Value="#888"/>
+    <Setter Property="BorderBrush" Value="#3F3F46"/>
+    <Setter Property="Cursor" Value="Hand"/>
+  </Style>
   <Style x:Key="TopicCardBtn" TargetType="Button" BasedOn="{StaticResource ChromeBtn}">
     <Style.Triggers>
       <DataTrigger Binding="{Binding IsSelected}" Value="True">

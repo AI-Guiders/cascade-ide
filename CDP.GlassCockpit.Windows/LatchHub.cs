@@ -49,6 +49,9 @@ internal sealed class LatchHub : IDisposable
     /// <summary>ignite-wake-LATEST.json path (AutoI wake charge — Autoi consumer).</summary>
     public event Action<string>? IgniteWakeChanged;
 
+    /// <summary>ignite-LATEST.json path (AutoI/HILD/course → Intercom HUD).</summary>
+    public event Action<string>? IgniteChanged;
+
     /// <summary>organId, chrome_hint (null/blank = clear).</summary>
     public event Action<string, string?>? SoftOrganChanged;
 
@@ -78,6 +81,7 @@ internal sealed class LatchHub : IDisposable
         TryFireExisting(CdpHabitatPaths.SharedLatchFileName, SharedChanged);
         TryFireExisting(CdpHabitatPaths.DiskLatchFileName, DiskChanged);
         TryFireExisting(CdpHabitatPaths.IgniteWakeLatchFileName, IgniteWakeChanged);
+        TryFireExisting(CdpHabitatPaths.IgniteLatchFileName, IgniteChanged);
         foreach (var id in SoftOrganLatchCatalog.Ids)
             TryFireSoftOrgan(id + "-LATEST.json");
     }
@@ -114,6 +118,8 @@ internal sealed class LatchHub : IDisposable
             CdpLatchIo.PostSettledIfExists(CdpHabitatPaths.GetLatchPath(name), p => DiskChanged?.Invoke(p));
         else if (name.Equals(CdpHabitatPaths.IgniteWakeLatchFileName, StringComparison.OrdinalIgnoreCase))
             CdpLatchIo.PostSettledIfExists(CdpHabitatPaths.GetLatchPath(name), p => IgniteWakeChanged?.Invoke(p));
+        else if (name.Equals(CdpHabitatPaths.IgniteLatchFileName, StringComparison.OrdinalIgnoreCase))
+            CdpLatchIo.PostSettledIfExists(CdpHabitatPaths.GetLatchPath(name), p => IgniteChanged?.Invoke(p));
         else if (SoftOrganLatchCatalog.TryParseFileName(name, out var organId))
             CdpLatchIo.PostSettledIfExists(CdpHabitatPaths.GetLatchPath(name), _ => ApplySoftOrganFromDisk(organId, name));
     }

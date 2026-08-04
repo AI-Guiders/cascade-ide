@@ -114,6 +114,23 @@
             </DockPanel>
           </Border>
 
+          <!-- Intercom HUD: flat Korry + HDG/CRS (not chat, not ERS deck) -->
+          <Border DockPanel.Dock="Top" Background="#161A18" Padding="10,5" BorderBrush="#2A2A2A" BorderThickness="0,0,0,1">
+            <DockPanel>
+              <StackPanel DockPanel.Dock="Left" Orientation="Horizontal" VerticalAlignment="Center">
+                <Button x:Name="AutoiKorryBtn" Content="AUTOI" Style="{StaticResource KorryBtn}"
+                        Click="AutoiKorryBtn_OnClick" ToolTip="AutoIgnition · 2-state"/>
+                <Button x:Name="HildKorryBtn" Content="HILD" Style="{StaticResource KorryBtn}"
+                        Click="HildKorryBtn_OnClick" ToolTip="Human-in-loop detector · 2-state"/>
+                <Button x:Name="VadKorryBtn" Content="VAD" Style="{StaticResource KorryBtn}"
+                        Click="VadKorryBtn_OnClick" ToolTip="Voice activity · slot (not wired)"/>
+              </StackPanel>
+              <TextBlock x:Name="HdgCrsText" Text="HDG/CRS · —" FontSize="11" FontFamily="Consolas"
+                         Foreground="#A8C5B5" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"
+                         Margin="12,0,0,0"/>
+            </DockPanel>
+          </Border>
+
           <!-- ADR 0120: editor XOR intercom on Forward; when Forward=intercom, editor mounts on M -->
           <Grid x:Name="ForwardBody">
             <Grid.RowDefinitions>
@@ -179,6 +196,11 @@
                   <DockPanel>
                     <Button x:Name="SendBtn" DockPanel.Dock="Right" Content="Send" Style="{StaticResource ChromeBtn}"
                             Click="SendBtn_OnClick" ToolTip="Send to @PF (Enter / Ctrl+Enter; Shift+Enter = newline; / = slash)"/>
+                    <ComboBox x:Name="ModelPicker" DockPanel.Dock="Left"
+                              Width="150" Margin="0,0,8,0" VerticalAlignment="Center"
+                              Background="#222" Foreground="#EEE" BorderBrush="#3F3F46"
+                              FontSize="11" FontFamily="Segoe UI"
+                              ToolTip="Model for this Intercom seat"/>
                     <TextBox x:Name="ComposerBox"
                              AcceptsReturn="True"
                              TextWrapping="Wrap"

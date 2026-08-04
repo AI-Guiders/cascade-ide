@@ -25,6 +25,7 @@ public partial class MainWindow : Window
         LoadIntercomHistory();
         InitIntercomSlash();
         InitIntercomPresence();
+        InitIntercomHud();
         InitCommandPalette();
         InitCascadeChord();
 
@@ -42,6 +43,7 @@ public partial class MainWindow : Window
         _latches.SharedChanged += OnSharedChanged;
         _latches.DiskChanged += OnDiskChanged;
         _latches.IgniteWakeChanged += OnIgniteWakeChanged;
+        _latches.IgniteChanged += OnIgniteChanged;
         _latches.SoftOrganChanged += OnSoftOrganChanged;
         _latches.AlertChanged += OnAlertChanged;
         _latches.QrhChanged += OnQrhChanged;
