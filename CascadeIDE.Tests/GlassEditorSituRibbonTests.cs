@@ -31,7 +31,10 @@ public sealed class GlassEditorSituRibbonTests
             Assert.Contains("Foo.xaml", face.BlastNames);
             Assert.False(face.Orphan);
             Assert.True(face.HopNodes >= 1);
-            Assert.Contains("focus ·", face.RoleInGraph, StringComparison.Ordinal);
+            Assert.Contains("IN-MAP ·", face.RoleInGraph, StringComparison.Ordinal);
+            Assert.Contains("map on MFD", face.RoleInGraph, StringComparison.Ordinal);
+            // ROLE must not twin BLAST companion names
+            Assert.DoesNotContain("Foo.xaml", face.RoleInGraph, StringComparison.Ordinal);
 
             var line = GlassEditorSituRibbon.Format(
                 a,
@@ -43,6 +46,7 @@ public sealed class GlassEditorSituRibbonTests
             Assert.Contains("WHY ·", line, StringComparison.Ordinal);
             Assert.Contains("BLAST ·", line, StringComparison.Ordinal);
             Assert.Contains("ROLE ·", line, StringComparison.Ordinal);
+            Assert.DoesNotContain("h1:", line, StringComparison.Ordinal);
         }
         finally
         {

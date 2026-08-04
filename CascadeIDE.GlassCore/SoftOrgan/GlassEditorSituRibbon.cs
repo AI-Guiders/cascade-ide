@@ -48,16 +48,12 @@ public static class GlassEditorSituRibbon
             .ToList();
         var blastLine = names.Count > 0 ? string.Join(" · ", names) : "";
 
+        // ROLE glance ≠ BLAST: no companion name list. Full hop map lives on MFD SemanticMap.
         var graph = GlassSemanticMapGraph.Collect(workspaceRoot, editorPath, maxNodes: 48, maxHop: 2);
-        var hopNames = graph.Nodes
-            .Take(blastMax)
-            .Select(n => $"h{n.Hop}:{Path.GetFileName(n.FilePath)}")
-            .Where(s => !string.IsNullOrWhiteSpace(s))
-            .ToList();
         var orphan = graph.Nodes.Count == 0;
         var roleLine = orphan
-            ? "ORPHAN · 0 hops"
-            : $"focus · {graph.Nodes.Count}n/{graph.Edges.Count}e · " + string.Join(" · ", hopNames);
+            ? "ORPHAN · map on MFD"
+            : $"IN-MAP · {graph.Nodes.Count}n/{graph.Edges.Count}e · map on MFD";
 
         return new Face(whyLine, blastLine, names, Truncate(roleLine, 96), graph.Nodes.Count, graph.Edges.Count, orphan);
     }

@@ -162,10 +162,10 @@
                         <TextBlock x:Name="EditorPathLabel" Text="(no file)" FontSize="11" Foreground="{StaticResource Glass.FgMuted}"
                                    FontFamily="Consolas" TextTrimming="CharacterEllipsis"/>
                         <StackPanel x:Name="EditorSituPanel" Margin="0,4,0,0" Visibility="Collapsed"
-                                    ToolTip="Shared-SSOT · WHY + BLAST + ROLE/GRAPH hop">
+                                    ToolTip="Shared-SSOT · WHY + BLAST + ROLE glance (map on MFD SemanticMap)">
                           <uikit:GlassEcamReadout x:Name="FileWhyReadout" Label="FILE WHY" ValueText="—" Margin="0,0,0,4"/>
                           <uikit:GlassEcamReadout x:Name="FileBlastReadout" Label="BLAST" ValueText="—" Margin="0,0,0,4"/>
-                          <uikit:GlassEcamReadout x:Name="FileRoleReadout" Label="ROLE/GRAPH" ValueText="—"/>
+                          <uikit:GlassEcamReadout x:Name="FileRoleReadout" Label="ROLE" ValueText="—"/>
                         </StackPanel>
                       </StackPanel>
                     </DockPanel>
