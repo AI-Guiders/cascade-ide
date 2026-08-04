@@ -3,7 +3,7 @@
 namespace CascadeIDE.SoftOrgan;
 
 /// <summary>
-/// Shared-SSOT Editor situ (Q2): WHY-this-file + blast as instrument faces (not one text ribbon).
+/// Shared-SSOT Editor situ (Q2): WHY-this-file + blast + role glance + diff intent (not one text ribbon).
 /// </summary>
 public static class GlassEditorSituRibbon
 {
@@ -15,12 +15,15 @@ public static class GlassEditorSituRibbon
         string RoleInGraph,
         int HopNodes,
         int HopEdges,
-        bool Orphan)
+        bool Orphan,
+        string DiffIntent,
+        GlassEditorDiffIntent.Face? Diff)
     {
         public bool HasAny =>
             !string.IsNullOrWhiteSpace(Why)
             || !string.IsNullOrWhiteSpace(Blast)
-            || !string.IsNullOrWhiteSpace(RoleInGraph);
+            || !string.IsNullOrWhiteSpace(RoleInGraph)
+            || !string.IsNullOrWhiteSpace(DiffIntent);
     }
 
     public static Face Build(
@@ -31,7 +34,7 @@ public static class GlassEditorSituRibbon
         int blastMax = 3)
     {
         if (string.IsNullOrWhiteSpace(editorPath))
-            return new Face("", "", [], "", 0, 0, Orphan: true);
+            return new Face("", "", [], "", 0, 0, Orphan: true, "", null);
 
         var whyBits = new List<string>(2);
         if (!string.IsNullOrWhiteSpace(leaf))
@@ -55,7 +58,19 @@ public static class GlassEditorSituRibbon
             ? "ORPHAN · map on MFD"
             : $"IN-MAP · {graph.Nodes.Count}n/{graph.Edges.Count}e · map on MFD";
 
-        return new Face(whyLine, blastLine, names, Truncate(roleLine, 96), graph.Nodes.Count, graph.Edges.Count, orphan);
+        var diff = GlassEditorDiffIntent.Collect(workspaceRoot, editorPath);
+        var diffLine = string.IsNullOrWhiteSpace(diff.Line) ? "" : Truncate(diff.Line, 48);
+
+        return new Face(
+            whyLine,
+            blastLine,
+            names,
+            Truncate(roleLine, 96),
+            graph.Nodes.Count,
+            graph.Edges.Count,
+            orphan,
+            diffLine,
+            diff);
     }
 
     /// <summary>Compat dump (tests / legacy). Prefer <see cref="Build"/> for instruments.</summary>
@@ -70,13 +85,15 @@ public static class GlassEditorSituRibbon
         if (!face.HasAny)
             return string.Empty;
 
-        var parts = new List<string>(3);
+        var parts = new List<string>(4);
         if (!string.IsNullOrWhiteSpace(face.Why))
             parts.Add("WHY · " + face.Why);
         if (!string.IsNullOrWhiteSpace(face.Blast))
             parts.Add("BLAST · " + face.Blast);
         if (!string.IsNullOrWhiteSpace(face.RoleInGraph))
             parts.Add("ROLE · " + face.RoleInGraph);
+        if (!string.IsNullOrWhiteSpace(face.DiffIntent))
+            parts.Add("DIFF · " + face.DiffIntent);
         return string.Join("  |  ", parts);
     }
 

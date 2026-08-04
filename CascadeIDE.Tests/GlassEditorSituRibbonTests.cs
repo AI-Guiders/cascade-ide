@@ -47,6 +47,7 @@ public sealed class GlassEditorSituRibbonTests
             Assert.Contains("BLAST ·", line, StringComparison.Ordinal);
             Assert.Contains("ROLE ·", line, StringComparison.Ordinal);
             Assert.DoesNotContain("h1:", line, StringComparison.Ordinal);
+            Assert.Contains("DIFF ·", line, StringComparison.Ordinal);
         }
         finally
         {

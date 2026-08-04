@@ -56,7 +56,7 @@ public partial class MainWindow
 
     void RefreshEditorSituRibbon()
     {
-        if (EditorSituPanel is null || FileWhyReadout is null || FileBlastReadout is null || FileRoleReadout is null)
+        if (EditorSituPanel is null || FileWhyReadout is null || FileBlastReadout is null || FileRoleReadout is null || FileDiffReadout is null)
             return;
 
         if (string.IsNullOrWhiteSpace(_editorPath))
@@ -64,7 +64,10 @@ public partial class MainWindow
             FileWhyReadout.ValueText = "—";
             FileBlastReadout.ValueText = "—";
             FileRoleReadout.ValueText = "—";
+            FileDiffReadout.ValueText = "—";
             EditorSituPanel.Visibility = Visibility.Collapsed;
+            _diffHunkRenderer?.Apply(null);
+            CodeEditor?.TextArea.TextView.InvalidateLayer(ICSharpCode.AvalonEdit.Rendering.KnownLayer.Background);
             return;
         }
 
@@ -78,9 +81,22 @@ public partial class MainWindow
         FileWhyReadout.ValueText = string.IsNullOrWhiteSpace(face.Why) ? "—" : face.Why;
         FileBlastReadout.ValueText = string.IsNullOrWhiteSpace(face.Blast) ? "—" : face.Blast;
         FileRoleReadout.ValueText = string.IsNullOrWhiteSpace(face.RoleInGraph) ? "—" : face.RoleInGraph;
+        FileDiffReadout.ValueText = string.IsNullOrWhiteSpace(face.DiffIntent) ? "—" : face.DiffIntent;
         EditorSituPanel.Visibility = face.HasAny
             ? Visibility.Visible
             : Visibility.Collapsed;
+
+        EnsureDiffHunkRenderer();
+        _diffHunkRenderer!.Apply(face.Diff);
+        CodeEditor.TextArea.TextView.InvalidateLayer(ICSharpCode.AvalonEdit.Rendering.KnownLayer.Background);
+    }
+
+    void EnsureDiffHunkRenderer()
+    {
+        if (_diffHunkRenderer is not null)
+            return;
+        _diffHunkRenderer = new GlassEditorDiffHunkRenderer();
+        CodeEditor.TextArea.TextView.BackgroundRenderers.Add(_diffHunkRenderer);
     }
 
     static bool PathsReferToSameFile(string? a, string? b)
