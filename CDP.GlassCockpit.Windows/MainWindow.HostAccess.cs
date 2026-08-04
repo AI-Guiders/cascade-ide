@@ -43,6 +43,7 @@ public partial class MainWindow
     Border? MfdRelatedFilesHost => MfdHosts?.MfdRelatedFilesHost;
     TextBlock? RelatedStatusLabel => MfdHosts?.RelatedStatusLabel;
     ListBox? RelatedList => MfdHosts?.RelatedList;
+    GlassSemanticMapSkia? RelatedSkia => MfdHosts?.RelatedSkia;
 
     Border? MfdHybridIndexHost => MfdHosts?.MfdHybridIndexHost;
     TextBlock? HybridIndexStatusLabel => MfdHosts?.HybridIndexStatusLabel;

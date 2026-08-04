@@ -202,6 +202,7 @@
         </ListBox>
       </DockPanel>
     </Border>
+    <!-- Shared-SSOT companions: list + Skia graph (not list-only dump). -->
     <Border x:Name="MfdRelatedFilesHost" Visibility="Collapsed" Background="#121212">
       <DockPanel Margin="8">
         <DockPanel DockPanel.Dock="Top" Margin="0,0,0,6">
@@ -210,8 +211,18 @@
           <TextBlock x:Name="RelatedStatusLabel" Text="related · idle"
                      FontSize="11" Foreground="#888" VerticalAlignment="Center"/>
         </DockPanel>
-        <ListBox x:Name="RelatedList" Background="Transparent" BorderThickness="0"
-                 DisplayMemberPath="Display" FontFamily="Consolas" FontSize="12" Foreground="#DDD"/>
+        <Grid>
+          <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="8"/>
+            <ColumnDefinition Width="*"/>
+          </Grid.ColumnDefinitions>
+          <Border Grid.Column="0" Background="#101010" BorderBrush="#2A2A2A" BorderThickness="1">
+            <local:GlassSemanticMapSkia x:Name="RelatedSkia"/>
+          </Border>
+          <ListBox Grid.Column="2" x:Name="RelatedList" Background="Transparent" BorderThickness="0"
+                   DisplayMemberPath="Display" FontFamily="Consolas" FontSize="12" Foreground="#DDD"/>
+        </Grid>
       </DockPanel>
     </Border>
     <Border x:Name="MfdHybridIndexHost" Visibility="Collapsed" Background="#121212">

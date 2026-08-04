@@ -9,7 +9,7 @@
 | plan / tm | P Plan readout | text pulse | Plan instrument: leaf board + WHY course (structured, not dump) | half |
 | files / explorer | SolutionExplorer | **tree** live | keep tree | ok |
 | arch | SemanticMap | **Skia graph** | keep graph; wire arch board live | thin |
-| related / find | RelatedFiles | list | companion **graph/list** instrument | thin |
+| related / find | RelatedFiles | **Skia graph + list** | companions instrument (list+graph) | ok (2026-08-04) |
 | problems / quality | Problems | list | severity board + jump | thin |
 | git | Git | porcelain+diff | tinted diff host (exists) | ok-ish |
 | shell / terminal | Terminal | ConPTY host | keep | ok |
@@ -25,9 +25,9 @@
 | webcam | (chrome) | — | shot desk = sense, not MFD text | n/a |
 | domain / rules / learn / inventory | Markdown stubs | text glance | real boards or defer | gap |
 
-## First ship (after map)
-Pick one **gap** with real viz already half-built → harden to human instrument + PNG of that instrument (not OCR of a sentence).
-Candidate: **RelatedFiles / companions as list+graph instrument** OR **Plan as structured board** — not Editor path ribbon.
+## Ships
+- **Plan instrument cards** (WHY/NEXT/COURSE) — dogfood PNG 2026-08-04
+- **RelatedFiles companions** — Skia graph + list (same pattern as SemanticMap) — dogfood PNG 2026-08-04
 
 ## Do not
 - Mark text ribbon Done
