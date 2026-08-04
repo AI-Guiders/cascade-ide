@@ -47,4 +47,25 @@ public class PresentationPmOneOfPolicyTests
             PresentationAnchorKind.Pfd,
             PresentationPmOneOfPolicy.Toggle(PresentationAnchorKind.Mfd));
     }
+
+    [Theory]
+    [InlineData("Terminal", "shell")]
+    [InlineData("Git", "git")]
+    [InlineData("WebAiPortal", "world")]
+    [InlineData("DomainBoard", "sit")]
+    [InlineData("Events", "alert")]
+    [InlineData("DebugStack", "probe")]
+    public void PreferSurfaceFromMfdPage_maps_intent(string page, string surface) =>
+        Assert.Equal(surface, PresentationPmOneOfPolicy.PreferSurfaceFromMfdPage(page));
+
+    [Fact]
+    public void ResolveStackSurface_exact_then_zone_fallback()
+    {
+        string[] stack = ["sit", "world", "alert"];
+        Assert.Equal("world", PresentationPmOneOfPolicy.ResolveStackSurface(stack, "WebAiPortal"));
+        Assert.Equal("sit", PresentationPmOneOfPolicy.ResolveStackSurface(stack, "DomainBoard"));
+        // Terminal→shell not in stack; zone(shell)=Mfd → first Mfd paint in stack = world
+        Assert.Equal("world", PresentationPmOneOfPolicy.ResolveStackSurface(stack, "Terminal"));
+        Assert.Null(PresentationPmOneOfPolicy.ResolveStackSurface(stack, "Editor")); // work→Forward, not in P/M stack zones
+    }
 }

@@ -49,9 +49,9 @@ Example: alert may ride chrome/EICAS *and* appear in a P/M OneOf stack when oper
 
 Three groups `(intercom)(sit)(world)` → full Scan **F,P,M**. Legacy `(F)(P/M)` via `FromLegacyMetaWire`.
 
-1. Describe packing as: slot → (scan role F|P|M, channel stack[], active channel).
-2. Glass remount: active **channel** in stack; scan role picks which TopLevel/zone geography.
-3. Chord / auto-switch: cycle or prefer **channel** inside the stack on that scan slot.
+1. Describe packing as: slot → (scan role F|P|M, channel stack[], active channel). **shipped**
+2. Glass remount: active **channel** in stack; scan role picks which TopLevel/zone geography. **shipped** (`f1a77c32`)
+3. Chord / auto-switch: `po` cycles PreferSurface; MFD page → ResolveStackSurface → PreferSurface (else PreferPmOneOf). **shipping**
 4. Dogfood: `(intercom)(sit/world/…)` on 2 windows; three-group full scan on 3 windows.
 
 ## Do not

@@ -21,7 +21,11 @@ public partial class MainWindow
         if (sticky)
             _stickyMfdPage = trimmed;
 
-        if (CascadeIDE.GlassCore.Presentation.PresentationPmOneOfPolicy.FromMfdPage(trimmed) is { } oneOf)
+        // Channel stack first (sit/world/alert…); legacy P↔M zone when no named surface hits.
+        if (CascadeIDE.GlassCore.Presentation.PresentationPmOneOfPolicy.ResolveStackSurface(
+                _hosts.PmOneOfStack, trimmed) is { } surface)
+            _hosts.PreferSurface(surface);
+        else if (CascadeIDE.GlassCore.Presentation.PresentationPmOneOfPolicy.FromMfdPage(trimmed) is { } oneOf)
             _hosts.PreferPmOneOf(oneOf);
 
         if (string.Equals(CurrentMfdPage(), trimmed, StringComparison.OrdinalIgnoreCase))
