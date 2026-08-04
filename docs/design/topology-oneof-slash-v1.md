@@ -52,7 +52,7 @@ Three groups `(intercom)(sit)(world)` → full Scan **F,P,M**. Legacy `(F)(P/M)`
 1. Describe packing as: slot → (scan role F|P|M, channel stack[], active channel). **shipped**
 2. Glass remount: active **channel** in stack; scan role picks which TopLevel/zone geography. **shipped** (`f1a77c32`)
 3. Chord / auto-switch: `po` cycles PreferSurface; MFD page → ResolveStackSurface → PreferSurface (else PreferPmOneOf). **shipped** (`e253954e`) · dogfood title `sit/world/alert · world active · OneOf host`
-4. Dogfood: `(intercom)(sit/world/…)` on 2 windows; three-group full scan on 3 windows. **partial** (2-window live OK)
+4. Dogfood: `(intercom)(sit/world/…)` on 2 windows; channel switch sit→world (mfd_page=Browser with topology held). **shipped** 2026-08-05 · evidence `tmp-glass-shots/topology-oneof-sit-active-20260805.png` + `topology-oneof-world-active-20260805.png`. Three-group full scan on 3 windows — residual.
 
 ## Do not
 

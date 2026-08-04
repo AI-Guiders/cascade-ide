@@ -28,6 +28,7 @@
 - DomainBoard `glance · unavailable` with empty WorkspaceRoot = seeming (climb / latch-only must paint).
 
 ## last_ship
+- 2026-08-05 · Topology OneOf v1 dogfood 2-window channel switch sit→world · titles `sit/world/alert · sit|world active · OneOf host` · evidence `tmp-glass-shots/topology-oneof-sit-active-20260805.png` + `topology-oneof-world-active-20260805.png` · latch merge fix cdp-mcp (mfd_page alone must not wipe topology)
 - 2026-08-04 · Dig WHY+NEXT Glass face LIVE · WHY=sealed course · NEXT=TM leaf · COURSE=Shared-SSOT · evidence `tmp-glass-shots/window-20260804-plan-why-next-live.png` (title `P · PFD host`) · dig note `scratch/dig-why-next-glass-face-20260804.md`
 - 2026-08-04 · Applies-on-locus live dogfood · semantic Roslyn Collect + CLEAN tone fix · APPLIES=`E1 W0 · problems on MFD` · tint L6 · evidence `tmp-glass-shots/window-20260804-applies-semantic.png` (title `M · MFD host`)
 - 2026-08-04 · Surface wire `(intercom)(sit/world/alert)` · Scan anchors + ND channel stack · OneOf PreferSurface · evidence `tmp-glass-shots/window-20260804-surface-wire-0.png` (title `sit/world/alert · world active · OneOf host`) · cascade-ide `e253954e`/`f1a77c32`/`237bade2`
