@@ -2,6 +2,7 @@
 
 using System.Collections.ObjectModel;
 using System.IO;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -9,10 +10,11 @@ using CascadeIDE.SoftOrgan;
 
 namespace CDP.GlassCockpit.Windows;
 
-/// <summary>Glass MFD SemanticMap — Skia multi-hop graph + list.</summary>
+/// <summary>Glass MFD SemanticMap — Skia graph + arch board instrument (ADR 0196).</summary>
 public partial class MainWindow
 {
     readonly ObservableCollection<GlassSemanticMapGraph.Node> _semanticItems = new();
+    readonly ObservableCollection<GlassArchBoardGlance.RoleLine> _archRoles = new();
     GlassSemanticMapGraph.Graph _semanticGraph = new(null, [], []);
     bool _semanticSkiaWired;
 
@@ -27,13 +29,17 @@ public partial class MainWindow
 
         EnsureSemanticSkiaWired();
 
-        if (show && SemanticList is not null && !ReferenceEquals(SemanticList.ItemsSource, _semanticItems))
-            SemanticList.ItemsSource = _semanticItems;
-
-        if (show && _semanticItems.Count == 0)
-            RefreshSemanticItems();
-        else if (show)
-            PushSemanticGraph();
+        if (show)
+        {
+            if (SemanticList is not null && !ReferenceEquals(SemanticList.ItemsSource, _semanticItems))
+                SemanticList.ItemsSource = _semanticItems;
+            if (SemanticArchRoleList is not null && !ReferenceEquals(SemanticArchRoleList.ItemsSource, _archRoles))
+                SemanticArchRoleList.ItemsSource = _archRoles;
+            if (_semanticItems.Count == 0 || (SemanticArchCardsPanel?.Items.Count ?? 0) == 0)
+                RefreshSemanticItems();
+            else
+                PushSemanticGraph();
+        }
     }
 
     bool IsSemanticHostActive()
@@ -52,6 +58,13 @@ public partial class MainWindow
         if (SemanticList?.SelectedItem is not GlassSemanticMapGraph.Node item)
             return;
         OpenSemanticNode(item.FilePath);
+    }
+
+    internal void SemanticArchRole_OnMouseDoubleClick(object sender, MouseButtonEventArgs e)
+    {
+        if (SemanticArchRoleList?.SelectedItem is not GlassArchBoardGlance.RoleLine role)
+            return;
+        StatusText.Text = $"glass · arch · {role.Role} · {role.Status} · {role.Id}";
     }
 
     void EnsureSemanticSkiaWired()
@@ -75,12 +88,33 @@ public partial class MainWindow
         foreach (var n in _semanticGraph.Nodes)
             _semanticItems.Add(n);
         PushSemanticGraph();
+
+        var arch = GlassArchBoardGlance.TryProbe(_session.WorkspaceRoot);
+        if (SemanticArchCardsPanel is not null)
+        {
+            SemanticArchCardsPanel.Items.Clear();
+            if (arch is { } snap)
+            {
+                foreach (var chip in GlassArchBoardGlance.BuildInstrument(snap))
+                    SemanticArchCardsPanel.Items.Add(CreateDeckCard(chip));
+            }
+        }
+
+        _archRoles.Clear();
+        if (arch is { } a)
+        {
+            foreach (var r in a.Roles.Take(24))
+                _archRoles.Add(r);
+        }
+
         if (SemanticStatusLabel is not null)
         {
             var hops = _semanticGraph.Nodes.Count > 0
                 ? $"h{_semanticGraph.Nodes.Max(n => n.Hop)}"
                 : "h0";
-            SemanticStatusLabel.Text = $"semantic · skia {_semanticGraph.Nodes.Count} · {hops} · {_semanticGraph.Edges.Count}e";
+            var archPart = arch?.StatusLine ?? "arch · no board";
+            SemanticStatusLabel.Text =
+                $"semantic · skia {_semanticGraph.Nodes.Count} · {hops} · {_semanticGraph.Edges.Count}e · {archPart}";
         }
     }
 

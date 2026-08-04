@@ -227,7 +227,7 @@ public partial class MainWindow
                 "SolutionExplorer",
                 "SolutionExplorerView",
                 "no .sln · " + (_session.WorkspaceRoot ?? "?")),
-            "SemanticMap" => FormatMfdStub("SemanticMap", "Glass Skia graph host", "radial · RelatedFiles heuristic"),
+            "SemanticMap" => FormatMfdStub("SemanticMap", "Glass Skia + arch board", "ADR 0196 roles"),
             "Problems" => FormatMfdStub("Problems", "severity board · ERR/WARN/ALL + jump list", "Shared-SSOT quality"),
             "Tests" => FormatMfdStub("Tests", "Glass log + fail ListBox", "Avalonia TestsMfdPageView SSOT"),
             "DebugStack" => FormatMfdStub("DebugStack", "Glass live DAP latch host", "debug_desk SoftOrgan · stack/locals"),

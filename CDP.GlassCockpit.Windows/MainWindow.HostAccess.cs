@@ -63,6 +63,8 @@ public partial class MainWindow
 
     Border? MfdSemanticMapHost => MfdHosts?.MfdSemanticMapHost;
     TextBlock? SemanticStatusLabel => MfdHosts?.SemanticStatusLabel;
+    ItemsControl? SemanticArchCardsPanel => MfdHosts?.SemanticArchCardsPanel;
+    ListBox? SemanticArchRoleList => MfdHosts?.SemanticArchRoleList;
     ListBox? SemanticList => MfdHosts?.SemanticList;
     GlassSemanticMapSkia? SemanticSkia => MfdHosts?.SemanticSkia;
 

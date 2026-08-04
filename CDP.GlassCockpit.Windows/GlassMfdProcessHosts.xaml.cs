@@ -39,6 +39,7 @@ public partial class GlassMfdProcessHosts : UserControl
         GlanceCardsRefreshBtn.Click += host.GlanceCardsRefresh_OnClick;
         SemanticRefreshBtn.Click += host.SemanticRefresh_OnClick;
         SemanticList.MouseDoubleClick += host.SemanticList_OnMouseDoubleClick;
+        SemanticArchRoleList.MouseDoubleClick += host.SemanticArchRole_OnMouseDoubleClick;
         CorrespondenceRefreshBtn.Click += host.CorrespondenceRefresh_OnClick;
         CorrespondenceTimelineList.MouseDoubleClick += host.CorrespondenceTimeline_OnMouseDoubleClick;
         MarkdownRefreshBtn.Click += host.MarkdownRefresh_OnClick;

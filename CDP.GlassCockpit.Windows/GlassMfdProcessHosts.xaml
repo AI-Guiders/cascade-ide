@@ -300,6 +300,7 @@
         </ScrollViewer>
       </DockPanel>
     </Border>
+    <!-- SoftOrgan: SemanticMap Skia + arch board instrument (ADR 0196 as_built roles). -->
     <Border x:Name="MfdSemanticMapHost" Visibility="Collapsed" Background="#121212">
       <DockPanel Margin="8">
         <DockPanel DockPanel.Dock="Top" Margin="0,0,0,6">
@@ -308,17 +309,36 @@
           <TextBlock x:Name="SemanticStatusLabel" Text="semantic · skia graph"
                      FontSize="11" Foreground="#888" VerticalAlignment="Center"/>
         </DockPanel>
+        <ItemsControl x:Name="SemanticArchCardsPanel" DockPanel.Dock="Top" Margin="0,0,0,8">
+          <ItemsControl.ItemsPanel>
+            <ItemsPanelTemplate>
+              <UniformGrid Columns="3"/>
+            </ItemsPanelTemplate>
+          </ItemsControl.ItemsPanel>
+        </ItemsControl>
         <Grid>
           <Grid.ColumnDefinitions>
             <ColumnDefinition Width="2*"/>
+            <ColumnDefinition Width="8"/>
+            <ColumnDefinition Width="*"/>
             <ColumnDefinition Width="8"/>
             <ColumnDefinition Width="*"/>
           </Grid.ColumnDefinitions>
           <Border Grid.Column="0" Background="#101010" BorderBrush="#2A2A2A" BorderThickness="1">
             <local:GlassSemanticMapSkia x:Name="SemanticSkia"/>
           </Border>
-          <ListBox Grid.Column="2" x:Name="SemanticList" Background="Transparent" BorderThickness="0"
-                   DisplayMemberPath="Display" FontFamily="Consolas" FontSize="12" Foreground="#DDD"/>
+          <DockPanel Grid.Column="2">
+            <TextBlock DockPanel.Dock="Top" Text="arch roles · ★ promo · ● elect · ○ open"
+                       FontSize="11" Foreground="#888" Margin="0,0,0,4"/>
+            <ListBox x:Name="SemanticArchRoleList" Background="Transparent" BorderThickness="0"
+                     DisplayMemberPath="Display" FontFamily="Consolas" FontSize="11" Foreground="#DDD"/>
+          </DockPanel>
+          <DockPanel Grid.Column="4">
+            <TextBlock DockPanel.Dock="Top" Text="graph nodes"
+                       FontSize="11" Foreground="#888" Margin="0,0,0,4"/>
+            <ListBox x:Name="SemanticList" Background="Transparent" BorderThickness="0"
+                     DisplayMemberPath="Display" FontFamily="Consolas" FontSize="12" Foreground="#DDD"/>
+          </DockPanel>
         </Grid>
       </DockPanel>
     </Border>
