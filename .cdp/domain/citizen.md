@@ -9,7 +9,7 @@
 
 - Live invite: `ai-keys.toml` open_ai or anthropic · scene `invite_ready`.
 - `@intent domain card=X` / `id=X` / `name=X` without `op=` → **op=card** (not silent scene).
-- Full-chain GREEN toward 15.08 — invent only on real product gap; DIG REJECT SoftFL/Meta/host re-prove mill.
+- Full-chain GREEN ≠ 15.08 Done — DoD is **full-ready** (usable habitat peer); invent only on real readiness gaps; DIG REJECT SoftFL/Meta/host re-prove mill.
 - Dig-before-ask: this card or SSOT; stamp after ship; Voice Letter only after live dogfood.
 
 ## Entry

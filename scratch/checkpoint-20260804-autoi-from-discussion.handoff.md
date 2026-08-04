@@ -44,7 +44,7 @@ Human-face axe + shot protocol `#CIDE`; world dig under doubt.
 
 ## Deadlines
 - Sick-leave dense → **2026-08-05** (1 day)
-- ≥1 citizen full chain → **2026-08-15** (11 days)
+- ≥1 citizen **full-ready** → **2026-08-15** (11 days) — full-chain pipe GREEN ≠ Done
 
 ## Paste seed (optional first user line in NEW chat)
 ```
