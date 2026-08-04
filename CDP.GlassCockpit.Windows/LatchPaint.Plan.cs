@@ -22,9 +22,11 @@ internal static partial class LatchPaint
             var active = root.TryGetProperty("active", out var a) && a.ValueKind is JsonValueKind.True;
             var feature = Prop(root, "feature");
             var task = Prop(root, "task");
+            var why = Prop(root, "why");
             var pulse = Prop(root, "pulse") ?? Prop(root, "chrome_hint");
 
-            if (!active && string.IsNullOrWhiteSpace(feature) && string.IsNullOrWhiteSpace(task))
+            if (!active && string.IsNullOrWhiteSpace(feature) && string.IsNullOrWhiteSpace(task)
+                && string.IsNullOrWhiteSpace(why))
             {
                 return new PlanView(
                     "Plan quiet",
@@ -33,27 +35,39 @@ internal static partial class LatchPaint
                     false);
             }
 
-            var headline = !string.IsNullOrWhiteSpace(feature)
-                ? feature.Trim()
+            // Shared-SSOT Plan face: NEXT = leaf, WHY = sealed course goal (not Intercom dump).
+            var next = !string.IsNullOrWhiteSpace(task) ? task!.Trim()
+                : !string.IsNullOrWhiteSpace(feature) ? feature!.Trim()
                 : TruncatePlan(pulse ?? "Plan", 56);
 
             var detail = new StringBuilder();
-            if (!string.IsNullOrWhiteSpace(task))
-                detail.AppendLine(task.Trim());
+            if (!string.IsNullOrWhiteSpace(why))
+                detail.Append("WHY · ").Append(why.Trim());
+
+            if (!string.IsNullOrWhiteSpace(task) && !string.IsNullOrWhiteSpace(feature))
+            {
+                if (detail.Length > 0)
+                    detail.AppendLine();
+                detail.Append(feature.Trim());
+            }
 
             var wall = ExtractWall(pulse);
             if (!string.IsNullOrWhiteSpace(wall))
+            {
+                if (detail.Length > 0)
+                    detail.AppendLine();
                 detail.Append(wall);
-            else if (!string.IsNullOrWhiteSpace(pulse) && string.IsNullOrWhiteSpace(task))
+            }
+            else if (detail.Length == 0 && !string.IsNullOrWhiteSpace(pulse) && string.IsNullOrWhiteSpace(task))
                 detail.Append(TruncatePlan(pulse!, 96));
 
             if (detail.Length == 0)
                 detail.Append(active ? "TM active" : "TM quiet");
 
             return new PlanView(
-                headline,
+                next,
                 detail.ToString().TrimEnd(),
-                active ? $"plan · active · {TruncatePlan(headline, 28)}" : "plan · quiet",
+                active ? $"plan · NEXT · {TruncatePlan(next, 24)}" : "plan · quiet",
                 active);
         }
         catch (Exception ex)
