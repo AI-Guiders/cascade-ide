@@ -218,7 +218,31 @@
                               Width="150" Margin="0,0,8,0" VerticalAlignment="Center"
                               Background="#222" Foreground="#EEE" BorderBrush="#3F3F46"
                               FontSize="11" FontFamily="Segoe UI"
-                              ToolTip="Model for this Intercom seat"/>
+                              ToolTip="Model for this Intercom seat">
+                      <!-- Dark Cockpit: default ComboBoxItem uses SystemColors (black text / light highlight). Template triggers beat Style Background setters — override brush keys. -->
+                      <ComboBox.Resources>
+                        <SolidColorBrush x:Key="{x:Static SystemColors.WindowBrushKey}" Color="#222222"/>
+                        <SolidColorBrush x:Key="{x:Static SystemColors.WindowTextBrushKey}" Color="#EEEEEE"/>
+                        <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="#152028"/>
+                        <SolidColorBrush x:Key="{x:Static SystemColors.HighlightTextBrushKey}" Color="#F0F0F0"/>
+                        <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightBrushKey}" Color="#1A2830"/>
+                        <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightTextBrushKey}" Color="#F0F0F0"/>
+                      </ComboBox.Resources>
+                      <ComboBox.ItemContainerStyle>
+                        <Style TargetType="ComboBoxItem">
+                          <Setter Property="Background" Value="#222"/>
+                          <Setter Property="Foreground" Value="#EEE"/>
+                          <Setter Property="BorderThickness" Value="0"/>
+                          <Setter Property="Padding" Value="8,4"/>
+                        </Style>
+                      </ComboBox.ItemContainerStyle>
+                      <ComboBox.ItemTemplate>
+                        <DataTemplate>
+                          <TextBlock Text="{Binding}" FontSize="11" FontFamily="Segoe UI"
+                                     Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=ComboBoxItem}}"/>
+                        </DataTemplate>
+                      </ComboBox.ItemTemplate>
+                    </ComboBox>
                     <TextBox x:Name="ComposerBox"
                              AcceptsReturn="True"
                              TextWrapping="Wrap"

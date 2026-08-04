@@ -14,6 +14,7 @@
 - Tests: `CascadeIDE.Tests/IntercomMarkdownTests.cs` · `GlassOperatorShareShelfTests.cs` · `GlassRadioPointerTests.cs`
 
 ## Antipatterns
+- Dark ComboBox dropdown: Style Background setters lose to ControlTemplate SystemColors — override HighlightBrushKey / WindowTextBrushKey on the ComboBox; don't trust ItemContainerStyle alone.
 - Reparenting a still-parented WPF child into `Content` (crash: logical child already set).
 - Forking Markdig preview host into Glass feed for "normal MD".
 - Silent Cursor Write past PathMutateGate for these files.
@@ -21,6 +22,7 @@
 - Claiming Radio Done via SA wall / Autoi dump / File.Exists alone.
 
 ## last_ship
+- 2026-08-05 · ModelPicker dropdown empty text · Dark Cockpit: override SystemColors Highlight*/Window* on ComboBox + ItemTemplate inherit FG · evidence `tmp-glass-shots/model-picker-fixed-20260805.png` (Citizen · default / Composer · host / PF · habitat)
 - 2026-08-05 · Intercom prose residual CLOSED · Citizen/@frame SA walls → Radio collapse (`FormatCitizenWakeIntercom` + Glass `CompactIntercomBody` LooksLikeSaInstrumentWall) · evidence `tmp-glass-shots/intercom-prose-radio-collapsed-20260805.png` (Citizen · SA collapsed · PFD + DELTA cards)
 - 2026-08-04 · Autoi Intercom Radio face (Composer charge wall → `→ PFD.NEXT` / Plan delta) · dual-seat claim · cdp-mcp `IdeIgniteArmHost.Fire.Habitat.Radio`
 - 2026-08-04 · Intercom Radio pointer cards (I6) · `GlassRadioPointer` · PNG `scratch/intercom-radio-pointer-20260804.png` (DELTA · Right:Editor)
