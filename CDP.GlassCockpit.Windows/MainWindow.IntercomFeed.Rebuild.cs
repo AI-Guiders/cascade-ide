@@ -81,6 +81,7 @@ public partial class MainWindow
             var body = chips.Count > 0
                 ? GlassAttachChipPeel.StripBracketsForDisplay(e.Body)
                 : e.Body;
+            body = LatchPaint.CompactIntercomBody(body);
             if (string.IsNullOrWhiteSpace(body) && chips.Count > 0)
                 body = "(attach)";
             _feed.Add(new ChatBubble(e.RoleLabel, body, e.WhenLabel, chips));

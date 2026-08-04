@@ -36,6 +36,7 @@ public partial class MainWindow : Window
         _latches.CitizenDialogRequestChanged += OnCitizenDialogRequestChanged;
         _latches.PresenceChanged += OnPresenceChanged;
         _latches.PresentationChanged += OnPresentationChanged;
+        _latches.PlanChanged += OnPlanChanged;
         _latches.SeatsChanged += OnSeatsChanged;
         _latches.LandChanged += OnLandChanged;
         _latches.SharedChanged += OnSharedChanged;

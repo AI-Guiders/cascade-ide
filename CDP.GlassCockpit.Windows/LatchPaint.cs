@@ -40,10 +40,17 @@ internal static partial class LatchPaint
             var id = Prop(root, "id");
             var stamped = Prop(root, "stamped_utc") ?? "";
             var acked = root.TryGetProperty("acked", out var a) && a.ValueKind is JsonValueKind.True;
-            var body = Prop(root, "body") ?? "(empty)";
+            var rawBody = Prop(root, "body") ?? "(empty)";
+            var wake = LooksLikeAutoiWake(rawBody);
+            var body = CompactIntercomBody(rawBody);
             var name = Prop(root, "name") ?? Prop(root, "display_name");
             var kind = Prop(root, "kind");
             var (resolvedName, resolvedKind) = ResolveIntercomIdentity(from, origin, name, kind);
+            if (wake)
+            {
+                resolvedName = "Autoi";
+                resolvedKind = "wake";
+            }
 
             var whenLabel = TryLocalTime(stamped) ?? DateTime.Now.ToString("HH:mm");
             var role = FormatIntercomRole(from, to, resolvedName, resolvedKind);
@@ -53,7 +60,7 @@ internal static partial class LatchPaint
 
             return new IntercomView(
                 header,
-                body.Replace("\r\n", "\n"),
+                body,
                 role,
                 whenLabel,
                 $"intercom · {resolvedName} · {resolvedKind} · {(acked ? "acked" : "unread")}",
@@ -96,12 +103,11 @@ internal static partial class LatchPaint
             if (string.IsNullOrWhiteSpace(headline))
                 headline = "Cabin presentation";
 
+            // Topology/MFD only — Plan/TM paints from plan-LATEST (PaintPlan), not this latch.
             var detail = new StringBuilder();
             if (!string.IsNullOrWhiteSpace(mfd))
                 detail.AppendLine($"MFD focus: {mfd}");
-            detail.AppendLine($"Origin: {origin}");
-            detail.AppendLine();
-            detail.Append("PFD instruments / TM later.");
+            detail.Append($"Origin: {origin}");
 
             return new PresentationView(
                 headline,

@@ -27,6 +27,9 @@ public static class CdpHabitatPaths
     public const string CitizenDialogRequestLatchFileName = "citizen-dialog-request-LATEST.json";
     /// <summary>Last AutoI wake charge (composer|habitat) — Glass Autoi consumer.</summary>
     public const string IgniteWakeLatchFileName = "ignite-wake-LATEST.json";
+    /// <summary>Task Manager plan pulse — Glass P Plan readout.</summary>
+    public const string PlanLatchFileName = "plan-LATEST.json";
+
 
     public static string StateRoot =>
         Path.Combine(

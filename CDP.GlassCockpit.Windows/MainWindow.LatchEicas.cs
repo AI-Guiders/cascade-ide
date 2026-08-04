@@ -22,12 +22,7 @@ public partial class MainWindow
             {
                 var raw = File.ReadAllText(path);
                 var view = LatchPaint.PaintPresentation(raw);
-                var headline = string.IsNullOrWhiteSpace(view.Headline) ? "Presentation" : view.Headline;
-                PlanTitle.Text = headline;
-                PlanMeta.Text = view.Detail;
-                PlanReadout.ValueText = headline;
-                PlanReadout.SubText = string.IsNullOrWhiteSpace(view.Detail) ? null : view.Detail;
-
+                // Topology/MFD only — Plan paints from plan-LATEST (OnPlanChanged).
                 var layout = _session.ApplyTopology(view.Topology);
                 WpfMainGridColumns.Apply(MainGrid, layout.ColumnDefinitions);
                 TopologyBadge.Text = layout.Topology;
@@ -41,6 +36,27 @@ public partial class MainWindow
             catch (Exception ex)
             {
                 StatusText.Text = $"glass · presentation fail · {ex.Message}";
+            }
+        }, DispatcherPriority.Background);
+    }
+
+    void OnPlanChanged(string path)
+    {
+        Dispatcher.BeginInvoke(() =>
+        {
+            try
+            {
+                var raw = File.ReadAllText(path);
+                var view = LatchPaint.PaintPlan(raw);
+                PlanTitle.Text = view.Headline;
+                PlanMeta.Text = view.Detail;
+                PlanReadout.ValueText = view.Headline;
+                PlanReadout.SubText = string.IsNullOrWhiteSpace(view.Detail) ? null : view.Detail;
+                StatusText.Text = $"glass · {view.StatusLine} · {DateTime.Now:HH:mm:ss}";
+            }
+            catch (Exception ex)
+            {
+                StatusText.Text = $"glass · plan fail · {ex.Message}";
             }
         }, DispatcherPriority.Background);
     }
