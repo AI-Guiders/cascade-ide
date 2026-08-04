@@ -35,6 +35,8 @@
   <ItemGroup>
     <Compile Remove="**/obj/**" />
     <Compile Remove="**/bin/**" />
+    <Compile Remove="tmp-glass-shots/**/*.cs" />
+    <Compile Remove="scratch/**/*.cs" />
     <!-- Contracts project lives inside repo; exclude its sources from main app compilation (use ProjectReference). -->
     <Compile Remove="CascadeIDE.Contracts\**\*.cs" />
     <Compile Remove="CascadeIDE.GlassCore\**\*.cs" />
