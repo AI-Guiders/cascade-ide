@@ -96,6 +96,7 @@ public partial class MainWindow
             {
                 AppendBuildText($"\n┌ exited · {code} ┐\n");
                 RefreshBuildProblems();
+                RefreshEditorSituRibbon();
                 if (BuildStatusLabel is not null)
                 {
                     var err = _buildProblems.Count(p => p.IsError);

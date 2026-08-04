@@ -45,7 +45,9 @@ public static class GlassEditorSituRibbon
         string? why,
         string? leaf,
         int blastMax = 3,
-        string? sourceText = null)
+        string? sourceText = null,
+        IReadOnlyList<GlassProblemItem>? buildProblems = null,
+        IReadOnlyList<GlassTestOutputParse.FailRow>? testFails = null)
     {
         if (string.IsNullOrWhiteSpace(editorPath))
             return new Face("", "", [], "", 0, 0, Orphan: true, "", "", null, "", null);
@@ -74,7 +76,7 @@ public static class GlassEditorSituRibbon
         var diff = GlassEditorDiffIntent.Collect(workspaceRoot, editorPath);
         var diffLine = string.IsNullOrWhiteSpace(diff.Line) ? "" : Truncate(diff.Line, 48);
 
-        var applies = GlassEditorAppliesLocus.Collect(editorPath, sourceText);
+        var applies = GlassEditorAppliesLocus.Collect(editorPath, sourceText, buildProblems, testFails);
         var appliesLine = string.IsNullOrWhiteSpace(applies.Line) ? "" : Truncate(applies.Line, 56);
 
         return new Face(
@@ -98,9 +100,11 @@ public static class GlassEditorSituRibbon
         string? why,
         string? leaf,
         int blastMax = 3,
-        string? sourceText = null)
+        string? sourceText = null,
+        IReadOnlyList<GlassProblemItem>? buildProblems = null,
+        IReadOnlyList<GlassTestOutputParse.FailRow>? testFails = null)
     {
-        var face = Build(editorPath, workspaceRoot, why, leaf, blastMax, sourceText);
+        var face = Build(editorPath, workspaceRoot, why, leaf, blastMax, sourceText, buildProblems, testFails);
         if (!face.HasAny)
             return string.Empty;
 

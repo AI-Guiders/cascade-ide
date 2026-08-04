@@ -79,7 +79,9 @@ public partial class MainWindow
             _planWhy,
             _planLeaf,
             blastMax: 3,
-            sourceText: CodeEditor?.Text);
+            sourceText: CodeEditor?.Text,
+            buildProblems: MergeAppliesProblemSources(),
+            testFails: _testFails);
 
         var chips = GlassGlanceCards.BuildEditorSitu(face);
         var factory = new FrameworkElementFactory(typeof(UniformGrid));
@@ -119,6 +121,18 @@ public partial class MainWindow
             return;
         _appliesTintRenderer = new GlassEditorAppliesTintRenderer();
         CodeEditor.TextArea.TextView.BackgroundRenderers.Add(_appliesTintRenderer);
+    }
+
+    /// <summary>Build + Problems lists scoped later by Applies Collect — prefer union without dup keys.</summary>
+    IReadOnlyList<GlassProblemItem> MergeAppliesProblemSources()
+    {
+        if (_buildProblems.Count == 0 && _problemAll.Count == 0)
+            return [];
+        if (_problemAll.Count == 0)
+            return _buildProblems.ToList();
+        if (_buildProblems.Count == 0)
+            return _problemAll.ToList();
+        return GlassRoslynDiagnosticsFeed.MergeDistinct(_buildProblems.ToList(), _problemAll);
     }
 
     static bool PathsReferToSameFile(string? a, string? b)

@@ -66,4 +66,37 @@ public sealed class GlassEditorSituRibbonTests
     {
         Assert.Equal(string.Empty, GlassEditorSituRibbon.Format(null, null, "why", "leaf"));
     }
+
+    [Fact]
+    public void Build_applies_merges_scoped_build_problems()
+    {
+        var root = Path.Combine(Path.GetTempPath(), "glass-applies-wire-" + Guid.NewGuid().ToString("N")[..8]);
+        Directory.CreateDirectory(root);
+        try
+        {
+            var path = Path.Combine(root, "Broken.cs");
+            File.WriteAllText(path, "class Broken { }");
+            var problems = new[]
+            {
+                new GlassProblemItem(path, 1, 1, "error", "CS0001", "boom"),
+                new GlassProblemItem(Path.Combine(root, "Other.cs"), 2, 1, "error", "CS0002", "other"),
+            };
+
+            var face = GlassEditorSituRibbon.Build(
+                path,
+                root,
+                why: null,
+                leaf: null,
+                buildProblems: problems);
+
+            Assert.Contains("E1", face.AppliesOnLocus, StringComparison.Ordinal);
+            Assert.NotNull(face.Applies);
+            Assert.Equal(1, face.Applies!.Errors);
+            Assert.Contains(1, face.Applies.ErrorLines);
+        }
+        finally
+        {
+            try { Directory.Delete(root, recursive: true); } catch { /* ignore */ }
+        }
+    }
 }

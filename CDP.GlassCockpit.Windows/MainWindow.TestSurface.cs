@@ -104,6 +104,7 @@ public partial class MainWindow
             {
                 AppendTestsText($"\n┌ exited · {code} ┐\n");
                 RefreshTestParse();
+                RefreshEditorSituRibbon();
                 if (TestsStatusLabel is not null)
                 {
                     var summary = GlassTestOutputParse.ParseSummary(_testBuffer.ToString());

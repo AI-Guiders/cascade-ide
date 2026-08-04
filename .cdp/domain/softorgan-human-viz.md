@@ -28,6 +28,7 @@
 - DomainBoard `glance · unavailable` with empty WorkspaceRoot = seeming (climb / latch-only must paint).
 
 ## last_ship
+- 2026-08-04 · Surface wire `(intercom)(sit/world/alert)` · Scan anchors + ND channel stack · OneOf PreferSurface · evidence `tmp-glass-shots/window-20260804-surface-wire-0.png` (title `sit/world/alert · world active · OneOf host`) · cascade-ide `e253954e`/`f1a77c32`/`237bade2`
 - 2026-08-04 · ROLE situ live PNG dogfood after Glass rebuild · ROLE=`в карте` · HOPS=`25 узлов · 96 связей` · LOOK=`карта → MFD` · evidence `scratch/role-situ-live-20260804.png` (P/M · OneOf · PrintWindow)
 - 2026-08-04 · Editor situ ROLE split human labels · ROLE=`в карте`/`сирота` · HOPS=`N узлов · E связей` · LOOK=`карта → MFD` · tests 3/0
 - 2026-08-04 · Editor situ WHY-file instrument cards · PNG `scratch/editor-situ-cards-20260804.png` (M·Editor · LEVEL SITU)
