@@ -260,10 +260,25 @@
           <TextBlock x:Name="HybridIndexStatusLabel" Text="hci · idle"
                      FontSize="11" Foreground="#888" VerticalAlignment="Center"/>
         </DockPanel>
-        <TextBox x:Name="HybridIndexOutput" IsReadOnly="True"
-                 AcceptsReturn="True" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto"
-                 Background="Transparent" Foreground="#CCCCCC" BorderThickness="0"
-                 FontFamily="Consolas" FontSize="12"/>
+        <ItemsControl x:Name="HybridIndexCardsPanel" DockPanel.Dock="Top" Margin="0,0,0,8">
+          <ItemsControl.ItemsPanel>
+            <ItemsPanelTemplate>
+              <UniformGrid Columns="3"/>
+            </ItemsPanelTemplate>
+          </ItemsControl.ItemsPanel>
+        </ItemsControl>
+        <Grid>
+          <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="8"/>
+            <ColumnDefinition Width="*"/>
+          </Grid.ColumnDefinitions>
+          <Border Grid.Column="0" Background="#101010" BorderBrush="#2A2A2A" BorderThickness="1">
+            <local:GlassSemanticMapSkia x:Name="HybridSkia"/>
+          </Border>
+          <ListBox Grid.Column="2" x:Name="HybridScopeList" Background="Transparent" BorderThickness="0"
+                   FontFamily="Consolas" FontSize="12" Foreground="#DDD"/>
+        </Grid>
       </DockPanel>
     </Border>
     <Border x:Name="MfdGlanceCardsHost" Visibility="Collapsed" Background="#121212">

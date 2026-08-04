@@ -51,4 +51,45 @@ public sealed class GlassHybridIndexGlanceTests
             path!,
             StringComparison.OrdinalIgnoreCase);
     }
+
+    [Fact]
+    public void BuildInstrument_projects_hci_docs_fresh()
+    {
+        var chips = GlassHybridIndexGlance.BuildInstrument(new GlassHybridIndexGlance.LiveInstrumentStatus(
+            DatabaseExists: true,
+            DocumentCount: 120,
+            DocumentCountMayBeStale: false,
+            IndexedAtIso: DateTimeOffset.UtcNow.AddMinutes(-5).ToString("o"),
+            ReindexState: "idle",
+            LastReindexError: null,
+            DatabasePath: @"D:\ws\.hybrid-codebase-index\codebase-index-v2.sqlite",
+            WorkspaceRoot: @"D:\ws",
+            ByteLength: 4096,
+            ModifiedUtc: DateTimeOffset.UtcNow.AddMinutes(-5)));
+
+        Assert.Equal(new GlassGlanceChip("HCI", "READY", "ok"), chips[0]);
+        Assert.Contains(new GlassGlanceChip("DOCS", "120", "ok"), chips);
+        Assert.Contains(chips, c => c.Label == "FRESH" && c.Tone == "ok");
+        Assert.Contains(new GlassGlanceChip("ERR", "—", "idle"), chips);
+    }
+
+    [Fact]
+    public void BuildScopeMap_hub_plus_folders()
+    {
+        var root = Path.Combine(Path.GetTempPath(), "hci-map-" + Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(Path.Combine(root, "Features"));
+        Directory.CreateDirectory(Path.Combine(root, "bin"));
+        try
+        {
+            var graph = GlassHybridIndexGlance.BuildScopeMap(root, indexReady: true);
+            Assert.NotNull(graph.FocusPath);
+            Assert.Contains(graph.Nodes, n => n.Hop == 0 && n.Kind == "index-root");
+            Assert.Contains(graph.Nodes, n => n.Hop == 1 && Path.GetFileName(n.FilePath) == "Features");
+            Assert.DoesNotContain(graph.Nodes, n => Path.GetFileName(n.FilePath) == "bin");
+        }
+        finally
+        {
+            try { Directory.Delete(root, recursive: true); } catch { /* ignore */ }
+        }
+    }
 }

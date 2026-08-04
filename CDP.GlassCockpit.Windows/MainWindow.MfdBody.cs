@@ -172,10 +172,10 @@ public partial class MainWindow
             return;
         }
 
-        if (string.Equals(page, "HybridIndex", StringComparison.OrdinalIgnoreCase)
-            && GlassHybridIndexGlance.TryFormatFromWorkspaceRoot(_session.WorkspaceRoot) is { } hiGlance)
+        if (string.Equals(page, "HybridIndex", StringComparison.OrdinalIgnoreCase))
         {
-            MfdBody.Text = hiGlance;
+            // Human face = instrument cards + scope Skia map (MfdHybridIndexHost).
+            MfdBody.Text = FormatMfdStub("HybridIndex", "HCI cards · DOCS/FRESH + scope map", "Shared-SSOT index instrument");
             RefreshEicasHealth();
             return;
         }

@@ -53,7 +53,9 @@ public partial class MainWindow
 
     Border? MfdHybridIndexHost => MfdHosts?.MfdHybridIndexHost;
     TextBlock? HybridIndexStatusLabel => MfdHosts?.HybridIndexStatusLabel;
-    TextBox? HybridIndexOutput => MfdHosts?.HybridIndexOutput;
+    ItemsControl? HybridIndexCardsPanel => MfdHosts?.HybridIndexCardsPanel;
+    GlassSemanticMapSkia? HybridSkia => MfdHosts?.HybridSkia;
+    ListBox? HybridScopeList => MfdHosts?.HybridScopeList;
 
     Border? MfdGlanceCardsHost => MfdHosts?.MfdGlanceCardsHost;
     TextBlock? GlanceCardsStatusLabel => MfdHosts?.GlanceCardsStatusLabel;
