@@ -1,6 +1,6 @@
 # SoftOrgan → human viz map (2026-08-04)
 
-**Canon:** agent cockpit zones on 2 screens via OneOf `(F)(P/M)`.
+**Canon:** human faces pack by **channels** (ADR 0193) onto 2|3 windows via `/`; P|F|M = meta only (see `docs/design/topology-oneof-slash-v1.md`). Compat wire `(F)(P/M)`.
 **Human-faced ≠** status/ribbon/text dump (WHY·BLAST string = seeming).
 **Human-faced =** tree / graph / instrument cards / live hosts.
 

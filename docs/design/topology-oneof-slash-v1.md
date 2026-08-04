@@ -1,67 +1,82 @@
-# Topology · OneOf via `/` (v1) — beyond P/M · channels
+# Topology · OneOf via `/` (v1) — **channels first** · P|F|M = meta
 
-**Status:** draft → act (operator 2026-08-04)  
+**Status:** act (operator 2026-08-04 correction)  
 **Extends:** [topology-oneof-slash-v0.md](topology-oneof-slash-v0.md) · ADR [0193](../adr/0193-agent-attention-channels-ccl.md) · ADR 0017  
 **Does not** redefine `+` (Split).
 
+## Hard steer (do not regress)
+
+- **Primary:** attention **channels** — sit · work · probe · report · world · alert (ADR 0193).
+- **Secondary meta only:** P · F · M — legacy zone tags for *which human face / Glass zone paints* when a channel is active. **Not** window identity. **Not** OneOf member identity.
+- Agent SoftOrgan ≠ HDMI. Operator windows = **2 or 3 slots** that host channel faces (dedicated or `/` OneOf).
+- Wrong leaf: «generalize any P|F|M pair». Right leaf: pack **channels** onto slots; keep P|F|M as projection meta.
+
 ## Intent
 
-- Agents ship **human-faced instruments per attention channel** (sit / work / probe / report / world / alert) — not HDMI copies of seats.
-- Operator calmly runs **2 or 3 physical windows**; `/` packs channels so they are **not locked** to «one P + one F + one M monitor».
-- Chord + auto-switch move the **active channel face** inside a OneOf TopLevel.
+1. Agents ship **human-faced instruments per channel** calmly (no monitor-count anxiety).
+2. Operator calmly uses **2 or 3 physical windows**; `/` XOR-switches **channels** inside a slot.
+3. Chord + auto-switch = active **channel**, not «toggle P↔M as ontology».
 
-## Grammar (unchanged join)
+## Grammar (wire still uses P|F|M tokens — as meta)
 
-| Op | Meaning | Example |
-|----|---------|---------|
-| `+` | Split simultaneous | `(P+M)(F)` |
-| `/` | OneOf XOR full zone | `(P/M)(F)` · `(F/M)(P)` · `(P/F)(M)` |
+Join ops unchanged:
 
-Parser already accepts any anchor set with `/`. **v0 host/analyzer hardcodes P/M only** — that is the gap.
+| Op | Meaning |
+|----|---------|
+| `+` | Split simultaneous faces in one TopLevel |
+| `/` | OneOf — XOR **channel faces** on one full TopLevel |
 
-## Packing matrix (v1 DoD)
+String examples `(F)(P/M)` remain valid **compat wire**: each token is a **meta tag** mapped to a default channel pack, not «the seat is the channel».
 
-| Windows | Topology examples | Behavior |
-|--------:|-------------------|----------|
-| 3 | `(P)(F)(M)` | Dedicated TopLevels; no OneOf required |
-| 2 | `(F)(P/M)` · `(P)(F/M)` · `(M)(P/F)` (+ sym) | One dedicated + OneOf of the other two |
-| 1 | out of scope v1 | compact tier stays ADR 0171 |
+### Meta → default channel (projection table)
 
-Three-way OneOf `(P/F/M)` on one TopLevel — **defer** (v1.1) unless dogfood demands.
+| Meta token | Default channel face | Typical human face |
+|------------|----------------------|--------------------|
+| `P` | sit (report shares sit face) | Plan / report board |
+| `F` | work | Editor / Intercom forward |
+| `M` | world (probe shares world face) | MFD instruments / shell / git / browser |
+| _(none)_ | alert | EICAS chrome — never a OneOf steal |
 
-## Channel → anchor (projection, not identity)
+One meta token may cover multiple channels that share a face (sit+report → P face). Switching **report** vs **sit** is organ/page within sit-face, not a new window.
 
-ADR 0193 channels are **not** window labels. Default projection (layout `agent` compatible):
+## Packing matrix (channel language)
 
-| Channel | Default face anchor |
-|---------|---------------------|
-| sit / report | P (plan / report board) |
-| work | F (editor / Intercom forward) |
-| probe / world | M (script / git / shell / browser) |
-| alert | EICAS chrome (not OneOf steal) |
+| Windows | Meaning | Compat wire (meta) |
+|--------:|---------|-------------------|
+| 3 | three dedicated channel-faces | `(P)(F)(M)` → sit \| work \| world |
+| 2 | one dedicated + OneOf{two faces} | `(F)(P/M)` → work \| OneOf{sit, world} |
+| 1 | out of scope v1 | compact ADR 0171 |
 
-When topology OneOf-hides an anchor, **auto-switch** PreferOneOf(that anchor) on channel demand (land / MFD page / locus). SoftOrgan seats still **never** steal page/OneOf (PresentationPmOneOfPolicy.SeatsMaySelectMfd = false — keep).
+Symmetries of meta strings are just different labels for the same channel packing.
 
-## DoD switch axes (same as v0, generalized)
+## Switch axes
 
-1. **Chord** — toggle active member of the OneOf set (not only P↔M).
-2. **Auto-switch** — channel / land / MFD intent → show needed member.
+1. **Chord** — cycle active **channel** in the OneOf slot (UI may still show meta glyph P/M as badge).
+2. **Auto-switch** — channel demand (land / locus / agent intent) → show that channel’s face if it lives in a OneOf slot.
 
-## Ship slices
+SoftOrgan seats never steal page/OneOf (keep v0 policy).
 
-1. **Analyzer + flags** — `IsOneOfPlusDedicatedTwoScreen` for any distinct pair + single dedicated; retire Pm-only as sole path (compat alias ok).
-2. **Glass OneOf host** — generic member set `{A,B}` + dedicated host for the third; titles `A/B · X active`.
-3. **Policy** — `PresentationOneOfPolicy` (rename/generalize from Pm); channel→Prefer map.
-4. **Chord** — `po` cycles OneOf set; optional `po P` / `po M` land.
-5. **Live dogfood** — PNG 2-window `(F)(P/M)` + `(P)(F/M)` toggle; 3-window `(P)(F)(M)` unchanged.
+## Model types (code)
+
+- `PresentationChannelId` — sit|work|probe|report|world|alert.
+- `PresentationZoneMeta` — optional P|F|M tag on a face (paint/remount hint only).
+- Slot describe: dedicated channel-face **or** OneOf set of channel-faces (+ meta for Glass remount).
+- **Do not** treat `PresentationAnchorKind` as the OneOf member id in new APIs; map meta↔channel at the boundary.
+
+## Ship slices (corrected)
+
+1. ~~Any P|F|M pair analyzer as ontology~~ → **channel packing describe** + meta map (this correction).
+2. Glass OneOf host remount by **active channel** (meta only selects which zone UIElement).
+3. Chord `po` / Prefer by **channel id**.
+4. Live dogfood: 2-window channel switch + 3-window dedicated; badges may show meta.
 
 ## Do not
 
-- Mirror agent SoftOrgan seats as extra HDMI windows.
-- Force human-faced work to invent chrome only on Editor when channel belongs on M/P.
-- SoftFL invent / Meta mill under citizen hold — this feature is operator-authorized densest Glass gap.
+- Invent «P/F/M are the channels».
+- Mirror agent seats as extra HDMI windows.
+- Blame habitat when the model was wrong.
 
 ## Compat
 
-- v0 `(P/M)(F)` keeps working.
-- Avalonia CIDE parity — follow-up after Glass Windows dogfood.
+- v0 `(P/M)(F)` wire keeps parsing.
+- Prior analyzer `IsOneOfPlusDedicatedTwoScreen` = **meta-level** helper for Glass remount until hosts speak channels; call sites must go through channel describe.
