@@ -19,7 +19,7 @@
 | correspondence | Correspondence | FS list | thread **timeline** | gap |
 | markdown / md_author | MarkdownPreview | FlowDocument | keep preview | ok-ish |
 | browser | WebAiPortal | WebView2 | keep | ok |
-| fds / shared | FlightDataStorage | chip glance | **card deck** instrument | thin |
+| fds / shared | FlightDataStorage | **card deck** | PLAN/SHARE/PRESSURE/WAKE instrument cards | ok (2026-08-04) |
 | Editor situ | Editor ribbon | **text strip** | **REJECT** as human-faced — situ must be instrument (why-board / companions viz), not path subtitle | reject |
 | pressure / alert / eicas | chrome / EICAS band | chips | keep chips; no prose wall | ok-ish |
 | webcam | (chrome) | — | shot desk = sense, not MFD text | n/a |
@@ -29,6 +29,7 @@
 - **Plan instrument cards** (WHY/NEXT/COURSE) — dogfood PNG 2026-08-04
 - **RelatedFiles companions** — Skia graph + list (same pattern as SemanticMap) — dogfood PNG 2026-08-04
 - **Problems severity board** — ERR/WARN/ALL cards + jump list — dogfood PNG 2026-08-04
+- **FDS card deck** — PLAN/SHARE/PRESSURE/WAKE instrument cards — dogfood PNG 2026-08-04
 
 ## Do not
 - Mark text ribbon Done
