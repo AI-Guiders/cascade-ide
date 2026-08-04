@@ -18,6 +18,7 @@ internal static partial class LatchPaint
         string Next = "",
         string Course = "",
         string? Wall = null,
+        string? NextSub = null,
         IReadOnlyList<string>? Board = null);
 
     public static PlanView PaintPlan(string json)
@@ -48,9 +49,11 @@ internal static partial class LatchPaint
             }
 
             // Shared-SSOT Q1: WHY + NEXT as separate instrument faces (not one ECAM string).
-            var next = !string.IsNullOrWhiteSpace(task) ? task!.Trim()
+            // Gap 3.3: NEXT glance = 1 human move; full TM title stays on Sub when collapsed.
+            var leafRaw = !string.IsNullOrWhiteSpace(task) ? task!.Trim()
                 : !string.IsNullOrWhiteSpace(feature) ? feature!.Trim()
                 : TruncatePlan(pulse ?? "Plan", 56);
+            var (next, nextSub) = FormatGlanceNext(leafRaw);
 
             var why = !string.IsNullOrWhiteSpace(whyRaw) ? whyRaw!.Trim() : "—";
             var course = !string.IsNullOrWhiteSpace(feature) ? feature!.Trim() : "";
@@ -71,7 +74,7 @@ internal static partial class LatchPaint
             }
 
             return new PlanView(
-                next,
+                leafRaw,
                 detail.ToString().TrimEnd(),
                 active
                     ? $"plan · board {board.Count} · {TruncatePlan(next, 20)}"
@@ -81,6 +84,7 @@ internal static partial class LatchPaint
                 Next: next,
                 Course: course,
                 Wall: wall,
+                NextSub: nextSub,
                 Board: board);
         }
         catch (Exception ex)
@@ -259,6 +263,62 @@ internal static partial class LatchPaint
         }
 
         return slice;
+    }
+
+/// <summary>PFD NEXT glance — 1 human move; full leaf on Sub when title is a dig/meta dump.</summary>
+    internal static (string Glance, string? Sub) FormatGlanceNext(string? raw)
+    {
+        var full = CleanLeafTitle(raw ?? "");
+        if (full.Length == 0)
+            return ("No active leaf.", null);
+
+        var cleaned = StripActTags(full);
+
+        // "Dig densest after … CLOSED — residual" → residual is the move.
+        var em = cleaned.IndexOf(" — ", StringComparison.Ordinal);
+        if (em > 0
+            && cleaned.StartsWith("Dig densest", StringComparison.OrdinalIgnoreCase)
+            && em + 3 < cleaned.Length)
+        {
+            var after = cleaned[(em + 3)..].Trim();
+            if (after.Length is >= 8 and <= 96)
+                return (after, string.Equals(after, full, StringComparison.Ordinal) ? null : full);
+        }
+
+        if (cleaned.Length <= 72)
+            return (cleaned, string.Equals(cleaned, full, StringComparison.Ordinal) ? null : full);
+
+        return (TruncatePlan(cleaned, 72), full);
+    }
+
+    static string CleanLeafTitle(string s)
+    {
+        s = s.Replace('\r', ' ').Replace('\n', ' ').Trim();
+        // Accidental REPL verb glued into title ("… @act #CIDE start").
+        if (s.EndsWith(" start", StringComparison.Ordinal))
+            s = s[..^6].TrimEnd();
+        return s;
+    }
+
+    static string StripActTags(string s)
+    {
+        while (true)
+        {
+            var i = s.IndexOf("@act", StringComparison.OrdinalIgnoreCase);
+            if (i < 0)
+                break;
+            var j = i + 4;
+            while (j < s.Length && char.IsWhiteSpace(s[j]))
+                j++;
+            if (j >= s.Length || s[j] != '#')
+                break;
+            j++;
+            while (j < s.Length && (char.IsLetterOrDigit(s[j]) || s[j] == '_'))
+                j++;
+            s = (s[..i] + s[j..]).Trim();
+        }
+
+        return s.Trim();
     }
 
     static string TruncatePlan(string s, int max)

@@ -48,10 +48,11 @@ public partial class MainWindow
             {
                 var raw = File.ReadAllText(path);
                 var view = LatchPaint.PaintPlan(raw);
-                PlanTitle.Text = view.Next;
+                PlanTitle.Text = view.Headline;
                 PlanMeta.Text = view.Detail;
                 PlanWhyReadout.ValueText = view.Why;
                 PlanNextReadout.ValueText = view.Next;
+                PlanNextReadout.SubText = view.NextSub;
                 PlanCourseReadout.ValueText = string.IsNullOrWhiteSpace(view.Course) ? "—" : view.Course;
                 PlanCourseReadout.SubText = string.IsNullOrWhiteSpace(view.Wall) ? null : view.Wall;
                 PlanCourseReadout.Visibility = string.IsNullOrWhiteSpace(view.Course) && string.IsNullOrWhiteSpace(view.Wall)
@@ -64,10 +65,10 @@ public partial class MainWindow
                         PlanLeafBoardList.Items.Add(line);
                 }
                 // Legacy mirror (collapsed).
-                PlanReadout.ValueText = view.Next;
+                PlanReadout.ValueText = view.Headline;
                 PlanReadout.SubText = string.IsNullOrWhiteSpace(view.Detail) ? null : view.Detail;
                 // Cache leaf/why for Editor situ ribbon (Shared-SSOT Q2).
-                _planLeaf = view.Next;
+                _planLeaf = view.Headline;
                 _planWhy = string.IsNullOrWhiteSpace(view.Why) || view.Why == "—" ? null : view.Why;
                 RefreshEditorSituRibbon();
                 // Plan paint ≠ OneOf Prefer P — see PresentationPmOneOfPolicy.FromPlanLatch.
