@@ -1,0 +1,64 @@
+#nullable enable
+using CascadeIDE.SoftOrgan;
+using Xunit;
+
+namespace CascadeIDE.Tests;
+
+public sealed class GlassGlanceCardsTests
+{
+    [Fact]
+    public void BuildEvents_ready_includes_latch_count()
+    {
+        var chips = GlassGlanceCards.BuildEvents(new GlassEventsGlance.EventsPresenceStatus(
+            LatchLatestCount: 12,
+            LatchRoot: "state",
+            Catalog: ["BuildStateChanged"]));
+
+        Assert.Equal(new GlassGlanceChip("LEVEL", "READY", "ok"), chips[0]);
+        Assert.Contains(new GlassGlanceChip("LATCHES", "12", "ok"), chips);
+    }
+
+    [Fact]
+    public void BuildWorkspaceHealth_projects_git_and_solution()
+    {
+        var chips = GlassGlanceCards.BuildWorkspaceHealth(new GlassWorkspaceHealthGlance.WorkspaceFsStatus(
+            RootPath: @"D:\ws",
+            RootExists: true,
+            HasGit: true,
+            SlnPath: @"D:\ws\CascadeIDE.sln",
+            HasCascadeIdeDir: true));
+
+        Assert.Equal(new GlassGlanceChip("LEVEL", "READY", "ok"), chips[0]);
+        Assert.Contains(new GlassGlanceChip("GIT", "yes", "ok"), chips);
+        Assert.Contains(new GlassGlanceChip("SLN", "CascadeIDE.sln", "ok"), chips);
+    }
+
+    [Fact]
+    public void BuildEnvironment_projects_probe_rows()
+    {
+        var chips = GlassGlanceCards.BuildEnvironment(new GlassEnvironmentReadinessGlance.EnvProbeStatus(
+            new GlassEnvironmentReadinessGlance.EnvProbeRow("AGENT_NOTES_FILE", "unset", null),
+            new GlassEnvironmentReadinessGlance.EnvProbeRow("NETCOREDBG_PATH", "missing", "dbg.exe"),
+            new GlassEnvironmentReadinessGlance.EnvProbeRow("dotnet", "ok", "dotnet.exe")));
+
+        Assert.Equal(new GlassGlanceChip("LEVEL", "DEGRADED", "warn"), chips[0]);
+        Assert.Contains(new GlassGlanceChip("NETCOREDBG_PATH", "missing · dbg.exe", "bad"), chips);
+    }
+
+    [Fact]
+    public void BuildHypotheses_projects_status_counts()
+    {
+        var chips = GlassGlanceCards.BuildHypotheses(new GlassHypothesesGlance.HypothesesFsStatus(
+            FilePath: @"D:\ws\.cascade-ide\debug-hypotheses.json",
+            FileExists: true,
+            Total: 3,
+            Open: 1,
+            Rejected: 1,
+            Confirmed: 1,
+            ModifiedUtc: null));
+
+        Assert.Equal(new GlassGlanceChip("LEVEL", "READY", "ok"), chips[0]);
+        Assert.Contains(new GlassGlanceChip("OPEN", "1", "warn"), chips);
+        Assert.Contains(new GlassGlanceChip("CONFIRMED", "1", "ok"), chips);
+    }
+}

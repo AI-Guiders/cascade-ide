@@ -48,6 +48,10 @@ public partial class MainWindow
     TextBlock? HybridIndexStatusLabel => MfdHosts?.HybridIndexStatusLabel;
     TextBox? HybridIndexOutput => MfdHosts?.HybridIndexOutput;
 
+    Border? MfdGlanceCardsHost => MfdHosts?.MfdGlanceCardsHost;
+    TextBlock? GlanceCardsStatusLabel => MfdHosts?.GlanceCardsStatusLabel;
+    ItemsControl? GlanceCardsPanel => MfdHosts?.GlanceCardsPanel;
+
     Border? MfdSemanticMapHost => MfdHosts?.MfdSemanticMapHost;
     TextBlock? SemanticStatusLabel => MfdHosts?.SemanticStatusLabel;
     ListBox? SemanticList => MfdHosts?.SemanticList;

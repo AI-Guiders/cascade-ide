@@ -49,7 +49,6 @@ public partial class MainWindow
     {
         RefreshMfdZoneTitle();
         RefreshSolutionExplorerTree();
-        RefreshMfdEditorVisibility();
         RefreshMfdTerminalVisibility();
         RefreshMfdBuildVisibility();
         RefreshMfdTestsVisibility();
@@ -57,6 +56,8 @@ public partial class MainWindow
         RefreshMfdProblemsVisibility();
         RefreshMfdRelatedVisibility();
         RefreshMfdHybridIndexVisibility();
+        RefreshMfdGlanceCardsVisibility();
+        RefreshMfdEditorVisibility();
         RefreshMfdSemanticVisibility();
         RefreshMfdCorrespondenceVisibility();
         RefreshMfdMarkdownVisibility();
@@ -116,6 +117,7 @@ public partial class MainWindow
             || IsSemanticHostActive()
             || IsCorrespondenceHostActive()
             || IsMarkdownHostActive()
+            || IsGlanceCardsHostActive()
             || IsAiChatSettingsHostActive()
             || IsDebugHostActive()
             || IsWebAiHostActive())

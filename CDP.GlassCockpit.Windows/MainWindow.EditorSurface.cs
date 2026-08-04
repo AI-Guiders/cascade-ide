@@ -72,8 +72,9 @@ public partial class MainWindow
             && string.Equals(page, "Build", StringComparison.OrdinalIgnoreCase);
         var showTests = MfdTestsHost is not null
             && string.Equals(page, "Tests", StringComparison.OrdinalIgnoreCase);
+        var showGlanceCards = IsGlanceCardsHostActive();
         // Terminal/Build/Tests host visibility owned by RefreshMfd*Visibility (called from UpdateMfdBody).
-        MfdBody.Visibility = (showEditor || showSe || showTerminal || showBuild || showTests) ? Visibility.Collapsed : Visibility.Visible;
+        MfdBody.Visibility = (showEditor || showSe || showTerminal || showBuild || showTests || showGlanceCards) ? Visibility.Collapsed : Visibility.Visible;
     }
 
     void TryOpenDogfoodFile()
