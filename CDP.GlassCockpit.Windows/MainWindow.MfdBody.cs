@@ -233,7 +233,7 @@ public partial class MainWindow
             "DebugStack" => FormatMfdStub("DebugStack", "Glass live DAP latch host", "debug_desk SoftOrgan · stack/locals"),
             "Git" => FormatMfdStub("Git", "Glass porcelain+diff host", "stage/commit/push/submodule"),
             "RelatedFiles" => FormatMfdStub("RelatedFiles", "companions · Skia graph + list", "Shared-SSOT blast instrument"),
-            "Correspondence" => FormatMfdStub("Correspondence", "Glass CRS FS host", "full resolver later"),
+            "Correspondence" => FormatMfdStub("Correspondence", "Glass CRS thread timeline", "cards + rail"),
             "MarkdownPreview" => FormatMfdStub("MarkdownPreview", "Glass Markdig FlowDocument", "headings/links/code"),
             "WebAiPortal" => FormatMfdStub("WebAiPortal", "Glass WebView2", "embedded browser"),
             "AiChatSettings" => FormatMfdStub("AiChatSettings", "Glass settings.toml host", "provider/model/MCP"),

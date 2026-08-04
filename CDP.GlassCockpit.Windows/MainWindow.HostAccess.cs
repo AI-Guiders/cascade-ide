@@ -68,8 +68,8 @@ public partial class MainWindow
 
     Border? MfdCorrespondenceHost => MfdHosts?.MfdCorrespondenceHost;
     TextBlock? CorrespondenceStatusLabel => MfdHosts?.CorrespondenceStatusLabel;
-    ListBox? CorrespondenceReverseList => MfdHosts?.CorrespondenceReverseList;
-    ListBox? CorrespondenceForwardList => MfdHosts?.CorrespondenceForwardList;
+    ItemsControl? CorrespondenceCardsPanel => MfdHosts?.CorrespondenceCardsPanel;
+    ListBox? CorrespondenceTimelineList => MfdHosts?.CorrespondenceTimelineList;
 
     Border? MfdMarkdownHost => MfdHosts?.MfdMarkdownHost;
     TextBlock? MarkdownStatusLabel => MfdHosts?.MarkdownStatusLabel;

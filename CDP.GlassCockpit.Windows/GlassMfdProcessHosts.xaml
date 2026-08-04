@@ -322,6 +322,7 @@
         </Grid>
       </DockPanel>
     </Border>
+    <!-- SoftOrgan human viz: CRS instrument cards + thread timeline (not dual FS dump). -->
     <Border x:Name="MfdCorrespondenceHost" Visibility="Collapsed" Background="#121212">
       <DockPanel Margin="8">
         <DockPanel DockPanel.Dock="Top" Margin="0,0,0,6">
@@ -330,23 +331,17 @@
           <TextBlock x:Name="CorrespondenceStatusLabel" Text="crs · idle"
                      FontSize="11" Foreground="#888" VerticalAlignment="Center"/>
         </DockPanel>
-        <Grid>
-          <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="*"/>
-            <ColumnDefinition Width="8"/>
-            <ColumnDefinition Width="*"/>
-          </Grid.ColumnDefinitions>
-          <DockPanel Grid.Column="0">
-            <TextBlock DockPanel.Dock="Top" Text="reverse · code" FontSize="11" Foreground="#888" Margin="0,0,0,4"/>
-            <ListBox x:Name="CorrespondenceReverseList" Background="Transparent" BorderThickness="0"
-                     DisplayMemberPath="Display" FontFamily="Consolas" FontSize="12" Foreground="#DDD"/>
-          </DockPanel>
-          <DockPanel Grid.Column="2">
-            <TextBlock DockPanel.Dock="Top" Text="forward · docs" FontSize="11" Foreground="#888" Margin="0,0,0,4"/>
-            <ListBox x:Name="CorrespondenceForwardList" Background="Transparent" BorderThickness="0"
-                     DisplayMemberPath="Display" FontFamily="Consolas" FontSize="12" Foreground="#DDD"/>
-          </DockPanel>
-        </Grid>
+        <ItemsControl x:Name="CorrespondenceCardsPanel" DockPanel.Dock="Top" Margin="0,0,0,8">
+          <ItemsControl.ItemsPanel>
+            <ItemsPanelTemplate>
+              <UniformGrid Columns="3"/>
+            </ItemsPanelTemplate>
+          </ItemsControl.ItemsPanel>
+        </ItemsControl>
+        <TextBlock DockPanel.Dock="Top" Text="thread timeline · ◀ reverse · ◆ focus · ▶ forward"
+                   FontSize="11" Foreground="#888" Margin="0,0,0,4"/>
+        <ListBox x:Name="CorrespondenceTimelineList" Background="Transparent" BorderThickness="0"
+                 DisplayMemberPath="Display" FontFamily="Consolas" FontSize="12" Foreground="#DDD"/>
       </DockPanel>
     </Border>
     <Border x:Name="MfdMarkdownHost" Visibility="Collapsed" Background="#121212">

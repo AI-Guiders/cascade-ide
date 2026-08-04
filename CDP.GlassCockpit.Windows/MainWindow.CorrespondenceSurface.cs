@@ -8,11 +8,10 @@ using CascadeIDE.SoftOrgan;
 
 namespace CDP.GlassCockpit.Windows;
 
-/// <summary>Glass MFD Correspondence — full CRS resolvers via GlassCore peel.</summary>
+/// <summary>Glass MFD Correspondence — instrument cards + thread timeline (not dual FS dump).</summary>
 public partial class MainWindow
 {
-    readonly ObservableCollection<GlassCorrespondenceFeed.Item> _crsReverse = new();
-    readonly ObservableCollection<GlassCorrespondenceFeed.Item> _crsForward = new();
+    readonly ObservableCollection<GlassCorrespondenceFeed.TimelineRow> _crsTimeline = new();
 
     void RefreshMfdCorrespondenceVisibility()
     {
@@ -25,13 +24,10 @@ public partial class MainWindow
 
         if (show)
         {
-            if (CorrespondenceReverseList is not null
-                && !ReferenceEquals(CorrespondenceReverseList.ItemsSource, _crsReverse))
-                CorrespondenceReverseList.ItemsSource = _crsReverse;
-            if (CorrespondenceForwardList is not null
-                && !ReferenceEquals(CorrespondenceForwardList.ItemsSource, _crsForward))
-                CorrespondenceForwardList.ItemsSource = _crsForward;
-            if (_crsReverse.Count == 0 && _crsForward.Count == 0)
+            if (CorrespondenceTimelineList is not null
+                && !ReferenceEquals(CorrespondenceTimelineList.ItemsSource, _crsTimeline))
+                CorrespondenceTimelineList.ItemsSource = _crsTimeline;
+            if (_crsTimeline.Count == 0 || (CorrespondenceCardsPanel?.Items.Count ?? 0) == 0)
                 RefreshCorrespondenceItems();
         }
     }
@@ -48,11 +44,9 @@ public partial class MainWindow
     internal void CorrespondenceRefresh_OnClick(object sender, RoutedEventArgs e) =>
         RefreshCorrespondenceItems();
 
-    internal void CorrespondenceReverse_OnMouseDoubleClick(object sender, MouseButtonEventArgs e) =>
-        OpenCorrespondenceItem(CorrespondenceReverseList?.SelectedItem as GlassCorrespondenceFeed.Item);
-
-    internal void CorrespondenceForward_OnMouseDoubleClick(object sender, MouseButtonEventArgs e) =>
-        OpenCorrespondenceItem(CorrespondenceForwardList?.SelectedItem as GlassCorrespondenceFeed.Item);
+    internal void CorrespondenceTimeline_OnMouseDoubleClick(object sender, MouseButtonEventArgs e) =>
+        OpenCorrespondenceItem(
+            (CorrespondenceTimelineList?.SelectedItem as GlassCorrespondenceFeed.TimelineRow)?.Item);
 
     void OpenCorrespondenceItem(GlassCorrespondenceFeed.Item? item)
     {
@@ -65,15 +59,21 @@ public partial class MainWindow
 
     void RefreshCorrespondenceItems()
     {
-        _crsReverse.Clear();
-        _crsForward.Clear();
         var snap = GlassCorrespondenceFeed.Collect(_session.WorkspaceRoot, _editorPath);
-        foreach (var i in snap.Reverse)
-            _crsReverse.Add(i);
-        foreach (var i in snap.Forward)
-            _crsForward.Add(i);
+        if (CorrespondenceCardsPanel is not null)
+        {
+            CorrespondenceCardsPanel.Items.Clear();
+            foreach (var chip in GlassCorrespondenceFeed.BuildInstrument(snap, _editorPath))
+                CorrespondenceCardsPanel.Items.Add(CreateDeckCard(chip));
+        }
+
+        _crsTimeline.Clear();
+        foreach (var row in GlassCorrespondenceFeed.BuildTimeline(snap, _editorPath))
+            _crsTimeline.Add(row);
+
         if (CorrespondenceStatusLabel is not null)
-            CorrespondenceStatusLabel.Text = snap.StatusLine;
+            CorrespondenceStatusLabel.Text =
+                $"crs · timeline {_crsTimeline.Count} · {snap.StatusLine}";
         if (!string.IsNullOrWhiteSpace(snap.FeatureLine) || !string.IsNullOrWhiteSpace(snap.AdrLine))
             StatusText.Text =
                 $"glass · crs · {snap.FeatureLine}"

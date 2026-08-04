@@ -1,5 +1,6 @@
 #nullable enable
 
+using System.Globalization;
 using CascadeIDE.Features.Workspace.DataAcquisition;
 using CascadeIDE.Features.WorkspaceNavigation.Application;
 using CascadeIDE.Services;
@@ -30,6 +31,60 @@ public static class GlassCorrespondenceFeed
         string AdrLine,
         string DocsCoverageLine,
         string LayersBadge);
+
+    /// <summary>One rail row on the CRS thread timeline (human face).</summary>
+    public sealed record TimelineRow(string Role, Item Item)
+    {
+        public string Display => Role switch
+        {
+            "focus" => $"◆ focus · {(Item.Title is { Length: > 0 } ? Item.Title : Path.GetFileName(Item.FilePath))}",
+            "reverse" => $"◀ {Item.Display}",
+            "forward" => $"▶ {Item.Display}",
+            _ => Item.Display,
+        };
+    }
+
+    public static IReadOnlyList<GlassGlanceChip> BuildInstrument(Snapshot snap, string? editorPath)
+    {
+        var focus = string.IsNullOrWhiteSpace(editorPath) ? "—" : Path.GetFileName(editorPath);
+        var feature = string.IsNullOrWhiteSpace(snap.FeatureLine) || snap.FeatureLine.Contains("no feature", StringComparison.OrdinalIgnoreCase)
+            ? "—"
+            : Trunc(snap.FeatureLine, 28);
+        var adr = string.IsNullOrWhiteSpace(snap.AdrLine) ? "—" : Trunc(snap.AdrLine, 28);
+        var hasThread = snap.Reverse.Count > 0 || snap.Forward.Count > 0;
+        return
+        [
+            new("CRS", hasThread ? "LIVE" : "IDLE", hasThread ? "ok" : "idle"),
+            new("FOCUS", Trunc(focus, 28), string.IsNullOrWhiteSpace(editorPath) ? "idle" : "ok"),
+            new("FEATURE", feature, feature == "—" ? "idle" : "ok"),
+            new("ADR", adr, adr == "—" ? "idle" : "warn"),
+            new("REV", snap.Reverse.Count.ToString(CultureInfo.InvariantCulture), snap.Reverse.Count > 0 ? "ok" : "idle"),
+            new("FWD", snap.Forward.Count.ToString(CultureInfo.InvariantCulture), snap.Forward.Count > 0 ? "ok" : "idle"),
+        ];
+    }
+
+    /// <summary>Thread rail: reverse (docs→code) → focus → forward (code→docs).</summary>
+    public static IReadOnlyList<TimelineRow> BuildTimeline(Snapshot snap, string? editorPath, int max = 48)
+    {
+        var rows = new List<TimelineRow>();
+        foreach (var r in snap.Reverse.Take(Math.Max(0, max / 2)))
+            rows.Add(new TimelineRow("reverse", r));
+
+        if (!string.IsNullOrWhiteSpace(editorPath) && File.Exists(editorPath))
+        {
+            rows.Add(new TimelineRow(
+                "focus",
+                new Item(editorPath, "focus", Title: Path.GetFileName(editorPath))));
+        }
+
+        foreach (var f in snap.Forward.Take(Math.Max(0, max - rows.Count)))
+            rows.Add(new TimelineRow("forward", f));
+
+        return rows;
+    }
+
+    static string Trunc(string s, int max) =>
+        s.Length <= max ? s : s[..(max - 1)] + "…";
 
     public static Snapshot Collect(
         string? workspaceRoot,
