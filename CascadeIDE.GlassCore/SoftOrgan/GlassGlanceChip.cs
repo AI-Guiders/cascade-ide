@@ -120,8 +120,6 @@ public static class GlassGlanceCards
         return s.Length <= max ? s : s[..(max - 1)].TrimEnd() + "…";
     }
 
-    static bool IsDash(string s) => s is "—" or "-" or "";
-
     static bool IsLivePresence(string state) =>
         state.Equals("composing", StringComparison.OrdinalIgnoreCase)
         || state.Equals("busy", StringComparison.OrdinalIgnoreCase)
