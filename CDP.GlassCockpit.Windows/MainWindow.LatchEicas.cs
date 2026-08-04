@@ -28,7 +28,7 @@ public partial class MainWindow
                 TopologyBadge.Text = layout.Topology;
                 SyncHostWindows();
 
-                SelectMfdPage(view.MfdPage);
+                SelectMfdPage(view.MfdPage, sticky: true);
                 RefreshEicasHealth();
                 StatusText.Text =
                     $"glass · {view.StatusLine} · cols={layout.ColumnDefinitions} · {DateTime.Now:HH:mm:ss}";
@@ -56,7 +56,7 @@ public partial class MainWindow
                 _planLeaf = view.Headline;
                 _planWhy = ExtractPlanWhy(view.Detail);
                 RefreshEditorSituRibbon();
-                _hosts.PreferPmOneOf(CascadeIDE.GlassCore.Presentation.PresentationPmOneOfPolicy.FromPlanLatch());
+                // Plan paint ≠ OneOf Prefer P — see PresentationPmOneOfPolicy.FromPlanLatch.
                 StatusText.Text = $"glass · {view.StatusLine} · {DateTime.Now:HH:mm:ss}";
             }
             catch (Exception ex)

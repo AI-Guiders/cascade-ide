@@ -149,15 +149,15 @@ public partial class MainWindow
         switch (id)
         {
             case GlassMelodyGlassActions.RunGitStatus:
-                SelectMfdPage("Git");
+                SelectMfdPage("Git", sticky: true);
                 GitStatus_OnClick(this, new RoutedEventArgs());
                 break;
             case GlassMelodyGlassActions.RunBuild:
-                SelectMfdPage("Build");
+                SelectMfdPage("Build", sticky: true);
                 BuildRun_OnClick(this, new RoutedEventArgs());
                 break;
             case GlassMelodyGlassActions.RunTests:
-                SelectMfdPage("Tests");
+                SelectMfdPage("Tests", sticky: true);
                 TestsRun_OnClick(this, new RoutedEventArgs());
                 break;
             case GlassMelodyGlassActions.RunWebAiPortal:
@@ -212,64 +212,64 @@ public partial class MainWindow
                 PageIntercomFeed(-1);
                 break;
             case "mfd_editor":
-                SelectMfdPage("Editor");
+                SelectMfdPage("Editor", sticky: true);
                 break;
             case "mfd_terminal":
-                SelectMfdPage("Terminal");
+                SelectMfdPage("Terminal", sticky: true);
                 break;
             case "mfd_fds":
-                SelectMfdPage("FlightDataStorage");
+                SelectMfdPage("FlightDataStorage", sticky: true);
                 break;
             case "mfd_build":
-                SelectMfdPage("Build");
+                SelectMfdPage("Build", sticky: true);
                 break;
             case "mfd_tests":
-                SelectMfdPage("Tests");
+                SelectMfdPage("Tests", sticky: true);
                 break;
             case "mfd_git":
-                SelectMfdPage("Git");
+                SelectMfdPage("Git", sticky: true);
                 break;
             case "mfd_problems":
-                SelectMfdPage("Problems");
+                SelectMfdPage("Problems", sticky: true);
                 break;
             case "mfd_related_files":
-                SelectMfdPage("RelatedFiles");
+                SelectMfdPage("RelatedFiles", sticky: true);
                 break;
             case "mfd_semantic_map":
-                SelectMfdPage("SemanticMap");
+                SelectMfdPage("SemanticMap", sticky: true);
                 break;
             case "mfd_correspondence":
-                SelectMfdPage("Correspondence");
+                SelectMfdPage("Correspondence", sticky: true);
                 break;
             case "mfd_markdown":
-                SelectMfdPage("MarkdownPreview");
+                SelectMfdPage("MarkdownPreview", sticky: true);
                 break;
             case "mfd_debug_stack":
-                SelectMfdPage("DebugStack");
+                SelectMfdPage("DebugStack", sticky: true);
                 break;
             case "mfd_webai":
-                SelectMfdPage("WebAiPortal");
+                SelectMfdPage("WebAiPortal", sticky: true);
                 break;
             case "mfd_solution_explorer":
-                SelectMfdPage("SolutionExplorer");
+                SelectMfdPage("SolutionExplorer", sticky: true);
                 break;
             case "mfd_hybrid_index":
-                SelectMfdPage("HybridIndex");
+                SelectMfdPage("HybridIndex", sticky: true);
                 break;
             case "mfd_workspace_health":
-                SelectMfdPage("WorkspaceHealth");
+                SelectMfdPage("WorkspaceHealth", sticky: true);
                 break;
             case "mfd_env_ready":
-                SelectMfdPage("EnvironmentReadiness");
+                SelectMfdPage("EnvironmentReadiness", sticky: true);
                 break;
             case "mfd_events":
-                SelectMfdPage("Events");
+                SelectMfdPage("Events", sticky: true);
                 break;
             case "mfd_hypotheses":
-                SelectMfdPage("Hypotheses");
+                SelectMfdPage("Hypotheses", sticky: true);
                 break;
             case "mfd_chat":
-                SelectMfdPage("Chat");
+                SelectMfdPage("Chat", sticky: true);
                 break;
             case "toggle_pm_oneof_role":
                 if (_hosts.TogglePmOneOfRole())

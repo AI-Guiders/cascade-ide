@@ -9,18 +9,28 @@ namespace CDP.GlassCockpit.Windows;
 /// Editor: AvalonEdit mounts on MfdEditorHost when Forward=intercom (ADR 0120); stub only if editor stays on Forward.</summary>
 public partial class MainWindow
 {
-    void SelectMfdPage(string? page)
+    /// <summary>Last presentation/chord/SoftOrgan-M instrument page — seats P/F republish must not yank it.</summary>
+    string? _stickyMfdPage;
+
+    void SelectMfdPage(string? page, bool sticky = false)
     {
         if (string.IsNullOrWhiteSpace(page) || MfdPages is null)
             return;
 
-        if (CascadeIDE.GlassCore.Presentation.PresentationPmOneOfPolicy.FromMfdPage(page) is { } oneOf)
+        var trimmed = page.Trim();
+        if (sticky)
+            _stickyMfdPage = trimmed;
+
+        if (CascadeIDE.GlassCore.Presentation.PresentationPmOneOfPolicy.FromMfdPage(trimmed) is { } oneOf)
             _hosts.PreferPmOneOf(oneOf);
+
+        if (string.Equals(CurrentMfdPage(), trimmed, StringComparison.OrdinalIgnoreCase))
+            return;
 
         foreach (var item in MfdPages.Items)
         {
             if (item is ListBoxItem lbi &&
-                string.Equals(lbi.Content?.ToString(), page, StringComparison.OrdinalIgnoreCase))
+                string.Equals(lbi.Content?.ToString(), trimmed, StringComparison.OrdinalIgnoreCase))
             {
                 MfdPages.SelectedItem = lbi;
                 return;
@@ -28,7 +38,7 @@ public partial class MainWindow
         }
 
         // 0-sync: CabinGlass may name a page before XAML list catches up — ensure selectable.
-        var created = new ListBoxItem { Content = page.Trim() };
+        var created = new ListBoxItem { Content = trimmed };
         MfdPages.Items.Add(created);
         MfdPages.SelectedItem = created;
     }

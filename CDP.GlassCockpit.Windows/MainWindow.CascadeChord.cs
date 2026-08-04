@@ -268,7 +268,7 @@ public partial class MainWindow
 
     void RunWebAiPortal(string? urlPayload)
     {
-        SelectMfdPage("WebAiPortal");
+        SelectMfdPage("WebAiPortal", sticky: true);
         if (WebAiUrl is null)
             return;
 

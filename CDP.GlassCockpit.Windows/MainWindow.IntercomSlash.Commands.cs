@@ -27,7 +27,7 @@ public partial class MainWindow
 
         if (cmd.Id == "fds")
         {
-            SelectMfdPage("FlightDataStorage");
+            SelectMfdPage("FlightDataStorage", sticky: true);
             AppendSlashBubble(cmd.Path, GlassFdsGlance.Format(_session.WorkspaceRoot));
             ComposerBox.Clear();
             HideSlashPopup();

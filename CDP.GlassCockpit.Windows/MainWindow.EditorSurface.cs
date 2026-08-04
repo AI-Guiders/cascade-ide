@@ -115,7 +115,7 @@ public partial class MainWindow
         if (_session.IsIntercomForward)
         {
             MountEditor(MfdEditorHost);
-            SelectMfdPage("Editor");
+            SelectMfdPage("Editor", sticky: true);
         }
 
         RefreshMfdEditorVisibility();
@@ -148,7 +148,7 @@ public partial class MainWindow
         if (_session.IsIntercomForward)
         {
             MountEditor(MfdEditorHost);
-            SelectMfdPage("Editor");
+            SelectMfdPage("Editor", sticky: true);
         }
 
         RefreshMfdEditorVisibility();

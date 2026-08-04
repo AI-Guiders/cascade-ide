@@ -62,7 +62,7 @@ public partial class MainWindow
             ForwardSplit.Visibility = Visibility.Collapsed;
             IntercomSurface.Visibility = Visibility.Visible;
             MountEditor(MfdEditorHost);
-            SelectMfdPage("Editor");
+            SelectMfdPage("Editor", sticky: true);
         }
         else
         {
