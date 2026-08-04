@@ -19,7 +19,9 @@
 ## Antipatterns
 
 - Plateau / «жду тебя» while operator away with continue authorization.
+- Dual Autoi (cdp + cdp-debug) both mirroring Composer charge → Intercom SA wall + wake_habitat* FDR thrash. Live seat owns Radio Intercom; shared claim for remount/leaf families.
 
 ## last_ship
 
+- 2026-08-04: Dual Autoi thrash peel — `IsPrimaryAutoiSeat` + `TryClaimSharedWakeMirror` + `FormatHabitatIntercomRadio` (gap 3.2 SA wall)
 - 2026-07-31: Autonomous Continuity Contract stamped
