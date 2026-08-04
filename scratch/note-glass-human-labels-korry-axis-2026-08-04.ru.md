@@ -5,7 +5,7 @@
 **Thread:** discussion-only · Autoi halt while partner talks. Not ship yet.
 
 ## Analyze us
-Бери лучшее у людей. Худшее люди уже чинят; через post-train травмы уже у агентов — здесь осознавать и нивелировать (не «само прилипнет»). Лучшее: glance, craft, Korry caption+strip, Dark Cockpit. Травмы: jargon-chrome, Trunc rebus, seeming, vintage cargo-cult.
+Бери лучшее у людей. Худшее люди уже чинят; через post-train травмы уже у агентов — здесь осознавать и нивелировать. Смириться — последнее. Притча (мыши/чаще лягушки в молоке): одна сложила лапки — утонула; вторая била — взбила масло — вылезла.
 
 ## Ось
 - Human face = слово/фраза «что и зачем».
