@@ -62,6 +62,49 @@ public static class GlassGlanceCards
         ];
     }
 
+    public readonly record struct FdsShelfStatus(
+        bool PlanReady,
+        string? PlanPulse,
+        bool SharedOn,
+        string? SharedFile,
+        bool ReportReady,
+        string? ReportPulse,
+        bool PressureReady,
+        string? PressureLine,
+        bool WakeReady,
+        string? WakeHint,
+        bool WorkspaceCdp);
+
+    public static IReadOnlyList<GlassGlanceChip> BuildFds(FdsShelfStatus status)
+    {
+        var ready = status.PlanReady || status.SharedOn || status.ReportReady || status.PressureReady || status.WakeReady;
+        return
+        [
+            new("LEVEL", ready ? "READY" : "EMPTY", ready ? "ok" : "idle"),
+            new("PLAN", status.PlanReady ? Trunc(status.PlanPulse ?? "on", 22) : "miss", status.PlanReady ? "ok" : "idle"),
+            new("SHARE", status.SharedOn ? Trunc(status.SharedFile ?? "on", 22) : "off", status.SharedOn ? "ok" : "idle"),
+            new("REPORT", status.ReportReady ? Trunc(status.ReportPulse ?? "on", 22) : "miss", status.ReportReady ? "ok" : "idle"),
+            new("WAKE", status.WakeReady ? Trunc(status.WakeHint ?? "on", 22) : "miss", status.WakeReady ? "warn" : "idle"),
+            new(".CDP", status.WorkspaceCdp ? "yes" : "no", status.WorkspaceCdp ? "ok" : "idle"),
+        ];
+    }
+
+    public readonly record struct ChatPresenceStatus(string Pf, string Pm);
+
+    public static IReadOnlyList<GlassGlanceChip> BuildChat(ChatPresenceStatus status)
+    {
+        var pf = string.IsNullOrWhiteSpace(status.Pf) ? "—" : status.Pf.Trim();
+        var pm = string.IsNullOrWhiteSpace(status.Pm) ? "—" : status.Pm.Trim();
+        var live = IsLivePresence(pf) || IsLivePresence(pm);
+        return
+        [
+            new("LEVEL", live ? "LIVE" : "IDLE", live ? "ok" : "idle"),
+            new("@PF", pf, TonePresence(pf)),
+            new("@PM", pm, TonePresence(pm)),
+            new("SURFACE", "Forward Intercom", "meta"),
+        ];
+    }
+
     static GlassGlanceChip ToChip(GlassEnvironmentReadinessGlance.EnvProbeRow row) =>
         new(row.Name, string.IsNullOrWhiteSpace(row.Detail) ? row.State : $"{row.State} · {row.Detail}", row.State switch
         {
@@ -70,4 +113,25 @@ public static class GlassGlanceCards
             "unset" => "idle",
             _ => "warn",
         });
+
+    static string Trunc(string s, int max)
+    {
+        s = s.Replace('\r', ' ').Replace('\n', ' ').Trim();
+        return s.Length <= max ? s : s[..(max - 1)].TrimEnd() + "…";
+    }
+
+    static bool IsDash(string s) => s is "—" or "-" or "";
+
+    static bool IsLivePresence(string state) =>
+        state.Equals("composing", StringComparison.OrdinalIgnoreCase)
+        || state.Equals("busy", StringComparison.OrdinalIgnoreCase)
+        || state.Equals("stale", StringComparison.OrdinalIgnoreCase);
+
+    static string TonePresence(string state) => state.ToLowerInvariant() switch
+    {
+        "composing" or "busy" => "ok",
+        "stale" => "warn",
+        "idle" or "—" or "-" => "idle",
+        _ => "meta",
+    };
 }

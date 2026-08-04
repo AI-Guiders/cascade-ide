@@ -37,6 +37,8 @@ public partial class MainWindow
             "WorkspaceHealth" when GlassWorkspaceHealthGlance.TryProbe(_session.WorkspaceRoot) is { } status => GlassGlanceCards.BuildWorkspaceHealth(status),
             "EnvironmentReadiness" => GlassGlanceCards.BuildEnvironment(GlassEnvironmentReadinessGlance.ProbeCurrentProcess()),
             "Hypotheses" when GlassHypothesesGlance.TryProbe(_session.WorkspaceRoot) is { } status => GlassGlanceCards.BuildHypotheses(status),
+            "FlightDataStorage" or "Fds" => GlassGlanceCards.BuildFds(GlassFdsGlance.Probe(_session.WorkspaceRoot)),
+            "Chat" => GlassGlanceCards.BuildChat(GlassIntercomPresence.ProbeChatMfd()),
             _ => [],
         };
 
@@ -50,7 +52,9 @@ public partial class MainWindow
                 : "glance · unavailable";
     }
 
-    static bool IsGlancePage(string page) => page is "Events" or "WorkspaceHealth" or "EnvironmentReadiness" or "Hypotheses";
+    static bool IsGlancePage(string page) =>
+        page is "Events" or "WorkspaceHealth" or "EnvironmentReadiness" or "Hypotheses"
+            or "FlightDataStorage" or "Fds" or "Chat";
 
     static Border CreateGlanceChip(GlassGlanceChip chip)
     {

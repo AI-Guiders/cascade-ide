@@ -61,4 +61,43 @@ public sealed class GlassGlanceCardsTests
         Assert.Contains(new GlassGlanceChip("OPEN", "1", "warn"), chips);
         Assert.Contains(new GlassGlanceChip("CONFIRMED", "1", "ok"), chips);
     }
+
+    [Fact]
+    public void BuildFds_projects_shelf_presence()
+    {
+        var chips = GlassGlanceCards.BuildFds(new GlassGlanceCards.FdsShelfStatus(
+            PlanReady: true,
+            PlanPulse: "wave · shipping",
+            SharedOn: false,
+            SharedFile: null,
+            ReportReady: true,
+            ReportPulse: "report",
+            PressureReady: true,
+            PressureLine: "human-faced",
+            WakeReady: true,
+            WakeHint: "leaf wake",
+            WorkspaceCdp: true));
+
+        Assert.Equal(new GlassGlanceChip("LEVEL", "READY", "ok"), chips[0]);
+        Assert.Contains(new GlassGlanceChip("PLAN", "wave · shipping", "ok"), chips);
+        Assert.Contains(new GlassGlanceChip("WAKE", "leaf wake", "warn"), chips);
+        Assert.Contains(new GlassGlanceChip(".CDP", "yes", "ok"), chips);
+    }
+
+    [Fact]
+    public void BuildChat_projects_presence_seats()
+    {
+        var chips = GlassGlanceCards.BuildChat(new GlassGlanceCards.ChatPresenceStatus("composing", "idle"));
+
+        Assert.Equal(new GlassGlanceChip("LEVEL", "LIVE", "ok"), chips[0]);
+        Assert.Contains(new GlassGlanceChip("@PF", "composing", "ok"), chips);
+        Assert.Contains(new GlassGlanceChip("@PM", "idle", "idle"), chips);
+    }
+
+    [Fact]
+    public void BuildChat_both_idle_is_idle_level()
+    {
+        var chips = GlassGlanceCards.BuildChat(new GlassGlanceCards.ChatPresenceStatus("idle", "idle"));
+        Assert.Equal(new GlassGlanceChip("LEVEL", "IDLE", "idle"), chips[0]);
+    }
 }
