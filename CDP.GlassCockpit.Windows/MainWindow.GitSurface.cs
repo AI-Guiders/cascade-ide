@@ -205,11 +205,12 @@ public partial class MainWindow
         if (GitStatusLabel is not null)
             GitStatusLabel.Text = "git · porcelain…";
 
-        var cwd = _session.WorkspaceRoot ?? Environment.CurrentDirectory;
+        var cwd = CascadeIDE.SoftOrgan.GlassGitIgnoreFilter.ResolveToplevel(_session.WorkspaceRoot);
         var psi = new ProcessStartInfo
         {
             FileName = "git",
-            Arguments = $"-C \"{cwd}\" status --porcelain=v1 -u",
+            // CIDE GitPanel: status --short --branch (default untracked). Not -uall.
+            Arguments = $"-C \"{cwd}\" status --porcelain=v1",
             WorkingDirectory = cwd,
             UseShellExecute = false,
             RedirectStandardOutput = true,
@@ -236,11 +237,18 @@ public partial class MainWindow
                 string text;
                 lock (buf) text = buf.ToString();
                 _gitRows.Clear();
-                foreach (var row in GlassGitPorcelainParse.Parse(text))
+                var parsed = GlassGitPorcelainParse.Parse(text);
+                var visible = GlassGitIgnoreFilter.DropIgnored(cwd, parsed);
+                var hidden = parsed.Count - visible.Count;
+                foreach (var row in visible)
                     _gitRows.Add(row);
                 _gitBusy = false;
                 if (GitStatusLabel is not null)
-                    GitStatusLabel.Text = $"git · {_gitRows.Count} rows";
+                {
+                    GitStatusLabel.Text = hidden > 0
+                        ? $"git · {_gitRows.Count} rows · {hidden} ignored"
+                        : $"git · {_gitRows.Count} rows";
+                }
                 try { p.Dispose(); } catch { /* ignore */ }
                 if (ReferenceEquals(_gitProc, p))
                     _gitProc = null;
