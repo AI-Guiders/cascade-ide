@@ -15,6 +15,7 @@ public static class CdpHabitatPaths
     public const string IntercomLatchFileName = "intercom-LATEST.json";
     /// <summary>Partner presence (idle|composing|busy) — not voice journal.</summary>
     public const string IntercomPresenceLatchFileName = "intercom-presence-LATEST.json";
+    public const string IntercomIdentityLatchFileName = "intercom-identity-LATEST.json";
     public const string SeatsLatchFileName = "seats-LATEST.json";
     public const string LandLatchFileName = "land-LATEST.json";
     public const string SharedLatchFileName = "shared-LATEST.json";
@@ -47,6 +48,8 @@ public static class CdpHabitatPaths
     public static string IntercomLatchPath => GetLatchPath(IntercomLatchFileName);
 
     public static string IntercomPresenceLatchPath => GetLatchPath(IntercomPresenceLatchFileName);
+
+    public static string IntercomIdentityLatchPath => GetLatchPath(IntercomIdentityLatchFileName);
 
     public static string SeatsLatchPath => GetLatchPath(SeatsLatchFileName);
 

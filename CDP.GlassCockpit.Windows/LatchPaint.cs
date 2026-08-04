@@ -141,7 +141,7 @@ internal static partial class LatchPaint
         return null;
     }
 
-    /// <summary>Parity with cdp-mcp <c>CideIntercomVoiceLatch.ResolveIdentity</c>.</summary>
+    /// <summary>Parity with cdp-mcp <c>CideIntercomVoiceLatch.ResolveIdentity</c> (+ sticky identity latch).</summary>
     internal static (string Name, string Kind) ResolveIntercomIdentity(
         string fromSeat,
         string origin,
@@ -159,9 +159,20 @@ internal static partial class LatchPaint
         }
 
         var n = string.IsNullOrWhiteSpace(name) ? null : name.Trim();
+        if (n is null)
+        {
+            var (stickyName, stickyKind) = GlassIntercomIdentity.TrySeat(fromSeat);
+            if (!string.IsNullOrWhiteSpace(stickyName))
+            {
+                n = stickyName;
+                if (NormalizeIntercomKind(stickyKind) is { } sk)
+                    k = sk;
+            }
+        }
+
         n ??= k switch
         {
-            "operator" => "Света",
+            "operator" => "Operator",
             "citizen" => "Citizen",
             _ => "Кир"
         };
