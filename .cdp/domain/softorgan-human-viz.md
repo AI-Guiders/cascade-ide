@@ -15,6 +15,7 @@
 - HybridIndex map: `MainWindow.HybridIndexSurface.cs` · HCI cards + `HybridSkia` scope map
 - Correspondence timeline: `MainWindow.CorrespondenceSurface.cs` · `GlassCorrespondenceFeed.BuildInstrument|BuildTimeline`
 - Plan leaf board: `LatchPaint.Plan.cs` · `PlanLeafBoardList` · `CidePlanLatch.Board` (cdp-mcp)
+- Arch board on SemanticMap: `GlassArchBoardGlance` · `MainWindow.SemanticMapSurface.cs` · AS_BUILT roles cards+list
 - Capture: `tools/Capture-Window.ps1` · title `P/M` or `M · MFD host` or main `(P/F/M)`
 
 ## Antipatterns
@@ -23,6 +24,7 @@
 - SoftFL / Meta / board-hygiene / inventory mill as work under sealed course.
 
 ## last_ship
+- 2026-08-04 · Arch board on SemanticMap · cards+roles · PNG `scratch/arch-board-semanticmap-20260804.png`
 - 2026-08-04 · Plan leaf board WHY/NEXT/COURSE + stage tree · PNG `scratch/plan-leaf-board-20260804.png`
 - 2026-08-04 · Correspondence CRS cards + thread timeline · PNG `scratch/correspondence-timeline-20260804.png`
 - 2026-08-04 · HybridIndex HCI cards + Skia scope map · PNG `scratch/hybridindex-map-20260804.png`

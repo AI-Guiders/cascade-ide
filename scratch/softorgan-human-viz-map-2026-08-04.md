@@ -8,7 +8,7 @@
 |---|---|---|---|---|
 | plan / tm | P Plan readout | **WHY/NEXT/COURSE + leaf board** | keep Plan instrument | ok (2026-08-04) |
 | files / explorer | SolutionExplorer | **tree** live | keep tree | ok |
-| arch | SemanticMap | **Skia graph** | keep graph; wire arch board live | thin |
+| arch | SemanticMap | **Skia + arch board cards/roles** | keep graph + AS_BUILT instrument | ok (2026-08-04) |
 | related / find | RelatedFiles | **Skia graph + list** | companions instrument (list+graph) | ok (2026-08-04) |
 | problems / quality | Problems | **severity board + list** | ERR/WARN/ALL cards + jump | ok (2026-08-04) |
 | git | Git | porcelain+diff | tinted diff host (exists) | ok-ish |
@@ -33,6 +33,7 @@
 - **HybridIndex map** — HCI/DOCS/FRESH cards + Skia scope map — dogfood PNG 2026-08-04
 - **Correspondence thread timeline** — CRS/FOCUS/FEATURE/ADR/REV/FWD cards + ◀◆▶ rail — dogfood PNG 2026-08-04
 - **Plan leaf board** — WHY/NEXT/COURSE + TM stage tree on P — dogfood PNG 2026-08-04
+- **Arch board on SemanticMap** — AS_BUILT chips + role list beside Skia — dogfood PNG 2026-08-04
 
 ## Do not
 - Mark text ribbon Done
