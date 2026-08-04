@@ -57,6 +57,12 @@ public partial class MainWindow
                 PlanCourseReadout.Visibility = string.IsNullOrWhiteSpace(view.Course) && string.IsNullOrWhiteSpace(view.Wall)
                     ? Visibility.Collapsed
                     : Visibility.Visible;
+                if (PlanLeafBoardList is not null)
+                {
+                    PlanLeafBoardList.Items.Clear();
+                    foreach (var line in view.Board ?? Array.Empty<string>())
+                        PlanLeafBoardList.Items.Add(line);
+                }
                 // Legacy mirror (collapsed).
                 PlanReadout.ValueText = view.Next;
                 PlanReadout.SubText = string.IsNullOrWhiteSpace(view.Detail) ? null : view.Detail;

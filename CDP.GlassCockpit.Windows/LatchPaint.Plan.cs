@@ -17,7 +17,8 @@ internal static partial class LatchPaint
         string Why = "",
         string Next = "",
         string Course = "",
-        string? Wall = null);
+        string? Wall = null,
+        IReadOnlyList<string>? Board = null);
 
     public static PlanView PaintPlan(string json)
     {
@@ -30,9 +31,10 @@ internal static partial class LatchPaint
             var task = Prop(root, "task");
             var whyRaw = Prop(root, "why");
             var pulse = Prop(root, "pulse") ?? Prop(root, "chrome_hint");
+            var board = ReadBoard(root);
 
             if (!active && string.IsNullOrWhiteSpace(feature) && string.IsNullOrWhiteSpace(task)
-                && string.IsNullOrWhiteSpace(whyRaw))
+                && string.IsNullOrWhiteSpace(whyRaw) && board.Count == 0)
             {
                 return new PlanView(
                     "Plan quiet",
@@ -41,7 +43,8 @@ internal static partial class LatchPaint
                     false,
                     Why: "No sealed course.",
                     Next: "No active leaf.",
-                    Course: "Plan quiet");
+                    Course: "Plan quiet",
+                    Board: []);
             }
 
             // Shared-SSOT Q1: WHY + NEXT as separate instrument faces (not one ECAM string).
@@ -70,12 +73,15 @@ internal static partial class LatchPaint
             return new PlanView(
                 next,
                 detail.ToString().TrimEnd(),
-                active ? $"plan · WHY+NEXT · {TruncatePlan(next, 24)}" : "plan · quiet",
+                active
+                    ? $"plan · board {board.Count} · {TruncatePlan(next, 20)}"
+                    : "plan · quiet",
                 active,
                 Why: why,
                 Next: next,
                 Course: course,
-                Wall: wall);
+                Wall: wall,
+                Board: board);
         }
         catch (Exception ex)
         {
@@ -86,8 +92,30 @@ internal static partial class LatchPaint
                 false,
                 Why: ex.Message,
                 Next: "Plan",
-                Course: "");
+                Course: "",
+                Board: []);
         }
+    }
+
+    static IReadOnlyList<string> ReadBoard(JsonElement root)
+    {
+        if (!root.TryGetProperty("board", out var arr) || arr.ValueKind != JsonValueKind.Array)
+            return [];
+
+        var list = new List<string>();
+        foreach (var el in arr.EnumerateArray())
+        {
+            if (el.ValueKind != JsonValueKind.String)
+                continue;
+            var s = el.GetString();
+            if (string.IsNullOrWhiteSpace(s))
+                continue;
+            list.Add(s.Trim());
+            if (list.Count >= 32)
+                break;
+        }
+
+        return list;
     }
 
     /// <summary>Autoi wake belongs on SoftOrgan tip / StatusText — not Intercom chat.</summary>

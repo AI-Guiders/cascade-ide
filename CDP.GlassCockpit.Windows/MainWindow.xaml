@@ -99,6 +99,10 @@
               <uikit:GlassEcamReadout x:Name="PlanWhyReadout" Label="WHY" ValueText="—" Margin="0,0,0,8"/>
               <uikit:GlassEcamReadout x:Name="PlanNextReadout" Label="NEXT" ValueText="(no leaf)" Margin="0,0,0,8"/>
               <uikit:GlassEcamReadout x:Name="PlanCourseReadout" Label="COURSE" ValueText="—" Margin="0,0,0,8"/>
+              <TextBlock Text="leaf board" FontSize="10" Foreground="#888" Margin="0,4,0,4"/>
+              <ListBox x:Name="PlanLeafBoardList" Background="Transparent" BorderThickness="0"
+                       FontFamily="Consolas" FontSize="11" Foreground="#CCC"
+                       MaxHeight="280"/>
               <!-- Legacy single dump kept collapsed for situ cache / latch paint mirror. -->
               <uikit:GlassEcamReadout x:Name="PlanReadout" Label="PLAN" ValueText="(no solution yet)" Visibility="Collapsed"/>
               <TextBlock x:Name="PlanTitle" Visibility="Collapsed" Text="(no solution yet)"/>
