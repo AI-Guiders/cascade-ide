@@ -43,3 +43,4 @@
 - Mark text ribbon Done
 - SoftOrgan seats auto-flip page
 - Seeming PNG of Intercom prose wall (Radio Done needs DELTA/LOOK instrument card)
+- Pack ROLE as `IN-MAP · Nn/Ee · map on MFD` (3 meanings + Trunc = Цикада) — split: Korry в карте · readout узлов/связей · pointer «карта → MFD» (see `scratch/note-glass-human-labels-korry-axis-2026-08-04.ru.md`)
