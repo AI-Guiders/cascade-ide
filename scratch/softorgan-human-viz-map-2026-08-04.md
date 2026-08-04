@@ -6,7 +6,7 @@
 
 | SoftOrgan / zone | Glass page today | Viz now | Target human viz | Gap |
 |---|---|---|---|---|
-| plan / tm | P Plan readout | text pulse | Plan instrument: leaf board + WHY course (structured, not dump) | half |
+| plan / tm | P Plan readout | **WHY/NEXT/COURSE + leaf board** | keep Plan instrument | ok (2026-08-04) |
 | files / explorer | SolutionExplorer | **tree** live | keep tree | ok |
 | arch | SemanticMap | **Skia graph** | keep graph; wire arch board live | thin |
 | related / find | RelatedFiles | **Skia graph + list** | companions instrument (list+graph) | ok (2026-08-04) |
@@ -32,6 +32,7 @@
 - **FDS card deck** — PLAN/SHARE/PRESSURE/WAKE instrument cards — dogfood PNG 2026-08-04
 - **HybridIndex map** — HCI/DOCS/FRESH cards + Skia scope map — dogfood PNG 2026-08-04
 - **Correspondence thread timeline** — CRS/FOCUS/FEATURE/ADR/REV/FWD cards + ◀◆▶ rail — dogfood PNG 2026-08-04
+- **Plan leaf board** — WHY/NEXT/COURSE + TM stage tree on P — dogfood PNG 2026-08-04
 
 ## Do not
 - Mark text ribbon Done
