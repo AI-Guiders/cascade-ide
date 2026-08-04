@@ -20,7 +20,7 @@
 | markdown / md_author | MarkdownPreview | FlowDocument | keep preview | ok-ish |
 | browser | WebAiPortal | WebView2 | keep | ok |
 | fds / shared | FlightDataStorage | **card deck** | PLAN/SHARE/PRESSURE/WAKE instrument cards | ok (2026-08-04) |
-| Editor situ | Editor ribbon | **text strip** | **REJECT** as human-faced — situ must be instrument (why-board / companions viz), not path subtitle | reject |
+| Editor situ | Editor (F or M mount) | **WHY/BLAST/ROLE/DIFF/APPLIES card deck** | keep situ instrument | ok (2026-08-04) |
 | pressure / alert / eicas | chrome / EICAS band | chips | keep chips; no prose wall | ok-ish |
 | webcam | (chrome) | — | shot desk = sense, not MFD text | n/a |
 | domain / rules / learn | DomainBoard | **card deck** (DOM/CARDS/LATCH/LEARN + domain cards) | keep instrument; inventory mill REFUSED | ok (2026-08-04) |
