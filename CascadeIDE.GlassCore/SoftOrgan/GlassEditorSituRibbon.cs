@@ -3,7 +3,7 @@
 namespace CascadeIDE.SoftOrgan;
 
 /// <summary>
-/// Shared-SSOT Editor situ (Q2): WHY-this-file + blast + role glance + diff intent (not one text ribbon).
+/// Shared-SSOT Editor situ (Q2): WHY + blast + role glance + diff intent + applies on locus.
 /// </summary>
 public static class GlassEditorSituRibbon
 {
@@ -17,13 +17,16 @@ public static class GlassEditorSituRibbon
         int HopEdges,
         bool Orphan,
         string DiffIntent,
-        GlassEditorDiffIntent.Face? Diff)
+        GlassEditorDiffIntent.Face? Diff,
+        string AppliesOnLocus,
+        GlassEditorAppliesLocus.Face? Applies)
     {
         public bool HasAny =>
             !string.IsNullOrWhiteSpace(Why)
             || !string.IsNullOrWhiteSpace(Blast)
             || !string.IsNullOrWhiteSpace(RoleInGraph)
-            || !string.IsNullOrWhiteSpace(DiffIntent);
+            || !string.IsNullOrWhiteSpace(DiffIntent)
+            || !string.IsNullOrWhiteSpace(AppliesOnLocus);
     }
 
     public static Face Build(
@@ -31,10 +34,11 @@ public static class GlassEditorSituRibbon
         string? workspaceRoot,
         string? why,
         string? leaf,
-        int blastMax = 3)
+        int blastMax = 3,
+        string? sourceText = null)
     {
         if (string.IsNullOrWhiteSpace(editorPath))
-            return new Face("", "", [], "", 0, 0, Orphan: true, "", null);
+            return new Face("", "", [], "", 0, 0, Orphan: true, "", null, "", null);
 
         var whyBits = new List<string>(2);
         if (!string.IsNullOrWhiteSpace(leaf))
@@ -51,7 +55,6 @@ public static class GlassEditorSituRibbon
             .ToList();
         var blastLine = names.Count > 0 ? string.Join(" · ", names) : "";
 
-        // ROLE glance ≠ BLAST: no companion name list. Full hop map lives on MFD SemanticMap.
         var graph = GlassSemanticMapGraph.Collect(workspaceRoot, editorPath, maxNodes: 48, maxHop: 2);
         var orphan = graph.Nodes.Count == 0;
         var roleLine = orphan
@@ -60,6 +63,9 @@ public static class GlassEditorSituRibbon
 
         var diff = GlassEditorDiffIntent.Collect(workspaceRoot, editorPath);
         var diffLine = string.IsNullOrWhiteSpace(diff.Line) ? "" : Truncate(diff.Line, 48);
+
+        var applies = GlassEditorAppliesLocus.Collect(editorPath, sourceText);
+        var appliesLine = string.IsNullOrWhiteSpace(applies.Line) ? "" : Truncate(applies.Line, 56);
 
         return new Face(
             whyLine,
@@ -70,22 +76,24 @@ public static class GlassEditorSituRibbon
             graph.Edges.Count,
             orphan,
             diffLine,
-            diff);
+            diff,
+            appliesLine,
+            applies);
     }
 
-    /// <summary>Compat dump (tests / legacy). Prefer <see cref="Build"/> for instruments.</summary>
     public static string Format(
         string? editorPath,
         string? workspaceRoot,
         string? why,
         string? leaf,
-        int blastMax = 3)
+        int blastMax = 3,
+        string? sourceText = null)
     {
-        var face = Build(editorPath, workspaceRoot, why, leaf, blastMax);
+        var face = Build(editorPath, workspaceRoot, why, leaf, blastMax, sourceText);
         if (!face.HasAny)
             return string.Empty;
 
-        var parts = new List<string>(4);
+        var parts = new List<string>(5);
         if (!string.IsNullOrWhiteSpace(face.Why))
             parts.Add("WHY · " + face.Why);
         if (!string.IsNullOrWhiteSpace(face.Blast))
@@ -94,6 +102,8 @@ public static class GlassEditorSituRibbon
             parts.Add("ROLE · " + face.RoleInGraph);
         if (!string.IsNullOrWhiteSpace(face.DiffIntent))
             parts.Add("DIFF · " + face.DiffIntent);
+        if (!string.IsNullOrWhiteSpace(face.AppliesOnLocus))
+            parts.Add("APPLIES · " + face.AppliesOnLocus);
         return string.Join("  |  ", parts);
     }
 

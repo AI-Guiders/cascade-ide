@@ -162,11 +162,12 @@
                         <TextBlock x:Name="EditorPathLabel" Text="(no file)" FontSize="11" Foreground="{StaticResource Glass.FgMuted}"
                                    FontFamily="Consolas" TextTrimming="CharacterEllipsis"/>
                         <StackPanel x:Name="EditorSituPanel" Margin="0,4,0,0" Visibility="Collapsed"
-                                    ToolTip="Shared-SSOT · WHY + BLAST + ROLE glance + DIFF intent (hunk tint)">
+                                    ToolTip="Shared-SSOT · WHY + BLAST + ROLE + DIFF + APPLIES (locus diags)">
                           <uikit:GlassEcamReadout x:Name="FileWhyReadout" Label="FILE WHY" ValueText="—" Margin="0,0,0,4"/>
                           <uikit:GlassEcamReadout x:Name="FileBlastReadout" Label="BLAST" ValueText="—" Margin="0,0,0,4"/>
                           <uikit:GlassEcamReadout x:Name="FileRoleReadout" Label="ROLE" ValueText="—" Margin="0,0,0,4"/>
-                          <uikit:GlassEcamReadout x:Name="FileDiffReadout" Label="DIFF" ValueText="—"/>
+                          <uikit:GlassEcamReadout x:Name="FileDiffReadout" Label="DIFF" ValueText="—" Margin="0,0,0,4"/>
+                          <uikit:GlassEcamReadout x:Name="FileAppliesReadout" Label="APPLIES" ValueText="—"/>
                         </StackPanel>
                       </StackPanel>
                     </DockPanel>

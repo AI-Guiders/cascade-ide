@@ -15,6 +15,7 @@ public partial class MainWindow
     GlassAvalonEditChrome? _editorChrome;
     GlassAvalonEditTextMate? _editorTextMate;
     GlassEditorDiffHunkRenderer? _diffHunkRenderer;
+    GlassEditorAppliesTintRenderer? _appliesTintRenderer;
 
     void EnsureEditorChrome()
     {
