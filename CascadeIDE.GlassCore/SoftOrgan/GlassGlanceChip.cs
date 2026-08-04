@@ -81,10 +81,11 @@ public static class GlassGlanceCards
         return
         [
             new("LEVEL", ready ? "READY" : "EMPTY", ready ? "ok" : "idle"),
-            new("PLAN", status.PlanReady ? Trunc(status.PlanPulse ?? "on", 22) : "miss", status.PlanReady ? "ok" : "idle"),
-            new("SHARE", status.SharedOn ? Trunc(status.SharedFile ?? "on", 22) : "off", status.SharedOn ? "ok" : "idle"),
-            new("REPORT", status.ReportReady ? Trunc(status.ReportPulse ?? "on", 22) : "miss", status.ReportReady ? "ok" : "idle"),
-            new("WAKE", status.WakeReady ? Trunc(status.WakeHint ?? "on", 22) : "miss", status.WakeReady ? "warn" : "idle"),
+            new("PLAN", status.PlanReady ? Trunc(status.PlanPulse ?? "on", 28) : "miss", status.PlanReady ? "ok" : "idle"),
+            new("SHARE", status.SharedOn ? Trunc(status.SharedFile ?? "on", 28) : "off", status.SharedOn ? "ok" : "idle"),
+            new("REPORT", status.ReportReady ? Trunc(status.ReportPulse ?? "on", 28) : "miss", status.ReportReady ? "ok" : "idle"),
+            new("PRESSURE", status.PressureReady ? Trunc(status.PressureLine ?? "on", 28) : "miss", status.PressureReady ? "warn" : "idle"),
+            new("WAKE", status.WakeReady ? Trunc(status.WakeHint ?? "on", 28) : "miss", status.WakeReady ? "warn" : "idle"),
             new(".CDP", status.WorkspaceCdp ? "yes" : "no", status.WorkspaceCdp ? "ok" : "idle"),
         ];
     }

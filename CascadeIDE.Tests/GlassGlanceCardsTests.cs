@@ -80,6 +80,7 @@ public sealed class GlassGlanceCardsTests
 
         Assert.Equal(new GlassGlanceChip("LEVEL", "READY", "ok"), chips[0]);
         Assert.Contains(new GlassGlanceChip("PLAN", "wave · shipping", "ok"), chips);
+        Assert.Contains(new GlassGlanceChip("PRESSURE", "human-faced", "warn"), chips);
         Assert.Contains(new GlassGlanceChip("WAKE", "leaf wake", "warn"), chips);
         Assert.Contains(new GlassGlanceChip(".CDP", "yes", "ok"), chips);
     }

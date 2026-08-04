@@ -2,11 +2,15 @@
 
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Media;
 using CascadeIDE.SoftOrgan;
 
 namespace CDP.GlassCockpit.Windows;
 
+/// <summary>
+/// SoftOrgan glance pages — FDS uses card-deck instrument (Shared-SSOT), other pages keep chip wrap.
+/// </summary>
 public partial class MainWindow
 {
     void RefreshMfdGlanceCardsVisibility()
@@ -42,14 +46,30 @@ public partial class MainWindow
             _ => [],
         };
 
+        var fdsDeck = page is "FlightDataStorage" or "Fds";
+        if (fdsDeck)
+        {
+            var factory = new FrameworkElementFactory(typeof(UniformGrid));
+            factory.SetValue(UniformGrid.ColumnsProperty, 3);
+            GlanceCardsPanel.ItemsPanel = new ItemsPanelTemplate(factory);
+        }
+        else
+        {
+            GlanceCardsPanel.ItemsPanel = new ItemsPanelTemplate(new FrameworkElementFactory(typeof(WrapPanel)));
+        }
+
         GlanceCardsPanel.Items.Clear();
         foreach (var chip in chips)
-            GlanceCardsPanel.Items.Add(CreateGlanceChip(chip));
+            GlanceCardsPanel.Items.Add(fdsDeck ? CreateDeckCard(chip) : CreateGlanceChip(chip));
 
         if (GlanceCardsStatusLabel is not null)
-            GlanceCardsStatusLabel.Text = chips.Count > 0
-                ? $"{page} · {chips[0].Value}"
-                : "glance · unavailable";
+        {
+            GlanceCardsStatusLabel.Text = chips.Count == 0
+                ? "glance · unavailable"
+                : fdsDeck
+                    ? $"fds · card deck · {chips.Count} · {chips[0].Value}"
+                    : $"{page} · {chips[0].Value}";
+        }
     }
 
     static bool IsGlancePage(string page) =>
@@ -58,15 +78,7 @@ public partial class MainWindow
 
     static Border CreateGlanceChip(GlassGlanceChip chip)
     {
-        var (background, foreground) = chip.Tone switch
-        {
-            "ok" => ("#1A2E1A", "#A8E0A8"),
-            "warn" => ("#2A2618", "#E0C878"),
-            "bad" => ("#2E1A1A", "#E0A8A8"),
-            "idle" => ("#1A1A1A", "#888888"),
-            _ => ("#121212", "#7A7A7A"),
-        };
-
+        var (background, foreground) = ToneColors(chip.Tone);
         return new Border
         {
             Margin = new Thickness(0, 0, 8, 8),
@@ -96,4 +108,59 @@ public partial class MainWindow
             },
         };
     }
+
+    /// <summary>FDS card deck — larger instrument cards (Problems/Plan parity), not wrap chips.</summary>
+    static Border CreateDeckCard(GlassGlanceChip chip)
+    {
+        var (background, foreground) = ToneColors(chip.Tone);
+        var accent = chip.Tone switch
+        {
+            "ok" => "#4A8A4A",
+            "warn" => "#D7A33C",
+            "bad" => "#E05858",
+            _ => "#3A3A3A",
+        };
+
+        return new Border
+        {
+            Margin = new Thickness(0, 0, 8, 8),
+            Padding = new Thickness(12, 10, 12, 10),
+            MinHeight = 72,
+            CornerRadius = new CornerRadius(4),
+            Background = (Brush)new BrushConverter().ConvertFromString(background)!,
+            BorderBrush = (Brush)new BrushConverter().ConvertFromString(accent)!,
+            BorderThickness = new Thickness(1),
+            Child = new StackPanel
+            {
+                Children =
+                {
+                    new TextBlock
+                    {
+                        Text = chip.Label,
+                        FontSize = 10,
+                        Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#888888")),
+                    },
+                    new TextBlock
+                    {
+                        Text = chip.Value,
+                        FontSize = 16,
+                        FontWeight = FontWeights.SemiBold,
+                        FontFamily = new FontFamily("Consolas"),
+                        TextWrapping = TextWrapping.Wrap,
+                        Margin = new Thickness(0, 4, 0, 0),
+                        Foreground = (Brush)new BrushConverter().ConvertFromString(foreground)!,
+                    },
+                },
+            },
+        };
+    }
+
+    static (string Background, string Foreground) ToneColors(string tone) => tone switch
+    {
+        "ok" => ("#1A2E1A", "#A8E0A8"),
+        "warn" => ("#2A2618", "#E0C878"),
+        "bad" => ("#2E1A1A", "#E0A8A8"),
+        "idle" => ("#1A1A1A", "#888888"),
+        _ => ("#121212", "#7A7A7A"),
+    };
 }

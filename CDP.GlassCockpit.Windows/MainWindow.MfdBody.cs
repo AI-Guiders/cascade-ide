@@ -213,7 +213,8 @@ public partial class MainWindow
         if (string.Equals(page, "FlightDataStorage", StringComparison.OrdinalIgnoreCase)
             || string.Equals(page, "Fds", StringComparison.OrdinalIgnoreCase))
         {
-            MfdBody.Text = GlassFdsGlance.Format(_session.WorkspaceRoot);
+            // Human face = glance card deck (MfdGlanceCardsHost); body stub only if host hidden.
+            MfdBody.Text = FormatMfdStub("FlightDataStorage", "FDS card deck · PLAN/SHARE/PRESSURE/WAKE", "Shared-SSOT shelf instrument");
             RefreshEicasHealth();
             return;
         }
@@ -242,7 +243,7 @@ public partial class MainWindow
             "Hypotheses" => FormatMfdStub("Hypotheses", "Glass JSON status glance", "Avalonia Hypotheses SSOT"),
             "Editor" => FormatMfdStub("Editor", "on Forward", "primary_work_surface=editor"),
             "Chat" => GlassIntercomPresence.FormatChatMfdGlance(),
-            "FlightDataStorage" or "Fds" => GlassFdsGlance.Format(_session.WorkspaceRoot),
+            "FlightDataStorage" or "Fds" => FormatMfdStub("FlightDataStorage", "FDS card deck · PLAN/SHARE/PRESSURE/WAKE", "Shared-SSOT shelf instrument"),
             _ => FormatMfdStub(page, "instrument peel later", "CabinGlass may select")
         };
         RefreshEicasHealth();
