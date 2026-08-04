@@ -6,7 +6,7 @@
 
 | SoftOrgan / zone | Glass page today | Viz now | Target human viz | Gap |
 |---|---|---|---|---|
-| plan / tm | P Plan readout | **WHY/NEXT/COURSE + leaf board** | keep Plan instrument | ok (2026-08-04) |
+| plan / tm | P Plan readout | **WHY/NEXT/COURSE + leaf board** | keep Plan instrument | ok LIVE 2026-08-04 (sealed why) |
 | files / explorer | SolutionExplorer | **tree** live | keep tree | ok |
 | arch | SemanticMap | **Skia + arch board cards/roles** | keep graph + AS_BUILT instrument | ok (2026-08-04) |
 | related / find | RelatedFiles | **Skia graph + list** | companions instrument (list+graph) | ok (2026-08-04) |
