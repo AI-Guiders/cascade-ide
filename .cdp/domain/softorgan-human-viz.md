@@ -28,6 +28,7 @@
 - DomainBoard `glance · unavailable` with empty WorkspaceRoot = seeming (climb / latch-only must paint).
 
 ## last_ship
+- 2026-08-05 · Intercom prose residual · Citizen SA wall → Radio collapse · evidence `tmp-glass-shots/intercom-prose-radio-collapsed-20260805.png`
 - 2026-08-05 · Topology 3-window dedicated dogfood `(intercom)(sit)(world)` · OneOf→Triple Sync fix (close hosts before EnsurePfd) · P Plan WHY/NEXT live · evidence `tmp-glass-shots/topology-3win-{forward,pfd,mfd}-fixed-20260805.png`
 - 2026-08-05 · presentation latch merge live dogfood · mfd_page=Events alone kept topology `(intercom)(sit/world/alert)` · title `sit/world/alert · alert active · OneOf host` · evidence `tmp-glass-shots/latch-merge-alert-oneof-20260805.png` · cdp-mcp `67d03f0` hard-self 21:40Z
 - 2026-08-05 · Topology OneOf v1 dogfood 2-window channel switch sit→world · titles `sit/world/alert · sit|world active · OneOf host` · evidence `tmp-glass-shots/topology-oneof-sit-active-20260805.png` + `topology-oneof-world-active-20260805.png` · latch merge fix cdp-mcp (mfd_page alone must not wipe topology)

@@ -21,6 +21,7 @@
 - Claiming Radio Done via SA wall / Autoi dump / File.Exists alone.
 
 ## last_ship
+- 2026-08-05 · Intercom prose residual CLOSED · Citizen/@frame SA walls → Radio collapse (`FormatCitizenWakeIntercom` + Glass `CompactIntercomBody` LooksLikeSaInstrumentWall) · evidence `tmp-glass-shots/intercom-prose-radio-collapsed-20260805.png` (Citizen · SA collapsed · PFD + DELTA cards)
 - 2026-08-04 · Autoi Intercom Radio face (Composer charge wall → `→ PFD.NEXT` / Plan delta) · dual-seat claim · cdp-mcp `IdeIgniteArmHost.Fire.Habitat.Radio`
 - 2026-08-04 · Intercom Radio pointer cards (I6) · `GlassRadioPointer` · PNG `scratch/intercom-radio-pointer-20260804.png` (DELTA · Right:Editor)
 - 2026-08-04 · share-to-model human→agent shelf · `GlassOperatorShareShelf` + Intercom send mirror · PNG Intercom/near-black/CFG
