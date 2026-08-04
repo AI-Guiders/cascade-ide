@@ -22,11 +22,13 @@
 
 ## Antipatterns
 - Claiming Editor situ text ribbon Done.
+- Packing ROLE as `IN-MAP · Nn/Ee · map on MFD` (3 meanings + Trunc = Цикада) — split ROLE/HOPS/LOOK.
 - Autoi-in-chat / status-list-as-verify / File.Exists alone = seeming.
 - SoftFL / Meta / board-hygiene / inventory mill as work under sealed course.
 - DomainBoard `glance · unavailable` with empty WorkspaceRoot = seeming (climb / latch-only must paint).
 
 ## last_ship
+- 2026-08-04 · Editor situ ROLE split human labels · ROLE=`в карте`/`сирота` · HOPS=`N узлов · E связей` · LOOK=`карта → MFD` · tests 3/0
 - 2026-08-04 · Editor situ WHY-file instrument cards · PNG `scratch/editor-situ-cards-20260804.png` (M·Editor · LEVEL SITU)
 - 2026-08-04 · DomainBoard instrument cards · DOM LIVE · PNG `scratch/domain-board-cards-20260804.png`
 - 2026-08-04 · Arch board on SemanticMap · cards+roles · PNG `scratch/arch-board-semanticmap-20260804.png`

@@ -92,10 +92,11 @@ public sealed class GlassGlanceCardsTests
             Why: "leaf · why-file",
             Blast: "A · B",
             BlastNames: ["A.cs", "B.cs"],
-            RoleInGraph: "IN-MAP · 3n/2e",
+            RoleInGraph: "в карте",
             HopNodes: 3,
             HopEdges: 2,
             Orphan: false,
+            LookMap: "карта → MFD",
             DiffIntent: "+2 −1",
             Diff: null,
             AppliesOnLocus: "E0 W1",
@@ -106,7 +107,9 @@ public sealed class GlassGlanceCardsTests
         Assert.Equal(new GlassGlanceChip("LEVEL", "SITU", "ok"), chips[0]);
         Assert.Contains(new GlassGlanceChip("WHY", "leaf · why-file", "ok"), chips);
         Assert.Contains(new GlassGlanceChip("BLAST", "A.cs · B.cs", "ok"), chips);
-        Assert.Contains(new GlassGlanceChip("ROLE", "IN-MAP · 3n/2e", "ok"), chips);
+        Assert.Contains(new GlassGlanceChip("ROLE", "в карте", "ok"), chips);
+        Assert.Contains(new GlassGlanceChip("HOPS", "3 узлов · 2 связей", "ok"), chips);
+        Assert.Contains(new GlassGlanceChip("LOOK", "карта → MFD", "meta"), chips);
         Assert.Contains(new GlassGlanceChip("DIFF", "+2 −1", "warn"), chips);
         Assert.Contains(new GlassGlanceChip("APPLIES", "E0 W1", "ok"), chips);
     }

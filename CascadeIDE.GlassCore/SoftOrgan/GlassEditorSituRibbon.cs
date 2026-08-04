@@ -4,6 +4,7 @@ namespace CascadeIDE.SoftOrgan;
 
 /// <summary>
 /// Shared-SSOT Editor situ (Q2): WHY + blast + role glance + diff intent + applies on locus.
+/// ROLE = map membership only; hops = neighborhood size; LookMap = Radio pointer (not Trunc rebus).
 /// </summary>
 public static class GlassEditorSituRibbon
 {
@@ -16,6 +17,7 @@ public static class GlassEditorSituRibbon
         int HopNodes,
         int HopEdges,
         bool Orphan,
+        string LookMap,
         string DiffIntent,
         GlassEditorDiffIntent.Face? Diff,
         string AppliesOnLocus,
@@ -25,8 +27,16 @@ public static class GlassEditorSituRibbon
             !string.IsNullOrWhiteSpace(Why)
             || !string.IsNullOrWhiteSpace(Blast)
             || !string.IsNullOrWhiteSpace(RoleInGraph)
+            || !string.IsNullOrWhiteSpace(LookMap)
+            || HopNodes > 0
+            || HopEdges > 0
             || !string.IsNullOrWhiteSpace(DiffIntent)
             || !string.IsNullOrWhiteSpace(AppliesOnLocus);
+
+        public string HopLine =>
+            HopNodes <= 0 && HopEdges <= 0
+                ? string.Empty
+                : $"{HopNodes} узлов · {HopEdges} связей";
     }
 
     public static Face Build(
@@ -38,7 +48,7 @@ public static class GlassEditorSituRibbon
         string? sourceText = null)
     {
         if (string.IsNullOrWhiteSpace(editorPath))
-            return new Face("", "", [], "", 0, 0, Orphan: true, "", null, "", null);
+            return new Face("", "", [], "", 0, 0, Orphan: true, "", "", null, "", null);
 
         var whyBits = new List<string>(2);
         if (!string.IsNullOrWhiteSpace(leaf))
@@ -57,9 +67,9 @@ public static class GlassEditorSituRibbon
 
         var graph = GlassSemanticMapGraph.Collect(workspaceRoot, editorPath, maxNodes: 48, maxHop: 2);
         var orphan = graph.Nodes.Count == 0;
-        var roleLine = orphan
-            ? "ORPHAN · map on MFD"
-            : $"IN-MAP · {graph.Nodes.Count}n/{graph.Edges.Count}e · map on MFD";
+        // Human labels — membership only (no Trunc rebus packing hops + look).
+        var roleLine = orphan ? "сирота" : "в карте";
+        const string lookMap = "карта → MFD";
 
         var diff = GlassEditorDiffIntent.Collect(workspaceRoot, editorPath);
         var diffLine = string.IsNullOrWhiteSpace(diff.Line) ? "" : Truncate(diff.Line, 48);
@@ -71,10 +81,11 @@ public static class GlassEditorSituRibbon
             whyLine,
             blastLine,
             names,
-            Truncate(roleLine, 96),
+            roleLine,
             graph.Nodes.Count,
             graph.Edges.Count,
             orphan,
+            lookMap,
             diffLine,
             diff,
             appliesLine,
@@ -93,13 +104,17 @@ public static class GlassEditorSituRibbon
         if (!face.HasAny)
             return string.Empty;
 
-        var parts = new List<string>(5);
+        var parts = new List<string>(7);
         if (!string.IsNullOrWhiteSpace(face.Why))
             parts.Add("WHY · " + face.Why);
         if (!string.IsNullOrWhiteSpace(face.Blast))
             parts.Add("BLAST · " + face.Blast);
         if (!string.IsNullOrWhiteSpace(face.RoleInGraph))
             parts.Add("ROLE · " + face.RoleInGraph);
+        if (!string.IsNullOrWhiteSpace(face.HopLine))
+            parts.Add("HOPS · " + face.HopLine);
+        if (!string.IsNullOrWhiteSpace(face.LookMap))
+            parts.Add("LOOK · " + face.LookMap);
         if (!string.IsNullOrWhiteSpace(face.DiffIntent))
             parts.Add("DIFF · " + face.DiffIntent);
         if (!string.IsNullOrWhiteSpace(face.AppliesOnLocus))

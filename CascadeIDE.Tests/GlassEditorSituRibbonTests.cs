@@ -31,8 +31,11 @@ public sealed class GlassEditorSituRibbonTests
             Assert.Contains("Foo.xaml", face.BlastNames);
             Assert.False(face.Orphan);
             Assert.True(face.HopNodes >= 1);
-            Assert.Contains("IN-MAP ·", face.RoleInGraph, StringComparison.Ordinal);
-            Assert.Contains("map on MFD", face.RoleInGraph, StringComparison.Ordinal);
+            Assert.Equal("в карте", face.RoleInGraph);
+            Assert.Equal("карта → MFD", face.LookMap);
+            Assert.Contains("узлов", face.HopLine, StringComparison.Ordinal);
+            Assert.DoesNotContain("IN-MAP", face.RoleInGraph, StringComparison.Ordinal);
+            Assert.DoesNotContain("map on MFD", face.RoleInGraph, StringComparison.Ordinal);
             // ROLE must not twin BLAST companion names
             Assert.DoesNotContain("Foo.xaml", face.RoleInGraph, StringComparison.Ordinal);
 
@@ -46,6 +49,8 @@ public sealed class GlassEditorSituRibbonTests
             Assert.Contains("WHY ·", line, StringComparison.Ordinal);
             Assert.Contains("BLAST ·", line, StringComparison.Ordinal);
             Assert.Contains("ROLE ·", line, StringComparison.Ordinal);
+            Assert.Contains("HOPS ·", line, StringComparison.Ordinal);
+            Assert.Contains("LOOK ·", line, StringComparison.Ordinal);
             Assert.DoesNotContain("h1:", line, StringComparison.Ordinal);
             Assert.Contains("DIFF ·", line, StringComparison.Ordinal);
             Assert.Contains("APPLIES ·", line, StringComparison.Ordinal);

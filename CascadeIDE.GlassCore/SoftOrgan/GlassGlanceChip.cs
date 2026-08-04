@@ -99,6 +99,9 @@ public static class GlassGlanceCards
             ? Trunc(string.Join(" · ", face.BlastNames.Take(2)), 28)
             : V(face.Blast);
         var roleTone = face.Orphan ? "warn" : ToneFilled(face.RoleInGraph, "ok");
+        var hops = face.HopLine;
+        var hopsTone = string.IsNullOrWhiteSpace(hops) ? "idle" : "ok";
+        var lookTone = ToneFilled(face.LookMap, "meta");
         var appliesHasError = !string.IsNullOrWhiteSpace(face.AppliesOnLocus)
             && face.AppliesOnLocus.Contains('E', StringComparison.Ordinal)
             && !face.AppliesOnLocus.Contains("E0", StringComparison.Ordinal);
@@ -110,6 +113,8 @@ public static class GlassGlanceCards
             new("WHY", V(face.Why), ToneFilled(face.Why, "ok")),
             new("BLAST", blast, blast == "—" ? "idle" : "ok"),
             new("ROLE", V(face.RoleInGraph), roleTone),
+            new("HOPS", V(hops), hopsTone),
+            new("LOOK", V(face.LookMap), lookTone),
             new("DIFF", V(face.DiffIntent), ToneFilled(face.DiffIntent, "warn")),
             new("APPLIES", V(face.AppliesOnLocus), appliesTone),
         ];
