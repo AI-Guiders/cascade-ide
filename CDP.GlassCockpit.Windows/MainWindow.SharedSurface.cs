@@ -1,7 +1,9 @@
 #nullable enable
 
 using System.IO;
+using System.Windows;
 using System.Windows.Threading;
+using CascadeIDE.SoftOrgan;
 
 namespace CDP.GlassCockpit.Windows;
 
@@ -10,6 +12,8 @@ public partial class MainWindow
 {
     string? _sharedLatchPath;
     bool _sharedLatchOn;
+    string? _planWhy;
+    string? _planLeaf;
 
     void OnSharedChanged(string path)
     {
@@ -47,6 +51,31 @@ public partial class MainWindow
         EditorPathLabel.Text = match
             ? basePath + LatchPaint.SharedSuffix
             : basePath;
+        RefreshEditorSituRibbon();
+    }
+
+    void RefreshEditorSituRibbon()
+    {
+        if (EditorSituRibbon is null)
+            return;
+
+        if (string.IsNullOrWhiteSpace(_editorPath))
+        {
+            EditorSituRibbon.Text = string.Empty;
+            EditorSituRibbon.Visibility = Visibility.Collapsed;
+            return;
+        }
+
+        var line = GlassEditorSituRibbon.Format(
+            _editorPath,
+            _session.WorkspaceRoot,
+            _planWhy,
+            _planLeaf,
+            blastMax: 3);
+        EditorSituRibbon.Text = line;
+        EditorSituRibbon.Visibility = string.IsNullOrWhiteSpace(line)
+            ? Visibility.Collapsed
+            : Visibility.Visible;
     }
 
     static bool PathsReferToSameFile(string? a, string? b)

@@ -150,8 +150,14 @@
                               Click="SaveFileBtn_OnClick" ToolTip="Save (Ctrl+S)" Margin="8,0,0,0"/>
                       <Button x:Name="OpenFileBtn" DockPanel.Dock="Right" Content="Open…" Style="{StaticResource ChromeBtn}"
                               Click="OpenFileBtn_OnClick" ToolTip="Open a file (Ctrl+O)" Margin="8,0,0,0"/>
-                      <TextBlock x:Name="EditorPathLabel" Text="(no file)" FontSize="11" Foreground="{StaticResource Glass.FgMuted}"
-                                 FontFamily="Consolas" TextTrimming="CharacterEllipsis" VerticalAlignment="Center"/>
+                      <StackPanel VerticalAlignment="Center">
+                        <TextBlock x:Name="EditorPathLabel" Text="(no file)" FontSize="11" Foreground="{StaticResource Glass.FgMuted}"
+                                   FontFamily="Consolas" TextTrimming="CharacterEllipsis"/>
+                        <TextBlock x:Name="EditorSituRibbon" Text="" FontSize="10" Foreground="#A8C5B5"
+                                   FontFamily="Consolas" TextTrimming="CharacterEllipsis" Margin="0,2,0,0"
+                                   Visibility="Collapsed"
+                                   ToolTip="Shared-SSOT · WHY-this-file + BLAST companions"/>
+                      </StackPanel>
                     </DockPanel>
                   </Border>
                   <avalonEdit:TextEditor x:Name="CodeEditor"

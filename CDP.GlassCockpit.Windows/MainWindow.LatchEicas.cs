@@ -52,6 +52,10 @@ public partial class MainWindow
                 PlanMeta.Text = view.Detail;
                 PlanReadout.ValueText = view.Headline;
                 PlanReadout.SubText = string.IsNullOrWhiteSpace(view.Detail) ? null : view.Detail;
+                // Cache leaf/why for Editor situ ribbon (Shared-SSOT Q2).
+                _planLeaf = view.Headline;
+                _planWhy = ExtractPlanWhy(view.Detail);
+                RefreshEditorSituRibbon();
                 StatusText.Text = $"glass · {view.StatusLine} · {DateTime.Now:HH:mm:ss}";
             }
             catch (Exception ex)
@@ -59,6 +63,17 @@ public partial class MainWindow
                 StatusText.Text = $"glass · plan fail · {ex.Message}";
             }
         }, DispatcherPriority.Background);
+    }
+
+    static string? ExtractPlanWhy(string? detail)
+    {
+        if (string.IsNullOrWhiteSpace(detail))
+            return null;
+        const string prefix = "WHY · ";
+        var line = detail.Replace("\r\n", "\n").Split('\n')[0].Trim();
+        if (line.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
+            return line[prefix.Length..].Trim();
+        return null;
     }
 
     void OnAlertChanged(string path)
