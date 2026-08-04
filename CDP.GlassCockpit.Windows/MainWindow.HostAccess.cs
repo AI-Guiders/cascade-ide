@@ -39,6 +39,12 @@ public partial class MainWindow
     Border? MfdProblemsHost => MfdHosts?.MfdProblemsHost;
     TextBlock? ProblemsStatusLabel => MfdHosts?.ProblemsStatusLabel;
     ListBox? ProblemsList => MfdHosts?.ProblemsList;
+    Border? ProblemsErrCard => MfdHosts?.ProblemsErrCard;
+    Border? ProblemsWarnCard => MfdHosts?.ProblemsWarnCard;
+    Border? ProblemsAllCard => MfdHosts?.ProblemsAllCard;
+    TextBlock? ProblemsErrCount => MfdHosts?.ProblemsErrCount;
+    TextBlock? ProblemsWarnCount => MfdHosts?.ProblemsWarnCount;
+    TextBlock? ProblemsAllCount => MfdHosts?.ProblemsAllCount;
 
     Border? MfdRelatedFilesHost => MfdHosts?.MfdRelatedFilesHost;
     TextBlock? RelatedStatusLabel => MfdHosts?.RelatedStatusLabel;

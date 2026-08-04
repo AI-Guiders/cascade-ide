@@ -154,6 +154,7 @@
         </Grid>
       </DockPanel>
     </Border>
+    <!-- Shared-SSOT quality: severity board (ERR/WARN/ALL) + jump list. -->
     <Border x:Name="MfdProblemsHost" Visibility="Collapsed" Background="#121212">
       <DockPanel Margin="8">
         <DockPanel DockPanel.Dock="Top" Margin="0,0,0,6">
@@ -163,9 +164,35 @@
             <Button x:Name="ProblemsClearBtn" Content="clear" Padding="8,2"
                     Background="#2A2A2A" Foreground="#CCC" BorderBrush="#3A3A3A"/>
           </StackPanel>
-          <TextBlock x:Name="ProblemsStatusLabel" Text="0 ошиб., 0 предупр."
+          <TextBlock x:Name="ProblemsStatusLabel" Text="problems · idle"
                      FontSize="11" Foreground="#888" VerticalAlignment="Center"/>
         </DockPanel>
+        <UniformGrid DockPanel.Dock="Top" Columns="3" Margin="0,0,0,8">
+          <Border x:Name="ProblemsErrCard" Margin="0,0,6,0" Padding="10,8" CornerRadius="4"
+                  Background="#2E1A1A" BorderBrush="#E05858" BorderThickness="1" Cursor="Hand">
+            <StackPanel>
+              <TextBlock Text="ERR" FontSize="10" Foreground="#888"/>
+              <TextBlock x:Name="ProblemsErrCount" Text="0" FontSize="18" FontWeight="SemiBold"
+                         FontFamily="Consolas" Foreground="#E0A8A8"/>
+            </StackPanel>
+          </Border>
+          <Border x:Name="ProblemsWarnCard" Margin="0,0,6,0" Padding="10,8" CornerRadius="4"
+                  Background="#2A2618" BorderBrush="#D7A33C" BorderThickness="1" Cursor="Hand">
+            <StackPanel>
+              <TextBlock Text="WARN" FontSize="10" Foreground="#888"/>
+              <TextBlock x:Name="ProblemsWarnCount" Text="0" FontSize="18" FontWeight="SemiBold"
+                         FontFamily="Consolas" Foreground="#E0C878"/>
+            </StackPanel>
+          </Border>
+          <Border x:Name="ProblemsAllCard" Padding="10,8" CornerRadius="4"
+                  Background="#1A1A1A" BorderBrush="#3A3A3A" BorderThickness="1" Cursor="Hand">
+            <StackPanel>
+              <TextBlock Text="ALL" FontSize="10" Foreground="#888"/>
+              <TextBlock x:Name="ProblemsAllCount" Text="0" FontSize="18" FontWeight="SemiBold"
+                         FontFamily="Consolas" Foreground="#DDD"/>
+            </StackPanel>
+          </Border>
+        </UniformGrid>
         <ListBox x:Name="ProblemsList" Background="Transparent" BorderThickness="0"
                  ScrollViewer.HorizontalScrollBarVisibility="Disabled">
           <ListBox.ItemTemplate>

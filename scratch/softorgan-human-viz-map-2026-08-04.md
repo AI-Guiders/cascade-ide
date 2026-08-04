@@ -10,7 +10,7 @@
 | files / explorer | SolutionExplorer | **tree** live | keep tree | ok |
 | arch | SemanticMap | **Skia graph** | keep graph; wire arch board live | thin |
 | related / find | RelatedFiles | **Skia graph + list** | companions instrument (list+graph) | ok (2026-08-04) |
-| problems / quality | Problems | list | severity board + jump | thin |
+| problems / quality | Problems | **severity board + list** | ERR/WARN/ALL cards + jump | ok (2026-08-04) |
 | git | Git | porcelain+diff | tinted diff host (exists) | ok-ish |
 | shell / terminal | Terminal | ConPTY host | keep | ok |
 | build / test | Build/Tests | log hosts | keep | ok |
@@ -28,6 +28,7 @@
 ## Ships
 - **Plan instrument cards** (WHY/NEXT/COURSE) — dogfood PNG 2026-08-04
 - **RelatedFiles companions** — Skia graph + list (same pattern as SemanticMap) — dogfood PNG 2026-08-04
+- **Problems severity board** — ERR/WARN/ALL cards + jump list — dogfood PNG 2026-08-04
 
 ## Do not
 - Mark text ribbon Done
