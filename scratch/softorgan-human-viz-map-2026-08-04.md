@@ -23,7 +23,7 @@
 | Editor situ | Editor ribbon | **text strip** | **REJECT** as human-faced — situ must be instrument (why-board / companions viz), not path subtitle | reject |
 | pressure / alert / eicas | chrome / EICAS band | chips | keep chips; no prose wall | ok-ish |
 | webcam | (chrome) | — | shot desk = sense, not MFD text | n/a |
-| domain / rules / learn / inventory | Markdown stubs | text glance | real boards or defer | gap |
+| domain / rules / learn | DomainBoard | **card deck** (DOM/CARDS/LATCH/LEARN + domain cards) | keep instrument; inventory mill REFUSED | ok (2026-08-04) |
 
 ## Ships
 - **Plan instrument cards** (WHY/NEXT/COURSE) — dogfood PNG 2026-08-04
@@ -34,6 +34,7 @@
 - **Correspondence thread timeline** — CRS/FOCUS/FEATURE/ADR/REV/FWD cards + ◀◆▶ rail — dogfood PNG 2026-08-04
 - **Plan leaf board** — WHY/NEXT/COURSE + TM stage tree on P — dogfood PNG 2026-08-04
 - **Arch board on SemanticMap** — AS_BUILT chips + role list beside Skia — dogfood PNG 2026-08-04
+- **DomainBoard instrument cards** — DOM/CARDS/LATCH/LEARN + `.cdp/domain` cards — dogfood PNG 2026-08-04
 
 ## Do not
 - Mark text ribbon Done

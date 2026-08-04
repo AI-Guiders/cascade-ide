@@ -16,14 +16,17 @@
 - Correspondence timeline: `MainWindow.CorrespondenceSurface.cs` · `GlassCorrespondenceFeed.BuildInstrument|BuildTimeline`
 - Plan leaf board: `LatchPaint.Plan.cs` · `PlanLeafBoardList` · `CidePlanLatch.Board` (cdp-mcp)
 - Arch board on SemanticMap: `GlassArchBoardGlance` · `MainWindow.SemanticMapSurface.cs` · AS_BUILT roles cards+list
+- DomainBoard card deck: `GlassDomainBoardGlance` · `MainWindow.GlanceCardsSurface` page DomainBoard · `.cdp/domain/*.md` + latch/learn
 - Capture: `tools/Capture-Window.ps1` · title `P/M` or `M · MFD host` or main `(P/F/M)`
 
 ## Antipatterns
 - Claiming Editor situ text ribbon Done.
 - Autoi-in-chat / status-list-as-verify / File.Exists alone = seeming.
 - SoftFL / Meta / board-hygiene / inventory mill as work under sealed course.
+- DomainBoard `glance · unavailable` with empty WorkspaceRoot = seeming (climb / latch-only must paint).
 
 ## last_ship
+- 2026-08-04 · DomainBoard instrument cards · DOM LIVE · PNG `scratch/domain-board-cards-20260804.png`
 - 2026-08-04 · Arch board on SemanticMap · cards+roles · PNG `scratch/arch-board-semanticmap-20260804.png`
 - 2026-08-04 · Plan leaf board WHY/NEXT/COURSE + stage tree · PNG `scratch/plan-leaf-board-20260804.png`
 - 2026-08-04 · Correspondence CRS cards + thread timeline · PNG `scratch/correspondence-timeline-20260804.png`
