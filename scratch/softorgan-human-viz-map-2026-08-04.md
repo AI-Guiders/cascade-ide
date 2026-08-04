@@ -21,6 +21,7 @@
 | browser | WebAiPortal | WebView2 | keep | ok |
 | fds / shared | FlightDataStorage | **card deck** | PLAN/SHARE/PRESSURE/WAKE instrument cards | ok (2026-08-04) |
 | Editor situ | Editor (F or M mount) | **WHY/BLAST/ROLE/DIFF/APPLIES card deck** | keep situ instrument | ok (2026-08-04) |
+| Intercom / Radio | Forward Intercom | **pointer cards** (`delta →` / zone arrows) + short prose | keep Radio; not SA wall | ok (2026-08-04) |
 | pressure / alert / eicas | chrome / EICAS band | chips | keep chips; no prose wall | ok-ish |
 | webcam | (chrome) | — | shot desk = sense, not MFD text | n/a |
 | domain / rules / learn | DomainBoard | **card deck** (DOM/CARDS/LATCH/LEARN + domain cards) | keep instrument; inventory mill REFUSED | ok (2026-08-04) |
@@ -35,8 +36,10 @@
 - **Plan leaf board** — WHY/NEXT/COURSE + TM stage tree on P — dogfood PNG 2026-08-04
 - **Arch board on SemanticMap** — AS_BUILT chips + role list beside Skia — dogfood PNG 2026-08-04
 - **DomainBoard instrument cards** — DOM/CARDS/LATCH/LEARN + `.cdp/domain` cards — dogfood PNG 2026-08-04
+- **Editor situ WHY-file cards** — dogfood PNG 2026-08-04
+- **Intercom Radio pointer cards** — `delta → Right:Editor · verify on Applies` — dogfood PNG 2026-08-04
 
 ## Do not
 - Mark text ribbon Done
 - SoftOrgan seats auto-flip page
-- Seeming PNG of Intercom prose
+- Seeming PNG of Intercom prose wall (Radio Done needs DELTA/LOOK instrument card)
