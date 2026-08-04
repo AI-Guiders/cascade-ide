@@ -7,7 +7,7 @@ namespace CascadeIDE.Tests;
 public sealed class GlassEditorSituRibbonTests
 {
     [Fact]
-    public void Format_why_and_blast_from_companions()
+    public void Build_face_splits_why_and_blast()
     {
         var root = Path.Combine(Path.GetTempPath(), "glass-editor-situ-" + Guid.NewGuid().ToString("N")[..8]);
         Directory.CreateDirectory(root);
@@ -18,6 +18,18 @@ public sealed class GlassEditorSituRibbonTests
             File.WriteAllText(a, "// a");
             File.WriteAllText(b, "<Grid/>");
 
+            var face = GlassEditorSituRibbon.Build(
+                a,
+                root,
+                why: "Glass Done (human flight)",
+                leaf: "WHY-file + blast ribbon",
+                blastMax: 3);
+
+            Assert.True(face.HasAny);
+            Assert.Contains("Glass Done", face.Why, StringComparison.Ordinal);
+            Assert.Contains("Foo.xaml", face.Blast, StringComparison.Ordinal);
+            Assert.Contains("Foo.xaml", face.BlastNames);
+
             var line = GlassEditorSituRibbon.Format(
                 a,
                 root,
@@ -26,9 +38,7 @@ public sealed class GlassEditorSituRibbonTests
                 blastMax: 3);
 
             Assert.Contains("WHY ·", line, StringComparison.Ordinal);
-            Assert.Contains("Glass Done", line, StringComparison.Ordinal);
             Assert.Contains("BLAST ·", line, StringComparison.Ordinal);
-            Assert.Contains("Foo.xaml", line, StringComparison.Ordinal);
         }
         finally
         {

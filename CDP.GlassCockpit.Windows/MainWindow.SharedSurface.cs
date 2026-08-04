@@ -56,26 +56,29 @@ public partial class MainWindow
 
     void RefreshEditorSituRibbon()
     {
-        if (EditorSituRibbon is null)
+        if (EditorSituPanel is null || FileWhyReadout is null || FileBlastReadout is null)
             return;
 
         if (string.IsNullOrWhiteSpace(_editorPath))
         {
-            EditorSituRibbon.Text = string.Empty;
-            EditorSituRibbon.Visibility = Visibility.Collapsed;
+            FileWhyReadout.ValueText = "—";
+            FileBlastReadout.ValueText = "—";
+            EditorSituPanel.Visibility = Visibility.Collapsed;
             return;
         }
 
-        var line = GlassEditorSituRibbon.Format(
+        var face = GlassEditorSituRibbon.Build(
             _editorPath,
             _session.WorkspaceRoot,
             _planWhy,
             _planLeaf,
             blastMax: 3);
-        EditorSituRibbon.Text = line;
-        EditorSituRibbon.Visibility = string.IsNullOrWhiteSpace(line)
-            ? Visibility.Collapsed
-            : Visibility.Visible;
+
+        FileWhyReadout.ValueText = string.IsNullOrWhiteSpace(face.Why) ? "—" : face.Why;
+        FileBlastReadout.ValueText = string.IsNullOrWhiteSpace(face.Blast) ? "—" : face.Blast;
+        EditorSituPanel.Visibility = face.HasAny
+            ? Visibility.Visible
+            : Visibility.Collapsed;
     }
 
     static bool PathsReferToSameFile(string? a, string? b)
