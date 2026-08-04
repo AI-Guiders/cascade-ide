@@ -27,14 +27,3 @@
 - SoftFL / Meta / board-hygiene / inventory mill as work under sealed course.
 - DomainBoard `glance · unavailable` with empty WorkspaceRoot = seeming (climb / latch-only must paint).
 
-## last_ship
-- 2026-08-04 · Editor situ ROLE split human labels · ROLE=`в карте`/`сирота` · HOPS=`N узлов · E связей` · LOOK=`карта → MFD` · tests 3/0
-- 2026-08-04 · Editor situ WHY-file instrument cards · PNG `scratch/editor-situ-cards-20260804.png` (M·Editor · LEVEL SITU)
-- 2026-08-04 · DomainBoard instrument cards · DOM LIVE · PNG `scratch/domain-board-cards-20260804.png`
-- 2026-08-04 · Arch board on SemanticMap · cards+roles · PNG `scratch/arch-board-semanticmap-20260804.png`
-- 2026-08-04 · Plan leaf board WHY/NEXT/COURSE + stage tree · PNG `scratch/plan-leaf-board-20260804.png`
-- 2026-08-04 · Correspondence CRS cards + thread timeline · PNG `scratch/correspondence-timeline-20260804.png`
-- 2026-08-04 · HybridIndex HCI cards + Skia scope map · PNG `scratch/hybridindex-map-20260804.png`
-- 2026-08-04 · FDS card deck PLAN/SHARE/PRESSURE/WAKE · PNG `scratch/fds-card-deck-20260804.png`
-- 2026-08-04 · Problems severity board ERR/WARN/ALL · PNG `scratch/problems-severity-board-20260804.png`
-- 2026-08-04 · RelatedFiles companions Skia+list · `75eb3c95` · PNG `scratch/relatedfiles-list-graph-20260804.png`
