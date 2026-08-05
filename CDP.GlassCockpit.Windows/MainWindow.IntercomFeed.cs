@@ -5,6 +5,7 @@ using System.IO;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Threading;
+using CascadeIDE.Intercom;
 
 namespace CDP.GlassCockpit.Windows;
 
@@ -171,7 +172,7 @@ public partial class MainWindow
     {
         var text = ComposerBox.Text ?? "";
         var empty = string.IsNullOrWhiteSpace(text)
-                    || text is "Message @PF…" or "Message @PM…";
+                    || GlassIntercomLane.IsComposerPlaceholder(text);
         var state = empty ? "idle" : "composing";
         if (string.Equals(_lastPublishedPmPresence, state, StringComparison.Ordinal))
             return;
@@ -211,7 +212,7 @@ public partial class MainWindow
 
     void ComposerBox_OnGotKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
     {
-        if (ComposerBox.Text is "Message @PF…" or "Message @PM…")
+        if (GlassIntercomLane.IsComposerPlaceholder(ComposerBox.Text))
             ComposerBox.Clear();
     }
 

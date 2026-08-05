@@ -243,7 +243,7 @@ public partial class MainWindow
 
         var bracket = GlassAttachChipPeel.FormatBracket(display, lineStart, lineEnd);
         var cur = ComposerBox.Text ?? "";
-        if (cur is "Message @PF…" or "Message @PM…")
+        if (GlassIntercomLane.IsComposerPlaceholder(cur))
             cur = "";
         ComposerBox.Text = string.IsNullOrWhiteSpace(cur)
             ? bracket

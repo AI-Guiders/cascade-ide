@@ -30,7 +30,7 @@ public partial class MainWindow
     void RefreshSlashPopup()
     {
         var text = ComposerBox.Text ?? "";
-        if (text is "Message @PF…" or "Message @PM…" || !GlassSlashCatalog.IsSlashLine(text))
+        if (GlassIntercomLane.IsComposerPlaceholder(text) || !GlassSlashCatalog.IsSlashLine(text))
         {
             HideSlashPopup();
             return;

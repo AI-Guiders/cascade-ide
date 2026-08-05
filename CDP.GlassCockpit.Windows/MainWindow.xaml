@@ -125,7 +125,7 @@
             </DockPanel>
           </Border>
 
-          <!-- Intercom HUD: flat Korry + HDG/CRS (not chat, not ERS deck) -->
+          <!-- Intercom HUD: flat Korry + HDG/CRS + model (CIT-lit only) -->
           <Border DockPanel.Dock="Top" Background="#161A18" Padding="10,5" BorderBrush="#2A2A2A" BorderThickness="0,0,0,1">
             <DockPanel>
               <StackPanel DockPanel.Dock="Left" Orientation="Horizontal" VerticalAlignment="Center">
@@ -136,6 +136,28 @@
                 <Button x:Name="VadKorryBtn" Content="VAD" Style="{StaticResource KorryBtn}"
                         Click="VadKorryBtn_OnClick" ToolTip="Voice activity · slot (not wired)"/>
               </StackPanel>
+              <ComboBox x:Name="HudModelPicker" DockPanel.Dock="Right"
+                        Width="140" Margin="12,0,0,0" VerticalAlignment="Center"
+                        Background="#222" Foreground="#EEE" BorderBrush="#3F3F46"
+                        FontSize="11" FontFamily="Consolas"
+                        ToolTip="FM model · lit only when lane=CIT">
+                <ComboBox.Resources>
+                  <SolidColorBrush x:Key="{x:Static SystemColors.WindowBrushKey}" Color="#222222"/>
+                  <SolidColorBrush x:Key="{x:Static SystemColors.WindowTextBrushKey}" Color="#EEEEEE"/>
+                  <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="#152028"/>
+                  <SolidColorBrush x:Key="{x:Static SystemColors.HighlightTextBrushKey}" Color="#F0F0F0"/>
+                  <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightBrushKey}" Color="#1A2830"/>
+                  <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightTextBrushKey}" Color="#F0F0F0"/>
+                </ComboBox.Resources>
+                <ComboBox.ItemContainerStyle>
+                  <Style TargetType="ComboBoxItem">
+                    <Setter Property="Background" Value="#222"/>
+                    <Setter Property="Foreground" Value="#EEE"/>
+                    <Setter Property="BorderThickness" Value="0"/>
+                    <Setter Property="Padding" Value="8,4"/>
+                  </Style>
+                </ComboBox.ItemContainerStyle>
+              </ComboBox>
               <TextBlock x:Name="HdgCrsText" Text="HDG/CRS · —" FontSize="11" FontFamily="Consolas"
                          Foreground="#A8C5B5" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"
                          Margin="12,0,0,0"/>
@@ -214,36 +236,15 @@
                   </Popup>
                   <DockPanel>
                     <Button x:Name="SendBtn" DockPanel.Dock="Right" Content="Send" Style="{StaticResource ChromeBtn}"
-                            Click="SendBtn_OnClick" ToolTip="Send to @PF (Enter / Ctrl+Enter; Shift+Enter = newline; / = slash)"/>
-                    <ComboBox x:Name="ModelPicker" DockPanel.Dock="Left"
-                              Width="150" Margin="0,0,8,0" VerticalAlignment="Center"
-                              Background="#222" Foreground="#EEE" BorderBrush="#3F3F46"
-                              FontSize="11" FontFamily="Segoe UI"
-                              ToolTip="Model for this Intercom seat">
-                      <!-- Dark Cockpit: default ComboBoxItem uses SystemColors (black text / light highlight). Template triggers beat Style Background setters — override brush keys. -->
-                      <ComboBox.Resources>
-                        <SolidColorBrush x:Key="{x:Static SystemColors.WindowBrushKey}" Color="#222222"/>
-                        <SolidColorBrush x:Key="{x:Static SystemColors.WindowTextBrushKey}" Color="#EEEEEE"/>
-                        <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="#152028"/>
-                        <SolidColorBrush x:Key="{x:Static SystemColors.HighlightTextBrushKey}" Color="#F0F0F0"/>
-                        <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightBrushKey}" Color="#1A2830"/>
-                        <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightTextBrushKey}" Color="#F0F0F0"/>
-                      </ComboBox.Resources>
-                      <ComboBox.ItemContainerStyle>
-                        <Style TargetType="ComboBoxItem">
-                          <Setter Property="Background" Value="#222"/>
-                          <Setter Property="Foreground" Value="#EEE"/>
-                          <Setter Property="BorderThickness" Value="0"/>
-                          <Setter Property="Padding" Value="8,4"/>
-                        </Style>
-                      </ComboBox.ItemContainerStyle>
-                      <ComboBox.ItemTemplate>
-                        <DataTemplate>
-                          <TextBlock Text="{Binding}" FontSize="11" FontFamily="Segoe UI"
-                                     Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=ComboBoxItem}}"/>
-                        </DataTemplate>
-                      </ComboBox.ItemTemplate>
-                    </ComboBox>
+                            Click="SendBtn_OnClick" ToolTip="Send (Enter / Ctrl+Enter; Shift+Enter = newline; / = slash)"/>
+                    <StackPanel DockPanel.Dock="Left" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,8,0">
+                      <Button x:Name="LaneCitBtn" Content="CIT" Style="{StaticResource KorryBtn}"
+                              Click="LaneCitBtn_OnClick" ToolTip="Citizen · MAF / FM path"/>
+                      <Button x:Name="LaneHostBtn" Content="HOST" Style="{StaticResource KorryBtn}"
+                              Click="LaneHostBtn_OnClick" ToolTip="Composer · host"/>
+                      <Button x:Name="LanePfBtn" Content="PF" Style="{StaticResource KorryBtn}"
+                              Click="LanePfBtn_OnClick" ToolTip="PF · habitat partner"/>
+                    </StackPanel>
                     <TextBox x:Name="ComposerBox"
                              AcceptsReturn="True"
                              TextWrapping="Wrap"

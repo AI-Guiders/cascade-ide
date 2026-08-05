@@ -4,6 +4,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
 using CascadeIDE.Features.Cdp;
+using CascadeIDE.Intercom;
 
 namespace CDP.GlassCockpit.Windows;
 
@@ -33,8 +34,7 @@ internal static partial class GlassIntercomSend
             return null;
 
         var text = raw.Trim();
-        if (text.Equals("Message @PF…", StringComparison.Ordinal)
-            || text.Equals("Message @PM…", StringComparison.Ordinal))
+        if (GlassIntercomLane.IsComposerPlaceholder(text))
             return null;
 
         var body = PfLeading().Replace(text, "").Trim();

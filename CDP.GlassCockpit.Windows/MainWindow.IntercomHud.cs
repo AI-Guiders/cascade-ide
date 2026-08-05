@@ -1,7 +1,6 @@
 #nullable enable
 
 using System.IO;
-using System.Linq;
 using System.Text.Json;
 using System.Windows;
 using System.Windows.Controls;
@@ -12,7 +11,7 @@ using CascadeIDE.Intercom;
 
 namespace CDP.GlassCockpit.Windows;
 
-/// <summary>Intercom HUD: flat Korry AUTOI/HILD/VAD + HDG/CRS + model picker.</summary>
+/// <summary>Intercom HUD: AUTOI/HILD/VAD + HDG/CRS + CIT-lit model; composer lane XOR Korry.</summary>
 public partial class MainWindow
 {
     static readonly Brush KorryOnBg = new SolidColorBrush(Color.FromRgb(0x1E, 0x3A, 0x2F));
@@ -24,20 +23,19 @@ public partial class MainWindow
 
     GlassIntercomHud.Snapshot _hud = GlassIntercomHud.Empty;
     string? _lastIgniteStamp;
-
-    static readonly string[] ModelChoices =
-    [
-        "Citizen · default",
-        "Composer · host",
-        "PF · habitat"
-    ];
+    GlassIntercomLane.Kind _lane = GlassIntercomLane.DefaultLane;
+    string? _modelId;
+    bool _hudModelSuppress;
 
     void InitIntercomHud()
     {
-        ModelPicker.ItemsSource = ModelChoices;
-        var saved = TryLoadModelChoice();
-        ModelPicker.SelectedItem = ModelChoices.Contains(saved) ? saved : ModelChoices[0];
-        ModelPicker.SelectionChanged += ModelPicker_OnSelectionChanged;
+        var snap = TryLoadLaneLatch();
+        _lane = snap.Lane;
+        _modelId = snap.ModelId;
+        HudModelPicker.SelectionChanged += HudModelPicker_OnSelectionChanged;
+        PaintLaneStrip();
+        PaintHudModelAxis();
+        ApplyComposerHintForLane(force: true);
         PaintIntercomHud(_hud);
         TryApplyIgniteHudFromDisk();
     }
@@ -74,7 +72,6 @@ public partial class MainWindow
     void ApplyIgniteHudRaw(string raw)
     {
         var snap = GlassIntercomHud.ParseIgniteJson(raw);
-        // stamp guard when present
         try
         {
             using var doc = JsonDocument.Parse(raw);
@@ -130,6 +127,90 @@ public partial class MainWindow
     void VadKorryBtn_OnClick(object sender, RoutedEventArgs e) =>
         StatusText.Text = "glass · VAD · not wired yet";
 
+    void LaneCitBtn_OnClick(object sender, RoutedEventArgs e) => SetLane(GlassIntercomLane.Kind.Cit);
+    void LaneHostBtn_OnClick(object sender, RoutedEventArgs e) => SetLane(GlassIntercomLane.Kind.Host);
+    void LanePfBtn_OnClick(object sender, RoutedEventArgs e) => SetLane(GlassIntercomLane.Kind.Pf);
+
+    void SetLane(GlassIntercomLane.Kind lane)
+    {
+        if (_lane == lane)
+            return;
+
+        _lane = lane;
+        PaintLaneStrip();
+        PaintHudModelAxis();
+        ApplyComposerHintForLane(force: false);
+        TrySaveLaneLatch();
+        StatusText.Text = $"glass · lane · {GlassIntercomLane.Label(lane)}";
+    }
+
+    void PaintLaneStrip()
+    {
+        PaintKorry(LaneCitBtn, _lane == GlassIntercomLane.Kind.Cit);
+        PaintKorry(LaneHostBtn, _lane == GlassIntercomLane.Kind.Host);
+        PaintKorry(LanePfBtn, _lane == GlassIntercomLane.Kind.Pf);
+        SendBtn.ToolTip =
+            $"Send to @{GlassIntercomLane.Label(_lane)} (Enter / Ctrl+Enter; Shift+Enter = newline; / = slash)";
+    }
+
+    void PaintHudModelAxis()
+    {
+        var lit = GlassIntercomLane.ModelAxisLit(_lane);
+        _hudModelSuppress = true;
+        try
+        {
+            if (!lit)
+            {
+                HudModelPicker.ItemsSource = new[] { "—" };
+                HudModelPicker.SelectedItem = "—";
+                HudModelPicker.IsEnabled = false;
+                HudModelPicker.Opacity = 0.55;
+                HudModelPicker.ToolTip = "FM model · dim when lane ≠ CIT";
+                return;
+            }
+
+            var items = new List<string> { "default" };
+            if (!string.IsNullOrWhiteSpace(_modelId)
+                && !string.Equals(_modelId, "default", StringComparison.OrdinalIgnoreCase)
+                && !string.Equals(_modelId, "—", StringComparison.Ordinal))
+                items.Add(_modelId.Trim());
+
+            HudModelPicker.ItemsSource = items;
+            var pick = string.IsNullOrWhiteSpace(_modelId) ? "default" : _modelId.Trim();
+            HudModelPicker.SelectedItem = items.Contains(pick) ? pick : items[0];
+            HudModelPicker.IsEnabled = true;
+            HudModelPicker.Opacity = 1.0;
+            HudModelPicker.ToolTip = "FM model id · session override (CFG holds secrets)";
+        }
+        finally
+        {
+            _hudModelSuppress = false;
+        }
+    }
+
+    void HudModelPicker_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (_hudModelSuppress)
+            return;
+        if (!GlassIntercomLane.ModelAxisLit(_lane))
+            return;
+        if (HudModelPicker.SelectedItem is not string s)
+            return;
+        if (string.Equals(s, "—", StringComparison.Ordinal))
+            return;
+
+        _modelId = string.Equals(s, "default", StringComparison.OrdinalIgnoreCase) ? null : s;
+        TrySaveLaneLatch();
+    }
+
+    void ApplyComposerHintForLane(bool force)
+    {
+        var hint = GlassIntercomLane.ComposerHint(_lane);
+        var cur = ComposerBox.Text ?? "";
+        if (force || GlassIntercomLane.IsComposerPlaceholder(cur) || string.IsNullOrWhiteSpace(cur))
+            ComposerBox.Text = hint;
+    }
+
     void PublishIgniteCmd(string op)
     {
         if (string.IsNullOrWhiteSpace(op))
@@ -160,37 +241,39 @@ public partial class MainWindow
         }
     }
 
-    void ModelPicker_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
-    {
-        if (ModelPicker.SelectedItem is string s)
-            TrySaveModelChoice(s);
-    }
+    static string LaneLatchPath =>
+        Path.Combine(CdpHabitatPaths.StateRoot, "glass-intercom-lane.json");
 
-    static string ModelChoicePath =>
+    static string LegacyModelLatchPath =>
         Path.Combine(CdpHabitatPaths.StateRoot, "glass-intercom-model.json");
 
-    static string? TryLoadModelChoice()
+    static GlassIntercomLane.Snapshot TryLoadLaneLatch()
     {
         try
         {
-            if (!File.Exists(ModelChoicePath))
-                return null;
-            using var doc = JsonDocument.Parse(File.ReadAllText(ModelChoicePath));
-            return doc.RootElement.TryGetProperty("model", out var m) ? m.GetString() : null;
+            if (File.Exists(LaneLatchPath))
+                return GlassIntercomLane.ParseLatchJson(File.ReadAllText(LaneLatchPath));
+
+            if (File.Exists(LegacyModelLatchPath))
+                return GlassIntercomLane.ParseLatchJson(File.ReadAllText(LegacyModelLatchPath));
         }
         catch
         {
-            return null;
+            /* best-effort */
         }
+
+        return new GlassIntercomLane.Snapshot(GlassIntercomLane.DefaultLane, null);
     }
 
-    static void TrySaveModelChoice(string model)
+    void TrySaveLaneLatch()
     {
         try
         {
             CdpHabitatPaths.EnsureStateRoot();
-            var json = JsonSerializer.Serialize(new { model, stamped_utc = DateTimeOffset.UtcNow });
-            File.WriteAllText(ModelChoicePath, json);
+            var json = GlassIntercomLane.FormatLatchJson(_lane, _modelId);
+            var tmp = LaneLatchPath + "." + Guid.NewGuid().ToString("N")[..8] + ".tmp";
+            File.WriteAllText(tmp, json);
+            File.Move(tmp, LaneLatchPath, overwrite: true);
         }
         catch
         {

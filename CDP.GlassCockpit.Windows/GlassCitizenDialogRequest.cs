@@ -3,6 +3,7 @@ using System.IO;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using CascadeIDE.Features.Cdp;
+using CascadeIDE.Intercom;
 
 namespace CDP.GlassCockpit.Windows;
 
@@ -30,8 +31,7 @@ internal static class GlassCitizenDialogRequest
             return null;
 
         var body = raw.Trim();
-        if (body.Equals("Message @PF…", StringComparison.Ordinal)
-            || body.Equals("Message @PM…", StringComparison.Ordinal))
+        if (GlassIntercomLane.IsComposerPlaceholder(body))
             return null;
 
         var id = Guid.NewGuid().ToString("N")[..12];
