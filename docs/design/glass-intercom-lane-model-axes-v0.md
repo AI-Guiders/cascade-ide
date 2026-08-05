@@ -2,6 +2,7 @@
 
 **Status:** accepted 2026-08-05 (operator + agent).
 **Scope:** Glass Intercom chrome — not ChatPanel Avalonia settings.
+**See also:** [glass-intercom-northstar-messenger-v0](glass-intercom-northstar-messenger-v0.md) — Intercom → team messenger/channels; lane strip is near-term, may become channel rail.
 
 ## Decision
 

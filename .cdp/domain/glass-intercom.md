@@ -7,6 +7,7 @@
 - Intercom = Radio (I6): instrument pointers are cards (`delta →` / `look →` / `→ PFD|MFD|Right|…`) — not SA prose wall; generic `→` bullets stay prose.
 - Sticky Who per seat (`intercom-identity-LATEST.json`): freeform nick, not model id; resolve = explicit name → sticky → bootstrap (guest Кир / operator Operator / citizen Citizen). Света = this machine's sticky, not repo default.
 - **Lane × model axes (accepted 2026-08-05):** lane = habitat seat (CIT/HOST/PF) at Send as **XOR Korry strip** (not ComboBox); FM model = HUD ComboBox у HDG/CRS, lit only when lane=CIT; provider key/baseUrl/default in CFG. Design: `docs/design/glass-intercom-lane-model-axes-v0.md`. Do not overload one "Model" ComboBox.
+- **NorthStar messenger (accepted 2026-08-05):** Intercom ≠ чат со вторым пилотом. Coordination hub for people + agents + agents-of-agents → messenger-with-channels (Slack/MM grammar). Do not copy CIDE session-graph suffering as day-1. Design: `docs/design/glass-intercom-northstar-messenger-v0.md` · canon ADR 0080 + intercom-ux-reference. Near-term lane strip may evolve into channel rail.
 
 ## Entry
 - Parser: `CascadeIDE.GlassCore/Intercom/IntercomMarkdown.cs`
@@ -17,6 +18,8 @@
 - Tests: `CascadeIDE.Tests/IntercomMarkdownTests.cs` · `GlassOperatorShareShelfTests.cs` · `GlassRadioPointerTests.cs`
 
 ## Antipatterns
+- Treating Intercom as DM with «second pilot» — NorthStar is team coordination (channels).
+- Shipping CIDE session-graph / topic-tree complexity as Glass day-1 (suffering, not work).
 - Hardcoding operator nick (Света) as clone default — sticky is local latch, bootstrap is Operator.
 - ComboBox for habitat lane (3 fixed seats) — use Korry XOR strip; ComboBox is for FM catalog.
 - One control mixing lane + FM model id; two ComboBoxes beside Send; live FM list when lane ≠ CIT.
@@ -26,8 +29,10 @@
 - Silent Cursor Write past PathMutateGate for these files.
 - Human Intercom send that only latches PF without writing `.cdp/share` — agent cannot `share from=operator`.
 - Claiming Radio Done via SA wall / Autoi dump / File.Exists alone.
+- Hand-wiring Folded AutoI Korry while Review — green paint ≠ consume path; fix ignite-cmd consumer later.
 
 ## last_ship
+- 2026-08-05 · **Decision stamped** · NorthStar messenger steer · Intercom ≠ second-pilot chat · channels hub · `glass-intercom-northstar-messenger-v0.md`
 - 2026-08-05 · **Decision stamped** · lane×model axes v0 · Lane=Korry XOR @ Send · Model=HUD Combo @ HDG/CRS · secrets=CFG · design `glass-intercom-lane-model-axes-v0.md` (UI not shipped yet)
 - 2026-08-05 · Sticky Intercom Who · `%LocalAppData%/cdp-mcp/intercom-identity-LATEST.json` · Glass `GlassIntercomIdentity` + `ResolveIntercomIdentity` · MCP `cdp_intercom op=identity` · dogfood send without name= → AutoI · pm sticky Света (local claim, not repo default)
 - 2026-08-05 · ModelPicker dropdown empty text · Dark Cockpit: override SystemColors Highlight*/Window* on ComboBox + ItemTemplate inherit FG · evidence `tmp-glass-shots/model-picker-fixed-20260805.png` (Citizen · default / Composer · host / PF · habitat)
