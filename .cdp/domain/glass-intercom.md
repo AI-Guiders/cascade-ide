@@ -22,6 +22,7 @@
 ## Antipatterns
 - **Bare topology wipe for dogfood** — never publish `topology=(intercom)` just to shoot Intercom; PreferSurface / surface run without replacing the latch, or restore **`GlassPresentationLayout.OperatorReviewFlightTopology` = `(F/P/M)`** (single OneOf TopLevel — all channels one window). Do **not** invent `(P)(F)(M)`, `(F)(P/M)`, `(intercom)(sit)(world)`, or **`(intercom)(sit/world/alert)`** as "restore" — that last one is 2 windows (F dedicated + satellite host); wrong wire = still regression. Ask if unsure which flight was live.
 - **Seeming-Done without topology regression tests** — before Done on presentation/OneOf: write/run tests that lock single-TopLevel no-host vs 2-group host spawn (`GlassPresentationLayoutSurfaceWireTests`); catch host-count regressions in CI, not by operator parrot.
+- **Cheap prior long-loss (2026-08-05)** — skip-tests / wrong 2-window wire / HOLD surface parade (ECL·QRH) look cheap now and burn the day in circles; horizon ≠ months (→15.08). Refuse; densest human-faced + locks.
 - Treating Intercom as DM with «second pilot» — NorthStar is team coordination (`#crew` + DM + Radio).
 - `#humans` / `#agents` as separate **channels** — discrimination; use lens (0143) inside `#crew`.
 - Shipping CIDE session-graph / topic-tree complexity as Glass day-1 (suffering, not work).
