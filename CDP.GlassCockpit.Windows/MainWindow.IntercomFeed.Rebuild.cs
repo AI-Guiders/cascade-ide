@@ -47,7 +47,11 @@ public partial class MainWindow
                 && string.Equals(t.Id, sid, StringComparison.OrdinalIgnoreCase);
             if (selected)
                 _selectedTopicEntryIds = t.EntryIds.ToArray();
-            var summary = $"{t.Count} msg · {t.StartUtc.ToLocalTime():HH:mm}–{t.EndUtc.ToLocalTime():HH:mm}";
+            var allow = t.EntryIds.ToHashSet(StringComparer.OrdinalIgnoreCase);
+            var bodies = entries
+                .Where(e => allow.Contains(e.Id))
+                .Select(e => e.Body);
+            var summary = GlassTopicCardSummary.Format(t.Count, t.StartUtc, t.EndUtc, bodies);
             _topics.Add(new TopicCard(t.Id, t.Title, selected, t.EntryIds, summary));
         }
 
@@ -66,6 +70,7 @@ public partial class MainWindow
                 () => _isTopicOverviewMode);
 
         SyncTopicOverviewChrome();
+        SyncProductSpineChrome();
 
         if (_isTopicOverviewMode)
         {
@@ -187,6 +192,21 @@ public partial class MainWindow
                 : $"{n} тем · Enter (ato) — открыть · atp/atn — выбор · atb — сюда";
             TopicOverviewHeader.Text = n <= 1 ? "Topic" : $"{n} topics";
         }
+    }
+
+    void SyncProductSpineChrome()
+    {
+        var spine = GlassProductSpineStore.LoadOrEmpty();
+        var strip = GlassProductSpineStore.FormatStrip(spine);
+        if (strip.Length == 0)
+        {
+            ProductSpineStrip.Visibility = Visibility.Collapsed;
+            ProductSpineStrip.Text = "";
+            return;
+        }
+
+        ProductSpineStrip.Text = strip;
+        ProductSpineStrip.Visibility = Visibility.Visible;
     }
 
     void TopicAllBtn_OnClick(object sender, RoutedEventArgs e) => ShowIntercomTopicOverview();

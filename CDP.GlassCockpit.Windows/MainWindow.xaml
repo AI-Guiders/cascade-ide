@@ -265,38 +265,43 @@
               </Border>
 
               <Border DockPanel.Dock="Top" Background="{StaticResource Glass.BgRaised}" BorderBrush="#2A2A2A" BorderThickness="0,0,0,1" Padding="8,6">
-                <DockPanel>
-                  <TextBlock DockPanel.Dock="Left" Text="Topics" FontSize="11" Foreground="#888" VerticalAlignment="Center" Margin="0,0,8,0"/>
-                  <Button x:Name="TopicAllBtn" DockPanel.Dock="Left" Content="Overview" Style="{StaticResource TopicAllBtnStyle}"
-                          Click="TopicAllBtn_OnClick" ToolTip="Topic catalog · ADR 0072 · c:atb" Margin="0,0,6,0" Tag="selected"/>
-                  <Button x:Name="TopicBackBtn" DockPanel.Dock="Left" Content="Back" Style="{StaticResource ChromeBtn}"
-                          Click="TopicBackBtn_OnClick" ToolTip="Back to topic overview (c:atb)" Margin="0,0,6,0" Visibility="Collapsed"/>
-                  <TextBlock x:Name="TopicsEmptyHint" DockPanel.Dock="Left"
-                             Text="(empty — send messages; new cards after 30m quiet gap)"
-                             FontSize="11" Foreground="#555" VerticalAlignment="Center"
-                             Visibility="Collapsed"/>
-                  <TextBlock x:Name="TopicsOverviewHint" DockPanel.Dock="Left"
-                             Text="" FontSize="11" Foreground="#666" VerticalAlignment="Center" Margin="0,0,8,0"
-                             Visibility="Collapsed"/>
-                  <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled">
-                    <ItemsControl x:Name="TopicCards">
-                      <ItemsControl.ItemsPanel>
-                        <ItemsPanelTemplate>
-                          <StackPanel Orientation="Horizontal"/>
-                        </ItemsPanelTemplate>
-                      </ItemsControl.ItemsPanel>
-                      <ItemsControl.ItemTemplate>
-                        <DataTemplate>
-                          <Button Content="{Binding Title}" Style="{StaticResource TopicCardBtn}"
-                                  Margin="0,0,6,0" MaxWidth="280"
-                                  ToolTip="{Binding Title}"
-                                  Tag="{Binding Id}"
-                                  Click="TopicCard_OnClick"/>
-                        </DataTemplate>
-                      </ItemsControl.ItemTemplate>
-                    </ItemsControl>
-                  </ScrollViewer>
-                </DockPanel>
+                <StackPanel>
+                  <DockPanel>
+                    <TextBlock DockPanel.Dock="Left" Text="Topics" FontSize="11" Foreground="#888" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                    <Button x:Name="TopicAllBtn" DockPanel.Dock="Left" Content="Overview" Style="{StaticResource TopicAllBtnStyle}"
+                            Click="TopicAllBtn_OnClick" ToolTip="Topic catalog · ADR 0072 · c:atb" Margin="0,0,6,0" Tag="selected"/>
+                    <Button x:Name="TopicBackBtn" DockPanel.Dock="Left" Content="Back" Style="{StaticResource ChromeBtn}"
+                            Click="TopicBackBtn_OnClick" ToolTip="Back to topic overview (c:atb)" Margin="0,0,6,0" Visibility="Collapsed"/>
+                    <TextBlock x:Name="TopicsEmptyHint" DockPanel.Dock="Left"
+                               Text="(empty — send messages; new cards after 30m quiet gap)"
+                               FontSize="11" Foreground="#555" VerticalAlignment="Center"
+                               Visibility="Collapsed"/>
+                    <TextBlock x:Name="TopicsOverviewHint" DockPanel.Dock="Left"
+                               Text="" FontSize="11" Foreground="#666" VerticalAlignment="Center" Margin="0,0,8,0"
+                               Visibility="Collapsed"/>
+                    <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled">
+                      <ItemsControl x:Name="TopicCards">
+                        <ItemsControl.ItemsPanel>
+                          <ItemsPanelTemplate>
+                            <StackPanel Orientation="Horizontal"/>
+                          </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                          <DataTemplate>
+                            <Button Content="{Binding Title}" Style="{StaticResource TopicCardBtn}"
+                                    Margin="0,0,6,0" MaxWidth="280"
+                                    ToolTip="{Binding Title}"
+                                    Tag="{Binding Id}"
+                                    Click="TopicCard_OnClick"/>
+                          </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                      </ItemsControl>
+                    </ScrollViewer>
+                  </DockPanel>
+                  <TextBlock x:Name="ProductSpineStrip" Text="" FontSize="11" Foreground="#9AB"
+                             Margin="0,6,0,0" TextWrapping="Wrap" Visibility="Collapsed"
+                             ToolTip="ADR 0096 product spine"/>
+                </StackPanel>
               </Border>
 
               <Grid>
