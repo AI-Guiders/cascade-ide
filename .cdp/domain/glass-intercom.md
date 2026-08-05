@@ -9,6 +9,7 @@
 - **Lane × model axes (accepted 2026-08-05):** lane = habitat seat (CIT/HOST/PF) at Send as **XOR Korry strip** (not ComboBox); FM model = HUD ComboBox у HDG/CRS, lit only when lane=CIT; provider key/baseUrl/default in CFG. Design: `docs/design/glass-intercom-lane-model-axes-v0.md`. Do not overload one "Model" ComboBox.
 - **NorthStar messenger (accepted 2026-08-05):** Intercom ≠ только чат со вторым пилотом. Ontology: **`#crew`** (люди+агенты вместе) · **DM** · **Radio** (оператор↔агент оператора). Не `#humans`/`#agents` как комнаты (lens=0143). one mind·N seats → мессенджер. Design: `docs/design/glass-intercom-northstar-messenger-v0.md`. I6 Radio pointers ≠ channel kind Radio.
 - **PreCondition (operator 2026-08-05):** CIDE EOL → Glass Done requires `All CIDE surfaces adopted` (or named supersede). **Not only Intercom Overview** — full gap table A1–A5 / B1–B3 in cdp-mcp `.cdp/domain/glass.md` PreCondition §. Topics P0b strip ≠ ADR 0072 overview (A1). Failure mode = **half-a instead of A** (PreCondition was stamped; undership) — not «PreCondition missing»; being playbook Seeming-Done.
+- **A3 SUPERSEDE (2026-08-05):** Glass does **not** adopt CIDE ADR 0172 `ThreadNode` / worklines / session-graph. Channel index = NorthStar (`#crew` · DM · Radio). Keep 30m quiet-gap clusters as Virtual History only.
 
 ## Entry
 - Parser: `CascadeIDE.GlassCore/Intercom/IntercomMarkdown.cs`
@@ -36,6 +37,7 @@
 - Hand-wiring Folded AutoI Korry while Review — green paint ≠ consume path; fix ignite-cmd consumer later.
 
 ## last_ship
+- 2026-08-05 · **ONE-WAVE PreCondition Intercom** · A2 ADOPTED (summary+spine strip) · A3 SUPERSEDE NorthStar (no ThreadNode) · B1–B3 DIG REJECT/defer · evidence `tmp-glass-shots/topic-overview-a2-20260805.png` · residual A4 denser only
 - 2026-08-05 · **A1+A5 ADOPTED** · ADR 0072 Glass overview ↔ detail ↔ back · `ChatTopicOverviewPolicy`→GlassCore · `topic_overview`/`topic_enter` (`ato`/`atb`) · evidence `tmp-glass-shots/topic-overview-a1-20260805.png` · PreCondition residual → A2 spine/summary, A3 dig/supersede, B denser
 - 2026-08-05 · **Decision stamped** · Face = Slack/MM light (not Conversational UI chrome) · northstar-messenger-v0 Face §
 - 2026-08-05 · **Decision stamped** · NorthStar ontology · `#crew`+DM+Radio · reject `#humans`/`#agents` rooms · `glass-intercom-northstar-messenger-v0.md`
