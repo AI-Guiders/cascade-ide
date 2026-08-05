@@ -268,7 +268,14 @@
               <Border DockPanel.Dock="Top" Background="{StaticResource Glass.BgRaised}" BorderBrush="#2A2A2A" BorderThickness="0,0,0,1" Padding="8,6">
                 <StackPanel>
                   <DockPanel>
-                    <TextBlock DockPanel.Dock="Left" Text="Topics" FontSize="11" Foreground="#888" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                    <StackPanel DockPanel.Dock="Left" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,10,0">
+                      <Button x:Name="ChannelCrewBtn" Content="#crew" Style="{StaticResource KorryBtn}"
+                              Click="ChannelCrewBtn_OnClick" ToolTip="#crew · humans+agents together (NorthStar hub)"/>
+                      <Button x:Name="ChannelRadioBtn" Content="Radio" Style="{StaticResource KorryBtn}"
+                              Click="ChannelRadioBtn_OnClick" ToolTip="Radio · operator ↔ this seat / citizen partner"/>
+                      <Button x:Name="ChannelDmBtn" Content="DM" Style="{StaticResource KorryBtn}"
+                              Click="ChannelDmBtn_OnClick" ToolTip="DM · 1:1 (address book later)"/>
+                    </StackPanel>
                     <Button x:Name="TopicAllBtn" DockPanel.Dock="Left" Content="Overview" Style="{StaticResource TopicAllBtnStyle}"
                             Click="TopicAllBtn_OnClick" ToolTip="Topic catalog · ADR 0072 · c:atb" Margin="0,0,6,0" Tag="selected"/>
                     <Button x:Name="TopicBackBtn" DockPanel.Dock="Left" Content="Back" Style="{StaticResource ChromeBtn}"

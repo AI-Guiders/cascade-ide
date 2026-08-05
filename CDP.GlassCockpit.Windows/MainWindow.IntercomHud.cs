@@ -24,6 +24,7 @@ public partial class MainWindow
     GlassIntercomHud.Snapshot _hud = GlassIntercomHud.Empty;
     string? _lastIgniteStamp;
     GlassIntercomLane.Kind _lane = GlassIntercomLane.DefaultLane;
+    GlassIntercomChannel.Kind _channel = GlassIntercomChannel.DefaultKind;
     string? _modelId;
     bool _hudModelSuppress;
 
@@ -32,8 +33,10 @@ public partial class MainWindow
         var snap = TryLoadLaneLatch();
         _lane = snap.Lane;
         _modelId = snap.ModelId;
+        _channel = TryLoadChannelLatch().Channel;
         HudModelPicker.SelectionChanged += HudModelPicker_OnSelectionChanged;
         PaintLaneStrip();
+        PaintChannelRail();
         PaintHudModelAxis();
         ApplyComposerHintForLane(force: true);
         PaintIntercomHud(_hud);
@@ -131,6 +134,10 @@ public partial class MainWindow
     void LaneHostBtn_OnClick(object sender, RoutedEventArgs e) => SetLane(GlassIntercomLane.Kind.Host);
     void LanePfBtn_OnClick(object sender, RoutedEventArgs e) => SetLane(GlassIntercomLane.Kind.Pf);
 
+    void ChannelCrewBtn_OnClick(object sender, RoutedEventArgs e) => SetChannel(GlassIntercomChannel.Kind.Crew);
+    void ChannelRadioBtn_OnClick(object sender, RoutedEventArgs e) => SetChannel(GlassIntercomChannel.Kind.Radio);
+    void ChannelDmBtn_OnClick(object sender, RoutedEventArgs e) => SetChannel(GlassIntercomChannel.Kind.Dm);
+
     void SetLane(GlassIntercomLane.Kind lane)
     {
         if (_lane == lane)
@@ -141,7 +148,18 @@ public partial class MainWindow
         PaintHudModelAxis();
         ApplyComposerHintForLane(force: false);
         TrySaveLaneLatch();
-        StatusText.Text = $"glass · lane · {GlassIntercomLane.Label(lane)}";
+        StatusText.Text = $"glass · lane · {GlassIntercomLane.Label(lane)} · ch {GlassIntercomChannel.Label(_channel)}";
+    }
+
+    void SetChannel(GlassIntercomChannel.Kind channel)
+    {
+        if (_channel == channel)
+            return;
+
+        _channel = channel;
+        PaintChannelRail();
+        TrySaveChannelLatch();
+        StatusText.Text = $"glass · channel · {GlassIntercomChannel.Label(channel)}";
     }
 
     void PaintLaneStrip()
@@ -150,7 +168,15 @@ public partial class MainWindow
         PaintKorry(LaneHostBtn, _lane == GlassIntercomLane.Kind.Host);
         PaintKorry(LanePfBtn, _lane == GlassIntercomLane.Kind.Pf);
         SendBtn.ToolTip =
-            $"Send to @{GlassIntercomLane.Label(_lane)} (Enter / Ctrl+Enter; Shift+Enter = newline; / = slash)";
+            $"Send to @{GlassIntercomLane.Label(_lane)} · {GlassIntercomChannel.Label(_channel)} (Enter / Ctrl+Enter; Shift+Enter = newline; / = slash)";
+    }
+
+    void PaintChannelRail()
+    {
+        PaintKorry(ChannelCrewBtn, _channel == GlassIntercomChannel.Kind.Crew);
+        PaintKorry(ChannelRadioBtn, _channel == GlassIntercomChannel.Kind.Radio);
+        PaintKorry(ChannelDmBtn, _channel == GlassIntercomChannel.Kind.Dm);
+        PaintLaneStrip();
     }
 
     void PaintHudModelAxis()
@@ -274,6 +300,40 @@ public partial class MainWindow
             var tmp = LaneLatchPath + "." + Guid.NewGuid().ToString("N")[..8] + ".tmp";
             File.WriteAllText(tmp, json);
             File.Move(tmp, LaneLatchPath, overwrite: true);
+        }
+        catch
+        {
+            /* best-effort */
+        }
+    }
+
+    static string ChannelLatchPath =>
+        Path.Combine(CdpHabitatPaths.StateRoot, "glass-intercom-channel.json");
+
+    static GlassIntercomChannel.Snapshot TryLoadChannelLatch()
+    {
+        try
+        {
+            if (File.Exists(ChannelLatchPath))
+                return GlassIntercomChannel.ParseLatchJson(File.ReadAllText(ChannelLatchPath));
+        }
+        catch
+        {
+            /* best-effort */
+        }
+
+        return new GlassIntercomChannel.Snapshot(GlassIntercomChannel.DefaultKind);
+    }
+
+    void TrySaveChannelLatch()
+    {
+        try
+        {
+            CdpHabitatPaths.EnsureStateRoot();
+            var json = GlassIntercomChannel.FormatLatchJson(_channel);
+            var tmp = ChannelLatchPath + "." + Guid.NewGuid().ToString("N")[..8] + ".tmp";
+            File.WriteAllText(tmp, json);
+            File.Move(tmp, ChannelLatchPath, overwrite: true);
         }
         catch
         {
