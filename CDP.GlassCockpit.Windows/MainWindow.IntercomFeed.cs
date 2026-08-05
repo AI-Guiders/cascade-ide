@@ -79,7 +79,9 @@ public partial class MainWindow
                     return;
                 }
 
-                TryJournalFromView(view);
+                // Habitat AppendJournal owns citizen voice (+ channel); skip duplicate journal with Radio default.
+                if (!string.Equals(view.Kind, "citizen", StringComparison.OrdinalIgnoreCase))
+                    TryJournalFromView(view);
                 var wasPinned = CascadeIDE.Intercom.GlassIntercomFeedScroll.IsPinnedToEnd(
                     FeedScroll.VerticalOffset,
                     FeedScroll.ExtentHeight,
