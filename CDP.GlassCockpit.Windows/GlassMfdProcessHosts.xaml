@@ -3,7 +3,8 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:term="clr-namespace:EasyWindowsTerminalControl;assembly=EasyWindowsTerminalControl"
              xmlns:wv2="clr-namespace:Microsoft.Web.WebView2.Wpf;assembly=Microsoft.Web.WebView2.Wpf"
-             xmlns:local="clr-namespace:CDP.GlassCockpit.Windows">
+             xmlns:local="clr-namespace:CDP.GlassCockpit.Windows"
+             xmlns:uikit="clr-namespace:CDP.GlassCockpit.Windows.UiKit">
   <Grid>
     <Border x:Name="MfdTerminalHost" Visibility="Collapsed" Background="#121212">
       <DockPanel Margin="8">
@@ -255,14 +256,8 @@
     <Border x:Name="MfdHybridIndexHost" Visibility="Collapsed" Background="#121212">
       <DockPanel Margin="8">
         <DockPanel DockPanel.Dock="Top" Margin="0,0,0,6">
-          <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
-            <Button x:Name="HybridIndexSearchBtn" Content="search" Padding="8,2" Margin="0,0,6,0"
-                    Background="#2A2A2A" Foreground="#CCC" BorderBrush="#3A3A3A"/>
-            <Button x:Name="HybridIndexReindexBtn" Content="reindex" Padding="8,2" Margin="0,0,6,0"
-                    Background="#2A2A2A" Foreground="#CCC" BorderBrush="#3A3A3A"/>
-            <Button x:Name="HybridIndexRefreshBtn" Content="refresh" Padding="8,2"
-                    Background="#2A2A2A" Foreground="#CCC" BorderBrush="#3A3A3A"/>
-          </StackPanel>
+          <uikit:GlassSoftKeyBar x:Name="HybridIndexSoftKeys" DockPanel.Dock="Right"
+                                 Key1Text="search" Key2Text="reindex" Key3Text="refresh"/>
           <TextBox x:Name="HybridIndexSearchBox" Height="26" Margin="0,0,8,0" Padding="6,3"
                    Background="#1A1A1A" Foreground="#EEE" BorderBrush="#3A3A3A"
                    FontFamily="Consolas" FontSize="12"

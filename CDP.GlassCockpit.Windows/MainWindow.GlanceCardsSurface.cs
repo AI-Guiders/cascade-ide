@@ -5,6 +5,7 @@ using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Media;
 using CascadeIDE.SoftOrgan;
+using CDP.GlassCockpit.Windows.UiKit;
 
 namespace CDP.GlassCockpit.Windows;
 
@@ -114,51 +115,9 @@ public partial class MainWindow
         };
     }
 
-    /// <summary>FDS card deck — larger instrument cards (Problems/Plan parity), not wrap chips.</summary>
-    static Border CreateDeckCard(GlassGlanceChip chip)
-    {
-        var (background, foreground) = ToneColors(chip.Tone);
-        var accent = chip.Tone switch
-        {
-            "ok" => "#4A8A4A",
-            "warn" => "#D7A33C",
-            "bad" => "#E05858",
-            _ => "#3A3A3A",
-        };
-
-        return new Border
-        {
-            Margin = new Thickness(0, 0, 8, 8),
-            Padding = new Thickness(12, 10, 12, 10),
-            MinHeight = 72,
-            CornerRadius = new CornerRadius(4),
-            Background = (Brush)new BrushConverter().ConvertFromString(background)!,
-            BorderBrush = (Brush)new BrushConverter().ConvertFromString(accent)!,
-            BorderThickness = new Thickness(1),
-            Child = new StackPanel
-            {
-                Children =
-                {
-                    new TextBlock
-                    {
-                        Text = chip.Label,
-                        FontSize = 10,
-                        Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#888888")),
-                    },
-                    new TextBlock
-                    {
-                        Text = chip.Value,
-                        FontSize = 16,
-                        FontWeight = FontWeights.SemiBold,
-                        FontFamily = new FontFamily("Consolas"),
-                        TextWrapping = TextWrapping.Wrap,
-                        Margin = new Thickness(0, 4, 0, 0),
-                        Foreground = (Brush)new BrushConverter().ConvertFromString(foreground)!,
-                    },
-                },
-            },
-        };
-    }
+    /// <summary>FDS card deck — UiKit GlassDeckCard (tone tokens), not inline Border factory.</summary>
+    static FrameworkElement CreateDeckCard(GlassGlanceChip chip) =>
+        GlassDeckCard.FromChip(chip);
 
     static (string Background, string Foreground) ToneColors(string tone) => tone switch
     {

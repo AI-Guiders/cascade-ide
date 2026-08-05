@@ -47,4 +47,25 @@
   <SolidColorBrush x:Key="Glass.EcamLabel" Color="#7A8490"/>
   <SolidColorBrush x:Key="Glass.EcamValue" Color="#D8DEE4"/>
   <SolidColorBrush x:Key="Glass.EcamSub" Color="#6A9AB0"/>
+  <!-- SoftKey / DeckCard (WPF UiKit edit-locus — modern Glass, not Avalonia ECAM green) -->
+  <SolidColorBrush x:Key="Glass.SoftKeyBg" Color="#14181C"/>
+  <SolidColorBrush x:Key="Glass.SoftKeyBgHover" Color="#1A242C"/>
+  <SolidColorBrush x:Key="Glass.SoftKeyBgPressed" Color="#152028"/>
+  <SolidColorBrush x:Key="Glass.SoftKeyBorder" Color="#3A4A58"/>
+  <SolidColorBrush x:Key="Glass.SoftKeyFg" Color="#C8D4DC"/>
+  <SolidColorBrush x:Key="Glass.DeckOkBg" Color="#121A16"/>
+  <SolidColorBrush x:Key="Glass.DeckOkBorder" Color="#3A6A4A"/>
+  <SolidColorBrush x:Key="Glass.DeckOkFg" Color="#A8D8B0"/>
+  <SolidColorBrush x:Key="Glass.DeckWarnBg" Color="#1A1810"/>
+  <SolidColorBrush x:Key="Glass.DeckWarnBorder" Color="#8A7030"/>
+  <SolidColorBrush x:Key="Glass.DeckWarnFg" Color="#E0C878"/>
+  <SolidColorBrush x:Key="Glass.DeckBadBg" Color="#1A1212"/>
+  <SolidColorBrush x:Key="Glass.DeckBadBorder" Color="#8A4040"/>
+  <SolidColorBrush x:Key="Glass.DeckBadFg" Color="#E0A8A8"/>
+  <SolidColorBrush x:Key="Glass.DeckIdleBg" Color="#101418"/>
+  <SolidColorBrush x:Key="Glass.DeckIdleBorder" Color="#2A323A"/>
+  <SolidColorBrush x:Key="Glass.DeckIdleFg" Color="#888888"/>
+  <SolidColorBrush x:Key="Glass.DeckMetaBg" Color="#101418"/>
+  <SolidColorBrush x:Key="Glass.DeckMetaBorder" Color="#2A4050"/>
+  <SolidColorBrush x:Key="Glass.DeckMetaFg" Color="#7A9AB0"/>
 </ResourceDictionary>

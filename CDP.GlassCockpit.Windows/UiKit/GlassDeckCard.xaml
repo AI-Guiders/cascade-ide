@@ -1,0 +1,25 @@
+<UserControl x:Class="CDP.GlassCockpit.Windows.UiKit.GlassDeckCard"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <Border x:Name="CardFrame"
+          Margin="0,0,8,8"
+          Padding="12,10,12,10"
+          MinHeight="72"
+          CornerRadius="4"
+          Background="{StaticResource Glass.DeckIdleBg}"
+          BorderBrush="{StaticResource Glass.DeckIdleBorder}"
+          BorderThickness="1">
+    <StackPanel>
+      <TextBlock x:Name="LabelBlock"
+                 FontSize="10"
+                 Foreground="{StaticResource Glass.FgDim}"/>
+      <TextBlock x:Name="ValueBlock"
+                 FontSize="16"
+                 FontWeight="SemiBold"
+                 FontFamily="Consolas"
+                 TextWrapping="Wrap"
+                 Margin="0,4,0,0"
+                 Foreground="{StaticResource Glass.DeckIdleFg}"/>
+    </StackPanel>
+  </Border>
+</UserControl>

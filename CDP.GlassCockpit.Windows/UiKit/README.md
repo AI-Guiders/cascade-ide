@@ -1,11 +1,16 @@
 # WPF Glass UiKit
 
-Adapt of Avalonia `Views/UiKit` into electric Glass — not a blind AXAML port.
+Adapt of Avalonia `Views/UiKit` into electric Glass — **not** a blind AXAML/ECAM port.
+One edit-locus for the modern WPF cabin rhythm: tokens in `../GlassDarkCockpit.xaml`, controls here.
 
-| Control | Avalonia source | Role |
+| Control | Avalonia cousin | Role |
 |---------|-----------------|------|
 | `GlassStatusChip` | `CascadeStatusChip` | Indication chips (Quiet/Caution/Warn/Fail) |
 | `GlassEcamReadout` | `EcamReadout` | Label / value / sub instrument tile |
 | `GlassSection` | `CascadeSection` | Flat inset + electric rail (`ContentControl`) |
+| `GlassSoftKeyBar` | `EcamSoftKeyBar` | Action keys (search/reindex/…) — SoftKey tokens, not ECAM green |
+| `GlassDeckCard` | `EcamMetricCard` (spirit) | Tone deck card (`FromChip`) — SoftOrgan/HCI instruments |
 
-Tokens live in `../GlassDarkCockpit.xaml` (merged from `App.xaml`). SoftOrgan band uses `GlassStatusChip` + `GlassChipLevel` (GlassCore).
+SoftOrgan band uses `GlassStatusChip` + `GlassChipLevel` (GlassCore).
+Deck surfaces: `CreateDeckCard` → `GlassDeckCard.FromChip`.
+HybridIndex hand: `GlassSoftKeyBar` + search box.
