@@ -41,6 +41,7 @@
 - Hand-wiring Folded AutoI Korry while Review — green paint ≠ consume path; fix ignite-cmd consumer later.
 
 ## last_ship
+- 2026-08-05 · **share-3.8 Send×lane** · HOST→`host-composer-request-LATEST.json` + ShareShelf `what=intercom-host` · CIT→`GlassCitizenDialogRequest`+`intercom-cit` · PF→`GlassIntercomSend`+`intercom` · evidence `tmp-glass-shots/share-3.8-host-send-20260805.png` · live latch pending id=026c0dd46d52
 - 2026-08-05 · **Review flight lock** · `OperatorReviewFlightTopology=(F/P/M)` · tests: single-TopLevel no satellite vs `(intercom)(sit/world/alert)` spawns host · antipattern stamp glass-intercom · parrot tax fix
 - 2026-08-05 · **ONE-WAVE PreCondition Intercom** · A2 ADOPTED (summary+spine strip) · A3 SUPERSEDE NorthStar (no ThreadNode) · B1–B3 DIG REJECT/defer · evidence `tmp-glass-shots/topic-overview-a2-20260805.png` · residual A4 denser only
 - 2026-08-05 · **A1+A5 ADOPTED** · ADR 0072 Glass overview ↔ detail ↔ back · `ChatTopicOverviewPolicy`→GlassCore · `topic_overview`/`topic_enter` (`ato`/`atb`) · evidence `tmp-glass-shots/topic-overview-a1-20260805.png` · PreCondition residual → A2 spine/summary, A3 dig/supersede, B denser
