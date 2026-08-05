@@ -26,4 +26,5 @@
 
 ## last_ship
 
+- **2026-08-05** — full-ready E2E dogfood stamped on SSOT sibling; see `cdp-mcp/.cdp/domain/citizen.md` entry 2026-08-05 live full-ready E2E.
 - **2026-08-04** — stub stamped for seat dig after Glass Radio CLOSED · densest leaf CitizenDomainCardRoute (route keyed card= + this card).
