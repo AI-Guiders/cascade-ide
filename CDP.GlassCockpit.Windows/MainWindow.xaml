@@ -6,6 +6,7 @@
         xmlns:local="clr-namespace:CDP.GlassCockpit.Windows"
         Title="CDP GlassCockpit · Windows"
         Height="800" Width="1400"
+        WindowState="Maximized"
         WindowStartupLocation="CenterScreen"
         Background="{StaticResource Glass.Bg}"
         Foreground="{StaticResource Glass.Fg}">
