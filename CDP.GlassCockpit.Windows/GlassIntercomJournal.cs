@@ -42,7 +42,8 @@ internal static class GlassIntercomJournal
         DateTimeOffset StampedUtc,
         string RoleLabel,
         string WhenLabel,
-        IReadOnlyList<GlassAttachChip> Chips);
+        IReadOnlyList<GlassAttachChip> Chips,
+        string Channel);
 
     public static void Append(
         string id,
@@ -52,7 +53,8 @@ internal static class GlassIntercomJournal
         string origin,
         DateTimeOffset stampedUtc,
         string? name = null,
-        string? kind = null)
+        string? kind = null,
+        string? channel = null)
     {
         if (string.IsNullOrWhiteSpace(id) || string.IsNullOrWhiteSpace(body))
             return;
@@ -83,6 +85,7 @@ internal static class GlassIntercomJournal
                 }
 
                 var (resolvedName, resolvedKind) = LatchPaint.ResolveIntercomIdentity(fromSeat, origin, name, kind);
+                var channelCode = GlassIntercomChannel.Code(GlassIntercomChannel.Parse(channel));
                 var payload = new
                 {
                     schema = GlassIntercomSend.Schema,
@@ -93,6 +96,7 @@ internal static class GlassIntercomJournal
                     origin,
                     name = resolvedName,
                     kind = resolvedKind,
+                    channel = channelCode,
                     stamped_utc = stampedUtc,
                     acked = false
                 };
@@ -139,6 +143,7 @@ internal static class GlassIntercomJournal
                     var when = dto.ToLocalTime().ToString("HH:mm");
                     var name = Prop(root, "name") ?? Prop(root, "display_name");
                     var kind = Prop(root, "kind");
+                    var channel = Prop(root, "channel") ?? GlassIntercomChannel.Code(GlassIntercomChannel.DefaultKind);
                     var (resolvedName, resolvedKind) = LatchPaint.ResolveIntercomIdentity(from, origin, name, kind);
                     var role = LatchPaint.FormatIntercomRole(from, to, resolvedName, resolvedKind);
                     JsonElement? attachments = null;
@@ -147,7 +152,7 @@ internal static class GlassIntercomJournal
                         attachments = attEl;
                     var chips = GlassAttachChipPeel.Peel(body, attachments);
                     all.Add(new Entry(
-                        id, from, to, body.Replace("\r\n", "\n"), origin, dto, role, when, chips));
+                        id, from, to, body.Replace("\r\n", "\n"), origin, dto, role, when, chips, channel));
                 }
                 catch
                 {

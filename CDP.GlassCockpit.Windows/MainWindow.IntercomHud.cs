@@ -159,6 +159,7 @@ public partial class MainWindow
         _channel = channel;
         PaintChannelRail();
         TrySaveChannelLatch();
+        RebuildIntercomFeedFromJournal(stickEnd: true);
         StatusText.Text = $"glass · channel · {GlassIntercomChannel.Label(channel)}";
     }
 

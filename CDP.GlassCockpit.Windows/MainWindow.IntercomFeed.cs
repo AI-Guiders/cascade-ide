@@ -226,7 +226,7 @@ public partial class MainWindow
         string? roleLabel;
         if (_lane == GlassIntercomLane.Kind.Cit)
         {
-            var cit = GlassCitizenDialogRequest.TryEnqueue(raw, _modelId, _session.WorkspaceRoot);
+            var cit = GlassCitizenDialogRequest.TryEnqueue(raw, _modelId, _session.WorkspaceRoot, _channel);
             if (cit is null)
             {
                 StatusText.Text = "glass · intercom · empty — nothing sent";
@@ -238,7 +238,7 @@ public partial class MainWindow
         }
         else if (_lane == GlassIntercomLane.Kind.Host)
         {
-            var host = GlassHostComposerRequest.TryEnqueue(raw, _session.WorkspaceRoot);
+            var host = GlassHostComposerRequest.TryEnqueue(raw, _session.WorkspaceRoot, _channel);
             if (host is null)
             {
                 StatusText.Text = "glass · intercom · empty — nothing sent";
@@ -250,7 +250,7 @@ public partial class MainWindow
         }
         else
         {
-            var pf = GlassIntercomSend.TrySend(raw, _session.WorkspaceRoot);
+            var pf = GlassIntercomSend.TrySend(raw, _session.WorkspaceRoot, _channel);
             if (pf is null)
             {
                 StatusText.Text = "glass · intercom · empty — nothing sent";
@@ -268,7 +268,7 @@ public partial class MainWindow
         HideSlashPopup();
         PublishPmIdle();
         StatusText.Text =
-            $"glass · intercom · {_lane} · sent {id} · {roleLabel} · {DateTime.Now:HH:mm:ss}";
+            $"glass · intercom · {_lane} · {GlassIntercomChannel.Label(_channel)} · sent {id} · {roleLabel} · {DateTime.Now:HH:mm:ss}";
     }
 
     public sealed record TopicCard(

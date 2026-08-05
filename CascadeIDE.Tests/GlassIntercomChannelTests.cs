@@ -42,4 +42,15 @@ public sealed class GlassIntercomChannelTests
         Assert.Equal(GlassIntercomChannel.Kind.Radio, GlassIntercomChannel.ParseLatchJson(null).Channel);
         Assert.Equal(GlassIntercomChannel.Kind.Radio, GlassIntercomChannel.ParseLatchJson("{}").Channel);
     }
+
+    [Theory]
+    [InlineData(GlassIntercomChannel.Kind.Radio, null, true)]
+    [InlineData(GlassIntercomChannel.Kind.Radio, "", true)]
+    [InlineData(GlassIntercomChannel.Kind.Radio, "radio", true)]
+    [InlineData(GlassIntercomChannel.Kind.Radio, "crew", false)]
+    [InlineData(GlassIntercomChannel.Kind.Crew, "crew", true)]
+    [InlineData(GlassIntercomChannel.Kind.Crew, null, false)]
+    [InlineData(GlassIntercomChannel.Kind.Dm, "dm", true)]
+    public void MatchesFeed_blank_is_radio(GlassIntercomChannel.Kind active, string? entry, bool expect) =>
+        Assert.Equal(expect, GlassIntercomChannel.MatchesFeed(active, entry));
 }

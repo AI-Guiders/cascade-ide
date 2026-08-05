@@ -25,7 +25,7 @@ internal static class GlassCitizenDialogRequest
     public sealed record Sent(string Id, string Body, string RoleLabel);
 
     /// <summary>Queue citizen dialog turn. Empty → null.</summary>
-    public static Sent? TryEnqueue(string? raw, string? modelId = null, string? workspaceRoot = null)
+    public static Sent? TryEnqueue(string? raw, string? modelId = null, string? workspaceRoot = null, GlassIntercomChannel.Kind channel = GlassIntercomChannel.Kind.Radio)
     {
         if (string.IsNullOrWhiteSpace(raw))
             return null;
@@ -38,6 +38,7 @@ internal static class GlassCitizenDialogRequest
         var (name, kind) = LatchPaint.ResolveIntercomIdentity("pm", "human", null, null);
         var stamped = DateTimeOffset.UtcNow;
         var mid = string.IsNullOrWhiteSpace(modelId) ? null : modelId.Trim();
+        var channelCode = GlassIntercomChannel.Code(channel);
 
         try
         {
@@ -49,6 +50,7 @@ internal static class GlassCitizenDialogRequest
                 body,
                 status = "pending",
                 lane = GlassIntercomLane.Code(GlassIntercomLane.Kind.Cit),
+                channel = channelCode,
                 model_id = mid,
                 stamped_utc = stamped
             };
@@ -59,7 +61,7 @@ internal static class GlassCitizenDialogRequest
             File.Move(tmp, path, overwrite: true);
 
             // Journal only — do not Publish intercom-LATEST (guest PF unread).
-            GlassIntercomJournal.Append(id, "pm", "cit", body, "human", stamped, name, kind);
+            GlassIntercomJournal.Append(id, "pm", "cit", body, "human", stamped, name, kind, channelCode);
             _ = GlassOperatorShareShelf.TryPut(
                 body,
                 workspaceRoot,

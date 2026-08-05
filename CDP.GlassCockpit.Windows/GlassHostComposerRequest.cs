@@ -25,7 +25,7 @@ internal static class GlassHostComposerRequest
     public sealed record Sent(string Id, string Body, string RoleLabel);
 
     /// <summary>Queue host Composer turn. Empty → null.</summary>
-    public static Sent? TryEnqueue(string? raw, string? workspaceRoot = null)
+    public static Sent? TryEnqueue(string? raw, string? workspaceRoot = null, GlassIntercomChannel.Kind channel = GlassIntercomChannel.Kind.Radio)
     {
         if (string.IsNullOrWhiteSpace(raw))
             return null;
@@ -37,6 +37,7 @@ internal static class GlassHostComposerRequest
         var id = Guid.NewGuid().ToString("N")[..12];
         var (name, kind) = LatchPaint.ResolveIntercomIdentity("pm", "human", null, null);
         var stamped = DateTimeOffset.UtcNow;
+        var channelCode = GlassIntercomChannel.Code(channel);
 
         try
         {
@@ -48,6 +49,7 @@ internal static class GlassHostComposerRequest
                 body,
                 status = "pending",
                 lane = GlassIntercomLane.Code(GlassIntercomLane.Kind.Host),
+                channel = channelCode,
                 stamped_utc = stamped
             };
             var json = JsonSerializer.Serialize(doc, JsonOpts);
@@ -56,7 +58,7 @@ internal static class GlassHostComposerRequest
             File.WriteAllText(tmp, json);
             File.Move(tmp, path, overwrite: true);
 
-            GlassIntercomJournal.Append(id, "pm", "host", body, "human", stamped, name, kind);
+            GlassIntercomJournal.Append(id, "pm", "host", body, "human", stamped, name, kind, channelCode);
             _ = GlassOperatorShareShelf.TryPut(
                 body,
                 workspaceRoot,

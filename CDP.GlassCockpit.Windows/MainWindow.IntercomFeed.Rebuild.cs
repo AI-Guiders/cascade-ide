@@ -23,6 +23,7 @@ public partial class MainWindow
 
         var entries = GlassIntercomJournal.LoadTail(TopicClusterTail)
             .Where(e => !LatchPaint.IsAutoiWakeFeedNoise(e.Body, roleLabel: e.RoleLabel))
+            .Where(e => GlassIntercomChannel.MatchesFeed(_channel, e.Channel))
             .ToList();
         foreach (var e in entries)
         {
@@ -116,7 +117,8 @@ public partial class MainWindow
                 body = "(attach)";
             if (string.IsNullOrWhiteSpace(body) && pointers is { Count: > 0 })
                 body = "(radio)";
-            _feed.Add(new ChatBubble(e.RoleLabel, body, e.WhenLabel, chips, pointers));
+            var role = $"{e.RoleLabel} · {GlassIntercomChannel.Label(GlassIntercomChannel.Parse(e.Channel))}";
+            _feed.Add(new ChatBubble(role, body, e.WhenLabel, chips, pointers));
         }
 
         while (_feed.Count > 81)

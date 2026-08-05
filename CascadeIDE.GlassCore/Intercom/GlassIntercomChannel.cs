@@ -48,6 +48,10 @@ public static class GlassIntercomChannel
         _ => "Radio · operator ↔ this seat / citizen partner"
     };
 
+    /// <summary>Feed filter: missing/blank journal channel = Radio (pre-tag backcompat).</summary>
+    public static bool MatchesFeed(Kind active, string? entryChannel) =>
+        Parse(entryChannel) == active;
+
     public static Kind Parse(string? raw)
     {
         if (string.IsNullOrWhiteSpace(raw))
