@@ -55,6 +55,17 @@ public class PresentationSurfaceWireTests
     }
 
     [Fact]
+    public void Single_TopLevel_Channel_Stack_Intercom_Sit_World_Alert()
+    {
+        var pack = PresentationSurfaceWire.Parse("(intercom/sit/world/alert)");
+        Assert.True(pack.IsSuccess, pack.Error);
+        Assert.Single(pack.Slots);
+        Assert.Equal(PresentationScanRole.PmOneOf, pack.Slots[0].Role);
+        Assert.Equal(new[] { "intercom", "sit", "world", "alert" }, pack.Slots[0].Stack);
+        Assert.Equal("intercom", pack.Slots[0].Active);
+    }
+
+    [Fact]
     public void Single_TopLevel_Scan_OneOf_P_F_M()
     {
         var pack = PresentationSurfaceWire.Parse("(P/F/M)");

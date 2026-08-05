@@ -8,6 +8,46 @@ namespace CascadeIDE.Tests;
 public class GlassPresentationLayoutSurfaceWireTests
 {
     [Fact]
+    public void OperatorReviewFlight_Is_Single_TopLevel_No_Satellite_Host()
+    {
+        var settings = new CascadeIdeSettings();
+        settings.Display.Screens.Topology = GlassPresentationLayout.OperatorReviewFlightTopology;
+        var snap = GlassPresentationLayout.Resolve(settings);
+        Assert.True(snap.ParseOk, snap.ParseError);
+        Assert.Equal("(F/P/M)", snap.Topology);
+        Assert.True(GlassPresentationLayout.IsSingleTopLevelOneOf(snap.SurfacePack));
+        Assert.False(GlassPresentationLayout.SpawnsSatelliteOneOfHost(snap.Flags));
+        Assert.False(snap.Flags.PmOneOfHostTopology);
+        Assert.False(snap.Flags.OneOfHostTopology);
+    }
+
+    [Fact]
+    public void TwoGroup_Intercom_Plus_ChannelOneOf_Spawns_Satellite_Host()
+    {
+        // Regression: agent published this as "cabin tour" — 2 windows, Intercom stuck on F.
+        // Legal wire, but NOT OperatorReviewFlightTopology.
+        var settings = new CascadeIdeSettings();
+        settings.Display.Screens.Topology = "(intercom)(sit/world/alert)";
+        var snap = GlassPresentationLayout.Resolve(settings);
+        Assert.True(snap.ParseOk, snap.ParseError);
+        Assert.False(GlassPresentationLayout.IsSingleTopLevelOneOf(snap.SurfacePack));
+        Assert.True(GlassPresentationLayout.SpawnsSatelliteOneOfHost(snap.Flags));
+        Assert.NotEqual(GlassPresentationLayout.OperatorReviewFlightTopology, snap.Topology);
+    }
+
+    [Fact]
+    public void ChannelStack_AllInOneWindow_No_Satellite_Host()
+    {
+        var settings = new CascadeIdeSettings();
+        settings.Display.Screens.Topology = "(intercom/sit/world/alert)";
+        var snap = GlassPresentationLayout.Resolve(settings);
+        Assert.True(snap.ParseOk, snap.ParseError);
+        Assert.True(GlassPresentationLayout.IsSingleTopLevelOneOf(snap.SurfacePack));
+        Assert.False(GlassPresentationLayout.SpawnsSatelliteOneOfHost(snap.Flags));
+        Assert.Equal(new[] { "intercom", "sit", "world", "alert" }, snap.SurfacePack!.Slots[0].Stack);
+    }
+
+    [Fact]
     public void Resolve_Surface_Wire_Sets_PmOneOf_Flags()
     {
         var settings = new CascadeIdeSettings();

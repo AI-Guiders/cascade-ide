@@ -6,11 +6,17 @@ namespace CascadeIDE.GlassCore.Presentation;
 
 /// <summary>
 /// Resolves presentation line → main-grid + topology flags.
-/// Prefers surface wire <c>(intercom)(sit/world/alert)</c> (Scan + channel stacks);
-/// falls back to legacy P/F/M parser.
+/// Prefers surface wire; falls back to legacy P/F/M parser.
+/// Operator review cabin = <see cref="OperatorReviewFlightTopology"/> — single TopLevel OneOf (no satellite host).
 /// </summary>
 public static class GlassPresentationLayout
 {
+    /// <summary>
+    /// Sealed review / cabin-tour wire: all scan channels XOR in <b>one</b> TopLevel.
+    /// Not <c>(intercom)(sit/world/alert)</c> (that is 2 windows: F dedicated + satellite OneOf host).
+    /// </summary>
+    public const string OperatorReviewFlightTopology = "(F/P/M)";
+
     public sealed record Snapshot(
         string Topology,
         string ColumnDefinitions,
@@ -18,6 +24,14 @@ public static class GlassPresentationLayout
         bool ParseOk,
         string? ParseError,
         PresentationSurfacePack? SurfacePack = null);
+
+    /// <summary>True when pack is a single TopLevel OneOf (no dedicated F + satellite host).</summary>
+    public static bool IsSingleTopLevelOneOf(PresentationSurfacePack? pack) =>
+        pack?.Slots is [{ Role: PresentationScanRole.PmOneOf }];
+
+    /// <summary>True when flags open a satellite OneOf host (2+ physical windows).</summary>
+    public static bool SpawnsSatelliteOneOfHost(PresentationTopologyFlags flags) =>
+        flags.PmOneOfHostTopology || flags.OneOfHostTopology;
 
     public static Snapshot Resolve(CascadeIdeSettings settings, string? topologyOverride = null)
     {
