@@ -49,6 +49,7 @@ Product face → **обычный мессенджер**: групповые ч�
 
 **Conversational UI → Slack/MM light:** меньше хрома, больше смысла.
 
+- **Substrate:** Glass **WPF** face — реально проще, чем Avalonia+Skia «рисуем мессенджер сами» (ItemsControl / virtualization / layout). Не тащить CIDE Skia chat surface как default для NorthStar.
 - Flat feed: имя + время + текст (не пузыри Telegram/RadChat).
 - Channel rail + composer — основные controls; не bot cards / suggested-actions / overlay carousel как default.
 - Meaning first: кто сказал, куда (crew/DM/Radio), Radio pointers / attach — не декоративный chat chrome.

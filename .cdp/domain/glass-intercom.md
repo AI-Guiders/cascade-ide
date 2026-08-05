@@ -22,6 +22,7 @@
 - `#humans` / `#agents` as separate **channels** — discrimination; use lens (0143) inside `#crew`.
 - Shipping CIDE session-graph / topic-tree complexity as Glass day-1 (suffering, not work).
 - Conversational-UI chrome (bubbles, bot cards, suggested-actions default) instead of Slack/MM flat feed — less chrome, more meaning.
+- Rebuilding NorthStar feed as Avalonia Skia surface by default — Glass WPF list/virtualization is the lighter face.
 - Hardcoding operator nick (Света) as clone default — sticky is local latch, bootstrap is Operator.
 - ComboBox for habitat lane (3 fixed seats) — use Korry XOR strip; ComboBox is for FM catalog.
 - One control mixing lane + FM model id; two ComboBoxes beside Send; live FM list when lane ≠ CIT.
