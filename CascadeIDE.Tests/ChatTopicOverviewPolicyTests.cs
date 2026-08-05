@@ -1,4 +1,4 @@
-using CascadeIDE.Features.Chat;
+using CascadeIDE.Intercom;
 using Xunit;
 
 namespace CascadeIDE.Tests;
@@ -15,5 +15,11 @@ public sealed class ChatTopicOverviewPolicyTests
     public void ResolveNextOverviewMode_SingleThread_StaysDetail()
     {
         Assert.False(ChatTopicOverviewPolicy.ResolveNextOverviewMode(threadCount: 1, lastOverviewThreadCount: -1, currentOverviewMode: false));
+    }
+
+    [Fact]
+    public void ResolveNextOverviewMode_GrowingFromOne_OpensOverview()
+    {
+        Assert.True(ChatTopicOverviewPolicy.ResolveNextOverviewMode(threadCount: 2, lastOverviewThreadCount: 1, currentOverviewMode: false));
     }
 }

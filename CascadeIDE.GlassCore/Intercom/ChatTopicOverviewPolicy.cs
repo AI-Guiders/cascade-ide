@@ -1,14 +1,16 @@
-namespace CascadeIDE.Features.Chat;
+#nullable enable
 
-/// <summary>Правила adaptive default для overview/detail ([ADR 0072 §3](docs/adr/0072-chat-topic-cards-intent-melody-keyboard-contract.md)).</summary>
-internal static class ChatTopicOverviewPolicy
+namespace CascadeIDE.Intercom;
+
+/// <summary>Adaptive default for overview/detail ([ADR 0072 §3](docs/adr/0072-chat-topic-cards-intent-melody-keyboard-contract.md)). Avalonia-free — shared by Glass WPF + CIDE.</summary>
+public static class ChatTopicOverviewPolicy
 {
     public static bool ResolveNextOverviewMode(int threadCount, int lastOverviewThreadCount, bool currentOverviewMode)
     {
         if (threadCount == lastOverviewThreadCount)
             return currentOverviewMode;
 
-        // ADR 0127: вкладки тем — daily path в detail; overview остаётся для картотеки.
+        // ADR 0127: topic tabs — daily path in detail; overview stays for the card catalog.
         if (lastOverviewThreadCount < 0)
             return false;
 

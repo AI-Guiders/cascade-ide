@@ -1,4 +1,5 @@
 #nullable enable
+using CascadeIDE.Intercom;
 namespace CascadeIDE.Features.Chat;
 
 public partial class ChatPanelViewModel
