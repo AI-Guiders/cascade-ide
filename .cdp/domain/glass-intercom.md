@@ -36,6 +36,7 @@
 - Hand-wiring Folded AutoI Korry while Review — green paint ≠ consume path; fix ignite-cmd consumer later.
 
 ## last_ship
+- 2026-08-05 · **A1+A5 ADOPTED** · ADR 0072 Glass overview ↔ detail ↔ back · `ChatTopicOverviewPolicy`→GlassCore · `topic_overview`/`topic_enter` (`ato`/`atb`) · evidence `tmp-glass-shots/topic-overview-a1-20260805.png` · PreCondition residual → A2 spine/summary, A3 dig/supersede, B denser
 - 2026-08-05 · **Decision stamped** · Face = Slack/MM light (not Conversational UI chrome) · northstar-messenger-v0 Face §
 - 2026-08-05 · **Decision stamped** · NorthStar ontology · `#crew`+DM+Radio · reject `#humans`/`#agents` rooms · `glass-intercom-northstar-messenger-v0.md`
 - 2026-08-05 · **Decision stamped** · lane×model axes v0 · Lane=Korry XOR @ Send · Model=HUD Combo @ HDG/CRS · secrets=CFG · design `glass-intercom-lane-model-axes-v0.md` (UI not shipped yet)
