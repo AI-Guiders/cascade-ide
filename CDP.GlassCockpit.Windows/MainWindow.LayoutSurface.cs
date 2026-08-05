@@ -12,14 +12,19 @@ public partial class MainWindow
 
     void ApplyLayoutFromSession()
     {
-        WpfMainGridColumns.Apply(MainGrid, _session.Layout.ColumnDefinitions);
         TopologyBadge.Text = _session.Layout.Topology;
         PaintCfgChip();
         ChromeHintChip.Tip =
             $"click = UI scale · settings.toml · {_session.Settings.Workspace.PrimaryWorkSurface} · tier={_session.Settings.Display.Presentation.Tier}" +
             (_session.Layout.ParseOk ? "" : $" · parse fail: {_session.Layout.ParseError}");
         SyncHostWindows();
+        if (!_hosts.IsMainScanOneOf)
+            WpfMainGridColumns.Apply(MainGrid, _session.Layout.ColumnDefinitions);
     }
+
+    /// <summary>Session SSOT cols/active follow live single-TopLevel OneOf PreferSurface.</summary>
+    internal void PatchScanOneOfActive(string surface) =>
+        _session.PatchScanOneOfActive(surface);
 
     void InitUiScale()
     {

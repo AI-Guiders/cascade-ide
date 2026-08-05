@@ -24,6 +24,8 @@ internal sealed class GlassHostWindows : IDisposable
     /// <summary>True when topology is a single TopLevel OneOf — XOR columns on main (no satellite).</summary>
     bool _mainScanOneOf;
 
+    public bool IsMainScanOneOf => _mainScanOneOf;
+
     public GlassHostWindows(MainWindow main) => _main = main;
 
     public bool IsPmOneOfActive => _pmOneOfHost is { IsVisible: true };
@@ -57,6 +59,11 @@ internal sealed class GlassHostWindows : IDisposable
         try
         {
             var singleScanOneOf = surfacePack?.Slots is [{ Role: PresentationScanRole.PmOneOf }];
+            // Preserve live XOR active across presentation latch re-apply (same topology).
+            var preserveActive = _mainScanOneOf
+                && _pmOneOfActiveSurface.Length > 0
+                && _pmOneOfStack.Length > 0;
+
             // Arm main-XOR mode before SetPmOneOfStack so PreferSurface accepts F in stack.
             if (singleScanOneOf)
                 _mainScanOneOf = true;
@@ -66,7 +73,14 @@ internal sealed class GlassHostWindows : IDisposable
             if (surfacePack?.Slots.FirstOrDefault(s => s.Role == PresentationScanRole.PmOneOf) is { } pmSlot
                 && pmSlot.Stack.Count > 0)
             {
-                SetPmOneOfStack(pmSlot.Stack, pmSlot.Active);
+                var active = pmSlot.Active;
+                if (preserveActive
+                    && pmSlot.Stack.Contains(_pmOneOfActiveSurface, StringComparer.Ordinal))
+                {
+                    active = _pmOneOfActiveSurface;
+                }
+
+                SetPmOneOfStack(pmSlot.Stack, active);
             }
 
             // Tear down hosts we do not want first so zones return to main before remount.
@@ -211,6 +225,7 @@ internal sealed class GlassHostWindows : IDisposable
     {
         var cols = GlassPresentationLayout.ColumnDefsForScanOneOfActive(_pmOneOfActiveSurface);
         WpfMainGridColumns.Apply(_main.MainGrid, cols);
+        _main.PatchScanOneOfActive(_pmOneOfActiveSurface);
         var stackLabel = string.Join('/', _pmOneOfStack);
         _main.StatusText.Text =
             $"glass · ({stackLabel}) · {_pmOneOfActiveSurface} active · single TopLevel OneOf · {DateTime.Now:HH:mm:ss}";

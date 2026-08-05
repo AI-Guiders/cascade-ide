@@ -280,7 +280,11 @@ public partial class MainWindow
                 break;
             case "toggle_pm_oneof_role":
                 if (_hosts.TogglePmOneOfRole())
-                    StatusText.Text = $"glass · OneOf · {_hosts.PmOneOfActiveSurface} · {DateTime.Now:HH:mm:ss}";
+                {
+                    // ApplyMainScanOneOfColumns already stamped StatusText for single-TopLevel.
+                    if (!_hosts.IsMainScanOneOf)
+                        StatusText.Text = $"glass · OneOf · {_hosts.PmOneOfActiveSurface} · {DateTime.Now:HH:mm:ss}";
+                }
                 else
                     StatusText.Text = "glass · OneOf host not active (need F + P/M channel stack)";
                 break;

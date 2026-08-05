@@ -24,14 +24,17 @@ public partial class MainWindow
                 var view = LatchPaint.PaintPresentation(raw);
                 // Topology/MFD only — Plan paints from plan-LATEST (OnPlanChanged).
                 var layout = _session.ApplyTopology(view.Topology);
-                WpfMainGridColumns.Apply(MainGrid, layout.ColumnDefinitions);
                 TopologyBadge.Text = layout.Topology;
                 SyncHostWindows();
+                // Single-TopLevel OneOf: Sync XOR-paints live cols + patches session.
+                // Do not re-apply Resolve default (stack[0]) — that wiped PreferSurface.
+                if (!_hosts.IsMainScanOneOf)
+                    WpfMainGridColumns.Apply(MainGrid, layout.ColumnDefinitions);
 
                 SelectMfdPage(view.MfdPage, sticky: true);
                 RefreshEicasHealth();
                 StatusText.Text =
-                    $"glass · {view.StatusLine} · cols={layout.ColumnDefinitions} · {DateTime.Now:HH:mm:ss}";
+                    $"glass · {view.StatusLine} · cols={_session.Layout.ColumnDefinitions} · {DateTime.Now:HH:mm:ss}";
             }
             catch (Exception ex)
             {

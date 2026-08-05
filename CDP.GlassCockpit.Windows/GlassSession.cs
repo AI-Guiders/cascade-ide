@@ -4,6 +4,7 @@ using CascadeIDE.Features.Workspace.DataAcquisition;
 using CascadeIDE.GlassCore.Presentation;
 using CascadeIDE.Models;
 using CascadeIDE.Services;
+using CascadeIDE.Services.Presentation;
 
 namespace CDP.GlassCockpit.Windows;
 
@@ -39,6 +40,27 @@ internal sealed class GlassSession
         else
             Layout = GlassPresentationLayout.Resolve(Settings);
         return Layout;
+    }
+
+    /// <summary>
+    /// Keep session SSOT in sync with live single-TopLevel OneOf XOR
+    /// (<see cref="GlassHostWindows.PreferSurface"/>) so /status cols match paint.
+    /// </summary>
+    public void PatchScanOneOfActive(string surface)
+    {
+        var s = surface.Trim().ToLowerInvariant();
+        if (s.Length == 0)
+            return;
+
+        var cols = GlassPresentationLayout.ColumnDefsForScanOneOfActive(s);
+        var pack = Layout.SurfacePack;
+        if (pack is { IsSuccess: true, Slots: [{ Role: PresentationScanRole.PmOneOf } slot] }
+            && slot.Stack.Contains(s, StringComparer.Ordinal))
+        {
+            pack = PresentationSurfacePack.Ok([slot with { Active = s }]);
+        }
+
+        Layout = Layout with { ColumnDefinitions = cols, SurfacePack = pack };
     }
 
     public bool IsIntercomForward =>
