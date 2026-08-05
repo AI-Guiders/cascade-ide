@@ -8,6 +8,7 @@
 - Sticky Who per seat (`intercom-identity-LATEST.json`): freeform nick, not model id; resolve = explicit name → sticky → bootstrap (guest Кир / operator Operator / citizen Citizen). Света = this machine's sticky, not repo default.
 - **Lane × model axes (accepted 2026-08-05):** lane = habitat seat (CIT/HOST/PF) at Send as **XOR Korry strip** (not ComboBox); FM model = HUD ComboBox у HDG/CRS, lit only when lane=CIT; provider key/baseUrl/default in CFG. Design: `docs/design/glass-intercom-lane-model-axes-v0.md`. Do not overload one "Model" ComboBox.
 - **NorthStar messenger (accepted 2026-08-05):** Intercom ≠ только чат со вторым пилотом. Ontology: **`#crew`** (люди+агенты вместе) · **DM** · **Radio** (оператор↔агент оператора). Не `#humans`/`#agents` как комнаты (lens=0143). one mind·N seats → мессенджер. Design: `docs/design/glass-intercom-northstar-messenger-v0.md`. I6 Radio pointers ≠ channel kind Radio.
+- **PreCondition (operator 2026-08-05):** CIDE EOL → Glass Done requires `All CIDE surfaces adopted` (or named supersede). Topics P0b strip ≠ ADR 0072 overview — undership vs this PreCondition; see cdp-mcp `.cdp/domain/glass.md` PreCondition §.
 
 ## Entry
 - Parser: `CascadeIDE.GlassCore/Intercom/IntercomMarkdown.cs`
