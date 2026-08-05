@@ -1,6 +1,6 @@
 # Glass Intercom · NorthStar messenger (v0 steer)
 
-**Status:** accepted direction 2026-08-05 (operator).
+**Status:** accepted direction 2026-08-05 (operator); channel ontology refined same day.
 **Do not:** wire Folded AutoI Korry by hand in this leaf — separate residual.
 
 ## Thesis
@@ -8,33 +8,62 @@
 Glass **Intercom** is **not** «чат со вторым пилотом».
 
 **NorthStar** = координационный центр команды: люди + агенты + агенты агентов.
-Product face → **мессенджер с каналами** (Slack/Mattermost grammar), не linear agent-chat и не CIDE session-graph страдание.
+Product face → **обычный мессенджер**: групповые чаты, личные диалоги, on-demand переключение внимания (человек или модель) — не linear agent-chat и не CIDE session-graph страдание.
+
+Рифма: **one mind · N seats** / Citizen multi-session (CDP-ADR-0030, CIDE 0203) — то, что сейчас костыльно двумя окнами Cursor, через API становится нормальным мессенджером с несколькими линиями.
 
 ## Already canon (reuse, don’t reinvent)
 
 - [ADR 0080](../adr/0080-intercom-naming-and-multi-party-channel-model.md) — Intercom = multi-party channel, not bot window.
-- [intercom-ux-reference-slack-mattermost-v1](intercom-ux-reference-slack-mattermost-v1.md) — composer, roles, flat feed, topic≈channel list patterns; **do not** fork full Slack server into IDE.
-- [ADR 0172](../adr/0172-conversation-first-habitat.md) — session-graph habitat was CIDE north-star; **Glass must not copy the suffering** (heavy tree/overview chrome as default).
+- [intercom-ux-reference-slack-mattermost-v1](intercom-ux-reference-slack-mattermost-v1.md) — composer, roles, flat feed; **do not** fork full Slack server into IDE.
+- [ADR 0143](../adr/0143-intercom-feed-participant-lens.md) — **lens** All/Humans/Agents/System = UI filter inside a room, **not** separate channels.
+- [ADR 0172](../adr/0172-conversation-first-habitat.md) — session-graph was CIDE north-star; **Glass must not copy the suffering**.
+- [ADR 0203](../adr/0203-intercom-ccc-citizen-multi-session-continuity.md) + CDP-ADR-0030 — Intercom as CCC / multi-session continuity.
 
-## Glass stance (this steer)
+## Channel ontology (accepted refine)
 
-| Prefer | Avoid |
-|--------|--------|
-| Channels as first-class (who’s on the wire) | One DM with «the second pilot» |
-| Light channel switcher + flat feed | CIDE topic-card / session-tree complexity as day-1 |
-| Human / agent / system / nested-agent voices | LLM-only bubbles |
-| Workspace+tools unique in IDE; heavy team ops outside if needed ([0080 §5](../adr/0080-intercom-naming-and-multi-party-channel-model.md)) | Rebuilding Mattermost inside Glass |
+### Reject as rooms
+
+- `#humans` / `#agents` as separate **channels** — выглядит как дискриминация экипажа; роли уже есть в сообщениях + **lens** (0143).
+- «Только DM с вторым пилотом» как вся поверхность Intercom.
+
+### First-class kinds
+
+| Kind | Name (working) | Who | What |
+|------|----------------|-----|------|
+| **Crew** | `#crew` | люди **и** агенты вместе | командный групповой эфир — NorthStar hub |
+| **DM** | личные / 1:1 (и малые группы позже) | выбранные участники | модель может быть в `#crew` **и** вести личные линии с разными членами |
+| **Radio** | Radio | оператор ↔ **агент оператора** (этот seat / citizen partner) | прямая связь «как сейчас с тобой» — не вся команда |
+
+Доп. групповые каналы (`#ops-feature`, project rooms…) — позже, по мере команды; day-1 достаточно `#crew` + Radio + DM.
+
+### Attention
+
+Переключение канала / линии — **on-demand** со стороны человека **или** модели (foreground seat), в духе one mind · N seats — не «новый чат Cursor = новая амнезия».
+
+### Lens (orthogonal)
+
+Внутри `#crew` (или DM) lens All/Humans/Agents/System **фильтрует вид**, не создаёт комнаты.
 
 ## Relation to lane × model axes
 
-[glass-intercom-lane-model-axes-v0](glass-intercom-lane-model-axes-v0.md) (CIT/HOST/PF Korry + HUD model) stays as **near-term chrome**.
+[glass-intercom-lane-model-axes-v0](glass-intercom-lane-model-axes-v0.md) (CIT/HOST/PF Korry + HUD model) = **near-term chrome / strangler**.
 
-Longer arc: lane strip → **channel strip / channel rail** (messenger). CIT/HOST/PF may become named channels or filters, not the final ontology. Model Combo stays on Citizen/MAF path when that channel needs an FM brain.
+Mapping sketch (not UI ship yet):
+
+- **Radio** ≈ сегодняшний прямой Intercom с PF/habitat partner (то, что ощущается как «этот чат»).
+- **`#crew`** ≈ командный эфир (ещё не UI).
+- **HOST** pipe может стать отдельным transport/DM к host Composer, не обязан быть «каналом экипажа».
+- **CIT** + model Combo — мозг Citizen, который **участвует** в `#crew` / DM / Radio по политике внимания, а не «lane = весь UX».
+
+Longer arc: lane strip → channel rail (`#crew` · Radio · DMs).
 
 ## Folded AutoI Korry (note only — no hand fix here)
 
-Green Korry = latch **paint** (state). Click writes `glass_ignite_cmd` pending. If Autoi halted/folded and no consumer → «кликабельно, никуда не ведёт». Fix later as ignite-cmd consume path, not Review manual wiring.
+Green Korry = latch **paint**. Click → `glass_ignite_cmd` pending. Halted/folded → no consumer. Fix later as consume path.
 
-## Open (preference later)
+## Open (later ship)
 
-First channel set for Glass v0 (examples, not decided): `#ops` / seat channels / per-citizen / per-human — pick when shipping channel rail, not in this stamp.
+- Identity of Radio partner vs Citizen vs host Composer when multiple minds on wire.
+- DM address book (humans + agents as equal-standing members).
+- Whether HOST stays a channel or a transport quirk.

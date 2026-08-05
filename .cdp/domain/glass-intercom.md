@@ -18,7 +18,8 @@
 - Tests: `CascadeIDE.Tests/IntercomMarkdownTests.cs` · `GlassOperatorShareShelfTests.cs` · `GlassRadioPointerTests.cs`
 
 ## Antipatterns
-- Treating Intercom as DM with «second pilot» — NorthStar is team coordination (channels).
+- Treating Intercom as DM with «second pilot» — NorthStar is team coordination (`#crew` + DM + Radio).
+- `#humans` / `#agents` as separate **channels** — discrimination; use lens (0143) inside `#crew`.
 - Shipping CIDE session-graph / topic-tree complexity as Glass day-1 (suffering, not work).
 - Hardcoding operator nick (Света) as clone default — sticky is local latch, bootstrap is Operator.
 - ComboBox for habitat lane (3 fixed seats) — use Korry XOR strip; ComboBox is for FM catalog.
