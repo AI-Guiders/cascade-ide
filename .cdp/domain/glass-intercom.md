@@ -13,6 +13,7 @@
 
 ## Entry
 - Channel rail: `CascadeIDE.GlassCore/Intercom/GlassIntercomChannel.cs` · WPF XOR `#crew`|Radio|DM @ Topics row · latch `glass-intercom-channel.json` · `MainWindow.IntercomHud.cs`
+- Channel tag on Send: journal `channel` + `MatchesFeed` · `GlassIntercomSend`/`GlassHostComposerRequest`/`GlassCitizenDialogRequest` · bubble `Role · #crew|Radio|DM`
 - Parser: `CascadeIDE.GlassCore/Intercom/IntercomMarkdown.cs`
 - Radio peel: `CascadeIDE.GlassCore/Intercom/GlassRadioPointer.cs` → feed `ChatBubble.Pointers`
 - WPF: `CDP.GlassCockpit.Windows/GlassIntercomMarkdownBody.cs` → `MainWindow.xaml` feed template
@@ -42,6 +43,8 @@
 - Hand-wiring Folded AutoI Korry while Review — green paint ≠ consume path; fix ignite-cmd consumer later.
 
 ## last_ship
+- 2026-08-05 · **channel tag on Send/journal** · `channel` wire crew|radio|dm · XOR feed filter · bubble `· #crew` · tests `MatchesFeed` 11/11 · evidence `tmp-glass-shots/channel-tag-send-crew-20260805.png` · live journal ids 7256d165839c/9f22f63f0a58/e41fb8e72a62
+- 2026-08-05 · **OneOf (F/P/M) dogfood GREEN** · single TopLevel (no PFD/MFD host) · latch topology=(F/P/M) · evidence `tmp-glass-shots/oneof-fpm-dogfood-20260805.png` · A4 invent DIG REJECT · next densest: channel tag on Send (rail paint-only)
 - 2026-08-05 · **channel-rail thin** · XOR `#crew`|Radio|DM @ Topics row · latch `glass-intercom-channel.json` · tests `GlassIntercomChannelTests` · evidence `tmp-glass-shots/channel-rail-crew-20260805.png` · orthogonal to lane×model transport
 - 2026-08-05 · **share-3.8 Send×lane** · HOST→`host-composer-request-LATEST.json` + ShareShelf `what=intercom-host` · CIT→`GlassCitizenDialogRequest`+`intercom-cit` · PF→`GlassIntercomSend`+`intercom` · evidence `tmp-glass-shots/share-3.8-host-send-20260805.png` · live latch pending id=026c0dd46d52
 - 2026-08-05 · **Review flight lock** · `OperatorReviewFlightTopology=(F/P/M)` · tests: single-TopLevel no satellite vs `(intercom)(sit/world/alert)` spawns host · antipattern stamp glass-intercom · parrot tax fix
