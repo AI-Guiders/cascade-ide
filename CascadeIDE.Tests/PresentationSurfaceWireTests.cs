@@ -53,4 +53,24 @@ public class PresentationSurfaceWireTests
         Assert.Equal(PresentationScanRole.PmOneOf, pack.Slots[1].Role);
         Assert.Equal(new[] { "p", "m" }, pack.Slots[1].Stack);
     }
+
+    [Fact]
+    public void Single_TopLevel_Scan_OneOf_P_F_M()
+    {
+        var pack = PresentationSurfaceWire.Parse("(P/F/M)");
+        Assert.True(pack.IsSuccess, pack.Error);
+        Assert.Single(pack.Slots);
+        Assert.Equal(PresentationScanRole.PmOneOf, pack.Slots[0].Role);
+        Assert.Equal(PresentationZoneCompose.OneOf, pack.Slots[0].Compose);
+        Assert.Equal(new[] { "p", "f", "m" }, pack.Slots[0].Stack);
+        Assert.Equal("p", pack.Slots[0].Active);
+    }
+
+    [Fact]
+    public void Single_Group_Spatial_Split_Fails_Surface_Wire()
+    {
+        var pack = PresentationSurfaceWire.Parse("(P+F+M)");
+        Assert.False(pack.IsSuccess);
+        Assert.Contains("OneOf", pack.Error, StringComparison.OrdinalIgnoreCase);
+    }
 }

@@ -27,4 +27,28 @@ public class GlassPresentationLayoutSurfaceWireTests
     [InlineData("intercom", PresentationAnchorKind.Forward)]
     public void ZoneForSurface_Maps_Paint(string surface, PresentationAnchorKind want) =>
         Assert.Equal(want, GlassPresentationLayout.ZoneForSurface(surface));
+
+    [Fact]
+    public void Resolve_Single_TopLevel_P_F_M_OneOf_No_Hosts()
+    {
+        var settings = new CascadeIdeSettings();
+        settings.Display.Screens.Topology = "(P/F/M)";
+        var snap = GlassPresentationLayout.Resolve(settings);
+        Assert.True(snap.ParseOk, snap.ParseError);
+        Assert.False(snap.Flags.PmOneOfHostTopology);
+        Assert.False(snap.Flags.OneOfHostTopology);
+        Assert.False(snap.Flags.TripleOneAnchorPerZone);
+        Assert.Equal("*,4,0,4,0", snap.ColumnDefinitions);
+        Assert.NotNull(snap.SurfacePack);
+        Assert.Single(snap.SurfacePack!.Slots);
+        Assert.Equal(PresentationScanRole.PmOneOf, snap.SurfacePack.Slots[0].Role);
+        Assert.Equal(new[] { "p", "f", "m" }, snap.SurfacePack.Slots[0].Stack);
+    }
+
+    [Theory]
+    [InlineData("p", "*,4,0,4,0")]
+    [InlineData("f", "0,4,*,4,0")]
+    [InlineData("m", "0,4,0,4,*")]
+    public void ColumnDefsForScanOneOfActive_Xor(string surface, string cols) =>
+        Assert.Equal(cols, GlassPresentationLayout.ColumnDefsForScanOneOfActive(surface));
 }

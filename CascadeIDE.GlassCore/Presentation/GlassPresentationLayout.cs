@@ -67,6 +67,10 @@ public static class GlassPresentationLayout
 
     static PresentationTopologyFlags FlagsFromSurfacePack(PresentationSurfacePack pack)
     {
+        // Single TopLevel OneOf — no satellite hosts; GlassHostWindows XOR-paints main columns.
+        if (pack.Slots is [{ Role: PresentationScanRole.PmOneOf }])
+            return default;
+
         var hasF = pack.Slots.Any(s => s.Role == PresentationScanRole.F);
         var hasPmOneOf = pack.Slots.Any(s => s.Role == PresentationScanRole.PmOneOf);
         var hasP = pack.Slots.Any(s => s.Role == PresentationScanRole.P);
@@ -84,6 +88,10 @@ public static class GlassPresentationLayout
 
     static string ColumnDefsForSurfacePack(PresentationSurfacePack pack)
     {
+        // (P/F/M) / (sit/world/…) — one TopLevel: only the active scan column is wide.
+        if (pack.Slots is [{ Role: PresentationScanRole.PmOneOf, Active: var active }])
+            return ColumnDefsForScanOneOfActive(active);
+
         // Same main-grid suppress pattern as (F)(P/M): Forward owns main; P/M live on OneOf host.
         if (pack.Slots.Any(s => s.Role == PresentationScanRole.PmOneOf)
             && pack.Slots.Any(s => s.Role == PresentationScanRole.F))
@@ -93,6 +101,18 @@ public static class GlassPresentationLayout
             return "0,4,*,4,0";
 
         return PresentationMainGridColumnDefinitions.Default;
+    }
+
+    /// <summary>Main-grid XOR widths for single-TopLevel scan OneOf (P|F|M active).</summary>
+    public static string ColumnDefsForScanOneOfActive(string? activeSurface)
+    {
+        var zone = ZoneForSurface(activeSurface);
+        return zone switch
+        {
+            PresentationAnchorKind.Pfd => "*,4,0,4,0",
+            PresentationAnchorKind.Mfd => "0,4,0,4,*",
+            _ => "0,4,*,4,0",
+        };
     }
 
     /// <summary>Map surface/channel token → Glass zone for OneOf remount (scan paint, not identity).</summary>

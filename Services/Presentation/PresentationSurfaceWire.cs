@@ -117,6 +117,30 @@ public static class PresentationSurfaceWire
         if (groups.Count == 0)
             return PresentationSurfacePack.Ok(Array.Empty<PresentationScanSlot>());
 
+        // Single TopLevel OneOf — e.g. (P/F/M) or (sit/world/alert). Slash = XOR on one window.
+        // Not spatial (P+F+M); that stays legacy Split / 2|3 groups.
+        if (groups.Count == 1)
+        {
+            var g = groups[0];
+            if (g.Compose != PresentationZoneCompose.OneOf)
+            {
+                return PresentationSurfacePack.Fail(
+                    "Single () group with '+' is spatial Split — use legacy (P+F+M) or 2|3 window groups; '/' for OneOf on one TopLevel.");
+            }
+
+            if (g.Stack.Count < 2)
+                return PresentationSurfacePack.Fail("OneOf group needs ≥2 surfaces.");
+
+            return PresentationSurfacePack.Ok(
+            [
+                new PresentationScanSlot(
+                    PresentationScanRole.PmOneOf,
+                    PresentationZoneCompose.OneOf,
+                    g.Stack,
+                    g.Stack[0])
+            ]);
+        }
+
         if (groups.Count == 2)
         {
             var a = groups[0];
@@ -196,7 +220,8 @@ public static class PresentationSurfaceWire
             return PresentationSurfacePack.Ok(assigned.Select(x => x!).ToArray());
         }
 
-        return PresentationSurfacePack.Fail("Surface wire supports 2 or 3 window groups (Scan Pattern pack).");
+        return PresentationSurfacePack.Fail(
+            "Surface wire supports 1 OneOf group (single TopLevel), or 2|3 window groups (Scan Pattern pack).");
     }
 
     static PresentationScanRole PreferRole(string surface)

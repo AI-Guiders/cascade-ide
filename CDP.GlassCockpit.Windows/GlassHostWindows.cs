@@ -21,6 +21,8 @@ internal sealed class GlassHostWindows : IDisposable
     string[] _pmOneOfStack = ["p", "m"];
     string _pmOneOfActiveSurface = "p";
     bool _syncing;
+    /// <summary>True when topology is a single TopLevel OneOf — XOR columns on main (no satellite).</summary>
+    bool _mainScanOneOf;
 
     public GlassHostWindows(MainWindow main) => _main = main;
 
@@ -54,6 +56,13 @@ internal sealed class GlassHostWindows : IDisposable
         _syncing = true;
         try
         {
+            var singleScanOneOf = surfacePack?.Slots is [{ Role: PresentationScanRole.PmOneOf }];
+            // Arm main-XOR mode before SetPmOneOfStack so PreferSurface accepts F in stack.
+            if (singleScanOneOf)
+                _mainScanOneOf = true;
+            else
+                _mainScanOneOf = false;
+
             if (surfacePack?.Slots.FirstOrDefault(s => s.Role == PresentationScanRole.PmOneOf) is { } pmSlot
                 && pmSlot.Stack.Count > 0)
             {
@@ -62,6 +71,16 @@ internal sealed class GlassHostWindows : IDisposable
 
             // Tear down hosts we do not want first so zones return to main before remount.
             // Prior bug: EnsurePfdHost ran while OneOf still held/parked PfdZone → empty P host.
+            if (singleScanOneOf)
+            {
+                ClosePmOneOfHost();
+                ClosePmHost();
+                ClosePfdHost();
+                CloseMfdHost();
+                ApplyMainScanOneOfColumns();
+                return;
+            }
+
             var wantOneOf = flags.PmOneOfHostTopology || flags.OneOfHostTopology;
             var wantPm = flags.PmHostTopology;
             var wantPfd = flags.PfdHostTopology;
@@ -115,7 +134,7 @@ internal sealed class GlassHostWindows : IDisposable
     /// <summary>Chord: cycle active surface in the OneOf channel stack.</summary>
     public bool TogglePmOneOfRole()
     {
-        if (!IsPmOneOfActive && _pmOneOfHost is null)
+        if (!_mainScanOneOf && !IsPmOneOfActive && _pmOneOfHost is null)
             return false;
         if (_pmOneOfStack.Length == 0)
             return false;
@@ -126,22 +145,51 @@ internal sealed class GlassHostWindows : IDisposable
         return true;
     }
 
-    /// <summary>Prefer a surface/channel in the OneOf stack (maps to P/M zone paint).</summary>
+    /// <summary>Prefer a surface/channel in the OneOf stack (maps to P/M/F zone paint).</summary>
     public void PreferSurface(string surface)
     {
         var s = surface.Trim().ToLowerInvariant();
         if (_pmOneOfStack.Length > 0 && !_pmOneOfStack.Contains(s, StringComparer.Ordinal))
             return;
         var zone = GlassPresentationLayout.ZoneForSurface(s);
+        if (zone is null)
+            return;
+
+        if (_mainScanOneOf)
+        {
+            if (zone is not (PresentationAnchorKind.Pfd or PresentationAnchorKind.Mfd or PresentationAnchorKind.Forward))
+                return;
+            _pmOneOfActiveSurface = s;
+            _pmOneOfActive = zone.Value;
+            ApplyMainScanOneOfColumns();
+            return;
+        }
+
         if (zone is not (PresentationAnchorKind.Pfd or PresentationAnchorKind.Mfd))
             return;
         _pmOneOfActiveSurface = s;
         PreferPmOneOf(zone.Value);
     }
 
-    /// <summary>Auto-switch / chord: show P or M full in OneOf host.</summary>
+    /// <summary>Auto-switch / chord: show P or M full in OneOf host (or F on single-TopLevel).</summary>
     public void PreferPmOneOf(PresentationAnchorKind kind)
     {
+        if (_mainScanOneOf)
+        {
+            if (kind is not (PresentationAnchorKind.Pfd or PresentationAnchorKind.Mfd or PresentationAnchorKind.Forward))
+                return;
+            if (GlassPresentationLayout.ZoneForSurface(_pmOneOfActiveSurface) != kind)
+            {
+                var match = _pmOneOfStack.FirstOrDefault(s => GlassPresentationLayout.ZoneForSurface(s) == kind);
+                if (match is not null)
+                    _pmOneOfActiveSurface = match;
+            }
+
+            _pmOneOfActive = kind;
+            ApplyMainScanOneOfColumns();
+            return;
+        }
+
         if (kind is not (PresentationAnchorKind.Pfd or PresentationAnchorKind.Mfd))
             return;
         // Keep surface label aligned when called from MFD page path.
@@ -157,6 +205,15 @@ internal sealed class GlassHostWindows : IDisposable
             return;
         if (IsPmOneOfActive)
             RemountPmOneOfActive();
+    }
+
+    void ApplyMainScanOneOfColumns()
+    {
+        var cols = GlassPresentationLayout.ColumnDefsForScanOneOfActive(_pmOneOfActiveSurface);
+        WpfMainGridColumns.Apply(_main.MainGrid, cols);
+        var stackLabel = string.Join('/', _pmOneOfStack);
+        _main.StatusText.Text =
+            $"glass · ({stackLabel}) · {_pmOneOfActiveSurface} active · single TopLevel OneOf · {DateTime.Now:HH:mm:ss}";
     }
 
     void EnsurePfdHost()
