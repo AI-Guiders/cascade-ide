@@ -255,11 +255,21 @@
     <Border x:Name="MfdHybridIndexHost" Visibility="Collapsed" Background="#121212">
       <DockPanel Margin="8">
         <DockPanel DockPanel.Dock="Top" Margin="0,0,0,6">
-          <Button x:Name="HybridIndexRefreshBtn" DockPanel.Dock="Right" Content="refresh" Padding="8,2"
-                  Background="#2A2A2A" Foreground="#CCC" BorderBrush="#3A3A3A"/>
-          <TextBlock x:Name="HybridIndexStatusLabel" Text="hci · idle"
-                     FontSize="11" Foreground="#888" VerticalAlignment="Center"/>
+          <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
+            <Button x:Name="HybridIndexSearchBtn" Content="search" Padding="8,2" Margin="0,0,6,0"
+                    Background="#2A2A2A" Foreground="#CCC" BorderBrush="#3A3A3A"/>
+            <Button x:Name="HybridIndexReindexBtn" Content="reindex" Padding="8,2" Margin="0,0,6,0"
+                    Background="#2A2A2A" Foreground="#CCC" BorderBrush="#3A3A3A"/>
+            <Button x:Name="HybridIndexRefreshBtn" Content="refresh" Padding="8,2"
+                    Background="#2A2A2A" Foreground="#CCC" BorderBrush="#3A3A3A"/>
+          </StackPanel>
+          <TextBox x:Name="HybridIndexSearchBox" Height="26" Margin="0,0,8,0" Padding="6,3"
+                   Background="#1A1A1A" Foreground="#EEE" BorderBrush="#3A3A3A"
+                   FontFamily="Consolas" FontSize="12"
+                   ToolTip="HCI search query"/>
         </DockPanel>
+        <TextBlock x:Name="HybridIndexStatusLabel" DockPanel.Dock="Top" Text="hci · idle"
+                   FontSize="11" Foreground="#888" Margin="0,0,0,6"/>
         <ItemsControl x:Name="HybridIndexCardsPanel" DockPanel.Dock="Top" Margin="0,0,0,8">
           <ItemsControl.ItemsPanel>
             <ItemsPanelTemplate>

@@ -92,4 +92,21 @@ public sealed class GlassHybridIndexGlanceTests
             try { Directory.Delete(root, recursive: true); } catch { /* ignore */ }
         }
     }
+
+    [Fact]
+    public void TrySearch_empty_query_returns_error()
+    {
+        var r = GlassHybridIndexStatusProbe.TrySearch(@"D:\ws", "   ");
+        Assert.Equal("empty query", r.Error);
+        Assert.Empty(r.Hits);
+    }
+
+    [Fact]
+    public void TryReindex_missing_workspace_returns_fail()
+    {
+        var r = GlassHybridIndexStatusProbe.TryReindex(null);
+        Assert.False(r.Ok);
+        Assert.Equal("workspace root unavailable", r.Message);
+    }
+
 }

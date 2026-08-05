@@ -36,6 +36,10 @@ public partial class GlassMfdProcessHosts : UserControl
         RelatedRefreshBtn.Click += host.RelatedRefresh_OnClick;
         RelatedList.MouseDoubleClick += host.RelatedList_OnMouseDoubleClick;
         HybridIndexRefreshBtn.Click += host.HybridIndexRefresh_OnClick;
+        HybridIndexSearchBtn.Click += host.HybridIndexSearch_OnClick;
+        HybridIndexReindexBtn.Click += host.HybridIndexReindex_OnClick;
+        HybridIndexSearchBox.KeyDown += host.HybridIndexSearchBox_OnKeyDown;
+        HybridScopeList.MouseDoubleClick += host.HybridScopeList_OnMouseDoubleClick;
         GlanceCardsRefreshBtn.Click += host.GlanceCardsRefresh_OnClick;
         SemanticRefreshBtn.Click += host.SemanticRefresh_OnClick;
         SemanticList.MouseDoubleClick += host.SemanticList_OnMouseDoubleClick;

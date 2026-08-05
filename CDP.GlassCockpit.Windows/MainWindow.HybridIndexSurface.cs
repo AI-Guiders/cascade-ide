@@ -4,18 +4,20 @@ using System.Collections.ObjectModel;
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using CascadeIDE.SoftOrgan;
 
 namespace CDP.GlassCockpit.Windows;
 
 /// <summary>
-/// Glass MFD HybridIndex — instrument cards (HCI/DOCS/FRESH) + scope Skia map (Shared-SSOT).
+/// Glass MFD HybridIndex — instrument cards + scope map + search/reindex hand (Ready-to-Interact).
 /// </summary>
 public partial class MainWindow
 {
-    readonly ObservableCollection<string> _hybridScopeLines = new();
+    readonly ObservableCollection<object> _hybridScopeLines = new();
     GlassSemanticMapGraph.Graph _hybridGraph = new(null, [], []);
     bool _hybridSkiaWired;
+    bool _hybridReindexBusy;
 
     void RefreshMfdHybridIndexVisibility()
     {
@@ -48,6 +50,29 @@ public partial class MainWindow
 
     internal void HybridIndexRefresh_OnClick(object sender, RoutedEventArgs e) => RefreshHybridIndexBody();
 
+    internal void HybridIndexSearch_OnClick(object sender, RoutedEventArgs e) => RunHybridIndexSearch();
+
+    internal void HybridIndexSearchBox_OnKeyDown(object sender, KeyEventArgs e)
+    {
+        if (e.Key == Key.Enter)
+        {
+            RunHybridIndexSearch();
+            e.Handled = true;
+        }
+    }
+
+    internal void HybridIndexReindex_OnClick(object sender, RoutedEventArgs e) => StartHybridIndexReindex();
+
+    internal void HybridScopeList_OnMouseDoubleClick(object sender, MouseButtonEventArgs e)
+    {
+        if (HybridScopeList?.SelectedItem is GlassHybridIndexStatusProbe.SearchHitRow hit
+            && !string.IsNullOrWhiteSpace(hit.Path))
+        {
+            OpenCodeFile(hit.Path, hit.LineStart > 0 ? hit.LineStart : null);
+            StatusText.Text = $"glass · hci · search · {Path.GetFileName(hit.Path)}";
+        }
+    }
+
     void EnsureHybridSkiaWired()
     {
         if (_hybridSkiaWired || HybridSkia is null)
@@ -68,7 +93,76 @@ public partial class MainWindow
         StatusText.Text = $"glass · hci · {Path.GetFileName(path)}";
     }
 
-    void RefreshHybridIndexBody()
+    void RunHybridIndexSearch()
+    {
+        var q = HybridIndexSearchBox?.Text ?? "";
+        var result = GlassHybridIndexStatusProbe.TrySearch(_session.WorkspaceRoot, q);
+        _hybridScopeLines.Clear();
+
+        if (!string.IsNullOrWhiteSpace(result.Error))
+        {
+            if (HybridScopeList is not null)
+                HybridScopeList.DisplayMemberPath = string.Empty;
+            _hybridScopeLines.Add($"search · {result.Error}");
+            if (HybridIndexStatusLabel is not null)
+                HybridIndexStatusLabel.Text = $"hci · search · {result.Error}";
+            return;
+        }
+
+        if (result.Hits.Count == 0)
+        {
+            if (HybridScopeList is not null)
+                HybridScopeList.DisplayMemberPath = string.Empty;
+            _hybridScopeLines.Add("search · 0 hits");
+        }
+        else
+        {
+            if (HybridScopeList is not null)
+                HybridScopeList.DisplayMemberPath = nameof(GlassHybridIndexStatusProbe.SearchHitRow.Display);
+            foreach (var hit in result.Hits)
+                _hybridScopeLines.Add(hit);
+        }
+
+        if (HybridIndexStatusLabel is not null)
+            HybridIndexStatusLabel.Text = $"hci · search · {result.Hits.Count} hits · {q.Trim()}";
+    }
+
+    void StartHybridIndexReindex()
+    {
+        if (_hybridReindexBusy)
+            return;
+
+        var ws = _session.WorkspaceRoot;
+        if (string.IsNullOrWhiteSpace(ws))
+        {
+            if (HybridIndexStatusLabel is not null)
+                HybridIndexStatusLabel.Text = "hci · reindex · workspace unavailable";
+            return;
+        }
+
+        _hybridReindexBusy = true;
+        if (HybridIndexStatusLabel is not null)
+            HybridIndexStatusLabel.Text = "hci · reindex · running…";
+
+        _ = Task.Run(() =>
+        {
+            var result = GlassHybridIndexStatusProbe.TryReindex(ws);
+            Dispatcher.BeginInvoke(() =>
+            {
+                _hybridReindexBusy = false;
+                if (HybridIndexStatusLabel is not null)
+                    HybridIndexStatusLabel.Text = result.Ok
+                        ? $"hci · {result.Message}"
+                        : $"hci · reindex · fail · {result.Message}";
+                StatusText.Text = result.Ok
+                    ? $"glass · hci · {result.Message}"
+                    : $"glass · hci · reindex fail";
+                RefreshHybridIndexBody(forceScopeLines: true);
+            });
+        });
+    }
+
+    void RefreshHybridIndexBody(bool forceScopeLines = false)
     {
         var live = GlassHybridIndexGlance.TryProbeLive(_session.WorkspaceRoot);
         if (HybridIndexCardsPanel is not null)
@@ -86,26 +180,35 @@ public partial class MainWindow
         _hybridGraph = GlassHybridIndexGlance.BuildScopeMap(_session.WorkspaceRoot, ready);
         PushHybridGraph();
 
-        _hybridScopeLines.Clear();
-        if (live is { } s)
+        var keepSearchHits = !forceScopeLines
+            && _hybridScopeLines.Count > 0
+            && _hybridScopeLines[0] is GlassHybridIndexStatusProbe.SearchHitRow;
+
+        if (!keepSearchHits)
         {
-            _hybridScopeLines.Add($"docs · {s.DocumentCount}{(s.DocumentCountMayBeStale ? " · stale" : "")}");
-            _hybridScopeLines.Add($"state · {s.ReindexState ?? "—"}");
-            if (!string.IsNullOrWhiteSpace(s.WorkspaceRoot))
-                _hybridScopeLines.Add($"ws · {Path.GetFileName(s.WorkspaceRoot.TrimEnd('\\', '/'))}");
-            if (!string.IsNullOrWhiteSpace(s.DatabasePath))
-                _hybridScopeLines.Add($"db · {Path.GetFileName(s.DatabasePath)}");
-            if (!string.IsNullOrWhiteSpace(s.LastReindexError))
-                _hybridScopeLines.Add($"err · {s.LastReindexError}");
-            foreach (var n in _hybridGraph.Nodes.Where(n => n.Hop == 1).Take(16))
-                _hybridScopeLines.Add($"· {Path.GetFileName(n.FilePath)}");
-        }
-        else
-        {
-            _hybridScopeLines.Add("hci · workspace root unavailable");
+            _hybridScopeLines.Clear();
+            if (HybridScopeList is not null)
+                HybridScopeList.DisplayMemberPath = string.Empty;
+            if (live is { } s)
+            {
+                _hybridScopeLines.Add($"docs · {s.DocumentCount}{(s.DocumentCountMayBeStale ? " · stale" : "")}");
+                _hybridScopeLines.Add($"state · {s.ReindexState ?? "—"}");
+                if (!string.IsNullOrWhiteSpace(s.WorkspaceRoot))
+                    _hybridScopeLines.Add($"ws · {Path.GetFileName(s.WorkspaceRoot.TrimEnd('\\', '/'))}");
+                if (!string.IsNullOrWhiteSpace(s.DatabasePath))
+                    _hybridScopeLines.Add($"db · {Path.GetFileName(s.DatabasePath)}");
+                if (!string.IsNullOrWhiteSpace(s.LastReindexError))
+                    _hybridScopeLines.Add($"err · {s.LastReindexError}");
+                foreach (var n in _hybridGraph.Nodes.Where(n => n.Hop == 1).Take(16))
+                    _hybridScopeLines.Add($"· {Path.GetFileName(n.FilePath)}");
+            }
+            else
+            {
+                _hybridScopeLines.Add("hci · workspace root unavailable");
+            }
         }
 
-        if (HybridIndexStatusLabel is not null)
+        if (HybridIndexStatusLabel is not null && !_hybridReindexBusy && !keepSearchHits)
         {
             HybridIndexStatusLabel.Text = live is null
                 ? "hci · unavailable"
