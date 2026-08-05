@@ -17,7 +17,8 @@
 - WPF: `CDP.GlassCockpit.Windows/GlassIntercomMarkdownBody.cs` → `MainWindow.xaml` feed template
 - Human send: `GlassIntercomSend` → `ResolveIntercomIdentity` (sticky) + voice latch + journal + `GlassOperatorShareShelf`
 - Sticky Who: `GlassIntercomIdentity` · path `CdpHabitatPaths.IntercomIdentityLatchFileName` · cdp-mcp `op=identity` / `send name=`
-- Tests: `CascadeIDE.Tests/IntercomMarkdownTests.cs` · `GlassOperatorShareShelfTests.cs` · `GlassRadioPointerTests.cs`
+- Lane×model: `CascadeIDE.GlassCore/Intercom/GlassIntercomLane.cs` · WPF `MainWindow.xaml` (`LaneCitBtn`/`LaneHostBtn`/`LanePfBtn` + `HudModelPicker`) · `MainWindow.IntercomHud.cs`
+- Tests: `CascadeIDE.Tests/GlassIntercomLaneTests.cs` · `IntercomMarkdownTests.cs` · `GlassOperatorShareShelfTests.cs` · `GlassRadioPointerTests.cs`
 
 ## Antipatterns
 - **Bare topology wipe for dogfood** — never publish `topology=(intercom)` just to shoot Intercom; PreferSurface / surface run without replacing the latch, or restore **`GlassPresentationLayout.OperatorReviewFlightTopology` = `(F/P/M)`** (single OneOf TopLevel — all channels one window). Do **not** invent `(P)(F)(M)`, `(F)(P/M)`, `(intercom)(sit)(world)`, or **`(intercom)(sit/world/alert)`** as "restore" — that last one is 2 windows (F dedicated + satellite host); wrong wire = still regression. Ask if unsure which flight was live.
@@ -45,7 +46,8 @@
 - 2026-08-05 · **A1+A5 ADOPTED** · ADR 0072 Glass overview ↔ detail ↔ back · `ChatTopicOverviewPolicy`→GlassCore · `topic_overview`/`topic_enter` (`ato`/`atb`) · evidence `tmp-glass-shots/topic-overview-a1-20260805.png` · PreCondition residual → A2 spine/summary, A3 dig/supersede, B denser
 - 2026-08-05 · **Decision stamped** · Face = Slack/MM light (not Conversational UI chrome) · northstar-messenger-v0 Face §
 - 2026-08-05 · **Decision stamped** · NorthStar ontology · `#crew`+DM+Radio · reject `#humans`/`#agents` rooms · `glass-intercom-northstar-messenger-v0.md`
-- 2026-08-05 · **Decision stamped** · lane×model axes v0 · Lane=Korry XOR @ Send · Model=HUD Combo @ HDG/CRS · secrets=CFG · design `glass-intercom-lane-model-axes-v0.md` (UI not shipped yet)
+- 2026-08-05 · **lane×model UI shipped** · XOR Korry CIT|HOST|PF @ composer · HudModelPicker CIT-lit only · latch `glass-intercom-lane.json` + legacy model migrate · tests `GlassIntercomLaneTests` 6/6 · evidence `tmp-glass-shots/lane-model-axes-20260805.png` (+ hud/composer crops) · design `glass-intercom-lane-model-axes-v0.md`
+- 2026-08-05 · **Decision stamped** · lane×model axes v0 · Lane=Korry XOR @ Send · Model=HUD Combo @ HDG/CRS · secrets=CFG · design `glass-intercom-lane-model-axes-v0.md`
 - 2026-08-05 · Sticky Intercom Who · `%LocalAppData%/cdp-mcp/intercom-identity-LATEST.json` · Glass `GlassIntercomIdentity` + `ResolveIntercomIdentity` · MCP `cdp_intercom op=identity` · dogfood send without name= → AutoI · pm sticky Света (local claim, not repo default)
 - 2026-08-05 · ModelPicker dropdown empty text · Dark Cockpit: override SystemColors Highlight*/Window* on ComboBox + ItemTemplate inherit FG · evidence `tmp-glass-shots/model-picker-fixed-20260805.png` (Citizen · default / Composer · host / PF · habitat)
 - 2026-08-05 · Intercom prose residual CLOSED · Citizen/@frame SA walls → Radio collapse (`FormatCitizenWakeIntercom` + Glass `CompactIntercomBody` LooksLikeSaInstrumentWall) · evidence `tmp-glass-shots/intercom-prose-radio-collapsed-20260805.png` (Citizen · SA collapsed · PFD + DELTA cards)
