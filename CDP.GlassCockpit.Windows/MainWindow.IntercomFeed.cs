@@ -16,6 +16,8 @@ public partial class MainWindow
     readonly HashSet<string> _seenIntercomIds = new(StringComparer.OrdinalIgnoreCase);
     string? _selectedTopicId;
     string[] _selectedTopicEntryIds = [];
+    bool _isTopicOverviewMode;
+    int _lastOverviewTopicCount = -1;
     int _pendingNewBelow;
     string _intercomHeader = "Intercom";
     string? _partnerPresenceLine;
@@ -239,7 +241,8 @@ public partial class MainWindow
         string Id,
         string Title,
         bool IsSelected,
-        IReadOnlyList<string> EntryIds);
+        IReadOnlyList<string> EntryIds,
+        string Summary = "");
 
     public sealed record ChatBubble(
         string Role,

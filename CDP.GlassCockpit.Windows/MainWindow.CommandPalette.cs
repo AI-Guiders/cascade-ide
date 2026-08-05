@@ -197,7 +197,11 @@ public partial class MainWindow
                 TryRunGlassSlash("/citizen");
                 break;
             case "topics_all":
-                TopicAllBtn_OnClick(TopicAllBtn, new RoutedEventArgs());
+            case "topic_overview":
+                ShowIntercomTopicOverview();
+                break;
+            case "topic_enter":
+                EnterIntercomFocusedTopic();
                 break;
             case "topic_next":
                 SelectIntercomTopicNext();

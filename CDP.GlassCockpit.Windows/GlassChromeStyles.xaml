@@ -33,6 +33,11 @@
       </DataTrigger>
     </Style.Triggers>
   </Style>
+  <Style x:Key="TopicOverviewCardBtn" TargetType="Button" BasedOn="{StaticResource TopicCardBtn}">
+    <Setter Property="HorizontalContentAlignment" Value="Left"/>
+    <Setter Property="Padding" Value="12,10"/>
+    <Setter Property="Background" Value="#1A1A1A"/>
+  </Style>
   <Style x:Key="TopicAllBtnStyle" TargetType="Button" BasedOn="{StaticResource ChromeBtn}">
     <Style.Triggers>
       <Trigger Property="Tag" Value="selected">

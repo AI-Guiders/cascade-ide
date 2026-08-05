@@ -47,7 +47,8 @@ public partial class MainWindow
                 && string.Equals(t.Id, sid, StringComparison.OrdinalIgnoreCase);
             if (selected)
                 _selectedTopicEntryIds = t.EntryIds.ToArray();
-            _topics.Add(new TopicCard(t.Id, t.Title, selected, t.EntryIds));
+            var summary = $"{t.Count} msg · {t.StartUtc.ToLocalTime():HH:mm}–{t.EndUtc.ToLocalTime():HH:mm}";
+            _topics.Add(new TopicCard(t.Id, t.Title, selected, t.EntryIds, summary));
         }
 
         TopicsEmptyHint.Visibility = _topics.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
@@ -55,7 +56,23 @@ public partial class MainWindow
         if (_selectedTopicId is null)
             _selectedTopicEntryIds = [];
 
-        SyncTopicAllChrome();
+        if (stickEnd && _selectedTopicId is { Length: > 0 })
+            _isTopicOverviewMode = false;
+        else
+            ChatTopicOverviewPolicy.ApplyAdaptiveDefault(
+                _topics.Count,
+                ref _lastOverviewTopicCount,
+                value => _isTopicOverviewMode = value,
+                () => _isTopicOverviewMode);
+
+        SyncTopicOverviewChrome();
+
+        if (_isTopicOverviewMode)
+        {
+            _feed.Clear();
+            ApplyFeedScrollAfterRebuild(stickEnd, wasPinned, priorOffset);
+            return;
+        }
 
         _feed.Clear();
         _feed.Add(new ChatBubble(
@@ -154,22 +171,59 @@ public partial class MainWindow
         SyncNewMsgCue();
     }
 
-    void SyncTopicAllChrome()
+    void SyncTopicOverviewChrome()
     {
-        TopicAllBtn.Tag = _selectedTopicId is null ? "selected" : "";
+        var overview = _isTopicOverviewMode;
+        TopicOverviewScroll.Visibility = overview ? Visibility.Visible : Visibility.Collapsed;
+        FeedScroll.Visibility = overview ? Visibility.Collapsed : Visibility.Visible;
+        TopicAllBtn.Tag = overview ? "selected" : "";
+        TopicBackBtn.Visibility = overview || _topics.Count == 0 ? Visibility.Collapsed : Visibility.Visible;
+        TopicsOverviewHint.Visibility = overview && _topics.Count > 0 ? Visibility.Visible : Visibility.Collapsed;
+        if (overview)
+        {
+            var n = _topics.Count;
+            TopicsOverviewHint.Text = n == 1
+                ? "1 тема · Enter (ato) — открыть · atp/atn — выбор · atb — сюда"
+                : $"{n} тем · Enter (ato) — открыть · atp/atn — выбор · atb — сюда";
+            TopicOverviewHeader.Text = n <= 1 ? "Topic" : $"{n} topics";
+        }
     }
 
-    void TopicAllBtn_OnClick(object sender, RoutedEventArgs e)
+    void TopicAllBtn_OnClick(object sender, RoutedEventArgs e) => ShowIntercomTopicOverview();
+
+    void TopicBackBtn_OnClick(object sender, RoutedEventArgs e) => ShowIntercomTopicOverview();
+
+    void ShowIntercomTopicOverview()
     {
-        _selectedTopicId = null;
-        _selectedTopicEntryIds = [];
-        RebuildIntercomFeedFromJournal(stickEnd: true);
+        _isTopicOverviewMode = true;
+        if (_topics.Count > 0)
+            _lastOverviewTopicCount = _topics.Count;
+        RebuildIntercomFeedFromJournal(stickEnd: false);
+        StatusText.Text = $"glass · topics overview · {_topics.Count}";
+    }
+
+    void EnterIntercomFocusedTopic()
+    {
+        if (_selectedTopicId is not { Length: > 0 } id)
+        {
+            id = _topics.FirstOrDefault()?.Id;
+            if (id is null || id.Length == 0)
+            {
+                StatusText.Text = "glass · topic enter · empty";
+                return;
+            }
+        }
+
+        _isTopicOverviewMode = false;
+        ApplyIntercomTopicSelection(id);
+        StatusText.Text = $"glass · topic enter · {ShortTopicLabel(id)}";
     }
 
     void TopicCard_OnClick(object sender, RoutedEventArgs e)
     {
         if (sender is not Button { Tag: string id } || id.Length == 0)
             return;
+        _isTopicOverviewMode = false;
         ApplyIntercomTopicSelection(id);
     }
 
@@ -183,7 +237,13 @@ public partial class MainWindow
             return;
         }
 
-        ApplyIntercomTopicSelection(next);
+        if (_isTopicOverviewMode)
+        {
+            _selectedTopicId = next;
+            RebuildIntercomFeedFromJournal(stickEnd: false);
+        }
+        else
+            ApplyIntercomTopicSelection(next);
         StatusText.Text = $"glass · topic next · {ShortTopicLabel(next)}";
     }
 
@@ -197,7 +257,13 @@ public partial class MainWindow
             return;
         }
 
-        ApplyIntercomTopicSelection(prev);
+        if (_isTopicOverviewMode)
+        {
+            _selectedTopicId = prev;
+            RebuildIntercomFeedFromJournal(stickEnd: false);
+        }
+        else
+            ApplyIntercomTopicSelection(prev);
         StatusText.Text = $"glass · topic prev · {ShortTopicLabel(prev)}";
     }
 

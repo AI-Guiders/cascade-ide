@@ -39,8 +39,8 @@ public static class GlassMelodyGlassActions
             // Intercom IOP keyboard — topic overview/nav + open (was browse-only melody).
             ["chat_select_next_thread"] = "topic_next",
             ["chat_select_prev_thread"] = "topic_prev",
-            ["chat_show_thread_overview"] = "topics_all",
-            ["chat_open_selected_thread"] = "slash_open",
+            ["chat_show_thread_overview"] = "topic_overview",
+            ["chat_open_selected_thread"] = "topic_enter",
             ["chat_select_next_message"] = "feed_page_down",
             ["chat_select_prev_message"] = "feed_page_up",
             // Glass peels already in RunPaletteEntry — cabin c: without inventing Avalonia hosts.

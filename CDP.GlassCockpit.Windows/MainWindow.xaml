@@ -267,11 +267,16 @@
               <Border DockPanel.Dock="Top" Background="{StaticResource Glass.BgRaised}" BorderBrush="#2A2A2A" BorderThickness="0,0,0,1" Padding="8,6">
                 <DockPanel>
                   <TextBlock DockPanel.Dock="Left" Text="Topics" FontSize="11" Foreground="#888" VerticalAlignment="Center" Margin="0,0,8,0"/>
-                  <Button x:Name="TopicAllBtn" DockPanel.Dock="Left" Content="All" Style="{StaticResource TopicAllBtnStyle}"
-                          Click="TopicAllBtn_OnClick" ToolTip="Show full Virtual History feed" Margin="0,0,6,0" Tag="selected"/>
+                  <Button x:Name="TopicAllBtn" DockPanel.Dock="Left" Content="Overview" Style="{StaticResource TopicAllBtnStyle}"
+                          Click="TopicAllBtn_OnClick" ToolTip="Topic catalog · ADR 0072 · c:atb" Margin="0,0,6,0" Tag="selected"/>
+                  <Button x:Name="TopicBackBtn" DockPanel.Dock="Left" Content="Back" Style="{StaticResource ChromeBtn}"
+                          Click="TopicBackBtn_OnClick" ToolTip="Back to topic overview (c:atb)" Margin="0,0,6,0" Visibility="Collapsed"/>
                   <TextBlock x:Name="TopicsEmptyHint" DockPanel.Dock="Left"
                              Text="(empty — send messages; new cards after 30m quiet gap)"
                              FontSize="11" Foreground="#555" VerticalAlignment="Center"
+                             Visibility="Collapsed"/>
+                  <TextBlock x:Name="TopicsOverviewHint" DockPanel.Dock="Left"
+                             Text="" FontSize="11" Foreground="#666" VerticalAlignment="Center" Margin="0,0,8,0"
                              Visibility="Collapsed"/>
                   <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled">
                     <ItemsControl x:Name="TopicCards">
@@ -295,6 +300,34 @@
               </Border>
 
               <Grid>
+                <ScrollViewer x:Name="TopicOverviewScroll" VerticalScrollBarVisibility="Auto" Padding="12"
+                              Visibility="Collapsed">
+                  <StackPanel>
+                    <TextBlock x:Name="TopicOverviewHeader" Text="Topics" FontSize="14" FontWeight="SemiBold"
+                               Foreground="#CCC" Margin="0,0,0,10"/>
+                    <ItemsControl x:Name="TopicOverviewCards">
+                      <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                          <WrapPanel Orientation="Horizontal"/>
+                        </ItemsPanelTemplate>
+                      </ItemsControl.ItemsPanel>
+                      <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                          <Button Style="{StaticResource TopicOverviewCardBtn}"
+                                  Margin="0,0,10,10" MinWidth="200" MaxWidth="320"
+                                  Tag="{Binding Id}"
+                                  Click="TopicCard_OnClick"
+                                  ToolTip="{Binding Title}">
+                            <StackPanel>
+                              <TextBlock Text="{Binding Title}" FontSize="13" FontWeight="SemiBold" TextWrapping="Wrap"/>
+                              <TextBlock Text="{Binding Summary}" FontSize="11" Foreground="#888" Margin="0,4,0,0" TextWrapping="Wrap"/>
+                            </StackPanel>
+                          </Button>
+                        </DataTemplate>
+                      </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                  </StackPanel>
+                </ScrollViewer>
                 <ScrollViewer x:Name="FeedScroll" VerticalScrollBarVisibility="Auto" Padding="10"
                               ScrollChanged="FeedScroll_OnScrollChanged">
                   <ItemsControl x:Name="MessageFeed">

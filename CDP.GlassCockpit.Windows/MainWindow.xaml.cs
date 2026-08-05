@@ -16,6 +16,7 @@ public partial class MainWindow : Window
         PreviewKeyDown += MainWindow_OnPreviewKeyDown;
         MessageFeed.ItemsSource = _feed;
         TopicCards.ItemsSource = _topics;
+        TopicOverviewCards.ItemsSource = _topics;
         _hosts = new GlassHostWindows(this);
 
         _session = new GlassSession();
