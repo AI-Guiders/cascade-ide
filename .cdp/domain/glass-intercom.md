@@ -20,6 +20,7 @@
 - Tests: `CascadeIDE.Tests/IntercomMarkdownTests.cs` · `GlassOperatorShareShelfTests.cs` · `GlassRadioPointerTests.cs`
 
 ## Antipatterns
+- **Bare topology wipe for dogfood** — never publish `topology=(intercom)` (or any single-group) just to shoot Intercom; use `cdp_cide_presentation` with full wire e.g. `(intercom)(sit)(world)` / `(P)(F)(M)`, or PreferSurface / surface run without replacing the latch. Half-topology = regression (hosts evaporate).
 - Treating Intercom as DM with «second pilot» — NorthStar is team coordination (`#crew` + DM + Radio).
 - `#humans` / `#agents` as separate **channels** — discrimination; use lens (0143) inside `#crew`.
 - Shipping CIDE session-graph / topic-tree complexity as Glass day-1 (suffering, not work).
