@@ -6,6 +6,7 @@
 - Fenced code segments never feed attach/`[…]` parse (0128).
 - Intercom = Radio (I6): instrument pointers are cards (`delta →` / `look →` / `→ PFD|MFD|Right|…`) — not SA prose wall; generic `→` bullets stay prose.
 - Sticky Who per seat (`intercom-identity-LATEST.json`): freeform nick, not model id; resolve = explicit name → sticky → bootstrap (guest Кир / operator Operator / citizen Citizen). Света = this machine's sticky, not repo default.
+- **Lane × model axes (accepted 2026-08-05):** lane = habitat seat (CIT/HOST/PF) at Send as **XOR Korry strip** (not ComboBox); FM model = HUD ComboBox у HDG/CRS, lit only when lane=CIT; provider key/baseUrl/default in CFG. Design: `docs/design/glass-intercom-lane-model-axes-v0.md`. Do not overload one "Model" ComboBox.
 
 ## Entry
 - Parser: `CascadeIDE.GlassCore/Intercom/IntercomMarkdown.cs`
@@ -17,6 +18,8 @@
 
 ## Antipatterns
 - Hardcoding operator nick (Света) as clone default — sticky is local latch, bootstrap is Operator.
+- ComboBox for habitat lane (3 fixed seats) — use Korry XOR strip; ComboBox is for FM catalog.
+- One control mixing lane + FM model id; two ComboBoxes beside Send; live FM list when lane ≠ CIT.
 - Dark ComboBox dropdown: Style Background setters lose to ControlTemplate SystemColors — override HighlightBrushKey / WindowTextBrushKey on the ComboBox; don't trust ItemContainerStyle alone.
 - Reparenting a still-parented WPF child into `Content` (crash: logical child already set).
 - Forking Markdig preview host into Glass feed for "normal MD".
@@ -25,6 +28,7 @@
 - Claiming Radio Done via SA wall / Autoi dump / File.Exists alone.
 
 ## last_ship
+- 2026-08-05 · **Decision stamped** · lane×model axes v0 · Lane=Korry XOR @ Send · Model=HUD Combo @ HDG/CRS · secrets=CFG · design `glass-intercom-lane-model-axes-v0.md` (UI not shipped yet)
 - 2026-08-05 · Sticky Intercom Who · `%LocalAppData%/cdp-mcp/intercom-identity-LATEST.json` · Glass `GlassIntercomIdentity` + `ResolveIntercomIdentity` · MCP `cdp_intercom op=identity` · dogfood send without name= → AutoI · pm sticky Света (local claim, not repo default)
 - 2026-08-05 · ModelPicker dropdown empty text · Dark Cockpit: override SystemColors Highlight*/Window* on ComboBox + ItemTemplate inherit FG · evidence `tmp-glass-shots/model-picker-fixed-20260805.png` (Citizen · default / Composer · host / PF · habitat)
 - 2026-08-05 · Intercom prose residual CLOSED · Citizen/@frame SA walls → Radio collapse (`FormatCitizenWakeIntercom` + Glass `CompactIntercomBody` LooksLikeSaInstrumentWall) · evidence `tmp-glass-shots/intercom-prose-radio-collapsed-20260805.png` (Citizen · SA collapsed · PFD + DELTA cards)
