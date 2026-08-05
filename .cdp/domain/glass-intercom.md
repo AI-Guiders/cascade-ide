@@ -20,7 +20,8 @@
 - Tests: `CascadeIDE.Tests/IntercomMarkdownTests.cs` · `GlassOperatorShareShelfTests.cs` · `GlassRadioPointerTests.cs`
 
 ## Antipatterns
-- **Bare topology wipe for dogfood** — never publish `topology=(intercom)` (or any single-group) just to shoot Intercom; PreferSurface / surface run without replacing the latch, or restore the **operator flight topology**. Review wire here: `(F/P/M)` (single OneOf TopLevel). Do **not** invent `(P)(F)(M)`, `(F)(P/M)`, or surface-groups `(intercom)(sit)(world)` as "fix" — wrong wire = still regression. Ask if unsure which flight was live.
+- **Bare topology wipe for dogfood** — never publish `topology=(intercom)` just to shoot Intercom; PreferSurface / surface run without replacing the latch, or restore **`GlassPresentationLayout.OperatorReviewFlightTopology` = `(F/P/M)`** (single OneOf TopLevel — all channels one window). Do **not** invent `(P)(F)(M)`, `(F)(P/M)`, `(intercom)(sit)(world)`, or **`(intercom)(sit/world/alert)`** as "restore" — that last one is 2 windows (F dedicated + satellite host); wrong wire = still regression. Ask if unsure which flight was live.
+- **Seeming-Done without topology regression tests** — before Done on presentation/OneOf: write/run tests that lock single-TopLevel no-host vs 2-group host spawn (`GlassPresentationLayoutSurfaceWireTests`); catch host-count regressions in CI, not by operator parrot.
 - Treating Intercom as DM with «second pilot» — NorthStar is team coordination (`#crew` + DM + Radio).
 - `#humans` / `#agents` as separate **channels** — discrimination; use lens (0143) inside `#crew`.
 - Shipping CIDE session-graph / topic-tree complexity as Glass day-1 (suffering, not work).
@@ -38,6 +39,7 @@
 - Hand-wiring Folded AutoI Korry while Review — green paint ≠ consume path; fix ignite-cmd consumer later.
 
 ## last_ship
+- 2026-08-05 · **Review flight lock** · `OperatorReviewFlightTopology=(F/P/M)` · tests: single-TopLevel no satellite vs `(intercom)(sit/world/alert)` spawns host · antipattern stamp glass-intercom · parrot tax fix
 - 2026-08-05 · **ONE-WAVE PreCondition Intercom** · A2 ADOPTED (summary+spine strip) · A3 SUPERSEDE NorthStar (no ThreadNode) · B1–B3 DIG REJECT/defer · evidence `tmp-glass-shots/topic-overview-a2-20260805.png` · residual A4 denser only
 - 2026-08-05 · **A1+A5 ADOPTED** · ADR 0072 Glass overview ↔ detail ↔ back · `ChatTopicOverviewPolicy`→GlassCore · `topic_overview`/`topic_enter` (`ato`/`atb`) · evidence `tmp-glass-shots/topic-overview-a1-20260805.png` · PreCondition residual → A2 spine/summary, A3 dig/supersede, B denser
 - 2026-08-05 · **Decision stamped** · Face = Slack/MM light (not Conversational UI chrome) · northstar-messenger-v0 Face §
