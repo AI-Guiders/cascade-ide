@@ -148,10 +148,26 @@ public partial class MainWindow
         var chips = _eicas.BandChips;
         if (chips.Count == 0)
         {
+            _eicasClrSuppressPulse = null;
             MfdHealthBand.Items.Add(MakeEicasChip(
                 $"EICAS · CLEAR · {CurrentMfdPage()}",
                 "idle"));
             return;
+        }
+
+        // CLR SoftKey: hide band until latch pulse changes (master-caution cancel feel).
+        if (_eicasClrSuppressPulse is not null)
+        {
+            var pulse = ReadEclPulse() ?? ReadAlertPulse() ?? "";
+            if (string.Equals(pulse, _eicasClrSuppressPulse, StringComparison.Ordinal))
+            {
+                MfdHealthBand.Items.Add(MakeEicasChip(
+                    $"EICAS · CLR · {CurrentMfdPage()}",
+                    "idle"));
+                return;
+            }
+
+            _eicasClrSuppressPulse = null;
         }
 
         for (var i = 0; i < chips.Count; i++)

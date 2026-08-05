@@ -421,13 +421,18 @@
             <TextBlock x:Name="MfdZoneTitle" Text="M · Terminal" FontWeight="SemiBold" FontSize="12" Foreground="{StaticResource Glass.FgTitle}"/>
           </Border>
           <Border DockPanel.Dock="Top" Background="{StaticResource Glass.BgRaised}" Padding="8,6" BorderBrush="#2A2A2A" BorderThickness="0,0,0,1">
-            <ItemsControl x:Name="MfdHealthBand">
-              <ItemsControl.ItemsPanel>
-                <ItemsPanelTemplate>
-                  <StackPanel Orientation="Horizontal"/>
-                </ItemsPanelTemplate>
-              </ItemsControl.ItemsPanel>
-            </ItemsControl>
+            <DockPanel>
+              <uikit:GlassSoftKeyBar x:Name="EicasSoftKeys" DockPanel.Dock="Right"
+                                     Key1Text="clr" Key2Text="ack" Key3Text="list"
+                                     Margin="12,0,0,0"/>
+              <ItemsControl x:Name="MfdHealthBand">
+                <ItemsControl.ItemsPanel>
+                  <ItemsPanelTemplate>
+                    <StackPanel Orientation="Horizontal"/>
+                  </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+              </ItemsControl>
+            </DockPanel>
           </Border>
           <!-- Catalog kept for SelectMfdPage / seats latch; not shown (aviation: one page on glass). -->
           <ListBox x:Name="MfdPages"

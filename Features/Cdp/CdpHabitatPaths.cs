@@ -34,6 +34,8 @@ public static class CdpHabitatPaths
     public const string IgniteLatchFileName = "ignite-LATEST.json";
     /// <summary>Glass Intercom HUD → habitat AutoI/HILD toggle request.</summary>
     public const string IgniteCmdLatchFileName = "ignite-cmd-LATEST.json";
+    /// <summary>Glass EICAS SoftKeys → habitat ECL ack / alert clr request.</summary>
+    public const string EicasCmdLatchFileName = "eicas-cmd-LATEST.json";
     /// <summary>Task Manager plan pulse — Glass P Plan readout.</summary>
     public const string PlanLatchFileName = "plan-LATEST.json";
 
@@ -74,6 +76,8 @@ public static class CdpHabitatPaths
     public static string IgniteLatchPath => GetLatchPath(IgniteLatchFileName);
 
     public static string IgniteCmdLatchPath => GetLatchPath(IgniteCmdLatchFileName);
+
+    public static string EicasCmdLatchPath => GetLatchPath(EicasCmdLatchFileName);
 
     /// <summary>Ensure state root exists; returns <see cref="StateRoot"/>.</summary>
     public static string EnsureStateRoot()

@@ -12,6 +12,7 @@ public partial class MainWindow : Window
     public MainWindow()
     {
         InitializeComponent();
+        WireEicasSoftKeys();
         MfdHosts.Wire(this);
         PreviewKeyDown += MainWindow_OnPreviewKeyDown;
         MessageFeed.ItemsSource = _feed;
