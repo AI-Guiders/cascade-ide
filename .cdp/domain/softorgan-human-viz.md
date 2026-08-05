@@ -25,9 +25,10 @@
 - Packing ROLE as `IN-MAP · Nn/Ee · map on MFD` (3 meanings + Trunc = Цикада) — split ROLE/HOPS/LOOK.
 - Autoi-in-chat / status-list-as-verify / File.Exists alone = seeming.
 - SoftFL / Meta / board-hygiene / inventory mill as work under sealed course.
-- DomainBoard `glance · unavailable` with empty WorkspaceRoot = seeming (climb / latch-only must paint).
+- DomainBoard / WorkspaceHealth / Hypotheses `glance · unavailable` with empty WorkspaceRoot = seeming (climb / latch-only must paint).
 
 ## last_ship
+- **2026-08-06 glance-pages-ac CLOSED** — DIG ACCEPT SA glance Ready-to-Interact: Events READY · Env READY · Hyp paints MISSING · WH climb paints (was unavailable) · `GlassWorkspaceClimb` + always-build WH/Hyp · tests TryProbe_null_root 2/2 · evidence `tmp-glass-shots/glance-{events,wh-climb,env,hyp}-ac-20260806.png` (M·MFD). Extra hands beyond refresh DIG REJECT.
 - 2026-08-05 · cabin glass_scene ROLE human-face parity · `IdeGlassSurfaceChannel.BuildRoleInGraph` → ROLE=`сирота`/`в карте` + hops/look (not `ORPHAN·IN-MAP·map on MFD`) · GlassSurfaceIpcTests 2/2 · dig=domain antipattern Packing ROLE
 - 2026-08-05 · file-situ Applies on locus CLOSED · diags Roslyn+build scoped · tests T-scoped wire (RefreshTestParse→situ) · unit 8/8 · live PNG `tmp-glass-shots/window-20260804-applies-semantic.png` (M·MFD APPLIES E1 W0 + tint L6)
 - 2026-08-05 · gap 3.3 NEXT glance · `FormatGlanceNext` (Dig densest…CLOSED — residual) · Sub=full leaf · dark/scale DIG REJECT (CFG+Dark already LIVE) · evidence `tmp-glass-shots/gap33-next-glance-20260805.png`

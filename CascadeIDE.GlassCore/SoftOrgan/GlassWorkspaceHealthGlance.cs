@@ -18,12 +18,12 @@ public static class GlassWorkspaceHealthGlance
 
     public static WorkspaceFsStatus? TryProbe(string? workspaceRoot)
     {
-        if (string.IsNullOrWhiteSpace(workspaceRoot))
-            return null;
-
         try
         {
-            var root = Path.GetFullPath(workspaceRoot.Trim());
+            var root = GlassWorkspaceClimb.ResolveRoot(workspaceRoot);
+            if (root is null)
+                return new WorkspaceFsStatus("—", false, false, null, false);
+
             var exists = Directory.Exists(root);
             if (!exists)
                 return new WorkspaceFsStatus(root, false, false, null, false);
@@ -36,7 +36,7 @@ public static class GlassWorkspaceHealthGlance
         }
         catch
         {
-            return null;
+            return new WorkspaceFsStatus("—", false, false, null, false);
         }
     }
 

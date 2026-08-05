@@ -24,12 +24,12 @@ public static class GlassHypothesesGlance
 
     public static string? TryResolveFilePath(string? workspaceRoot)
     {
-        if (string.IsNullOrWhiteSpace(workspaceRoot))
+        var root = GlassWorkspaceClimb.ResolveRoot(workspaceRoot);
+        if (root is null)
             return null;
 
         try
         {
-            var root = Path.GetFullPath(workspaceRoot.Trim());
             return Path.Combine(root, ".cascade-ide", "debug-hypotheses.json");
         }
         catch
@@ -42,7 +42,7 @@ public static class GlassHypothesesGlance
     {
         var path = TryResolveFilePath(workspaceRoot);
         if (path is null)
-            return null;
+            return new HypothesesFsStatus(RelativePath, false, 0, 0, 0, 0, null);
 
         try
         {

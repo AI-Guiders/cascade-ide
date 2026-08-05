@@ -54,4 +54,13 @@ public sealed class GlassWorkspaceHealthGlanceTests
         Assert.Contains("WorkspaceHealth glance · THIN", body);
         Assert.Contains("no .sln / .git", body);
     }
+
+    [Fact]
+    public void TryProbe_null_root_still_returns_instrument_status()
+    {
+        var probe = GlassWorkspaceHealthGlance.TryProbe(null);
+        Assert.NotNull(probe);
+        var chips = GlassGlanceCards.BuildWorkspaceHealth(probe.Value);
+        Assert.Contains(chips, c => c.Label == "LEVEL");
+    }
 }

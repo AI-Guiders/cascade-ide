@@ -39,9 +39,15 @@ public partial class MainWindow
         var chips = page switch
         {
             "Events" => GlassGlanceCards.BuildEvents(GlassEventsGlance.ProbeCurrentHabitat()),
-            "WorkspaceHealth" when GlassWorkspaceHealthGlance.TryProbe(_session.WorkspaceRoot) is { } status => GlassGlanceCards.BuildWorkspaceHealth(status),
+            // Climb when session root empty — never paint glance · unavailable (DomainBoard parity).
+            "WorkspaceHealth" => GlassGlanceCards.BuildWorkspaceHealth(
+                GlassWorkspaceHealthGlance.TryProbe(_session.WorkspaceRoot)
+                ?? new GlassWorkspaceHealthGlance.WorkspaceFsStatus("—", false, false, null, false)),
             "EnvironmentReadiness" => GlassGlanceCards.BuildEnvironment(GlassEnvironmentReadinessGlance.ProbeCurrentProcess()),
-            "Hypotheses" when GlassHypothesesGlance.TryProbe(_session.WorkspaceRoot) is { } status => GlassGlanceCards.BuildHypotheses(status),
+            "Hypotheses" => GlassGlanceCards.BuildHypotheses(
+                GlassHypothesesGlance.TryProbe(_session.WorkspaceRoot)
+                ?? new GlassHypothesesGlance.HypothesesFsStatus(
+                    GlassHypothesesGlance.RelativePath, false, 0, 0, 0, 0, null)),
             "FlightDataStorage" or "Fds" => GlassGlanceCards.BuildFds(GlassFdsGlance.Probe(_session.WorkspaceRoot)),
             "DomainBoard" or "Domain" => GlassGlanceCards.BuildDomain(
                 GlassDomainBoardGlance.TryProbe(_session.WorkspaceRoot)

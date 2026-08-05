@@ -62,4 +62,13 @@ public sealed class GlassHypothesesGlanceTests
         Assert.Equal(1, rejected);
         Assert.Equal(1, confirmed);
     }
+
+    [Fact]
+    public void TryProbe_null_root_still_returns_instrument_status()
+    {
+        var probe = GlassHypothesesGlance.TryProbe(null);
+        Assert.NotNull(probe);
+        var chips = GlassGlanceCards.BuildHypotheses(probe.Value);
+        Assert.Contains(chips, c => c.Label == "LEVEL");
+    }
 }
