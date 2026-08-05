@@ -21,6 +21,7 @@
 - Treating Intercom as DM with «second pilot» — NorthStar is team coordination (`#crew` + DM + Radio).
 - `#humans` / `#agents` as separate **channels** — discrimination; use lens (0143) inside `#crew`.
 - Shipping CIDE session-graph / topic-tree complexity as Glass day-1 (suffering, not work).
+- Conversational-UI chrome (bubbles, bot cards, suggested-actions default) instead of Slack/MM flat feed — less chrome, more meaning.
 - Hardcoding operator nick (Света) as clone default — sticky is local latch, bootstrap is Operator.
 - ComboBox for habitat lane (3 fixed seats) — use Korry XOR strip; ComboBox is for FM catalog.
 - One control mixing lane + FM model id; two ComboBoxes beside Send; live FM list when lane ≠ CIT.
@@ -33,6 +34,7 @@
 - Hand-wiring Folded AutoI Korry while Review — green paint ≠ consume path; fix ignite-cmd consumer later.
 
 ## last_ship
+- 2026-08-05 · **Decision stamped** · Face = Slack/MM light (not Conversational UI chrome) · northstar-messenger-v0 Face §
 - 2026-08-05 · **Decision stamped** · NorthStar ontology · `#crew`+DM+Radio · reject `#humans`/`#agents` rooms · `glass-intercom-northstar-messenger-v0.md`
 - 2026-08-05 · **Decision stamped** · lane×model axes v0 · Lane=Korry XOR @ Send · Model=HUD Combo @ HDG/CRS · secrets=CFG · design `glass-intercom-lane-model-axes-v0.md` (UI not shipped yet)
 - 2026-08-05 · Sticky Intercom Who · `%LocalAppData%/cdp-mcp/intercom-identity-LATEST.json` · Glass `GlassIntercomIdentity` + `ResolveIntercomIdentity` · MCP `cdp_intercom op=identity` · dogfood send without name= → AutoI · pm sticky Света (local claim, not repo default)

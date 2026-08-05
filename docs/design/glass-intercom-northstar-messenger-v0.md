@@ -45,6 +45,16 @@ Product face → **обычный мессенджер**: групповые ч�
 
 Внутри `#crew` (или DM) lens All/Humans/Agents/System **фильтрует вид**, не создаёт комнаты.
 
+## Face (UX)
+
+**Conversational UI → Slack/MM light:** меньше хрома, больше смысла.
+
+- Flat feed: имя + время + текст (не пузыри Telegram/RadChat).
+- Channel rail + composer — основные controls; не bot cards / suggested-actions / overlay carousel как default.
+- Meaning first: кто сказал, куда (crew/DM/Radio), Radio pointers / attach — не декоративный chat chrome.
+- Paid Conversational kits (Telerik/DE) не нужны под этот stance; stand on `intercom-wire` + WPF list/virtualization.
+- Canon UX: [intercom-ux-reference-slack-mattermost-v1](intercom-ux-reference-slack-mattermost-v1.md).
+
 ## Relation to lane × model axes
 
 [glass-intercom-lane-model-axes-v0](glass-intercom-lane-model-axes-v0.md) (CIT/HOST/PF Korry + HUD model) = **near-term chrome / strangler**.
