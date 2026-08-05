@@ -20,7 +20,7 @@
 - Tests: `CascadeIDE.Tests/IntercomMarkdownTests.cs` · `GlassOperatorShareShelfTests.cs` · `GlassRadioPointerTests.cs`
 
 ## Antipatterns
-- **Bare topology wipe for dogfood** — never publish `topology=(intercom)` (or any single-group) just to shoot Intercom; PreferSurface / surface run without replacing the latch, or restore the **operator flight topology** (this desk: `(F)(P/M)` — Forward alone + OneOf P/M). Do **not** invent `(P)(F)(M)` or surface-groups `(intercom)(sit)(world)` as "fix" — wrong wire = still regression.
+- **Bare topology wipe for dogfood** — never publish `topology=(intercom)` (or any single-group) just to shoot Intercom; PreferSurface / surface run without replacing the latch, or restore the **operator flight topology**. Review wire here: `(F/P/M)` (single OneOf TopLevel). Do **not** invent `(P)(F)(M)`, `(F)(P/M)`, or surface-groups `(intercom)(sit)(world)` as "fix" — wrong wire = still regression. Ask if unsure which flight was live.
 - Treating Intercom as DM with «second pilot» — NorthStar is team coordination (`#crew` + DM + Radio).
 - `#humans` / `#agents` as separate **channels** — discrimination; use lens (0143) inside `#crew`.
 - Shipping CIDE session-graph / topic-tree complexity as Glass day-1 (suffering, not work).
