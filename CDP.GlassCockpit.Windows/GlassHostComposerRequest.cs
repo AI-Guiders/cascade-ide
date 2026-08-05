@@ -8,12 +8,12 @@ using CascadeIDE.Intercom;
 namespace CDP.GlassCockpit.Windows;
 
 /// <summary>
-/// Operator → citizen dialog request for habitat bridge (not guest PF Intercom latch).
-/// Does not publish human→PF voice (would wake guest unread). Journals locally + request latch + IdeShare.
+/// Operator → host Composer request latch (HOST lane). Journals locally + mirrors IdeShare;
+/// CDT inject consumer is a later residual — share shelf is the share-3.8 wire now.
 /// </summary>
-internal static class GlassCitizenDialogRequest
+internal static class GlassHostComposerRequest
 {
-    public const string Schema = "citizen_dialog_request/v0";
+    public const string Schema = "host_composer_request/v0";
 
     static readonly JsonSerializerOptions JsonOpts = new()
     {
@@ -24,8 +24,8 @@ internal static class GlassCitizenDialogRequest
 
     public sealed record Sent(string Id, string Body, string RoleLabel);
 
-    /// <summary>Queue citizen dialog turn. Empty → null.</summary>
-    public static Sent? TryEnqueue(string? raw, string? modelId = null, string? workspaceRoot = null)
+    /// <summary>Queue host Composer turn. Empty → null.</summary>
+    public static Sent? TryEnqueue(string? raw, string? workspaceRoot = null)
     {
         if (string.IsNullOrWhiteSpace(raw))
             return null;
@@ -37,7 +37,6 @@ internal static class GlassCitizenDialogRequest
         var id = Guid.NewGuid().ToString("N")[..12];
         var (name, kind) = LatchPaint.ResolveIntercomIdentity("pm", "human", null, null);
         var stamped = DateTimeOffset.UtcNow;
-        var mid = string.IsNullOrWhiteSpace(modelId) ? null : modelId.Trim();
 
         try
         {
@@ -48,24 +47,22 @@ internal static class GlassCitizenDialogRequest
                 id,
                 body,
                 status = "pending",
-                lane = GlassIntercomLane.Code(GlassIntercomLane.Kind.Cit),
-                model_id = mid,
+                lane = GlassIntercomLane.Code(GlassIntercomLane.Kind.Host),
                 stamped_utc = stamped
             };
             var json = JsonSerializer.Serialize(doc, JsonOpts);
-            var path = CdpHabitatPaths.CitizenDialogRequestLatchPath;
+            var path = CdpHabitatPaths.HostComposerRequestLatchPath;
             var tmp = path + "." + Guid.NewGuid().ToString("N")[..8] + ".tmp";
             File.WriteAllText(tmp, json);
             File.Move(tmp, path, overwrite: true);
 
-            // Journal only — do not Publish intercom-LATEST (guest PF unread).
-            GlassIntercomJournal.Append(id, "pm", "cit", body, "human", stamped, name, kind);
+            GlassIntercomJournal.Append(id, "pm", "host", body, "human", stamped, name, kind);
             _ = GlassOperatorShareShelf.TryPut(
                 body,
                 workspaceRoot,
                 id,
-                GlassIntercomLane.ShareWhat(GlassIntercomLane.Kind.Cit));
-            return new Sent(id, body, LatchPaint.FormatIntercomRole("pm", "cit", name, kind));
+                GlassIntercomLane.ShareWhat(GlassIntercomLane.Kind.Host));
+            return new Sent(id, body, LatchPaint.FormatIntercomRole("pm", "host", name, kind));
         }
         catch
         {

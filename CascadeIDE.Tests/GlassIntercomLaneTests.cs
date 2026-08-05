@@ -59,4 +59,12 @@ public sealed class GlassIntercomLaneTests
         Assert.True(GlassIntercomLane.IsComposerPlaceholder("Message @HOST…"));
         Assert.False(GlassIntercomLane.IsComposerPlaceholder("hello"));
     }
+
+    [Fact]
+    public void ShareWhat_tags_lane_for_IdeShare()
+    {
+        Assert.Equal("intercom-cit", GlassIntercomLane.ShareWhat(GlassIntercomLane.Kind.Cit));
+        Assert.Equal("intercom-host", GlassIntercomLane.ShareWhat(GlassIntercomLane.Kind.Host));
+        Assert.Equal("intercom", GlassIntercomLane.ShareWhat(GlassIntercomLane.Kind.Pf));
+    }
 }

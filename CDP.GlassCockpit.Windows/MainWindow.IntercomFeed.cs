@@ -222,20 +222,53 @@ public partial class MainWindow
         if (TryRunGlassSlash(raw))
             return;
 
-        var sent = GlassIntercomSend.TrySend(raw, _session.WorkspaceRoot);
-        if (sent is null)
+        string? id;
+        string? roleLabel;
+        if (_lane == GlassIntercomLane.Kind.Cit)
         {
-            StatusText.Text = "glass · intercom · empty — nothing sent";
-            return;
+            var cit = GlassCitizenDialogRequest.TryEnqueue(raw, _modelId, _session.WorkspaceRoot);
+            if (cit is null)
+            {
+                StatusText.Text = "glass · intercom · empty — nothing sent";
+                return;
+            }
+
+            id = cit.Id;
+            roleLabel = cit.RoleLabel;
+        }
+        else if (_lane == GlassIntercomLane.Kind.Host)
+        {
+            var host = GlassHostComposerRequest.TryEnqueue(raw, _session.WorkspaceRoot);
+            if (host is null)
+            {
+                StatusText.Text = "glass · intercom · empty — nothing sent";
+                return;
+            }
+
+            id = host.Id;
+            roleLabel = host.RoleLabel;
+        }
+        else
+        {
+            var pf = GlassIntercomSend.TrySend(raw, _session.WorkspaceRoot);
+            if (pf is null)
+            {
+                StatusText.Text = "glass · intercom · empty — nothing sent";
+                return;
+            }
+
+            id = pf.Id;
+            roleLabel = pf.RoleLabel;
         }
 
-        _seenIntercomIds.Add(sent.Id);
+        _seenIntercomIds.Add(id);
         RebuildIntercomFeedFromJournal(stickEnd: true);
 
         ComposerBox.Clear();
         HideSlashPopup();
         PublishPmIdle();
-        StatusText.Text = $"glass · intercom · sent {sent.Id} · {sent.RoleLabel} · {DateTime.Now:HH:mm:ss}";
+        StatusText.Text =
+            $"glass · intercom · {_lane} · sent {id} · {roleLabel} · {DateTime.Now:HH:mm:ss}";
     }
 
     public sealed record TopicCard(

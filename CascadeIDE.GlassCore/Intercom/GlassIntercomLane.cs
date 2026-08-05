@@ -60,6 +60,14 @@ public static class GlassIntercomLane
         text is "Message @PF…" or "Message @PM…"
             or "Message @CIT…" or "Message @HOST…";
 
+    /// <summary>IdeShare <c>what=</c> tag for human→agent shelf by lane.</summary>
+    public static string ShareWhat(Kind lane) => lane switch
+    {
+        Kind.Cit => "intercom-cit",
+        Kind.Host => "intercom-host",
+        _ => "intercom"
+    };
+
     public static Kind Parse(string? raw)
     {
         if (string.IsNullOrWhiteSpace(raw))

@@ -26,6 +26,8 @@ public static class CdpHabitatPaths
     public const string SurfaceReplyLatchFileName = "surface-reply-LATEST.json";
     /// <summary>Glass Intercom → habitat citizen dialog request (poll by cdp-mcp bridge).</summary>
     public const string CitizenDialogRequestLatchFileName = "citizen-dialog-request-LATEST.json";
+    /// <summary>Glass Intercom → host Composer inject request (CDT/Autoi consumer later).</summary>
+    public const string HostComposerRequestLatchFileName = "host-composer-request-LATEST.json";
     /// <summary>Last AutoI wake charge (composer|habitat) — Glass Autoi consumer.</summary>
     public const string IgniteWakeLatchFileName = "ignite-wake-LATEST.json";
     /// <summary>AutoIgnition continuity chrome (autonomous/hild/course for Intercom HUD).</summary>
@@ -64,6 +66,8 @@ public static class CdpHabitatPaths
     public static string SurfaceReplyLatchPath => GetLatchPath(SurfaceReplyLatchFileName);
 
     public static string CitizenDialogRequestLatchPath => GetLatchPath(CitizenDialogRequestLatchFileName);
+
+    public static string HostComposerRequestLatchPath => GetLatchPath(HostComposerRequestLatchFileName);
 
     public static string IgniteWakeLatchPath => GetLatchPath(IgniteWakeLatchFileName);
 

@@ -65,7 +65,7 @@ public partial class MainWindow
                 return true;
             }
 
-            var sent = GlassCitizenDialogRequest.TryEnqueue(argsTail);
+            var sent = GlassCitizenDialogRequest.TryEnqueue(argsTail, workspaceRoot: _session.WorkspaceRoot);
             if (sent is null)
             {
                 StatusText.Text = "glass · citizen · enqueue failed";
