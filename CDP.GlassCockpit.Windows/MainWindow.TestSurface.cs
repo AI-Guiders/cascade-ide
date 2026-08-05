@@ -78,6 +78,8 @@ public partial class MainWindow
         foreach (var row in GlassTestOutputParse.ParseFails(text))
             _testFails.Add(row);
 
+        RefreshEditorSituRibbon();
+
         if (TestsStatusLabel is null || _testRunner is { IsRunning: true })
             return;
 

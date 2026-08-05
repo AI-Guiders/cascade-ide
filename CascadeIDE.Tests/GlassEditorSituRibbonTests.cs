@@ -62,6 +62,30 @@ public sealed class GlassEditorSituRibbonTests
     }
 
     [Fact]
+    public void Build_applies_includes_scoped_test_fails()
+    {
+        var root = Path.Combine(Path.GetTempPath(), "glass-applies-tests-" + Guid.NewGuid().ToString("N")[..8]);
+        Directory.CreateDirectory(root);
+        try
+        {
+            var path = Path.Combine(root, "Target.cs");
+            File.WriteAllText(path, "class Target { }");
+            var fails = new[]
+            {
+                new GlassTestOutputParse.FailRow("✗ TargetTests.Fail", "TargetTests.Fail", "boom"),
+            };
+
+            var face = GlassEditorSituRibbon.Build(path, root, why: null, leaf: null, testFails: fails);
+            Assert.Contains("T1", face.AppliesOnLocus, StringComparison.Ordinal);
+            Assert.Equal(1, face.Applies!.TestFails);
+        }
+        finally
+        {
+            try { Directory.Delete(root, recursive: true); } catch { /* ignore */ }
+        }
+    }
+
+    [Fact]
     public void Format_empty_without_editor()
     {
         Assert.Equal(string.Empty, GlassEditorSituRibbon.Format(null, null, "why", "leaf"));
