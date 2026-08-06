@@ -27,8 +27,16 @@ public static class GlassSlashCatalog
         new("open", "/open", "Open path[:line] in AvalonEdit (thin attach↔code)", ArgTailKind.Required),
         // optional: bare may use AvalonEdit selection; empty + no selection → honest usage.
         new("attach", "/attach", "Insert [path:line] chip from editor selection (ADR 0128 thin)", ArgTailKind.Optional),
+        new("attach_selection", "/intercom attach selection", "Attach chip from AvalonEdit selection (alias of bare /attach)"),
+        new("attach_file", "/intercom attach file", "Attach chip from path[:line[-line]]", ArgTailKind.Required),
+        new("attach_scope", "/intercom attach scope", "Honest refuse — Glass has no Roslyn caret scope yet (DIG REJECT SoftFL)"),
         new("citizen", "/citizen", "Talk to habitat citizen (dialog peer) — not guest @PF", ArgTailKind.Required),
         new("letter", "/letter", "Where the Agent Who letter lives (CDP canon)"),
+        new("topic_overview", "/intercom overview", "Open topic cards overview (30m clusters)"),
+        new("topic_cards", "/intercom topic cards", "Alias of /intercom overview"),
+        new("topic_open", "/intercom topic open", "Enter focused topic · optional N ordinal", ArgTailKind.Optional),
+        new("topic_next", "/intercom topic next", "Next topic card"),
+        new("topic_prev", "/intercom topic prev", "Previous topic card"),
         // CIDE intent-catalog: /intercom message select · arg_tail = required (no bare=last invent).
         new("select", "/intercom message select", "Select #N · N:M · [3;5] [8;15] · clear (ADR 0136/0150)", ArgTailKind.Required),
         new("message_next", "/intercom message next", "Select next feed message (ordinal)"),
@@ -116,6 +124,6 @@ public static class GlassSlashCatalog
     {
         var lines = Commands.Select(c => $"{c.Path,-28} [{c.ArgTail,-8}] {c.Help}");
         return "Glass slash (ADR 0150 ArgTail):\n" + string.Join('\n', lines)
-               + "\n\n(/select short → /intercom message select · required → type N then Enter; residual: find/relate/anchors…)";
+               + "\n\n(/select short → /intercom message select · required → type N then Enter; residual: find/relate/anchors/spine…)";
     }
 }

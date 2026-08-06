@@ -45,10 +45,91 @@ public partial class MainWindow
             return true;
         }
 
-        if (cmd.Id == "attach")
+        if (cmd.Id is "attach" or "attach_selection" or "attach_file")
         {
-            var attachBody = TryAttachSlash(argsTail);
+            var attachArgs = cmd.Id == "attach_selection" ? "" : argsTail;
+            if (cmd.Id == "attach_file" && string.IsNullOrWhiteSpace(attachArgs))
+            {
+                AppendSlashBubble(cmd.Path,
+                    "usage: /intercom attach file path[:line[-line]]\n(or /attach with AvalonEdit selection)");
+                ComposerBox.Clear();
+                HideSlashPopup();
+                StatusText.Text = $"glass · slash · {cmd.Path} · usage · {DateTime.Now:HH:mm:ss}";
+                return true;
+            }
+
+            var attachBody = TryAttachSlash(attachArgs);
             AppendSlashBubble(cmd.Path, attachBody);
+            HideSlashPopup();
+            StatusText.Text = $"glass · slash · {cmd.Path} · {DateTime.Now:HH:mm:ss}";
+            return true;
+        }
+
+        if (cmd.Id == "attach_scope")
+        {
+            AppendSlashBubble(cmd.Path,
+                "Glass has no Roslyn caret-scope attach yet (DIG REJECT SoftFL).\n"
+                + "Use /attach or /intercom attach selection · /intercom attach file path[:line]");
+            ComposerBox.Clear();
+            HideSlashPopup();
+            StatusText.Text = $"glass · slash · {cmd.Path} · refuse · {DateTime.Now:HH:mm:ss}";
+            return true;
+        }
+
+        if (cmd.Id is "topic_overview" or "topic_cards")
+        {
+            ShowIntercomTopicOverview();
+            AppendSlashBubble(cmd.Path, $"topics overview · {_topics.Count} cards");
+            ComposerBox.Clear();
+            HideSlashPopup();
+            StatusText.Text = $"glass · slash · {cmd.Path} · {DateTime.Now:HH:mm:ss}";
+            return true;
+        }
+
+        if (cmd.Id == "topic_next")
+        {
+            SelectIntercomTopicNext();
+            AppendSlashBubble(cmd.Path, StatusText.Text ?? "topic next");
+            ComposerBox.Clear();
+            HideSlashPopup();
+            return true;
+        }
+
+        if (cmd.Id == "topic_prev")
+        {
+            SelectIntercomTopicPrev();
+            AppendSlashBubble(cmd.Path, StatusText.Text ?? "topic prev");
+            ComposerBox.Clear();
+            HideSlashPopup();
+            return true;
+        }
+
+        if (cmd.Id == "topic_open")
+        {
+            if (!string.IsNullOrWhiteSpace(argsTail)
+                && int.TryParse(argsTail.Trim(), out var topicOrdinal)
+                && topicOrdinal > 0)
+            {
+                RebuildIntercomFeedFromJournal(stickEnd: false);
+                var clustered = GlassIntercomTopics.Cluster(
+                    GlassIntercomJournal.LoadTail(TopicClusterTail));
+                var pick = CascadeIDE.Intercom.GlassIntercomTopicFollow.IdByOrdinal(clustered, topicOrdinal);
+                if (pick is null)
+                    AppendSlashBubble(cmd.Path, $"no topic #{topicOrdinal} (have {_topics.Count})");
+                else
+                {
+                    _isTopicOverviewMode = false;
+                    ApplyIntercomTopicSelection(pick);
+                    AppendSlashBubble(cmd.Path, $"opened #{topicOrdinal} · {ShortTopicLabel(pick)}");
+                }
+            }
+            else
+            {
+                EnterIntercomFocusedTopic();
+                AppendSlashBubble(cmd.Path, StatusText.Text ?? "topic enter");
+            }
+
+            ComposerBox.Clear();
             HideSlashPopup();
             StatusText.Text = $"glass · slash · {cmd.Path} · {DateTime.Now:HH:mm:ss}";
             return true;

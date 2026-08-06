@@ -175,8 +175,8 @@ public sealed class GlassPaletteChordCatalogTests
                     && of2 == "open_file");
         Assert.True(GlassMelodyGlassActions.TryMapCommandId("intercom.attach_selection", out var ias)
                     && ias == "slash_attach");
-        Assert.True(GlassMelodyGlassActions.TryMapCommandId("intercom.attach_scope", out var isc)
-                    && isc == "slash_attach");
+        Assert.False(GlassMelodyGlassActions.TryMapCommandId("intercom.attach_scope", out _),
+            "attach_scope must not false-map to slash_attach (DIG REJECT SoftFL)");
         Assert.True(GlassMelodyGlassActions.TryMapCommandId("chat_select_next_thread", out var tn)
                     && tn == "topic_next");
         Assert.True(GlassMelodyGlassActions.TryMapCommandId("chat_select_prev_thread", out var tp)

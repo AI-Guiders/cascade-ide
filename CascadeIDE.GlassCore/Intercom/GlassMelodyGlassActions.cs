@@ -35,7 +35,7 @@ public static class GlassMelodyGlassActions
             ["open_file"] = "open_file",
             ["open_file_dialog"] = "open_file",
             ["intercom.attach_selection"] = "slash_attach",
-            ["intercom.attach_scope"] = "slash_attach",
+            // attach_scope: DIG REJECT SoftFL — melody discoverability-only (no false → slash_attach).
             // Intercom IOP keyboard — topic overview/nav + open (was browse-only melody).
             ["chat_select_next_thread"] = "topic_next",
             ["chat_select_prev_thread"] = "topic_prev",
