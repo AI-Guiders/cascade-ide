@@ -265,6 +265,17 @@
                 </Grid>
               </Border>
 
+              <!-- Slack/MM Face: partner typing above composer (presence latch — not bubble invent). -->
+              <TextBlock x:Name="TypingCue"
+                         DockPanel.Dock="Bottom"
+                         Text=""
+                         FontSize="12"
+                         FontStyle="Italic"
+                         Foreground="#888"
+                         Margin="14,0,14,4"
+                         Visibility="Collapsed"
+                         ToolTip="Partner presence · composing|busy"/>
+
               <Border DockPanel.Dock="Top" Background="{StaticResource Glass.BgRaised}" BorderBrush="#2A2A2A" BorderThickness="0,0,0,1" Padding="8,6">
                 <StackPanel>
                   <DockPanel>

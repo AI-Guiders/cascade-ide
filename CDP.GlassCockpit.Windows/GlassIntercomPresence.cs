@@ -96,17 +96,7 @@ internal static class GlassIntercomPresence
     {
         try
         {
-            PresenceDoc? doc;
-            if (json is not null)
-                doc = JsonSerializer.Deserialize<PresenceDoc>(json, ReadOpts);
-            else
-                doc = TryReadRaw();
-
-            if (doc is null || !string.Equals(doc.Schema, Schema, StringComparison.OrdinalIgnoreCase))
-                return null;
-
-            var now = DateTimeOffset.UtcNow;
-            var partner = Effective(doc.Pf, now); // Glass watches PF
+            var partner = TryPartnerSeat(json);
             if (partner is null || string.IsNullOrWhiteSpace(partner.State))
                 return null;
             if (string.Equals(partner.State, "idle", StringComparison.OrdinalIgnoreCase))
@@ -118,6 +108,50 @@ internal static class GlassIntercomPresence
         {
             return null;
         }
+    }
+
+    /// <summary>
+    /// Slack/MM Face cue above composer — human eyes, not subtitle-only.
+    /// Null when partner idle/missing/stale.
+    /// </summary>
+    public static string? TryTypingCue(string? json = null, string? whoName = null)
+    {
+        try
+        {
+            var partner = TryPartnerSeat(json);
+            if (partner is null || string.IsNullOrWhiteSpace(partner.State))
+                return null;
+
+            var state = partner.State.Trim().ToLowerInvariant();
+            if (state is "idle" or "stale")
+                return null;
+
+            var who = string.IsNullOrWhiteSpace(whoName) ? "PF" : whoName.Trim();
+            return state switch
+            {
+                "composing" => $"{who} is typing…",
+                "busy" => $"{who} is busy…",
+                _ => $"{who} · {state}"
+            };
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
+    static PresenceSeat? TryPartnerSeat(string? json)
+    {
+        PresenceDoc? doc;
+        if (json is not null)
+            doc = JsonSerializer.Deserialize<PresenceDoc>(json, ReadOpts);
+        else
+            doc = TryReadRaw();
+
+        if (doc is null || !string.Equals(doc.Schema, Schema, StringComparison.OrdinalIgnoreCase))
+            return null;
+
+        return Effective(doc.Pf, DateTimeOffset.UtcNow); // Glass watches PF
     }
 
     /// <summary>MFD Chat secondary card — Forward is primary; no SoftOrgan invent.</summary>

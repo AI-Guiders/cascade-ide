@@ -153,6 +153,7 @@ public partial class MainWindow
             json = File.ReadAllText(path);
         _partnerPresenceLine = GlassIntercomPresence.TryPartnerLine(json);
         MergeIntercomSubtitle();
+        PaintTypingCue(json);
     }
 
     void MergeIntercomSubtitle()
@@ -160,6 +161,21 @@ public partial class MainWindow
         IntercomSubtitle.Text = string.IsNullOrWhiteSpace(_partnerPresenceLine)
             ? _intercomHeader
             : $"{_intercomHeader} · {_partnerPresenceLine}";
+    }
+
+    void PaintTypingCue(string? json)
+    {
+        var (who, _) = LatchPaint.ResolveIntercomIdentity("pf", "guest", null, null);
+        var cue = GlassIntercomPresence.TryTypingCue(json, who);
+        if (string.IsNullOrWhiteSpace(cue))
+        {
+            TypingCue.Visibility = Visibility.Collapsed;
+            TypingCue.Text = "";
+            return;
+        }
+
+        TypingCue.Text = cue;
+        TypingCue.Visibility = Visibility.Visible;
     }
 
     void NoteComposerPresenceChanged()
