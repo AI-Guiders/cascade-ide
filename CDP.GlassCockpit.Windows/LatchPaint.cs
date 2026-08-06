@@ -18,7 +18,8 @@ internal static partial class LatchPaint
         string ToSeat = "?",
         string Origin = "?",
         string? Name = null,
-        string? Kind = null);
+        string? Kind = null,
+        string? Channel = null);
 
     public sealed record PresentationView(
         string Headline,
@@ -45,6 +46,7 @@ internal static partial class LatchPaint
             var body = CompactIntercomBody(rawBody);
             var name = Prop(root, "name") ?? Prop(root, "display_name");
             var kind = Prop(root, "kind");
+            var channel = Prop(root, "channel");
             var (resolvedName, resolvedKind) = ResolveIntercomIdentity(from, origin, name, kind);
             if (wake)
             {
@@ -69,7 +71,8 @@ internal static partial class LatchPaint
                 to,
                 origin,
                 resolvedName,
-                resolvedKind);
+                resolvedKind,
+                channel);
         }
         catch (Exception ex)
         {

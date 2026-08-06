@@ -52,6 +52,34 @@ public static class GlassIntercomChannel
     public static bool MatchesFeed(Kind active, string? entryChannel) =>
         Parse(entryChannel) == active;
 
+    /// <summary>
+    /// Face follow: off-rail arrival with explicit crew/dm (or citizen) switches the XOR rail
+    /// so Sierra observe letters are not hidden behind Radio stale refuse.
+    /// Blank channel = Radio backcompat — do not steal. wake never follows.
+    /// </summary>
+    public static bool TryFollowArrival(Kind active, string? entryChannel, string? kind, out Kind follow)
+    {
+        follow = active;
+        if (string.Equals(kind, "wake", StringComparison.OrdinalIgnoreCase))
+            return false;
+        if (string.IsNullOrWhiteSpace(entryChannel))
+            return false;
+
+        var target = Parse(entryChannel);
+        if (MatchesFeed(active, entryChannel))
+            return false;
+
+        if (string.Equals(kind, "citizen", StringComparison.OrdinalIgnoreCase)
+            || target is Kind.Crew or Kind.Dm)
+        {
+            follow = target;
+            return true;
+        }
+
+        return false;
+    }
+
+
     public static Kind Parse(string? raw)
     {
         if (string.IsNullOrWhiteSpace(raw))

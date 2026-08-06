@@ -52,7 +52,8 @@ public partial class MainWindow
             view.Origin,
             DateTimeOffset.Now,
             view.Name,
-            view.Kind);
+            view.Kind,
+            view.Channel);
     }
 
     void OnIntercomChanged(string path)
@@ -87,7 +88,11 @@ public partial class MainWindow
                     FeedScroll.VerticalOffset,
                     FeedScroll.ExtentHeight,
                     FeedScroll.ViewportHeight);
-                RebuildIntercomFeedFromJournal(); // preserve scroll unless pinned to end
+                // Off-rail crew/dm (Sierra observe) → follow Face rail; else rebuild on current rail.
+                if (GlassIntercomChannel.TryFollowArrival(_channel, view.Channel, view.Kind, out var follow))
+                    SetChannel(follow);
+                else
+                    RebuildIntercomFeedFromJournal(); // preserve scroll unless pinned to end
                 NoteArrivalWhileReading(wasPinned);
                 StatusText.Text = $"glass · {view.StatusLine} · {DateTime.Now:HH:mm:ss}";
             }

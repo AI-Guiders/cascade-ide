@@ -53,4 +53,26 @@ public sealed class GlassIntercomChannelTests
     [InlineData(GlassIntercomChannel.Kind.Dm, "dm", true)]
     public void MatchesFeed_blank_is_radio(GlassIntercomChannel.Kind active, string? entry, bool expect) =>
         Assert.Equal(expect, GlassIntercomChannel.MatchesFeed(active, entry));
+
+    [Theory]
+    [InlineData(GlassIntercomChannel.Kind.Radio, "crew", "citizen", true, GlassIntercomChannel.Kind.Crew)]
+    [InlineData(GlassIntercomChannel.Kind.Radio, "crew", "guest", true, GlassIntercomChannel.Kind.Crew)]
+    [InlineData(GlassIntercomChannel.Kind.Radio, "dm", "guest", true, GlassIntercomChannel.Kind.Dm)]
+    [InlineData(GlassIntercomChannel.Kind.Radio, null, "citizen", false, GlassIntercomChannel.Kind.Radio)]
+    [InlineData(GlassIntercomChannel.Kind.Radio, "", "guest", false, GlassIntercomChannel.Kind.Radio)]
+    [InlineData(GlassIntercomChannel.Kind.Radio, "radio", "guest", false, GlassIntercomChannel.Kind.Radio)]
+    [InlineData(GlassIntercomChannel.Kind.Crew, "crew", "citizen", false, GlassIntercomChannel.Kind.Crew)]
+    [InlineData(GlassIntercomChannel.Kind.Radio, "crew", "wake", false, GlassIntercomChannel.Kind.Radio)]
+    public void TryFollowArrival_off_rail_explicit(
+        GlassIntercomChannel.Kind active,
+        string? entry,
+        string? kind,
+        bool expectFollow,
+        GlassIntercomChannel.Kind expectTarget)
+    {
+        var followed = GlassIntercomChannel.TryFollowArrival(active, entry, kind, out var follow);
+        Assert.Equal(expectFollow, followed);
+        Assert.Equal(expectTarget, follow);
+    }
+
 }
