@@ -7,7 +7,7 @@ public sealed record GlassSlashSuggestion(string InsertText, string Title, strin
 
 public static class GlassSlashCatalog
 {
-    public sealed record Command(string Id, string Path, string Help);
+    public sealed record Command(string Id, string Path, string Help, bool RequiresArgs = false);
 
     static readonly Command[] Commands =
     [
@@ -15,11 +15,11 @@ public static class GlassSlashCatalog
         new("status", "/status", "Glass session / latch status line"),
         new("topics", "/topics", "List topic cards (30m gap) · /topics N to select"),
         new("fds", "/fds", "Open Flight Data Storage MFD (plans/reports/notes)"),
-        new("open", "/open", "Open path[:line] in AvalonEdit (thin attach↔code)"),
-        new("attach", "/attach", "Insert [path:line] chip from editor selection (ADR 0128 thin)"),
-        new("citizen", "/citizen", "Talk to habitat citizen (dialog peer · GigaChat) — not guest @PF"),
+        new("open", "/open", "Open path[:line] in AvalonEdit (thin attach↔code)", RequiresArgs: true),
+        new("attach", "/attach", "Insert [path:line] chip from editor selection (ADR 0128 thin)", RequiresArgs: true),
+        new("citizen", "/citizen", "Talk to habitat citizen (dialog peer · GigaChat) — not guest @PF", RequiresArgs: true),
         new("letter", "/letter", "Where the Agent Who letter lives (CDP canon)"),
-        new("select", "/intercom message select", "Select #N · N:M · [3;5] [8;15] · clear (ADR 0136/0138)"),
+        new("select", "/intercom message select", "Select #N · N:M · [3;5] [8;15] · clear · bare=last (ADR 0136/0138)", RequiresArgs: true),
         new("message_next", "/intercom message next", "Select next feed message (ordinal)"),
         new("message_prev", "/intercom message prev", "Select previous feed message (ordinal)"),
     ];
@@ -43,7 +43,12 @@ public static class GlassSlashCatalog
             .Where(c => filter.Length == 0
                         || c.Id.StartsWith(filter, StringComparison.OrdinalIgnoreCase)
                         || c.Path.Contains(filter, StringComparison.OrdinalIgnoreCase))
-            .Select(c => new GlassSlashSuggestion(c.Path + " ", c.Path, c.Help))
+            .Select(c =>
+            {
+                // Short insert for select — Enter-commit must leave room for N (not run bare path).
+                var insert = c.Id == "select" ? "/select " : c.Path + " ";
+                return new GlassSlashSuggestion(insert, c.Path, c.Help);
+            })
             .ToArray();
     }
 

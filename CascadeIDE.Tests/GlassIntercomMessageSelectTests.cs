@@ -48,6 +48,18 @@ public sealed class GlassIntercomMessageSelectTests
     }
 
     [Fact]
+    public void Slash_select_requires_args_and_short_suggest()
+    {
+        Assert.True(GlassSlashCatalog.TryResolve("/intercom message select", out var bare, out var args));
+        Assert.Equal("select", bare.Id);
+        Assert.True(bare.RequiresArgs);
+        Assert.Equal("", args);
+
+        var hits = GlassSlashCatalog.Suggest("/sel");
+        Assert.Contains(hits, h => h.InsertText.StartsWith("/select", StringComparison.Ordinal));
+    }
+
+    [Fact]
     public void Multi_bracket_and_offset()
     {
         Assert.True(GlassIntercomMessageSelect.TryParseSegments("[3;5] [8;15] [20]", out var segs, out _));

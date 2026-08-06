@@ -125,6 +125,21 @@ public partial class MainWindow
         }
 
         var pick = SlashList.SelectedItem as GlassSlashSuggestion ?? _slashSuggestions[_slashIndex];
+        // Enter on arg-required slash (select/open/…) must NOT run bare path → usage bubble with no highlight.
+        if (run
+            && GlassSlashCatalog.TryResolve(pick.InsertText.TrimEnd(), out var cmd, out _)
+            && cmd.RequiresArgs)
+        {
+            ComposerBox.Text = pick.InsertText.EndsWith(' ')
+                ? pick.InsertText
+                : pick.InsertText.TrimEnd() + " ";
+            ComposerBox.CaretIndex = ComposerBox.Text.Length;
+            HideSlashPopup();
+            ComposerBox.Focus();
+            StatusText.Text = $"glass · slash · type args · {cmd.Path} · {DateTime.Now:HH:mm:ss}";
+            return;
+        }
+
         ComposerBox.Text = pick.InsertText.TrimEnd() + (run ? "" : " ");
         ComposerBox.CaretIndex = ComposerBox.Text.Length;
         HideSlashPopup();

@@ -403,7 +403,7 @@
                     <ItemsControl.ItemTemplate>
                       <DataTemplate>
                         <!-- Face flat feed + ADR 0136: gutter · highlight · ПКМ select (CIDE port). -->
-                        <Border Margin="0,0,0,10" Padding="4,2" BorderThickness="0"
+                        <Border Margin="0,0,0,10" Padding="6,4" BorderThickness="0"
                                 HorizontalAlignment="Stretch">
                           <Border.ContextMenu>
                             <ContextMenu>
@@ -415,12 +415,20 @@
                           <Border.Style>
                             <Style TargetType="Border">
                               <Setter Property="Background" Value="Transparent"/>
+                              <Setter Property="BorderBrush" Value="Transparent"/>
+                              <Setter Property="BorderThickness" Value="0"/>
                               <Style.Triggers>
                                 <DataTrigger Binding="{Binding IsHighlighted}" Value="True">
-                                  <Setter Property="Background" Value="#152820"/>
+                                  <Setter Property="Background" Value="#1E3D30"/>
+                                  <Setter Property="BorderBrush" Value="#3D8F6A"/>
+                                  <Setter Property="BorderThickness" Value="0,0,0,0"/>
+                                  <Setter Property="Padding" Value="6,4,6,4"/>
                                 </DataTrigger>
                                 <DataTrigger Binding="{Binding IsSelected}" Value="True">
-                                  <Setter Property="Background" Value="#1A3A2A"/>
+                                  <Setter Property="Background" Value="#254A38"/>
+                                  <Setter Property="BorderBrush" Value="#5BC48A"/>
+                                  <Setter Property="BorderThickness" Value="3,0,0,0"/>
+                                  <Setter Property="Padding" Value="3,4,6,4"/>
                                 </DataTrigger>
                               </Style.Triggers>
                             </Style>

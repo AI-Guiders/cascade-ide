@@ -155,10 +155,10 @@ public partial class MainWindow
     {
         if (sender is not MenuItem mi)
             return;
-        var bubble = mi.DataContext as ChatBubble
-                     ?? (mi.Parent as ContextMenu)?.PlacementTarget is FrameworkElement fe
-                         ? fe.DataContext as ChatBubble
-                         : null;
+        ChatBubble? bubble = mi.DataContext as ChatBubble;
+        if (bubble is null
+            && mi.Parent is ContextMenu { PlacementTarget: FrameworkElement fe })
+            bubble = fe.DataContext as ChatBubble;
         if (bubble is null || bubble.Ordinal <= 0)
             return;
         var apply = GlassIntercomMessageSelect.Apply(_feed.Count, bubble.Ordinal, bubble.Ordinal, out var sel);

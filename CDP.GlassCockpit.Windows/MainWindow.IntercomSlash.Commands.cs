@@ -105,6 +105,20 @@ public partial class MainWindow
                 ApplyMessageSelectToFeed();
                 reply = GlassIntercomMessageSelect.FormatOk(_messageSelect);
             }
+            else if (string.IsNullOrWhiteSpace(argsTail))
+            {
+                // Bare /select — last feed ordinal (autocomplete used to dump usage here).
+                var apply = GlassIntercomMessageSelect.Apply(
+                    _feed.Count, _feed.Count, _feed.Count, out var sel);
+                if (!string.Equals(apply, "OK", StringComparison.Ordinal))
+                    reply = apply;
+                else
+                {
+                    _messageSelect = sel;
+                    ApplyMessageSelectToFeed();
+                    reply = GlassIntercomMessageSelect.FormatOk(sel);
+                }
+            }
             else if (!GlassIntercomMessageSelect.TryParseSegments(argsTail, out var segments, out var parseErr))
             {
                 reply = parseErr;
@@ -123,6 +137,7 @@ public partial class MainWindow
             }
 
             AppendSlashBubble(cmd.Path, reply);
+            ApplyMessageSelectToFeed();
             ComposerBox.Clear();
             HideSlashPopup();
             StatusText.Text = $"glass · slash · {cmd.Path} · {DateTime.Now:HH:mm:ss}";
