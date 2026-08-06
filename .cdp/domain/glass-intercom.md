@@ -43,6 +43,7 @@
 - Hand-wiring Folded AutoI Korry while Review — green paint ≠ consume path; fix ignite-cmd consumer later.
 
 ## last_ship
+- 2026-08-06 · **mode-picker Ready to Interact VERIFY** · live UIA: CIT→HudModelPicker enabled=True Expand ok · HOST→enabled=False (lane XOR) · Message @CIT · status `glass · lane · CIT` · window_list→title=`CDP GlassCockpit · Windows`→PrintWindow + `cdp_see` · evidence `tmp-glass-shots/mode-picker-cit-axes-20260806.png` + `mode-picker-host-disabled-20260806.png` (+ full `mode-picker-cit-open-20260806.png`) · SoftFL invent REJECT · CabinReadyToInteract 6/6
 - 2026-08-06 · **messenger Ready to Interact VERIFY** · MCP PF→PM → Radio feed (untagged journal = Radio) · #crew empty = channel filter · rail XOR + CIT/HOST/PF Send hand live · evidence `tmp-glass-shots/messenger-radio-verify-20260806.png` · probes `14edf8ee938c`/`f1c3ed7c3900`
 - 2026-08-05 · **citizen multiturn post-fix verify** · turn1+turn2 latch → jsonl 4 lines · journal `ac16e559e218`/`b3d8f2f744a9` channel=crew · turn2 body=sierra · pairs cdp-mcp 74786d1 turn2 persist fix · evidence `tmp-glass-shots/citizen-multiturn-post-fix-20260805.png`
 - 2026-08-05 · **citizen journal dedupe** · habitat AppendJournal owns citizen kind (+ channel) · Glass feed watcher skips TryJournalFromView for kind=citizen (was Radio default duplicate) · needs Glass restart · pairs cdp-mcp crew-channel bridge ship
