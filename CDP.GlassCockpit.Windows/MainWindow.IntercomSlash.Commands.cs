@@ -83,6 +83,41 @@ public partial class MainWindow
             return true;
         }
 
+        if (cmd.Id == "select")
+        {
+            string reply;
+            if (GlassIntercomMessageSelect.IsClear(argsTail))
+            {
+                _messageSelect = GlassIntercomMessageSelect.Empty;
+                ApplyMessageSelectToFeed();
+                reply = GlassIntercomMessageSelect.FormatOk(_messageSelect);
+            }
+            else if (!GlassIntercomMessageSelect.TryParseRange(argsTail, out var start, out var end, out var parseErr))
+            {
+                reply = parseErr;
+            }
+            else
+            {
+                var apply = GlassIntercomMessageSelect.Apply(_feed.Count, start, end, out var sel);
+                if (!string.Equals(apply, "OK", StringComparison.Ordinal))
+                {
+                    reply = apply;
+                }
+                else
+                {
+                    _messageSelect = sel;
+                    ApplyMessageSelectToFeed();
+                    reply = GlassIntercomMessageSelect.FormatOk(sel);
+                }
+            }
+
+            AppendSlashBubble(cmd.Path, reply);
+            ComposerBox.Clear();
+            HideSlashPopup();
+            StatusText.Text = $"glass · slash · {cmd.Path} · {DateTime.Now:HH:mm:ss}";
+            return true;
+        }
+
         if (cmd.Id == "topics")
         {
             RebuildIntercomFeedFromJournal(stickEnd: false);

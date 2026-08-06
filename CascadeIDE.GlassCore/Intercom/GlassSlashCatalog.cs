@@ -19,6 +19,7 @@ public static class GlassSlashCatalog
         new("attach", "/attach", "Insert [path:line] chip from editor selection (ADR 0128 thin)"),
         new("citizen", "/citizen", "Talk to habitat citizen (dialog peer · GigaChat) — not guest @PF"),
         new("letter", "/letter", "Where the Agent Who letter lives (CDP canon)"),
+        new("select", "/intercom message select", "Select feed msg #N (ADR 0136 port) · /intercom message select clear"),
     ];
 
     public static bool IsSlashLine(string? raw)
@@ -55,17 +56,27 @@ public static class GlassSlashCatalog
         if (body.Length == 0)
             return false;
 
-        var parts = body.Split(' ', 2, StringSplitOptions.TrimEntries);
-        var id = parts[0];
-        argsTail = parts.Length > 1 ? parts[1] : "";
-
-        foreach (var c in Commands)
+        // Longest path first (CIDE /intercom message select), then short id (/select, /topics…).
+        foreach (var c in Commands.OrderByDescending(x => x.Path.Length))
         {
-            if (c.Id.Equals(id, StringComparison.OrdinalIgnoreCase))
+            var pathBody = c.Path.TrimStart('/');
+            if (body.StartsWith(pathBody, StringComparison.OrdinalIgnoreCase)
+                && (body.Length == pathBody.Length || body[pathBody.Length] == ' '))
             {
                 command = c;
+                argsTail = body.Length > pathBody.Length ? body[(pathBody.Length)..].TrimStart() : "";
                 return true;
             }
+        }
+
+        var parts = body.Split(' ', 2, StringSplitOptions.TrimEntries);
+        foreach (var c in Commands)
+        {
+            if (!c.Id.Equals(parts[0], StringComparison.OrdinalIgnoreCase))
+                continue;
+            command = c;
+            argsTail = parts.Length > 1 ? parts[1] : "";
+            return true;
         }
 
         return false;
@@ -75,6 +86,6 @@ public static class GlassSlashCatalog
     {
         var lines = Commands.Select(c => $"{c.Path,-10} {c.Help}");
         return "Glass slash:\n" + string.Join('\n', lines)
-               + "\n\n(Full CIDE intent-catalog slash lives in Avalonia host — not wired here yet.)";
+               + "\n\n(/select short → /intercom message select · remaining CIDE slash still Avalonia denser)";
     }
 }

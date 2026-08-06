@@ -117,13 +117,38 @@ public partial class MainWindow
             if (string.IsNullOrWhiteSpace(body) && pointers is { Count: > 0 })
                 body = "(radio)";
             var role = GlassIntercomFaceMeta.QuietRole(e.RoleLabel);
-            _feed.Add(new ChatBubble(role, body, e.WhenLabel, chips, pointers));
+            var ordinal = _feed.Count + 1;
+            var hi = _messageSelect.Highlighted.Contains(ordinal);
+            var sel = ordinal == _messageSelect.ActiveOrdinal;
+            _feed.Add(new ChatBubble(role, body, e.WhenLabel, chips, pointers, ordinal, sel, hi));
         }
+
+        // Drop selection that no longer fits the rebuilt feed.
+        if (_messageSelect.ActiveOrdinal > _feed.Count)
+            _messageSelect = GlassIntercomMessageSelect.Empty;
 
         while (_feed.Count > 81)
             _feed.RemoveAt(1);
 
+        ApplyMessageSelectToFeed();
         ApplyFeedScrollAfterRebuild(stickEnd, wasPinned, priorOffset);
+    }
+
+    void ApplyMessageSelectToFeed()
+    {
+        if (_messageSelect.ActiveOrdinal > _feed.Count)
+            _messageSelect = GlassIntercomMessageSelect.Empty;
+
+        for (var i = 0; i < _feed.Count; i++)
+        {
+            var ord = i + 1;
+            var b = _feed[i];
+            var hi = _messageSelect.Highlighted.Contains(ord);
+            var sel = ord == _messageSelect.ActiveOrdinal;
+            if (b.Ordinal == ord && b.IsSelected == sel && b.IsHighlighted == hi)
+                continue;
+            _feed[i] = b with { Ordinal = ord, IsSelected = sel, IsHighlighted = hi };
+        }
     }
 
     void ApplyFeedScrollAfterRebuild(bool stickEnd, bool wasPinned, double priorOffset)

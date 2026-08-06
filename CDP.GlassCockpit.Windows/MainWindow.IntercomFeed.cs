@@ -13,6 +13,7 @@ namespace CDP.GlassCockpit.Windows;
 public partial class MainWindow
 {
     readonly ObservableCollection<ChatBubble> _feed = new();
+    GlassIntercomMessageSelect.Selection _messageSelect = GlassIntercomMessageSelect.Empty;
     readonly ObservableCollection<TopicCard> _topics = new();
     readonly HashSet<string> _seenIntercomIds = new(StringComparer.OrdinalIgnoreCase);
     string? _selectedTopicId;
@@ -301,9 +302,13 @@ public partial class MainWindow
         string Body,
         string When,
         IReadOnlyList<CascadeIDE.Intercom.GlassAttachChip>? Chips = null,
-        IReadOnlyList<CascadeIDE.SoftOrgan.GlassGlanceChip>? Pointers = null)
+        IReadOnlyList<CascadeIDE.SoftOrgan.GlassGlanceChip>? Pointers = null,
+        int Ordinal = 0,
+        bool IsSelected = false,
+        bool IsHighlighted = false)
     {
         public bool HasChips => Chips is { Count: > 0 };
         public bool HasPointers => Pointers is { Count: > 0 };
+        public string OrdinalLabel => Ordinal > 0 ? Ordinal.ToString() : "";
     }
 }
