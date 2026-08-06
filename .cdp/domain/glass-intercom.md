@@ -44,6 +44,7 @@
 - Hand-wiring Folded AutoI Korry while Review — green paint ≠ consume path; fix ignite-cmd consumer later.
 
 ## last_ship
+- **2026-08-06 face-contacts SHIPPED (thin)** · DM address book sidebar when channel=DM · `GlassIntercomContacts` · latch `glass-intercom-dm.json` (selected_id; roster SSOT=sticky/bootstrap) · humans+agents equal standing · live `tmp-glass-shots/face-contacts-dm-20260806.png` · residual: model directory + chrome-strip · SoftFL REJECT
 - **2026-08-06 CORRECT seeming messenger Done** — operator: no contact list · no model directory · chrome ≠ Slack/MM. Prior `messenger-ready-verify` = **hands only** (rail/Send/channel). Face OPEN: DM address book (northstar Open) · browsable model list · Face chrome-strip. Dig=northstar Open + live shot + operator. SoftFL REJECT.
 - 2026-08-06 · **mode-picker Ready to Interact VERIFY** · live UIA: CIT→HudModelPicker enabled=True Expand ok · HOST→enabled=False (lane XOR) · Message @CIT · status `glass · lane · CIT` · window_list→title=`CDP GlassCockpit · Windows`→PrintWindow + `cdp_see` · evidence `tmp-glass-shots/mode-picker-cit-axes-20260806.png` + `mode-picker-host-disabled-20260806.png` (+ full `mode-picker-cit-open-20260806.png`) · SoftFL invent REJECT · CabinReadyToInteract 6/6
 - 2026-08-06 · **messenger Ready to Interact VERIFY** · MCP PF→PM → Radio feed (untagged journal = Radio) · #crew empty = channel filter · rail XOR + CIT/HOST/PF Send hand live · evidence `tmp-glass-shots/messenger-radio-verify-20260806.png` · probes `14edf8ee938c`/`f1c3ed7c3900`

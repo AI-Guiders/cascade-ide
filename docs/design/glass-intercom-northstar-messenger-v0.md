@@ -76,5 +76,5 @@ Green Korry = latch **paint**. Click → `glass_ignite_cmd` pending. Halted/fold
 ## Open (later ship)
 
 - Identity of Radio partner vs Citizen vs host Composer when multiple minds on wire.
-- DM address book (humans + agents as equal-standing members).
+- DM address book (humans + agents as equal-standing members) — **thin shipped 2026-08-06** (`GlassIntercomContacts` · DM sidebar); peer journal filter / rich directory later.
 - Whether HOST stays a channel or a transport quirk.
