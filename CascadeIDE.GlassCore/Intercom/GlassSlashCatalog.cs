@@ -2,26 +2,35 @@
 
 namespace CascadeIDE.Intercom;
 
-/// <summary>Glass-local slash catalog (Avalonia-free). Full CIDE ChatSlash stays in host.</summary>
+/// <summary>Glass-local slash catalog (Avalonia-free). ArgTailKind = ADR 0150 (CIDE intent-catalog parity).</summary>
 public sealed record GlassSlashSuggestion(string InsertText, string Title, string Help);
 
 public static class GlassSlashCatalog
 {
-    public sealed record Command(string Id, string Path, string Help, bool RequiresArgs = false);
+    /// <summary>ADR 0150: none | optional | required — autocomplete Enter vs execute.</summary>
+    public enum ArgTailKind
+    {
+        None,
+        Optional,
+        Required
+    }
+
+    public sealed record Command(string Id, string Path, string Help, ArgTailKind ArgTail = ArgTailKind.None);
 
     static readonly Command[] Commands =
     [
         new("help", "/help", "List Glass slash commands"),
         new("status", "/status", "Glass session / latch status line"),
-        new("topics", "/topics", "List topic cards (30m gap) · /topics N to select"),
+        new("topics", "/topics", "List topic cards (30m gap) · /topics N to select", ArgTailKind.Optional),
         new("fds", "/fds", "Open Flight Data Storage MFD (plans/reports/notes)"),
-        new("open", "/open", "Open path[:line] in AvalonEdit (thin attach↔code)", RequiresArgs: true),
-        // attach: bare OK when AvalonEdit has a selection — Autocomplete may auto-run; fail → park composer (no usage bubble).
-        new("attach", "/attach", "Insert [path:line] chip from editor selection (ADR 0128 thin)"),
-        new("citizen", "/citizen", "Talk to habitat citizen (dialog peer · GigaChat) — not guest @PF", RequiresArgs: true),
+        // Glass /open = path in AvalonEdit (not CIDE chat_open_selected_thread).
+        new("open", "/open", "Open path[:line] in AvalonEdit (thin attach↔code)", ArgTailKind.Required),
+        // optional: bare may use AvalonEdit selection; empty + no selection → honest usage.
+        new("attach", "/attach", "Insert [path:line] chip from editor selection (ADR 0128 thin)", ArgTailKind.Optional),
+        new("citizen", "/citizen", "Talk to habitat citizen (dialog peer) — not guest @PF", ArgTailKind.Required),
         new("letter", "/letter", "Where the Agent Who letter lives (CDP canon)"),
-        // select: Autocomplete waits for N; bare TryRun → last message (not usage).
-        new("select", "/intercom message select", "Select #N · N:M · [3;5] [8;15] · clear · bare=last (ADR 0136/0138)", RequiresArgs: true),
+        // CIDE intent-catalog: /intercom message select · arg_tail = required (no bare=last invent).
+        new("select", "/intercom message select", "Select #N · N:M · [3;5] [8;15] · clear (ADR 0136/0150)", ArgTailKind.Required),
         new("message_next", "/intercom message next", "Select next feed message (ordinal)"),
         new("message_prev", "/intercom message prev", "Select previous feed message (ordinal)"),
     ];
@@ -32,6 +41,11 @@ public static class GlassSlashCatalog
             return false;
         return raw.TrimStart()[0] == '/';
     }
+
+    public static string ComposerInsert(Command cmd) =>
+        cmd.ArgTail == ArgTailKind.None
+            ? cmd.Path
+            : cmd.Id == "select" ? "/select " : cmd.Path.TrimEnd() + " ";
 
     public static IReadOnlyList<GlassSlashSuggestion> Suggest(string? raw)
     {
@@ -45,12 +59,7 @@ public static class GlassSlashCatalog
             .Where(c => filter.Length == 0
                         || c.Id.StartsWith(filter, StringComparison.OrdinalIgnoreCase)
                         || c.Path.Contains(filter, StringComparison.OrdinalIgnoreCase))
-            .Select(c =>
-            {
-                // Short insert for select — Enter-commit must leave room for N (not run bare path).
-                var insert = c.Id == "select" ? "/select " : c.Path + " ";
-                return new GlassSlashSuggestion(insert, c.Path, c.Help);
-            })
+            .Select(c => new GlassSlashSuggestion(ComposerInsert(c), c.Path, c.Help))
             .ToArray();
     }
 
@@ -91,23 +100,22 @@ public static class GlassSlashCatalog
         return false;
     }
 
-    /// <summary>CIDE parity: Autocomplete Enter auto-runs only when args are present or command allows bare.</summary>
+    /// <summary>ADR 0150 + CIDE <c>ShouldAutoExecuteAfterAutocompleteCommit</c>: required needs non-empty ArgTail.</summary>
     public static bool ShouldAutoRunOnCommit(string? raw)
     {
         if (!TryResolve(raw, out var cmd, out var argsTail))
             return false;
-        if (cmd.RequiresArgs && string.IsNullOrWhiteSpace(argsTail))
-            return false;
-        return true;
+        return cmd.ArgTail switch
+        {
+            ArgTailKind.Required => !string.IsNullOrWhiteSpace(argsTail),
+            _ => true
+        };
     }
-
-    public static string ComposerInsertForArgs(Command cmd) =>
-        cmd.Id == "select" ? "/select " : cmd.Path.TrimEnd() + " ";
 
     public static string FormatHelp()
     {
-        var lines = Commands.Select(c => $"{c.Path,-10} {c.Help}");
-        return "Glass slash:\n" + string.Join('\n', lines)
-               + "\n\n(/select short → /intercom message select · residual denser: find/relate/anchors/attach*/topic*/spine*)";
+        var lines = Commands.Select(c => $"{c.Path,-28} [{c.ArgTail,-8}] {c.Help}");
+        return "Glass slash (ADR 0150 ArgTail):\n" + string.Join('\n', lines)
+               + "\n\n(/select short → /intercom message select · required → type N then Enter; residual: find/relate/anchors…)";
     }
 }

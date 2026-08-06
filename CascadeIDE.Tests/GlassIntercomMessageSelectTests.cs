@@ -32,6 +32,7 @@ public sealed class GlassIntercomMessageSelectTests
         Assert.True(GlassSlashCatalog.TryResolve("/intercom message select 5", out var cmd, out var args));
         Assert.Equal("select", cmd.Id);
         Assert.Equal("/intercom message select", cmd.Path);
+        Assert.Equal(GlassSlashCatalog.ArgTailKind.Required, cmd.ArgTail);
         Assert.Equal("5", args);
 
         Assert.True(GlassSlashCatalog.TryResolve("/select 3", out cmd, out args));
@@ -48,21 +49,21 @@ public sealed class GlassIntercomMessageSelectTests
     }
 
     [Fact]
-    public void Slash_select_requires_args_and_short_suggest()
+    public void ArgTail_ADR0150_auto_run_matrix()
     {
-        Assert.True(GlassSlashCatalog.TryResolve("/intercom message select", out var bare, out var args));
-        Assert.Equal("select", bare.Id);
-        Assert.True(bare.RequiresArgs);
-        Assert.Equal("", args);
+        // required: autocomplete Enter must NOT run bare (insert + wait for N).
         Assert.False(GlassSlashCatalog.ShouldAutoRunOnCommit("/intercom message select"));
-        Assert.True(GlassSlashCatalog.ShouldAutoRunOnCommit("/select 3"));
         Assert.False(GlassSlashCatalog.ShouldAutoRunOnCommit("/open"));
         Assert.False(GlassSlashCatalog.ShouldAutoRunOnCommit("/citizen"));
+        Assert.True(GlassSlashCatalog.ShouldAutoRunOnCommit("/select 3"));
+
+        // none / optional: bare auto-run OK (attach may still emit honest usage if no selection).
         Assert.True(GlassSlashCatalog.ShouldAutoRunOnCommit("/help"));
         Assert.True(GlassSlashCatalog.ShouldAutoRunOnCommit("/attach"));
+        Assert.True(GlassSlashCatalog.ShouldAutoRunOnCommit("/topics"));
 
         var hits = GlassSlashCatalog.Suggest("/sel");
-        Assert.Contains(hits, h => h.InsertText.StartsWith("/select", StringComparison.Ordinal));
+        Assert.Contains(hits, h => h.InsertText == "/select ");
     }
 
     [Fact]
@@ -76,5 +77,12 @@ public sealed class GlassIntercomMessageSelectTests
 
         Assert.Equal("OK", GlassIntercomMessageSelect.ApplyOffset(25, sel, -1, out var prev));
         Assert.Equal(19, prev.ActiveOrdinal);
+    }
+
+    [Fact]
+    public void Empty_select_args_is_usage_not_silent()
+    {
+        Assert.False(GlassIntercomMessageSelect.TryParseSegments("", out _, out var err));
+        Assert.StartsWith("usage:", err);
     }
 }

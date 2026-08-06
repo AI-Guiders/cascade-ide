@@ -125,20 +125,16 @@ public partial class MainWindow
         }
 
         var pick = SlashList.SelectedItem as GlassSlashSuggestion ?? _slashSuggestions[_slashIndex];
-        var insert = pick.InsertText.EndsWith(' ')
-            ? pick.InsertText
-            : pick.InsertText.TrimEnd() + " ";
-        ComposerBox.Text = insert;
-        ComposerBox.CaretIndex = insert.Length;
+        // ADR 0150: insert catalog InsertText; auto-run only when ArgTail policy allows (required needs N).
+        ComposerBox.Text = pick.InsertText;
+        ComposerBox.CaretIndex = pick.InsertText.Length;
         HideSlashPopup();
         ComposerBox.Focus();
 
-        // Universal: never auto-run RequiresArgs bare (open/citizen/select…) — park for typing.
-        // Bare-ok commands (help/status/attach/…) still run on Enter.
-        if (run && GlassSlashCatalog.ShouldAutoRunOnCommit(insert.TrimEnd()))
-            TryRunGlassSlash(insert.TrimEnd());
+        if (run && GlassSlashCatalog.ShouldAutoRunOnCommit(pick.InsertText.TrimEnd()))
+            TryRunGlassSlash(pick.InsertText.TrimEnd());
         else if (run)
             StatusText.Text =
-                $"glass · slash · type args · {pick.Title} · {DateTime.Now:HH:mm:ss}";
+                $"glass · slash · arg_tail required · {pick.Title} · {DateTime.Now:HH:mm:ss}";
     }
 }
