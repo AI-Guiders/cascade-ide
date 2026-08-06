@@ -27,6 +27,9 @@ public partial class MainWindow
     GlassIntercomChannel.Kind _channel = GlassIntercomChannel.DefaultKind;
     string? _modelId;
     bool _hudModelSuppress;
+    string? _dmPeerId;
+    IReadOnlyList<GlassIntercomContacts.Contact> _dmRoster = GlassIntercomContacts.DefaultRoster();
+    bool _dmContactSuppress;
 
     void InitIntercomHud()
     {
@@ -34,6 +37,7 @@ public partial class MainWindow
         _lane = snap.Lane;
         _modelId = snap.ModelId;
         _channel = TryLoadChannelLatch().Channel;
+        LoadDmContactsLatch();
         HudModelPicker.SelectionChanged += HudModelPicker_OnSelectionChanged;
         PaintLaneStrip();
         PaintChannelRail();
@@ -160,7 +164,11 @@ public partial class MainWindow
         PaintChannelRail();
         TrySaveChannelLatch();
         RebuildIntercomFeedFromJournal(stickEnd: true);
-        StatusText.Text = $"glass · channel · {GlassIntercomChannel.Label(channel)}";
+        if (channel == GlassIntercomChannel.Kind.Dm
+            && GlassIntercomContacts.Find(_dmRoster, _dmPeerId) is { } peer)
+            StatusText.Text = $"glass · channel · DM · @{peer.Display}";
+        else
+            StatusText.Text = $"glass · channel · {GlassIntercomChannel.Label(channel)}";
     }
 
     void PaintLaneStrip()
@@ -177,8 +185,88 @@ public partial class MainWindow
         PaintKorry(ChannelCrewBtn, _channel == GlassIntercomChannel.Kind.Crew);
         PaintKorry(ChannelRadioBtn, _channel == GlassIntercomChannel.Kind.Radio);
         PaintKorry(ChannelDmBtn, _channel == GlassIntercomChannel.Kind.Dm);
+        PaintDmContactsPanel();
         PaintLaneStrip();
     }
+
+    void PaintDmContactsPanel()
+    {
+        var show = _channel == GlassIntercomChannel.Kind.Dm;
+        DmContactsPanel.Visibility = show ? Visibility.Visible : Visibility.Collapsed;
+        if (!show)
+            return;
+
+        _dmContactSuppress = true;
+        try
+        {
+            DmContactList.ItemsSource = _dmRoster;
+            var sel = GlassIntercomContacts.Find(_dmRoster, _dmPeerId);
+            DmContactList.SelectedItem = sel is { } c ? c : (_dmRoster.Count > 0 ? _dmRoster[0] : null);
+            if (DmContactList.SelectedItem is GlassIntercomContacts.Contact picked)
+                _dmPeerId = picked.Id;
+        }
+        finally
+        {
+            _dmContactSuppress = false;
+        }
+    }
+
+    void DmContactList_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (_dmContactSuppress)
+            return;
+        if (_channel != GlassIntercomChannel.Kind.Dm)
+            return;
+        if (DmContactList.SelectedItem is not GlassIntercomContacts.Contact c)
+            return;
+
+        if (string.Equals(_dmPeerId, c.Id, StringComparison.OrdinalIgnoreCase))
+            return;
+
+        _dmPeerId = c.Id;
+        TrySaveDmContactsLatch();
+        StatusText.Text = $"glass · channel · DM · @{c.Display}";
+    }
+
+    void LoadDmContactsLatch()
+    {
+        // Day-1 roster SSOT = ResolveIntercomIdentity (sticky → bootstrap) + Citizen — not frozen latch contacts.
+        var (op, _) = LatchPaint.ResolveIntercomIdentity("pm", "human", null, null);
+        var (partner, _) = LatchPaint.ResolveIntercomIdentity("pf", "guest", null, null);
+        var roster = GlassIntercomContacts.DefaultRoster(op, partner);
+        string? selected = null;
+        try
+        {
+            if (File.Exists(DmContactsLatchPath))
+                selected = GlassIntercomContacts.ParseLatchJson(File.ReadAllText(DmContactsLatchPath), roster).SelectedId;
+        }
+        catch
+        {
+            /* best-effort */
+        }
+
+        _dmRoster = roster;
+        _dmPeerId = GlassIntercomContacts.ResolveSelectedId(roster, selected);
+    }
+
+    void TrySaveDmContactsLatch()
+    {
+        try
+        {
+            CdpHabitatPaths.EnsureStateRoot();
+            var json = GlassIntercomContacts.FormatLatchJson(_dmPeerId, _dmRoster);
+            var tmp = DmContactsLatchPath + "." + Guid.NewGuid().ToString("N")[..8] + ".tmp";
+            File.WriteAllText(tmp, json);
+            File.Move(tmp, DmContactsLatchPath, overwrite: true);
+        }
+        catch
+        {
+            /* best-effort */
+        }
+    }
+
+    static string DmContactsLatchPath =>
+        Path.Combine(CdpHabitatPaths.StateRoot, "glass-intercom-dm.json");
 
     void PaintHudModelAxis()
     {

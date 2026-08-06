@@ -44,7 +44,7 @@ public static class GlassIntercomChannel
     {
         Kind.Crew => "#crew · humans+agents together (NorthStar hub)",
         Kind.Radio => "Radio · operator ↔ this seat / citizen partner",
-        Kind.Dm => "DM · 1:1 (address book later)",
+        Kind.Dm => "DM · 1:1 · address book (humans+agents)",
         _ => "Radio · operator ↔ this seat / citizen partner"
     };
 

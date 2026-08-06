@@ -274,7 +274,7 @@
                       <Button x:Name="ChannelRadioBtn" Content="Radio" Style="{StaticResource KorryBtn}"
                               Click="ChannelRadioBtn_OnClick" ToolTip="Radio · operator ↔ this seat / citizen partner"/>
                       <Button x:Name="ChannelDmBtn" Content="DM" Style="{StaticResource KorryBtn}"
-                              Click="ChannelDmBtn_OnClick" ToolTip="DM · 1:1 (address book later)"/>
+                              Click="ChannelDmBtn_OnClick" ToolTip="DM · 1:1 · address book (humans+agents)"/>
                     </StackPanel>
                     <Button x:Name="TopicAllBtn" DockPanel.Dock="Left" Content="Overview" Style="{StaticResource TopicAllBtnStyle}"
                             Click="TopicAllBtn_OnClick" ToolTip="Topic catalog · ADR 0072 · c:atb" Margin="0,0,6,0" Tag="selected"/>
@@ -313,7 +313,29 @@
               </Border>
 
               <Grid>
-                <ScrollViewer x:Name="TopicOverviewScroll" VerticalScrollBarVisibility="Auto" Padding="12"
+                <Grid.ColumnDefinitions>
+                  <ColumnDefinition Width="Auto"/>
+                  <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Border x:Name="DmContactsPanel" Grid.Column="0" Width="168" Visibility="Collapsed"
+                        Background="#1A1A1A" BorderBrush="#2A2A2A" BorderThickness="0,0,1,0" Padding="6,8">
+                  <DockPanel>
+                    <TextBlock DockPanel.Dock="Top" Text="Contacts" FontSize="11" FontWeight="SemiBold"
+                               Foreground="#AAA" Margin="2,0,0,8"
+                               ToolTip="DM address book · humans + agents equal standing"/>
+                    <ListBox x:Name="DmContactList" Background="Transparent" BorderThickness="0"
+                             Foreground="#DDD" FontSize="12" FontFamily="Segoe UI"
+                             ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                             SelectionChanged="DmContactList_OnSelectionChanged">
+                      <ListBox.ItemTemplate>
+                        <DataTemplate>
+                          <TextBlock Text="{Binding Line}" Padding="4,3" TextTrimming="CharacterEllipsis"/>
+                        </DataTemplate>
+                      </ListBox.ItemTemplate>
+                    </ListBox>
+                  </DockPanel>
+                </Border>
+                <ScrollViewer x:Name="TopicOverviewScroll" Grid.Column="1" VerticalScrollBarVisibility="Auto" Padding="12"
                               Visibility="Collapsed">
                   <StackPanel>
                     <TextBlock x:Name="TopicOverviewHeader" Text="Topics" FontSize="14" FontWeight="SemiBold"
@@ -341,7 +363,7 @@
                     </ItemsControl>
                   </StackPanel>
                 </ScrollViewer>
-                <ScrollViewer x:Name="FeedScroll" VerticalScrollBarVisibility="Auto" Padding="10"
+                <ScrollViewer x:Name="FeedScroll" Grid.Column="1" VerticalScrollBarVisibility="Auto" Padding="10"
                               ScrollChanged="FeedScroll_OnScrollChanged">
                   <ItemsControl x:Name="MessageFeed">
                     <ItemsControl.ItemTemplate>
