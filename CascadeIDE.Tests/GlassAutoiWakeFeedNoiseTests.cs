@@ -27,4 +27,11 @@ public sealed class GlassAutoiWakeFeedNoiseTests
     [Fact]
     public void Ordinary_guest_chat_is_not_noise() =>
         Assert.False(GlassAutoiWakeFeed.IsNoise("shipped tint", name: "Кир", kind: "guest"));
+
+    [Fact]
+    public void Autoi_radio_pointer_misattributed_as_citizen_is_noise() =>
+        Assert.True(GlassAutoiWakeFeed.IsNoise(
+            "Autoi \u00B7 remount\n\u2192 PFD.NEXT\ndelta \u2192 Plan \u00B7 remount-initialized",
+            name: "Citizen",
+            kind: "citizen"));
 }

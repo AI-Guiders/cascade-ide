@@ -15,7 +15,9 @@ public static class GlassAutoiWakeFeed
             return true;
         if (string.Equals(kind, "wake", StringComparison.OrdinalIgnoreCase))
             return true;
-        return LooksLikeCharge(body);
+        // Lived: remount painted as kind=citizen name=Citizen with Autoi Radio body —
+        // still SoftOrgan tip, not chat (Who ≠ body).
+        return LooksLikeCharge(body) || LooksLikeRadioPointer(body);
     }
 
     public static bool LooksLikeCharge(string? body)
@@ -28,6 +30,17 @@ public static class GlassAutoiWakeFeed
                || (body.Contains("Habitat=CDP", StringComparison.Ordinal)
                    && body.Contains("cdp_pressure", StringComparison.OrdinalIgnoreCase)
                    && body.Contains("op=recall", StringComparison.OrdinalIgnoreCase));
+    }
+
+    /// <summary>Collapsed Autoi Radio face (I6) — even when mis-attributed as Citizen.</summary>
+    public static bool LooksLikeRadioPointer(string? body)
+    {
+        if (string.IsNullOrWhiteSpace(body))
+            return false;
+        var t = body.TrimStart();
+        if (t.StartsWith("Autoi ", StringComparison.OrdinalIgnoreCase) && t.Contains('\u00B7'))
+            return true;
+        return t.Contains("PFD.NEXT", StringComparison.Ordinal);
     }
 
     static bool LooksLikeAutoiName(string? s) =>

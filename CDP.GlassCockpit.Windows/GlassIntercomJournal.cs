@@ -17,6 +17,7 @@ internal static class GlassIntercomJournal
     public const string FileName = "intercom-journal.jsonl";
 
     static readonly object Gate = new();
+    static readonly Mutex JournalMutex = new(false, @"Local\cdp-mcp-intercom-journal-v1");
 
     static readonly JsonSerializerOptions WriteOpts = new()
     {
@@ -61,8 +62,10 @@ internal static class GlassIntercomJournal
 
         lock (Gate)
         {
+            var locked = false;
             try
             {
+                locked = JournalMutex.WaitOne(TimeSpan.FromSeconds(5));
                 CdpHabitatPaths.EnsureStateRoot();
                 if (File.Exists(JournalPath))
                 {
@@ -106,6 +109,14 @@ internal static class GlassIntercomJournal
             catch
             {
                 /* best-effort */
+            }
+            finally
+            {
+                if (locked)
+                {
+                    try { JournalMutex.ReleaseMutex(); }
+                    catch { /* ignore */ }
+                }
             }
         }
     }
