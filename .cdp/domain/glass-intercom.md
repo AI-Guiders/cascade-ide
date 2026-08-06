@@ -19,8 +19,9 @@
 - WPF: `CDP.GlassCockpit.Windows/GlassIntercomMarkdownBody.cs` → `MainWindow.xaml` feed template
 - Human send: `GlassIntercomSend` → `ResolveIntercomIdentity` (sticky) + voice latch + journal + `GlassOperatorShareShelf`
 - Sticky Who: `GlassIntercomIdentity` · path `CdpHabitatPaths.IntercomIdentityLatchFileName` · cdp-mcp `op=identity` / `send name=`
-- Lane×model: `CascadeIDE.GlassCore/Intercom/GlassIntercomLane.cs` · WPF `MainWindow.xaml` (`LaneCitBtn`/`LaneHostBtn`/`LanePfBtn` + `HudModelPicker`) · `MainWindow.IntercomHud.cs`
-- Tests: `CascadeIDE.Tests/GlassIntercomChannelTests.cs` · `GlassIntercomLaneTests.cs` · `IntercomMarkdownTests.cs` · `GlassOperatorShareShelfTests.cs` · `GlassRadioPointerTests.cs`
+- Lane×model: `CascadeIDE.GlassCore/Intercom/GlassIntercomLane.cs` · WPF `MainWindow.xaml` (`LaneCitBtn`/`LaneHostBtn`/`LanePfBtn` + `HudModelPicker` + `CitModelsPanel`/`CitModelList`) · `MainWindow.IntercomHud.cs`
+- Model directory: `CascadeIDE.GlassCore/Intercom/GlassIntercomModels.cs` · sealed Cloud.ru shortlist · CIT-lit ListBox (not Combo alone)
+- Tests: `CascadeIDE.Tests/GlassIntercomChannelTests.cs` · `GlassIntercomLaneTests.cs` · `GlassIntercomContactsTests.cs` · `GlassIntercomModelsTests.cs` · `IntercomMarkdownTests.cs` · `GlassOperatorShareShelfTests.cs` · `GlassRadioPointerTests.cs`
 
 ## Antipatterns
 - **Bare topology wipe for dogfood** — never publish `topology=(intercom)` just to shoot Intercom; PreferSurface / surface run without replacing the latch, or restore **`GlassPresentationLayout.OperatorReviewFlightTopology` = `(F/P/M)`** (single OneOf TopLevel — all channels one window). Do **not** invent `(P)(F)(M)`, `(F)(P/M)`, `(intercom)(sit)(world)`, or **`(intercom)(sit/world/alert)`** as "restore" — that last one is 2 windows (F dedicated + satellite host); wrong wire = still regression. Ask if unsure which flight was live.
@@ -44,7 +45,8 @@
 - Hand-wiring Folded AutoI Korry while Review — green paint ≠ consume path; fix ignite-cmd consumer later.
 
 ## last_ship
-- **2026-08-06 face-contacts SHIPPED (thin)** · DM address book sidebar when channel=DM · `GlassIntercomContacts` · latch `glass-intercom-dm.json` (selected_id; roster SSOT=sticky/bootstrap) · humans+agents equal standing · live `tmp-glass-shots/face-contacts-dm-20260806.png` · residual: model directory + chrome-strip · SoftFL REJECT
+- **2026-08-06 face-model-list SHIPPED (thin)** · browsable Models ListBox when lane=CIT (Combo ≠ Face directory) · `GlassIntercomModels` sealed shortlist default·CFG + GLM-5.1 + Qwen3-Coder-Next · HudModelPicker synced · live `tmp-glass-shots/face-model-list-cit-20260806.png` (UIA: Models|GLM-5.1|Qwen3-Coder-Next) · residual: face-chrome-strip · SoftFL REJECT · Citizen KEEP (do not disconnect)
+- **2026-08-06 face-contacts SHIPPED (thin)** · DM address book sidebar when channel=DM · `GlassIntercomContacts` · latch `glass-intercom-dm.json` (selected_id; roster SSOT=sticky/bootstrap) · humans+agents equal standing · live `tmp-glass-shots/face-contacts-dm-20260806.png` · residual: chrome-strip (model directory shipped) · SoftFL REJECT
 - **2026-08-06 CORRECT seeming messenger Done** — operator: no contact list · no model directory · chrome ≠ Slack/MM. Prior `messenger-ready-verify` = **hands only** (rail/Send/channel). Face OPEN: DM address book (northstar Open) · browsable model list · Face chrome-strip. Dig=northstar Open + live shot + operator. SoftFL REJECT.
 - 2026-08-06 · **mode-picker Ready to Interact VERIFY** · live UIA: CIT→HudModelPicker enabled=True Expand ok · HOST→enabled=False (lane XOR) · Message @CIT · status `glass · lane · CIT` · window_list→title=`CDP GlassCockpit · Windows`→PrintWindow + `cdp_see` · evidence `tmp-glass-shots/mode-picker-cit-axes-20260806.png` + `mode-picker-host-disabled-20260806.png` (+ full `mode-picker-cit-open-20260806.png`) · SoftFL invent REJECT · CabinReadyToInteract 6/6
 - 2026-08-06 · **messenger Ready to Interact VERIFY** · MCP PF→PM → Radio feed (untagged journal = Radio) · #crew empty = channel filter · rail XOR + CIT/HOST/PF Send hand live · evidence `tmp-glass-shots/messenger-radio-verify-20260806.png` · probes `14edf8ee938c`/`f1c3ed7c3900`

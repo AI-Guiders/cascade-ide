@@ -65,7 +65,7 @@ Mapping sketch (not UI ship yet):
 - **Radio** ≈ сегодняшний прямой Intercom с PF/habitat partner (то, что ощущается как «этот чат»).
 - **`#crew`** ≈ командный эфир (ещё не UI).
 - **HOST** pipe может стать отдельным transport/DM к host Composer, не обязан быть «каналом экипажа».
-- **CIT** + model Combo — мозг Citizen, который **участвует** в `#crew` / DM / Radio по политике внимания, а не «lane = весь UX».
+- **CIT** + model directory (ListBox + HudModelPicker) — мозг Citizen, который **участвует** в `#crew` / DM / Radio по политике внимания, а не «lane = весь UX».
 
 Longer arc: lane strip → channel rail (`#crew` · Radio · DMs).
 
@@ -77,4 +77,6 @@ Green Korry = latch **paint**. Click → `glass_ignite_cmd` pending. Halted/fold
 
 - Identity of Radio partner vs Citizen vs host Composer when multiple minds on wire.
 - DM address book (humans + agents as equal-standing members) — **thin shipped 2026-08-06** (`GlassIntercomContacts` · DM sidebar); peer journal filter / rich directory later.
+- Browsable FM model directory (CIT) — **thin shipped 2026-08-06** (`GlassIntercomModels` · `CitModelsPanel`); live `GET /v1/models` merge later.
+- Face chrome-strip toward Slack/MM flat feed (topic cards / Autoi strip residual).
 - Whether HOST stays a channel or a transport quirk.
