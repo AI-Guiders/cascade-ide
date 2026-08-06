@@ -1,38 +1,20 @@
 #nullable enable
-using System.IO;
-using System.Text;
-using System.Text.Json;
-using System.Text.Json.Serialization;
 using CascadeIDE.Features.Cdp;
 using CascadeIDE.Intercom;
+using Cdp.IntercomJournal;
 
 namespace CDP.GlassCockpit.Windows;
 
 /// <summary>
-/// Virtual History cold store — same wire as cdp-mcp <c>intercom-journal.jsonl</c>.
+/// Virtual History cold store — shared <c>intercom.witdb</c> with cdp-mcp.
 /// Human scroll survives restart; PF uses <c>cdp_intercom op=history</c>.
 /// </summary>
 internal static class GlassIntercomJournal
 {
-    public const string FileName = "intercom-journal.jsonl";
+    public const string FileName = IntercomJournalStore.FileName;
+    public const string LegacyJsonlFileName = IntercomJournalStore.LegacyJsonlFileName;
 
-    static readonly object Gate = new();
-    static readonly Mutex JournalMutex = new(false, @"Local\cdp-mcp-intercom-journal-v1");
-
-    static readonly JsonSerializerOptions WriteOpts = new()
-    {
-        WriteIndented = false,
-        PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower,
-        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
-    };
-
-    static readonly JsonSerializerOptions ReadOpts = new()
-    {
-        PropertyNameCaseInsensitive = true,
-        PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower
-    };
-
-    public static string JournalPath => Path.Combine(CdpHabitatPaths.StateRoot, FileName);
+    public static string JournalPath => IntercomJournalStore.DbPath(CdpHabitatPaths.StateRoot);
 
     public sealed record Entry(
         string Id,
@@ -60,65 +42,23 @@ internal static class GlassIntercomJournal
         if (string.IsNullOrWhiteSpace(id) || string.IsNullOrWhiteSpace(body))
             return;
 
-        lock (Gate)
-        {
-            var locked = false;
-            try
+        var (resolvedName, resolvedKind) = LatchPaint.ResolveIntercomIdentity(fromSeat, origin, name, kind);
+        var channelCode = GlassIntercomChannel.Code(GlassIntercomChannel.Parse(channel));
+        _ = IntercomJournalStore.TryAppend(
+            CdpHabitatPaths.StateRoot,
+            new IntercomJournalRow
             {
-                locked = JournalMutex.WaitOne(TimeSpan.FromSeconds(5));
-                CdpHabitatPaths.EnsureStateRoot();
-                if (File.Exists(JournalPath))
-                {
-                    foreach (var line in File.ReadLines(JournalPath))
-                    {
-                        if (string.IsNullOrWhiteSpace(line))
-                            continue;
-                        try
-                        {
-                            using var doc = JsonDocument.Parse(line);
-                            if (doc.RootElement.TryGetProperty("id", out var idEl)
-                                && string.Equals(idEl.GetString(), id, StringComparison.OrdinalIgnoreCase))
-                                return;
-                        }
-                        catch
-                        {
-                            /* skip */
-                        }
-                    }
-                }
-
-                var (resolvedName, resolvedKind) = LatchPaint.ResolveIntercomIdentity(fromSeat, origin, name, kind);
-                var channelCode = GlassIntercomChannel.Code(GlassIntercomChannel.Parse(channel));
-                var payload = new
-                {
-                    schema = GlassIntercomSend.Schema,
-                    id,
-                    from_seat = fromSeat,
-                    to_seat = toSeat,
-                    body,
-                    origin,
-                    name = resolvedName,
-                    kind = resolvedKind,
-                    channel = channelCode,
-                    stamped_utc = stampedUtc,
-                    acked = false
-                };
-                var json = JsonSerializer.Serialize(payload, WriteOpts);
-                File.AppendAllText(JournalPath, json + Environment.NewLine, Encoding.UTF8);
-            }
-            catch
-            {
-                /* best-effort */
-            }
-            finally
-            {
-                if (locked)
-                {
-                    try { JournalMutex.ReleaseMutex(); }
-                    catch { /* ignore */ }
-                }
-            }
-        }
+                Id = id.Trim(),
+                FromSeat = fromSeat,
+                ToSeat = toSeat,
+                Body = body,
+                Origin = origin,
+                Name = resolvedName,
+                Kind = resolvedKind,
+                Channel = channelCode,
+                StampedUtc = stampedUtc,
+                Acked = false
+            });
     }
 
     public static IReadOnlyList<Entry> LoadTail(int limit = 40)
@@ -126,59 +66,31 @@ internal static class GlassIntercomJournal
         if (limit < 1) limit = 1;
         if (limit > 500) limit = 500;
 
-        lock (Gate)
+        var rows = IntercomJournalStore.LoadTail(CdpHabitatPaths.StateRoot, limit);
+        var list = new List<Entry>(rows.Count);
+        foreach (var row in rows)
         {
-            if (!File.Exists(JournalPath))
-                return [];
-
-            var all = new List<Entry>();
-            foreach (var line in File.ReadLines(JournalPath))
-            {
-                if (string.IsNullOrWhiteSpace(line))
-                    continue;
-                try
-                {
-                    using var doc = JsonDocument.Parse(line);
-                    var root = doc.RootElement;
-                    var id = Prop(root, "id") ?? "";
-                    var from = Prop(root, "from_seat") ?? "?";
-                    var to = Prop(root, "to_seat") ?? "?";
-                    var origin = Prop(root, "origin") ?? "?";
-                    var body = Prop(root, "body") ?? "";
-                    if (body.Length == 0)
-                        continue;
-                    var stamped = Prop(root, "stamped_utc") ?? "";
-                    DateTimeOffset.TryParse(stamped, out var dto);
-                    if (dto == default)
-                        dto = DateTimeOffset.UtcNow;
-                    var when = dto.ToLocalTime().ToString("HH:mm");
-                    var name = Prop(root, "name") ?? Prop(root, "display_name");
-                    var kind = Prop(root, "kind");
-                    var channel = Prop(root, "channel") ?? GlassIntercomChannel.Code(GlassIntercomChannel.DefaultKind);
-                    var (resolvedName, resolvedKind) = LatchPaint.ResolveIntercomIdentity(from, origin, name, kind);
-                    var role = LatchPaint.FormatIntercomRole(from, to, resolvedName, resolvedKind);
-                    JsonElement? attachments = null;
-                    if (root.TryGetProperty("attachments", out var attEl)
-                        && attEl.ValueKind == JsonValueKind.Array)
-                        attachments = attEl;
-                    var chips = GlassAttachChipPeel.Peel(body, attachments);
-                    all.Add(new Entry(
-                        id, from, to, body.Replace("\r\n", "\n"), origin, dto, role, when, chips, channel));
-                }
-                catch
-                {
-                    /* skip */
-                }
-            }
-
-            if (all.Count <= limit)
-                return all;
-            return all.GetRange(all.Count - limit, limit);
+            if (string.IsNullOrWhiteSpace(row.Body))
+                continue;
+            var when = row.StampedUtc.ToLocalTime().ToString("HH:mm");
+            var (resolvedName, resolvedKind) = LatchPaint.ResolveIntercomIdentity(
+                row.FromSeat, row.Origin, row.Name, row.Kind);
+            var role = LatchPaint.FormatIntercomRole(row.FromSeat, row.ToSeat, resolvedName, resolvedKind);
+            var channel = row.Channel ?? GlassIntercomChannel.Code(GlassIntercomChannel.DefaultKind);
+            var chips = GlassAttachChipPeel.Peel(row.Body);
+            list.Add(new Entry(
+                row.Id,
+                row.FromSeat,
+                row.ToSeat,
+                row.Body.Replace("\r\n", "\n"),
+                row.Origin,
+                row.StampedUtc,
+                role,
+                when,
+                chips,
+                channel));
         }
-    }
 
-    static string? Prop(JsonElement root, string name) =>
-        root.TryGetProperty(name, out var el) && el.ValueKind == JsonValueKind.String
-            ? el.GetString()
-            : null;
+        return list;
+    }
 }

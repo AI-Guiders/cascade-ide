@@ -13,6 +13,10 @@ public static class CdpHabitatPaths
     public const string FolderName = "cdp-mcp";
     public const string PresentationLatchFileName = "presentation-LATEST.json";
     public const string IntercomLatchFileName = "intercom-LATEST.json";
+    /// <summary>Radio Virtual History SSOT (WitDB) — not last-wins LATEST latch.</summary>
+    public const string IntercomJournalDbFileName = "intercom.witdb";
+    /// <summary>Legacy jsonl — migrated once into <see cref="IntercomJournalDbFileName"/>.</summary>
+    public const string IntercomJournalLegacyJsonlFileName = "intercom-journal.jsonl";
     /// <summary>Partner presence (idle|composing|busy) — not voice journal.</summary>
     public const string IntercomPresenceLatchFileName = "intercom-presence-LATEST.json";
     public const string IntercomIdentityLatchFileName = "intercom-identity-LATEST.json";
