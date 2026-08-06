@@ -41,6 +41,12 @@ public partial class MainWindow
                 _selectedTopicId, clustered, entries[^1].Id);
         }
 
+        // Unbind during mutate — ObservableCollection Clear+Add otherwise paints mid-rebuild
+        // (wrong scroll = stack of Radio/topic tiles at top for a frame; Send flash).
+        TopicCards.ItemsSource = null;
+        TopicOverviewCards.ItemsSource = null;
+        MessageFeed.ItemsSource = null;
+
         _topics.Clear();
         foreach (var t in clustered)
         {
@@ -62,7 +68,8 @@ public partial class MainWindow
             _selectedTopicEntryIds = [];
 
         // Face: flat feed default — topic catalog is opt-in via Overview (no adaptive overview slap).
-        if (stickEnd && _selectedTopicId is { Length: > 0 })
+        // Stick-end send/receive always leaves overview (All selection must not keep tile grid).
+        if (stickEnd)
             _isTopicOverviewMode = false;
 
         SyncTopicOverviewChrome();
@@ -71,6 +78,9 @@ public partial class MainWindow
         if (_isTopicOverviewMode)
         {
             _feed.Clear();
+            TopicCards.ItemsSource = _topics;
+            TopicOverviewCards.ItemsSource = _topics;
+            MessageFeed.ItemsSource = _feed;
             ApplyFeedScrollAfterRebuild(stickEnd, wasPinned, priorOffset);
             return;
         }
@@ -115,6 +125,9 @@ public partial class MainWindow
         while (_feed.Count > 81)
             _feed.RemoveAt(1);
 
+        TopicCards.ItemsSource = _topics;
+        TopicOverviewCards.ItemsSource = _topics;
+        MessageFeed.ItemsSource = _feed;
         ApplyFeedScrollAfterRebuild(stickEnd, wasPinned, priorOffset);
     }
 
@@ -125,15 +138,20 @@ public partial class MainWindow
 
         var target = CascadeIDE.Intercom.GlassIntercomFeedScroll.ResolveOffsetAfterRebuild(
             stickEnd, wasPinned, priorOffset);
-        // Layout after ItemsControl mutate — apply on next pass.
-        Dispatcher.BeginInvoke(() =>
+
+        void ApplyScroll()
         {
             if (double.IsPositiveInfinity(target))
                 FeedScroll.ScrollToEnd();
             else
                 FeedScroll.ScrollToVerticalOffset(target);
             SyncNewMsgCue();
-        }, DispatcherPriority.Loaded);
+        }
+
+        // Sync pass first — BeginInvoke-only left one paint frame at offset 0 (tile stack flash).
+        FeedScroll.UpdateLayout();
+        ApplyScroll();
+        Dispatcher.BeginInvoke(ApplyScroll, DispatcherPriority.Loaded);
     }
 
     void SyncNewMsgCue()
