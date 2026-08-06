@@ -232,10 +232,13 @@ public partial class MainWindow
 
     void LoadDmContactsLatch()
     {
-        // Day-1 roster SSOT = ResolveIntercomIdentity (sticky → bootstrap) + Citizen — not frozen latch contacts.
+        // Day-1 roster SSOT = ResolveIntercomIdentity (sticky → bootstrap) + citizen display from Who when tip is citizen.
         var (op, _) = LatchPaint.ResolveIntercomIdentity("pm", "human", null, null);
-        var (partner, _) = LatchPaint.ResolveIntercomIdentity("pf", "guest", null, null);
-        var roster = GlassIntercomContacts.DefaultRoster(op, partner);
+        var (partner, partnerKind) = LatchPaint.ResolveIntercomIdentity("pf", "guest", null, null);
+        string? citizenDisplay = null;
+        if (string.Equals(partnerKind, "citizen", StringComparison.OrdinalIgnoreCase))
+            citizenDisplay = partner;
+        var roster = GlassIntercomContacts.DefaultRoster(op, partner, citizenDisplay);
         string? selected = null;
         try
         {

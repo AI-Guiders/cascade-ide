@@ -46,7 +46,7 @@ public static class GlassIntercomContacts
     }
 
     /// <summary>Day-1 roster: operator + habitat partner + Citizen — equal standing lines.</summary>
-    public static IReadOnlyList<Contact> DefaultRoster(string? operatorDisplay = null, string? partnerDisplay = null)
+    public static IReadOnlyList<Contact> DefaultRoster(string? operatorDisplay = null, string? partnerDisplay = null, string? citizenDisplay = null)
     {
         var op = string.IsNullOrWhiteSpace(operatorDisplay) ? "Operator" : operatorDisplay.Trim();
         var partner = string.IsNullOrWhiteSpace(partnerDisplay) ? "Кир" : partnerDisplay.Trim();
@@ -54,11 +54,13 @@ public static class GlassIntercomContacts
         if (string.Equals(partner, "Citizen", StringComparison.OrdinalIgnoreCase))
             partner = "Кир";
 
+        var citizen = string.IsNullOrWhiteSpace(citizenDisplay) ? "Citizen" : citizenDisplay.Trim();
+
         return
         [
             new("operator", op, Standing.Human),
             new("partner", partner, Standing.Agent),
-            new("citizen", "Citizen", Standing.Agent)
+            new("citizen", citizen, Standing.Agent)
         ];
     }
 

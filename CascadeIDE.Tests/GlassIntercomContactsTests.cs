@@ -22,6 +22,9 @@ public sealed class GlassIntercomContactsTests
         Assert.Equal("Citizen · agent", collide[2].Line);
         Assert.Equal("citizen", roster[2].Id);
         Assert.Equal("Citizen · agent", roster[2].Line);
+
+        var named = GlassIntercomContacts.DefaultRoster("Света", "Sierra", "Sierra");
+        Assert.Equal("Sierra · agent", named[2].Line);
     }
 
     [Fact]
