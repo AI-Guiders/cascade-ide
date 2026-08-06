@@ -37,6 +37,11 @@ public static class GlassSlashCatalog
         new("topic_open", "/intercom topic open", "Enter focused topic · optional N ordinal", ArgTailKind.Optional),
         new("topic_next", "/intercom topic next", "Next topic card"),
         new("topic_prev", "/intercom topic prev", "Previous topic card"),
+        new("spine_show", "/intercom spine show", "Show product spine strip (ADR 0096 latch)"),
+        new("spine_toggle", "/intercom spine toggle", "Toggle product spine strip visibility"),
+        new("message_find", "/intercom message find", "Honest refuse — Glass has no code↔message find peel yet (Avalonia ADR 0137)", ArgTailKind.Optional),
+        new("message_relate", "/intercom message relate", "Honest refuse — Glass has no message↔code relate peel yet (Avalonia ADR 0137)", ArgTailKind.Optional),
+        new("message_anchors", "/intercom message anchors", "Honest refuse — Glass has no anchors peel yet (Avalonia denser)", ArgTailKind.Optional),
         // CIDE intent-catalog: /intercom message select · arg_tail = required (no bare=last invent).
         new("select", "/intercom message select", "Select #N · N:M · [3;5] [8;15] · clear (ADR 0136/0150)", ArgTailKind.Required),
         new("message_next", "/intercom message next", "Select next feed message (ordinal)"),
@@ -124,6 +129,6 @@ public static class GlassSlashCatalog
     {
         var lines = Commands.Select(c => $"{c.Path,-28} [{c.ArgTail,-8}] {c.Help}");
         return "Glass slash (ADR 0150 ArgTail):\n" + string.Join('\n', lines)
-               + "\n\n(/select short → /intercom message select · required → type N then Enter; residual: find/relate/anchors/spine…)";
+               + "\n\n(/select short → /intercom message select · required → type N then Enter; find/relate/anchors = DIG REJECT SoftFL until Glass code↔message peel)";
     }
 }

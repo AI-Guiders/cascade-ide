@@ -135,6 +135,40 @@ public partial class MainWindow
             return true;
         }
 
+        if (cmd.Id is "spine_show" or "spine_toggle")
+        {
+            if (cmd.Id == "spine_toggle"
+                && ProductSpineStrip.Visibility == Visibility.Visible)
+            {
+                ProductSpineStrip.Visibility = Visibility.Collapsed;
+                AppendSlashBubble(cmd.Path, "spine · hidden");
+            }
+            else
+            {
+                SyncProductSpineChrome();
+                var spineBody = ProductSpineStrip.Visibility == Visibility.Visible
+                    ? ProductSpineStrip.Text
+                    : "spine · empty latch (product-spine-LATEST.json)";
+                AppendSlashBubble(cmd.Path, spineBody ?? "spine");
+            }
+
+            ComposerBox.Clear();
+            HideSlashPopup();
+            StatusText.Text = $"glass · slash · {cmd.Path} · {DateTime.Now:HH:mm:ss}";
+            return true;
+        }
+
+        if (cmd.Id is "message_find" or "message_relate" or "message_anchors")
+        {
+            AppendSlashBubble(cmd.Path,
+                "Glass has no Avalonia IntercomCodeRef / message↔code peel yet (DIG REJECT SoftFL).\n"
+                + "Use attach chips + /open · A4 residual denser · CIDE /intercom message find|relate remains Avalonia SSOT");
+            ComposerBox.Clear();
+            HideSlashPopup();
+            StatusText.Text = $"glass · slash · {cmd.Path} · refuse · {DateTime.Now:HH:mm:ss}";
+            return true;
+        }
+
         if (cmd.Id == "citizen")
         {
             if (string.IsNullOrWhiteSpace(argsTail))
