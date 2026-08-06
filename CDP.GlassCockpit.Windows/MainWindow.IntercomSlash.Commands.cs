@@ -158,11 +158,86 @@ public partial class MainWindow
             return true;
         }
 
-        if (cmd.Id is "message_find" or "message_relate" or "message_anchors")
+        if (cmd.Id == "message_find")
+        {
+            if (!GlassIntercomMessageFind.TryParseNeedle(argsTail, out var needle, out var parseErr))
+            {
+                AppendSlashBubble(cmd.Path, parseErr);
+                ComposerBox.Clear();
+                HideSlashPopup();
+                StatusText.Text = $"glass · slash · {cmd.Path} · usage · {DateTime.Now:HH:mm:ss}";
+                return true;
+            }
+
+            var hits = new List<GlassIntercomMessageFind.Hit>(_feed.Count);
+            for (var i = 0; i < _feed.Count; i++)
+            {
+                var b = _feed[i];
+                var ordinal = b.Ordinal > 0 ? b.Ordinal : i + 1;
+                hits.Add(new GlassIntercomMessageFind.Hit(ordinal, b.Body, b.Chips));
+            }
+
+            var ordinals = GlassIntercomMessageFind.MatchOrdinals(needle, hits);
+            var apply = GlassIntercomMessageSelect.ApplyOrdinals(_feed.Count, ordinals, out var sel);
+            string reply;
+            if (string.Equals(apply, "OK", StringComparison.Ordinal))
+            {
+                _messageSelect = sel;
+                ApplyMessageSelectToFeed();
+                reply = GlassIntercomMessageFind.FormatResult(needle, ordinals)
+                        + "\n" + GlassIntercomMessageSelect.FormatOk(sel);
+            }
+            else
+            {
+                reply = GlassIntercomMessageFind.FormatResult(needle, ordinals) + "\n" + apply;
+            }
+
+            AppendSlashBubble(cmd.Path, reply);
+            ComposerBox.Clear();
+            HideSlashPopup();
+            StatusText.Text = $"glass · slash · {cmd.Path} · find · {DateTime.Now:HH:mm:ss}";
+            return true;
+        }
+
+        if (cmd.Id == "message_anchors")
+        {
+            var scopeSelected = _messageSelect.ActiveOrdinal > 0;
+            var lines = new List<string>();
+            for (var i = 0; i < _feed.Count; i++)
+            {
+                var b = _feed[i];
+                var ordinal = b.Ordinal > 0 ? b.Ordinal : i + 1;
+                if (scopeSelected && !_messageSelect.Highlighted.Contains(ordinal))
+                    continue;
+
+                var chips = b.Chips is { Count: > 0 }
+                    ? b.Chips
+                    : GlassAttachChipPeel.FromBody(b.Body);
+                if (chips.Count == 0)
+                    continue;
+
+                lines.Add($"#{ordinal} · {string.Join(" ", chips.Select(static c => c.Bracket))}");
+            }
+
+            var reply = lines.Count == 0
+                ? (scopeSelected
+                    ? "anchors · none on selected messages (select first or clear select)"
+                    : "anchors · none in feed")
+                : "anchors · " + (scopeSelected ? "selected" : "feed") + "\n" + string.Join("\n", lines);
+
+            AppendSlashBubble(cmd.Path, reply);
+            ComposerBox.Clear();
+            HideSlashPopup();
+            StatusText.Text = $"glass · slash · {cmd.Path} · anchors · {DateTime.Now:HH:mm:ss}";
+            return true;
+        }
+
+        if (cmd.Id == "message_relate")
         {
             AppendSlashBubble(cmd.Path,
-                "Glass has no Avalonia IntercomCodeRef / message↔code peel yet (DIG REJECT SoftFL).\n"
-                + "Use attach chips + /open · A4 residual denser · CIDE /intercom message find|relate remains Avalonia SSOT");
+                "Glass has no Avalonia IntercomCodeRef relate/event-log peel yet (DIG REJECT SoftFL).\n"
+                + "A4 denser shipped: /intercom message find [path:line] · /intercom message anchors\n"
+                + "CIDE /intercom message relate remains Avalonia SSOT");
             ComposerBox.Clear();
             HideSlashPopup();
             StatusText.Text = $"glass · slash · {cmd.Path} · refuse · {DateTime.Now:HH:mm:ss}";

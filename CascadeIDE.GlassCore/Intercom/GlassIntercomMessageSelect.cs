@@ -96,6 +96,37 @@ public static class GlassIntercomMessageSelect
         return "OK";
     }
 
+    public static string ApplyOrdinals(int feedCount, IReadOnlyList<int> ordinals, out Selection selection)
+    {
+        selection = Empty;
+        if (feedCount <= 0)
+            return "no messages in feed";
+        if (ordinals.Count == 0)
+            return "no matching messages";
+
+        var ordered = ordinals.Where(static o => o > 0).Distinct().OrderBy(static o => o).ToArray();
+        if (ordered.Length == 0)
+            return "no matching messages";
+
+        var segments = new List<Range>();
+        var runStart = ordered[0];
+        var runEnd = ordered[0];
+        for (var i = 1; i < ordered.Length; i++)
+        {
+            if (ordered[i] == runEnd + 1)
+            {
+                runEnd = ordered[i];
+                continue;
+            }
+
+            segments.Add(new Range(runStart, runEnd));
+            runStart = runEnd = ordered[i];
+        }
+
+        segments.Add(new Range(runStart, runEnd));
+        return ApplySegments(feedCount, segments, out selection);
+    }
+
     public static string ApplyOffset(int feedCount, Selection current, int delta, out Selection selection)
     {
         selection = Empty;
