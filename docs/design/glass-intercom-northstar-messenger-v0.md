@@ -78,5 +78,5 @@ Green Korry = latch **paint**. Click → `glass_ignite_cmd` pending. Halted/fold
 - Identity of Radio partner vs Citizen vs host Composer when multiple minds on wire.
 - DM address book (humans + agents as equal-standing members) — **thin shipped 2026-08-06** (`GlassIntercomContacts` · DM sidebar); peer journal filter / rich directory later.
 - Browsable FM model directory (CIT) — **thin shipped 2026-08-06** (`GlassIntercomModels` · `CitModelsPanel`); live `GET /v1/models` merge later.
-- Face chrome-strip toward Slack/MM flat feed (topic cards / Autoi strip residual).
+- Face chrome-strip toward Slack/MM flat feed — **thin shipped 2026-08-06** (flat rows · quiet meta · topic strip Collapsed / Topics opt-in); residual Autoi/HLD/VAD HUD + CIT/HOST/PF lane strangler.
 - Whether HOST stays a channel or a transport quirk.

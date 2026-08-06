@@ -13,7 +13,9 @@
 
 ## Entry
 - Channel rail: `CascadeIDE.GlassCore/Intercom/GlassIntercomChannel.cs` · WPF XOR `#crew`|Radio|DM @ Topics row · latch `glass-intercom-channel.json` · `MainWindow.IntercomHud.cs`
-- Channel tag on Send: journal `channel` + `MatchesFeed` · `GlassIntercomSend`/`GlassHostComposerRequest`/`GlassCitizenDialogRequest` · bubble `Role · #crew|Radio|DM`
+- Channel tag on Send: journal `channel` + `MatchesFeed` · `GlassIntercomSend`/`GlassHostComposerRequest`/`GlassCitizenDialogRequest` · channel on rail (not bubble meta)
+- Face meta: `GlassIntercomFaceMeta.QuietRole` · `FormatIntercomRole` = name only · flat feed template (no bubble Border)
+- Topic catalog: Overview/`Topics` opt-in · horizontal `TopicCardStrip` Collapsed (ADR 0072 still via Topics)
 - Parser: `CascadeIDE.GlassCore/Intercom/IntercomMarkdown.cs`
 - Radio peel: `CascadeIDE.GlassCore/Intercom/GlassRadioPointer.cs` → feed `ChatBubble.Pointers`
 - WPF: `CDP.GlassCockpit.Windows/GlassIntercomMarkdownBody.cs` → `MainWindow.xaml` feed template
@@ -21,7 +23,7 @@
 - Sticky Who: `GlassIntercomIdentity` · path `CdpHabitatPaths.IntercomIdentityLatchFileName` · cdp-mcp `op=identity` / `send name=`
 - Lane×model: `CascadeIDE.GlassCore/Intercom/GlassIntercomLane.cs` · WPF `MainWindow.xaml` (`LaneCitBtn`/`LaneHostBtn`/`LanePfBtn` + `HudModelPicker` + `CitModelsPanel`/`CitModelList`) · `MainWindow.IntercomHud.cs`
 - Model directory: `CascadeIDE.GlassCore/Intercom/GlassIntercomModels.cs` · sealed Cloud.ru shortlist · CIT-lit ListBox (not Combo alone)
-- Tests: `CascadeIDE.Tests/GlassIntercomChannelTests.cs` · `GlassIntercomLaneTests.cs` · `GlassIntercomContactsTests.cs` · `GlassIntercomModelsTests.cs` · `IntercomMarkdownTests.cs` · `GlassOperatorShareShelfTests.cs` · `GlassRadioPointerTests.cs`
+- Tests: `CascadeIDE.Tests/GlassIntercomChannelTests.cs` · `GlassIntercomLaneTests.cs` · `GlassIntercomContactsTests.cs` · `GlassIntercomModelsTests.cs` · `GlassIntercomFaceMetaTests.cs` · `IntercomMarkdownTests.cs` · `GlassOperatorShareShelfTests.cs` · `GlassRadioPointerTests.cs`
 
 ## Antipatterns
 - **Bare topology wipe for dogfood** — never publish `topology=(intercom)` just to shoot Intercom; PreferSurface / surface run without replacing the latch, or restore **`GlassPresentationLayout.OperatorReviewFlightTopology` = `(F/P/M)`** (single OneOf TopLevel — all channels one window). Do **not** invent `(P)(F)(M)`, `(F)(P/M)`, `(intercom)(sit)(world)`, or **`(intercom)(sit/world/alert)`** as "restore" — that last one is 2 windows (F dedicated + satellite host); wrong wire = still regression. Ask if unsure which flight was live.
@@ -45,6 +47,7 @@
 - Hand-wiring Folded AutoI Korry while Review — green paint ≠ consume path; fix ignite-cmd consumer later.
 
 ## last_ship
+- **2026-08-06 face-chrome-strip SHIPPED (thin)** · Slack/MM flat feed: no bubble Border · quiet name meta (`GlassIntercomFaceMeta` / `FormatIntercomRole`) · topic-card strip Collapsed · Topics opt-in catalog · no adaptive overview slap · no MVP system banner · live `tmp-glass-shots/face-chrome-strip-20260806.png` (UIA: #crew|Radio|DM|Topics|Back) · residual: Autoi/HLD/VAD HUD + CIT/HOST/PF lane strangler · SoftFL REJECT · NEXT: Glass Radio observe→verify (operator deferred)
 - **2026-08-06 face-model-list SHIPPED (thin)** · browsable Models ListBox when lane=CIT (Combo ≠ Face directory) · `GlassIntercomModels` sealed shortlist default·CFG + GLM-5.1 + Qwen3-Coder-Next · HudModelPicker synced · live `tmp-glass-shots/face-model-list-cit-20260806.png` (UIA: Models|GLM-5.1|Qwen3-Coder-Next) · residual: face-chrome-strip · SoftFL REJECT · Citizen KEEP (do not disconnect)
 - **2026-08-06 face-contacts SHIPPED (thin)** · DM address book sidebar when channel=DM · `GlassIntercomContacts` · latch `glass-intercom-dm.json` (selected_id; roster SSOT=sticky/bootstrap) · humans+agents equal standing · live `tmp-glass-shots/face-contacts-dm-20260806.png` · residual: chrome-strip (model directory shipped) · SoftFL REJECT
 - **2026-08-06 CORRECT seeming messenger Done** — operator: no contact list · no model directory · chrome ≠ Slack/MM. Prior `messenger-ready-verify` = **hands only** (rail/Send/channel). Face OPEN: DM address book (northstar Open) · browsable model list · Face chrome-strip. Dig=northstar Open + live shot + operator. SoftFL REJECT.
