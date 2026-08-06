@@ -69,9 +69,9 @@ Mapping sketch (not UI ship yet):
 
 Longer arc: lane strip → channel rail (`#crew` · Radio · DMs).
 
-## Folded AutoI Korry (note only — no hand fix here)
+## Folded AutoI Korry — CLOSED 2026-08-06 (cdp-mcp 0.5.674)
 
-Green Korry = latch **paint**. Click → `glass_ignite_cmd` pending. Halted/folded → no consumer. Fix later as consume path.
+Green Korry = latch **paint**. Click → `glass_ignite_cmd`. Halted/folded: `autonomous_on` now `Resume` + `SetAutonomous(true)` (clears await_partner so face returns to fly). Residual: operator eyes on HUD after fold; VAD still unwired.
 
 ## Open (later ship)
 

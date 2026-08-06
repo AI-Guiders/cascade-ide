@@ -10,7 +10,8 @@ using CascadeIDE.Intercom;
 namespace CDP.GlassCockpit.Windows;
 
 /// <summary>WPF Intercom feed body — ADR 0129/0170 subset via GlassCore <see cref="IntercomMarkdown"/>.</summary>
-/// <remarks>StackPanel (not ContentControl): setting Content during DataTemplate expand double-parents the built tree.</remarks>
+/// <remarks>StackPanel (not ContentControl): setting Content during DataTemplate expand double-parents the built tree.
+/// Body uses read-only RichTextBox so operators can select/copy (TextBlock has no selection on this desktop pack).</remarks>
 public sealed class GlassIntercomMarkdownBody : StackPanel
 {
     public static readonly DependencyProperty MarkdownProperty = DependencyProperty.Register(
@@ -65,22 +66,20 @@ internal static class GlassIntercomMarkdownRenderer
         }
 
         if (root.Children.Count == 0)
-            root.Children.Add(BuildPlainLine(""));
+            root.Children.Add(BuildSelectable([], 13, FontWeights.Normal, new Thickness(0), BodyFg));
 
         return root;
     }
 
     static FrameworkElement BuildCodeBlock(string code)
     {
-        var tb = new TextBlock
-        {
-            Text = code,
-            FontFamily = Mono,
-            FontSize = 12,
-            Foreground = CodeFg,
-            TextWrapping = TextWrapping.Wrap,
-            LineHeight = 16,
-        };
+        var rtb = BuildSelectable(
+            [new IntercomMarkdownRun(code, IntercomMarkdownStyle.Code)],
+            fontSize: 12,
+            FontWeights.Normal,
+            new Thickness(0),
+            CodeFg);
+        rtb.FontFamily = Mono;
         return new Border
         {
             Background = CodeBg,
@@ -89,14 +88,14 @@ internal static class GlassIntercomMarkdownRenderer
             CornerRadius = new CornerRadius(4),
             Padding = new Thickness(8, 6, 8, 6),
             Margin = new Thickness(0, 4, 0, 4),
-            Child = tb,
+            Child = rtb,
         };
     }
 
     static FrameworkElement BuildProse(string prose)
     {
         if (string.IsNullOrEmpty(prose))
-            return BuildPlainLine("");
+            return BuildSelectable([], 13, FontWeights.Normal, new Thickness(0), BodyFg);
 
         if (IntercomMarkdown.ShouldUseDocumentLayout(prose))
             return BuildDocument(prose);
@@ -123,7 +122,7 @@ internal static class GlassIntercomMarkdownRenderer
                     });
                     break;
                 default:
-                    panel.Children.Add(BuildRowTextBlock(row));
+                    panel.Children.Add(BuildRow(row));
                     break;
             }
         }
@@ -131,7 +130,7 @@ internal static class GlassIntercomMarkdownRenderer
         return panel;
     }
 
-    static TextBlock BuildRowTextBlock(IntercomMarkdownRow row)
+    static FrameworkElement BuildRow(IntercomMarkdownRow row)
     {
         var (fontSize, weight, margin) = row.Kind switch
         {
@@ -142,17 +141,7 @@ internal static class GlassIntercomMarkdownRenderer
             _ => (13.0, FontWeights.Normal, new Thickness(0, 1, 0, 1)),
         };
 
-        var tb = new TextBlock
-        {
-            FontSize = fontSize,
-            FontWeight = weight,
-            Foreground = BodyFg,
-            TextWrapping = TextWrapping.Wrap,
-            LineHeight = fontSize + 5,
-            Margin = margin,
-        };
-        AppendRuns(tb, row.Runs);
-        return tb;
+        return BuildSelectable(row.Runs, fontSize, weight, margin, BodyFg);
     }
 
     static FrameworkElement BuildInlineProse(string prose)
@@ -168,38 +157,63 @@ internal static class GlassIntercomMarkdownRenderer
                 continue;
             }
 
-            var tb = new TextBlock
-            {
-                FontSize = 13,
-                Foreground = BodyFg,
-                TextWrapping = TextWrapping.Wrap,
-                LineHeight = 18,
-                Margin = new Thickness(0, i == 0 ? 0 : 1, 0, 0),
-            };
-            AppendRuns(tb, IntercomMarkdown.ParseInline(line));
-            panel.Children.Add(tb);
+            panel.Children.Add(BuildSelectable(
+                IntercomMarkdown.ParseInline(line),
+                13,
+                FontWeights.Normal,
+                new Thickness(0, i == 0 ? 0 : 1, 0, 0),
+                BodyFg));
         }
 
         return panel;
     }
 
-    static TextBlock BuildPlainLine(string text)
+    static RichTextBox BuildSelectable(
+        IReadOnlyList<IntercomMarkdownRun> runs,
+        double fontSize,
+        FontWeight weight,
+        Thickness margin,
+        Brush foreground)
     {
-        return new TextBlock
+        var para = new Paragraph
         {
-            Text = text,
-            FontSize = 13,
-            Foreground = BodyFg,
-            TextWrapping = TextWrapping.Wrap,
-            LineHeight = 18,
+            Margin = new Thickness(0),
+            LineHeight = fontSize + 5,
+            TextAlignment = TextAlignment.Left,
+        };
+        AppendDocRuns(para, runs);
+
+        var doc = new FlowDocument(para)
+        {
+            PagePadding = new Thickness(0),
+            TextAlignment = TextAlignment.Left,
+            Background = Brushes.Transparent,
+        };
+
+        return new RichTextBox
+        {
+            Document = doc,
+            IsReadOnly = true,
+            IsDocumentEnabled = true,
+            BorderThickness = new Thickness(0),
+            Background = Brushes.Transparent,
+            Foreground = foreground,
+            FontSize = fontSize,
+            FontWeight = weight,
+            Margin = margin,
+            Padding = new Thickness(0),
+            VerticalScrollBarVisibility = ScrollBarVisibility.Disabled,
+            HorizontalScrollBarVisibility = ScrollBarVisibility.Disabled,
+            CaretBrush = Brushes.Transparent,
+            Focusable = true,
         };
     }
 
-    static void AppendRuns(TextBlock tb, IReadOnlyList<IntercomMarkdownRun> runs)
+    static void AppendDocRuns(Paragraph para, IReadOnlyList<IntercomMarkdownRun> runs)
     {
         if (runs.Count == 0)
         {
-            tb.Text = "";
+            para.Inlines.Add(new Run(""));
             return;
         }
 
@@ -225,11 +239,11 @@ internal static class GlassIntercomMarkdownRenderer
                 },
                 _ => new Run(run.Text),
             };
-            tb.Inlines.Add(inline);
+            para.Inlines.Add(inline);
         }
 
-        if (tb.Inlines.Count == 0)
-            tb.Text = "";
+        if (para.Inlines.Count == 0)
+            para.Inlines.Add(new Run(""));
     }
 
     static TextDecorationCollection CreateLinkUnderline()

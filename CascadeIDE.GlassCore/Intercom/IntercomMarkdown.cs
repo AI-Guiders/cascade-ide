@@ -463,11 +463,15 @@ public static class IntercomMarkdown
         return true;
     }
 
-    private static bool LooksLikeCodeReference(string inner) =>
-        inner.Contains(':', StringComparison.Ordinal)
-        || inner.Contains(".cs", StringComparison.OrdinalIgnoreCase)
-        || inner.Contains("F:", StringComparison.OrdinalIgnoreCase)
-        || inner.Contains("M:", StringComparison.OrdinalIgnoreCase);
+    private static bool LooksLikeCodeReference(string inner)
+    {
+        if (inner.Contains("F:", StringComparison.OrdinalIgnoreCase)
+            || inner.Contains("M:", StringComparison.OrdinalIgnoreCase))
+            return true;
+
+        // SSOT with attach peel — Telegram [dd.MM.yyyy HH:mm] must stay plain prose.
+        return GlassAttachChipPeel.TryParseBracketInner(inner, out _);
+    }
 
     private static bool StartsWith(string text, int index, string value) =>
         index >= 0 && index + value.Length <= text.Length

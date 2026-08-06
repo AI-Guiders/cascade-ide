@@ -64,4 +64,22 @@ public class GlassAttachChipPeelTests
         var resolved = GlassAttachChipPeel.ResolveAgainstDisk(chip, workspaceRoot: null);
         Assert.False(resolved.Resolved);
     }
+
+    [Fact]
+    public void FromBody_skips_telegram_desktop_timestamps()
+    {
+        var body =
+            "Sierra, [06.08.2026 7:32]\n" +
+            "hi\n" +
+            "Operator, [06.08.2026 7:33]\n" +
+            "and also [LatchPaint.cs:40]";
+        var chips = GlassAttachChipPeel.FromBody(body);
+        Assert.Single(chips);
+        Assert.Equal("LatchPaint.cs:40", chips[0].Label);
+
+        var stripped = GlassAttachChipPeel.StripBracketsForDisplay(body);
+        Assert.Contains("[06.08.2026 7:32]", stripped);
+        Assert.Contains("[06.08.2026 7:33]", stripped);
+        Assert.DoesNotContain("LatchPaint", stripped);
+    }
 }

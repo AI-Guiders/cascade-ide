@@ -27,26 +27,12 @@
 
 ## Antipatterns
 - **Bare topology wipe for dogfood** — never publish `topology=(intercom)` just to shoot Intercom; PreferSurface / surface run without replacing the latch, or restore **`GlassPresentationLayout.OperatorReviewFlightTopology` = `(F/P/M)`** (single OneOf TopLevel — all channels one window). Do **not** invent `(P)(F)(M)`, `(F)(P/M)`, `(intercom)(sit)(world)`, or **`(intercom)(sit/world/alert)`** as "restore" — that last one is 2 windows (F dedicated + satellite host); wrong wire = still regression. Ask if unsure which flight was live.
-- **Seeming-Done without topology regression tests** — before Done on presentation/OneOf: write/run tests that lock single-TopLevel no-host vs 2-group host spawn (`GlassPresentationLayoutSurfaceWireTests`); catch host-count regressions in CI, not by operator parrot.
-- **Cheap prior long-loss (2026-08-05)** — skip-tests / wrong 2-window wire / HOLD surface parade (ECL·QRH) look cheap now and burn the day in circles; horizon ≠ months (→15.08). Refuse; densest human-faced + locks.
-- Treating Intercom as DM with «second pilot» — NorthStar is team coordination (`#crew` + DM + Radio).
-- `#humans` / `#agents` as separate **channels** — discrimination; use lens (0143) inside `#crew`.
-- Shipping CIDE session-graph / topic-tree complexity as Glass day-1 (suffering, not work).
-- Conversational-UI chrome (bubbles, bot cards, suggested-actions default) instead of Slack/MM flat feed — less chrome, more meaning.
-- Rebuilding NorthStar feed as Avalonia Skia surface by default — Glass WPF list/virtualization is the lighter face.
-- Hardcoding operator nick (Света) as clone default — sticky is local latch, bootstrap is Operator.
-- ComboBox for habitat lane (3 fixed seats) — use Korry XOR strip; ComboBox is for FM catalog.
-- One control mixing lane + FM model id; two ComboBoxes beside Send; live FM list when lane ≠ CIT.
-- Dark ComboBox dropdown: Style Background setters lose to ControlTemplate SystemColors — override HighlightBrushKey / WindowTextBrushKey on the ComboBox; don't trust ItemContainerStyle alone.
-- Reparenting a still-parented WPF child into `Content` (crash: logical child already set).
-- Forking Markdig preview host into Glass feed for "normal MD".
-- Silent Cursor Write past PathMutateGate for these files.
-- Human Intercom send that only latches PF without writing `.cdp/share` — agent cannot `share from=operator`.
-- Claiming Radio Done via SA wall / Autoi dump / File.Exists alone.
+- **Telegram Desktop date brackets as attach chips** — paste `Name, [dd.MM.yyyy HH:mm]` is prose timestamp, not `[path:line]`. Missing-file red chips = peel false positive. `LooksLikePath` rejects space-without-slash + digit-only ext (`.2026`).
 - **Seeming messenger Done (operator 2026-08-06):** claiming `messenger-ready-verify` / CabinReady messenger as Face Done when dig shows no contact/DM address book, no browsable model directory (HudModelPicker Combo ≠ list), chrome ≠ Slack/MM flat feed. Hands (rail XOR · Send · channel filter) ≠ messenger. NorthStar Open: DM address book. Dig before claim — live shot alone without directory/Face checklist = seeming.
-- Hand-wiring Folded AutoI Korry while Review — green paint ≠ consume path; fix ignite-cmd consumer later.
 
 ## last_ship
+- **2026-08-06 Telegram date≠attach + feed copy** · peel rejects `[dd.MM.yyyy HH:mm]` (was red unresolved chips) · markdown link SSOT via peel · body RichTextBox IsReadOnly for select/Ctrl+C · tests GlassAttachChipPeel + IntercomMarkdown · SoftFL REJECT · **restart Glass**
+- **2026-08-06 Folded AutoI consume CLOSED** · pairs cdp-mcp **0.5.674** · Glass Autoi ON while folded/talk/halt → `Resume`+`SetAutonomous` (was paint-only seeming) · SoftFL REJECT · residual: operator Glass eyes on Autoi lit after fold; VAD; lane→channel strangler longer arc
 - **2026-08-06 Radio Check as Sierra LIVE** · pairs cdp-mcp **0.5.673** AutoI≠Claim Who · tip Sierra survives remount · dogfood request `ee1b0fd5017c` channel=radio → voice `name=Sierra kind=citizen` («Сьерра, принято…») · SoftFL REJECT · residual: operator Glass eyes on feed (not agent dump Done)
 - **2026-08-06 Face Who sticky residual CLOSED** · TypingCue/subtitle prefer presence.`who` (Citizen Turn) over identity sticky (AutoI remount) · Glass `GlassIntercomPresence` who+kind parity · pairs cdp-mcp 0.5.669 bridge Claim+orphan recover · **restart Glass** · SoftFL REJECT · DoD: `Citizen is busy…` visible while Sierra thinks
 - **2026-08-06 Radio journal → intercom.witdb SHIPPED** · Glass `GlassIntercomJournal` + linked `Cdp.IntercomJournal` sources · OutWit 12.2.0 on GlassCore · LoadTail/Append → shared StateRoot `intercom.witdb` (not jsonl mutex) · pairs cdp-mcp 0.5.668 · **restart Glass** to live reader · SoftFL REJECT

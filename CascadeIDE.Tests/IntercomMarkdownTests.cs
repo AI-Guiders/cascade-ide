@@ -48,4 +48,12 @@ public sealed class IntercomMarkdownTests
         Assert.NotEmpty(runs);
         Assert.True(sw.ElapsedMilliseconds < 100, $"ParseInline hung/slow: {sw.ElapsedMilliseconds}ms");
     }
+
+    [Fact]
+    public void ParseInline_telegram_timestamp_stays_plain()
+    {
+        var runs = IntercomMarkdown.ParseInline("Sierra, [06.08.2026 7:32] hi");
+        Assert.DoesNotContain(runs, r => r.Style == IntercomMarkdownStyle.Link);
+        Assert.Contains(runs, r => r.Text.Contains("[06.08.2026 7:32]", StringComparison.Ordinal));
+    }
 }

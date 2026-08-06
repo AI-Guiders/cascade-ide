@@ -194,6 +194,7 @@ public static partial class GlassAttachChipPeel
             return false;
 
         // Require a path-ish token (extension or separator) to avoid prose false positives.
+        // Telegram Desktop paste: [dd.MM.yyyy HH:mm] must stay prose (not red missing-file chips).
         if (!LooksLikePath(path))
             return false;
 
@@ -219,12 +220,29 @@ public static partial class GlassAttachChipPeel
             lineEnd);
     }
 
-    static bool LooksLikePath(string path)
+    /// <summary>
+    /// Path-ish bracket inner (extension or separator).
+    /// Rejects Telegram timestamps like <c>05.08.2026 14</c> (space, no slash)
+    /// and digit-only "extensions" like <c>.2026</c>.
+    /// </summary>
+    internal static bool LooksLikePath(string path)
     {
-        if (path.Contains('/') || path.Contains('\\'))
+        var hasSep = path.Contains('/') || path.Contains('\\');
+        if (!hasSep && path.Contains(' '))
+            return false;
+
+        if (hasSep)
             return true;
+
         var dot = path.LastIndexOf('.');
-        return dot > 0 && dot < path.Length - 1;
+        if (dot <= 0 || dot >= path.Length - 1)
+            return false;
+
+        var ext = path[(dot + 1)..];
+        if (ext.Length == 0 || ext.All(char.IsDigit))
+            return false;
+
+        return true;
     }
 
     static string? Prop(JsonElement root, string name) =>
