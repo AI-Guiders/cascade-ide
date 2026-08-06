@@ -30,6 +30,8 @@ public partial class MainWindow
     string? _dmPeerId;
     IReadOnlyList<GlassIntercomContacts.Contact> _dmRoster = GlassIntercomContacts.DefaultRoster();
     bool _dmContactSuppress;
+    IReadOnlyList<GlassIntercomModels.Entry> _modelDirectory = GlassIntercomModels.SealedDirectory;
+    bool _citModelSuppress;
 
     void InitIntercomHud()
     {
@@ -271,6 +273,7 @@ public partial class MainWindow
     void PaintHudModelAxis()
     {
         var lit = GlassIntercomLane.ModelAxisLit(_lane);
+        PaintCitModelsPanel(lit);
         _hudModelSuppress = true;
         try
         {
@@ -284,23 +287,66 @@ public partial class MainWindow
                 return;
             }
 
-            var items = new List<string> { "default" };
-            if (!string.IsNullOrWhiteSpace(_modelId)
-                && !string.Equals(_modelId, "default", StringComparison.OrdinalIgnoreCase)
-                && !string.Equals(_modelId, "—", StringComparison.Ordinal))
-                items.Add(_modelId.Trim());
-
-            HudModelPicker.ItemsSource = items;
-            var pick = string.IsNullOrWhiteSpace(_modelId) ? "default" : _modelId.Trim();
-            HudModelPicker.SelectedItem = items.Contains(pick) ? pick : items[0];
+            _modelDirectory = GlassIntercomModels.BuildDirectory(_modelId);
+            var ids = GlassIntercomModels.PickerIds(_modelDirectory);
+            HudModelPicker.ItemsSource = ids;
+            var pick = GlassIntercomModels.ResolveSelectedId(_modelDirectory, _modelId) ?? GlassIntercomModels.DefaultId;
+            HudModelPicker.SelectedItem = ids.Contains(pick, StringComparer.OrdinalIgnoreCase) ? pick : ids[0];
             HudModelPicker.IsEnabled = true;
             HudModelPicker.Opacity = 1.0;
-            HudModelPicker.ToolTip = "FM model id · session override (CFG holds secrets)";
+            HudModelPicker.ToolTip = "FM model directory · sealed shortlist + sticky (CFG secrets)";
         }
         finally
         {
             _hudModelSuppress = false;
         }
+    }
+
+    void PaintCitModelsPanel(bool lit)
+    {
+        CitModelsPanel.Visibility = lit ? Visibility.Visible : Visibility.Collapsed;
+        if (!lit)
+            return;
+
+        _citModelSuppress = true;
+        try
+        {
+            _modelDirectory = GlassIntercomModels.BuildDirectory(_modelId);
+            CitModelList.ItemsSource = _modelDirectory;
+            var pickId = GlassIntercomModels.ResolveSelectedId(_modelDirectory, _modelId);
+            CitModelList.SelectedItem = GlassIntercomModels.Find(_modelDirectory, pickId);
+        }
+        finally
+        {
+            _citModelSuppress = false;
+        }
+    }
+
+    void ApplyModelSelection(string? selectedId)
+    {
+        var next = GlassIntercomModels.ToLatchModelId(selectedId);
+        if (string.Equals(_modelId, next, StringComparison.OrdinalIgnoreCase)
+            || (_modelId is null && next is null))
+            return;
+
+        _modelId = next;
+        TrySaveLaneLatch();
+        StatusText.Text = next is null
+            ? "glass · model · default (CFG)"
+            : $"glass · model · {GlassIntercomModels.ShortLabel(next)}";
+        PaintHudModelAxis();
+    }
+
+    void CitModelList_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (_citModelSuppress)
+            return;
+        if (!GlassIntercomLane.ModelAxisLit(_lane))
+            return;
+        if (CitModelList.SelectedItem is not GlassIntercomModels.Entry entry)
+            return;
+
+        ApplyModelSelection(entry.Id);
     }
 
     void HudModelPicker_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -314,8 +360,7 @@ public partial class MainWindow
         if (string.Equals(s, "—", StringComparison.Ordinal))
             return;
 
-        _modelId = string.Equals(s, "default", StringComparison.OrdinalIgnoreCase) ? null : s;
-        TrySaveLaneLatch();
+        ApplyModelSelection(s);
     }
 
     void ApplyComposerHintForLane(bool force)
