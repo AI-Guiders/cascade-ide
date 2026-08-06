@@ -19,7 +19,9 @@ public static class GlassSlashCatalog
         new("attach", "/attach", "Insert [path:line] chip from editor selection (ADR 0128 thin)"),
         new("citizen", "/citizen", "Talk to habitat citizen (dialog peer · GigaChat) — not guest @PF"),
         new("letter", "/letter", "Where the Agent Who letter lives (CDP canon)"),
-        new("select", "/intercom message select", "Select feed msg #N (ADR 0136 port) · /intercom message select clear"),
+        new("select", "/intercom message select", "Select #N · N:M · [3;5] [8;15] · clear (ADR 0136/0138)"),
+        new("message_next", "/intercom message next", "Select next feed message (ordinal)"),
+        new("message_prev", "/intercom message prev", "Select previous feed message (ordinal)"),
     ];
 
     public static bool IsSlashLine(string? raw)
@@ -86,6 +88,6 @@ public static class GlassSlashCatalog
     {
         var lines = Commands.Select(c => $"{c.Path,-10} {c.Help}");
         return "Glass slash:\n" + string.Join('\n', lines)
-               + "\n\n(/select short → /intercom message select · remaining CIDE slash still Avalonia denser)";
+               + "\n\n(/select short → /intercom message select · residual denser: find/relate/anchors/attach*/topic*/spine*)";
     }
 }

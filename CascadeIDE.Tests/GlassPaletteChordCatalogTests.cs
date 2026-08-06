@@ -182,13 +182,13 @@ public sealed class GlassPaletteChordCatalogTests
         Assert.True(GlassMelodyGlassActions.TryMapCommandId("chat_select_prev_thread", out var tp)
                     && tp == "topic_prev");
         Assert.True(GlassMelodyGlassActions.TryMapCommandId("chat_show_thread_overview", out var to)
-                    && to == "topics_all");
+                    && to == "topic_overview");
         Assert.True(GlassMelodyGlassActions.TryMapCommandId("chat_open_selected_thread", out var ot)
-                    && ot == "slash_open");
+                    && ot == "topic_enter");
         Assert.True(GlassMelodyGlassActions.TryMapCommandId("chat_select_next_message", out var mn)
-                    && mn == "feed_page_down");
+                    && mn == "message_select_next");
         Assert.True(GlassMelodyGlassActions.TryMapCommandId("chat_select_prev_message", out var mp)
-                    && mp == "feed_page_up");
+                    && mp == "message_select_prev");
         Assert.Contains(GlassCommandPaletteCatalog.Filter("topic next"), e => e.Id == "topic_next");
         Assert.Contains(GlassCommandPaletteCatalog.Filter("feed page"), e => e.Id == "feed_page_down");
         Assert.Contains(GlassIntentMelodyCatalog.All(), a => a.Alias == "of");

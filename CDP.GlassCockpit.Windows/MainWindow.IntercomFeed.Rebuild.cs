@@ -151,6 +151,31 @@ public partial class MainWindow
         }
     }
 
+    void MessageSelectMenu_OnClick(object sender, RoutedEventArgs e)
+    {
+        if (sender is not MenuItem mi)
+            return;
+        var bubble = mi.DataContext as ChatBubble
+                     ?? (mi.Parent as ContextMenu)?.PlacementTarget is FrameworkElement fe
+                         ? fe.DataContext as ChatBubble
+                         : null;
+        if (bubble is null || bubble.Ordinal <= 0)
+            return;
+        var apply = GlassIntercomMessageSelect.Apply(_feed.Count, bubble.Ordinal, bubble.Ordinal, out var sel);
+        if (!string.Equals(apply, "OK", StringComparison.Ordinal))
+            return;
+        _messageSelect = sel;
+        ApplyMessageSelectToFeed();
+        StatusText.Text = $"glass · select #{bubble.Ordinal} · {DateTime.Now:HH:mm:ss}";
+    }
+
+    void MessageSelectClearMenu_OnClick(object sender, RoutedEventArgs e)
+    {
+        _messageSelect = GlassIntercomMessageSelect.Empty;
+        ApplyMessageSelectToFeed();
+        StatusText.Text = $"glass · select clear · {DateTime.Now:HH:mm:ss}";
+    }
+
     void ApplyFeedScrollAfterRebuild(bool stickEnd, bool wasPinned, double priorOffset)
     {
         if (stickEnd || wasPinned)

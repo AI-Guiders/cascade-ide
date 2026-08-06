@@ -83,26 +83,37 @@ public partial class MainWindow
             return true;
         }
 
-        if (cmd.Id == "select")
+        if (cmd.Id is "select" or "message_next" or "message_prev")
         {
             string reply;
-            if (GlassIntercomMessageSelect.IsClear(argsTail))
+            if (cmd.Id == "message_next" || cmd.Id == "message_prev")
+            {
+                var delta = cmd.Id == "message_next" ? 1 : -1;
+                var apply = GlassIntercomMessageSelect.ApplyOffset(_feed.Count, _messageSelect, delta, out var sel);
+                if (!string.Equals(apply, "OK", StringComparison.Ordinal))
+                    reply = apply;
+                else
+                {
+                    _messageSelect = sel;
+                    ApplyMessageSelectToFeed();
+                    reply = GlassIntercomMessageSelect.FormatOk(sel);
+                }
+            }
+            else if (GlassIntercomMessageSelect.IsClear(argsTail))
             {
                 _messageSelect = GlassIntercomMessageSelect.Empty;
                 ApplyMessageSelectToFeed();
                 reply = GlassIntercomMessageSelect.FormatOk(_messageSelect);
             }
-            else if (!GlassIntercomMessageSelect.TryParseRange(argsTail, out var start, out var end, out var parseErr))
+            else if (!GlassIntercomMessageSelect.TryParseSegments(argsTail, out var segments, out var parseErr))
             {
                 reply = parseErr;
             }
             else
             {
-                var apply = GlassIntercomMessageSelect.Apply(_feed.Count, start, end, out var sel);
+                var apply = GlassIntercomMessageSelect.ApplySegments(_feed.Count, segments, out var sel);
                 if (!string.Equals(apply, "OK", StringComparison.Ordinal))
-                {
                     reply = apply;
-                }
                 else
                 {
                     _messageSelect = sel;

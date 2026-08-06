@@ -41,8 +41,8 @@ public static class GlassMelodyGlassActions
             ["chat_select_prev_thread"] = "topic_prev",
             ["chat_show_thread_overview"] = "topic_overview",
             ["chat_open_selected_thread"] = "topic_enter",
-            ["chat_select_next_message"] = "feed_page_down",
-            ["chat_select_prev_message"] = "feed_page_up",
+            ["chat_select_next_message"] = "message_select_next",
+            ["chat_select_prev_message"] = "message_select_prev",
             // Glass peels already in RunPaletteEntry — cabin c: without inventing Avalonia hosts.
             ["save_document"] = "save_file",
             ["focus_composer"] = "focus_composer",

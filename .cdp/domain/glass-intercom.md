@@ -33,7 +33,8 @@
 - **Seeming messenger Done (operator 2026-08-06):** claiming `messenger-ready-verify` / CabinReady messenger as Face Done when dig shows no contact/DM address book, no browsable model directory (HudModelPicker Combo ≠ list), chrome ≠ Slack/MM flat feed. Hands (rail XOR · Send · channel filter) ≠ messenger. NorthStar Open: DM address book. Dig before claim — live shot alone without directory/Face checklist = seeming.
 
 ## last_ship
-- **2026-08-06 A6 ADR 0136 message select ADOPTED thin** · port CIDE contiguous `/intercom message select` (+ `/select`) · ordinal gutter · highlight · clear · `GlassIntercomMessageSelect` · tests 5/5 · SoftFL REJECT · residual: multi-bracket · ПКМ · MCP denser
+- **2026-08-06 A6 ADR 0136/0138 message select ADOPTED denser** · multi-bracket `[a;b]…` · `/intercom message next|prev` · ПКМ · melody `chat_select_*`→ordinal · contiguous+clear+gutter · SoftFL REJECT · residual: find/relate/anchors · attach* · topic*/spine* slash parity
+- **2026-08-06 A6 ADR 0136 message select ADOPTED thin** · contiguous first ship (superseded denser same day)
 - **2026-08-06 CORRECT seeming: feed copy ≠ message select** · was RTB-only claim; A6 thin port closes that gap
 - **2026-08-06 Unknown Hard Error / PtsHost FailFast FIX** · lived 07:58 FailFast `PtsHost.CreateDocContext` while Intercom rebuild · root: RichTextBox-per-line × full feed + ItemsSource=null/UpdateLayout · fix: **one** RTB/FlowDocument per bubble · Opacity hide (no unbind) · no sync UpdateLayout · SoftFL REJECT · **restart Glass**
 - **2026-08-06 Send feed tile-flash FIX** · lived: Send → 1-frame stack of tiles then normal · residual path now Opacity+Loaded scroll (unbind path struck — caused Hard Error) · SoftFL REJECT

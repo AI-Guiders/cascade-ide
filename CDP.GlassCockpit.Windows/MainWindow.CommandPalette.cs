@@ -215,6 +215,12 @@ public partial class MainWindow
             case "feed_page_up":
                 PageIntercomFeed(-1);
                 break;
+            case "message_select_next":
+                TryRunGlassSlash("/intercom message next");
+                break;
+            case "message_select_prev":
+                TryRunGlassSlash("/intercom message prev");
+                break;
             case "mfd_editor":
                 SelectMfdPage("Editor", sticky: true);
                 break;

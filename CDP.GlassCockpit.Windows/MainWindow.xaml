@@ -402,9 +402,16 @@
                   <ItemsControl x:Name="MessageFeed">
                     <ItemsControl.ItemTemplate>
                       <DataTemplate>
-                        <!-- Face flat feed + ADR 0136 thin: gutter ordinal + select highlight. -->
+                        <!-- Face flat feed + ADR 0136: gutter · highlight · ПКМ select (CIDE port). -->
                         <Border Margin="0,0,0,10" Padding="4,2" BorderThickness="0"
                                 HorizontalAlignment="Stretch">
+                          <Border.ContextMenu>
+                            <ContextMenu>
+                              <MenuItem Header="{Binding Ordinal, StringFormat=Выбрать сообщение #{0}}"
+                                        Click="MessageSelectMenu_OnClick"/>
+                              <MenuItem Header="Сбросить выбор" Click="MessageSelectClearMenu_OnClick"/>
+                            </ContextMenu>
+                          </Border.ContextMenu>
                           <Border.Style>
                             <Style TargetType="Border">
                               <Setter Property="Background" Value="Transparent"/>
