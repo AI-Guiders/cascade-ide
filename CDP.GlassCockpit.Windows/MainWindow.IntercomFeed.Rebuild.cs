@@ -61,14 +61,9 @@ public partial class MainWindow
         if (_selectedTopicId is null)
             _selectedTopicEntryIds = [];
 
+        // Face: flat feed default — topic catalog is opt-in via Overview (no adaptive overview slap).
         if (stickEnd && _selectedTopicId is { Length: > 0 })
             _isTopicOverviewMode = false;
-        else
-            ChatTopicOverviewPolicy.ApplyAdaptiveDefault(
-                _topics.Count,
-                ref _lastOverviewTopicCount,
-                value => _isTopicOverviewMode = value,
-                () => _isTopicOverviewMode);
 
         SyncTopicOverviewChrome();
         SyncProductSpineChrome();
@@ -81,10 +76,6 @@ public partial class MainWindow
         }
 
         _feed.Clear();
-        _feed.Add(new ChatBubble(
-            "system",
-            "MVP: Forward respects primary_work_surface. Intercom→editor on M; dark AvalonEdit theme. Virtual History + topic cards (30m gap).",
-            DateTime.Now.ToString("HH:mm")));
 
         IEnumerable<GlassIntercomJournal.Entry> shown = entries;
         if (_selectedTopicId is { Length: > 0 } topicId)
@@ -117,7 +108,7 @@ public partial class MainWindow
                 body = "(attach)";
             if (string.IsNullOrWhiteSpace(body) && pointers is { Count: > 0 })
                 body = "(radio)";
-            var role = $"{e.RoleLabel} · {GlassIntercomChannel.Label(GlassIntercomChannel.Parse(e.Channel))}";
+            var role = GlassIntercomFaceMeta.QuietRole(e.RoleLabel);
             _feed.Add(new ChatBubble(role, body, e.WhenLabel, chips, pointers));
         }
 

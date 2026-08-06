@@ -276,18 +276,20 @@
                       <Button x:Name="ChannelDmBtn" Content="DM" Style="{StaticResource KorryBtn}"
                               Click="ChannelDmBtn_OnClick" ToolTip="DM · 1:1 · address book (humans+agents)"/>
                     </StackPanel>
-                    <Button x:Name="TopicAllBtn" DockPanel.Dock="Left" Content="Overview" Style="{StaticResource TopicAllBtnStyle}"
-                            Click="TopicAllBtn_OnClick" ToolTip="Topic catalog · ADR 0072 · c:atb" Margin="0,0,6,0" Tag="selected"/>
+                    <Button x:Name="TopicAllBtn" DockPanel.Dock="Left" Content="Topics" Style="{StaticResource TopicAllBtnStyle}"
+                            Click="TopicAllBtn_OnClick" ToolTip="Topic catalog · ADR 0072 · opt-in (Face: no card strip)" Margin="0,0,6,0" Tag="selected"/>
                     <Button x:Name="TopicBackBtn" DockPanel.Dock="Left" Content="Back" Style="{StaticResource ChromeBtn}"
                             Click="TopicBackBtn_OnClick" ToolTip="Back to topic overview (c:atb)" Margin="0,0,6,0" Visibility="Collapsed"/>
                     <TextBlock x:Name="TopicsEmptyHint" DockPanel.Dock="Left"
-                               Text="(empty — send messages; new cards after 30m quiet gap)"
+                               Text="(empty feed — send a message)"
                                FontSize="11" Foreground="#555" VerticalAlignment="Center"
                                Visibility="Collapsed"/>
                     <TextBlock x:Name="TopicsOverviewHint" DockPanel.Dock="Left"
                                Text="" FontSize="11" Foreground="#666" VerticalAlignment="Center" Margin="0,0,8,0"
                                Visibility="Collapsed"/>
-                    <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled">
+                    <!-- Face: horizontal topic-card strip collapsed — catalog via Overview (ADR 0072). -->
+                    <ScrollViewer x:Name="TopicCardStrip" Visibility="Collapsed"
+                                  HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled">
                       <ItemsControl x:Name="TopicCards">
                         <ItemsControl.ItemsPanel>
                           <ItemsPanelTemplate>
@@ -389,13 +391,13 @@
                   <ItemsControl x:Name="MessageFeed">
                     <ItemsControl.ItemTemplate>
                       <DataTemplate>
-                        <Border Margin="0,0,0,8" Padding="10,8" CornerRadius="6"
-                                Background="{StaticResource Glass.BubbleBg}" BorderBrush="{StaticResource Glass.BubbleBorder}" BorderThickness="1"
+                        <!-- Face flat feed: name + time + text — no bubble chrome (Slack/MM light). -->
+                        <Border Margin="0,0,0,10" Padding="0,2" Background="Transparent" BorderThickness="0"
                                 HorizontalAlignment="Stretch">
                           <StackPanel>
-                            <DockPanel Margin="0,0,0,4">
-                              <TextBlock Text="{Binding Role}" FontSize="11" FontWeight="SemiBold" Foreground="{StaticResource Glass.BubbleMeta}"/>
-                              <TextBlock DockPanel.Dock="Right" Text="{Binding When}" FontSize="10" Foreground="#666" HorizontalAlignment="Right"/>
+                            <DockPanel Margin="0,0,0,2">
+                              <TextBlock Text="{Binding Role}" FontSize="12" FontWeight="SemiBold" Foreground="#D0D0D0"/>
+                              <TextBlock DockPanel.Dock="Right" Text="{Binding When}" FontSize="11" Foreground="#666" HorizontalAlignment="Right" Margin="12,0,0,0"/>
                             </DockPanel>
                             <local:GlassIntercomMarkdownBody Markdown="{Binding Body}"/>
                             <ItemsControl ItemsSource="{Binding Pointers}" Margin="0,6,0,0">

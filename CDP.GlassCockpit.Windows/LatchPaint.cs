@@ -193,6 +193,13 @@ internal static partial class LatchPaint
         };
     }
 
-    internal static string FormatIntercomRole(string fromSeat, string toSeat, string name, string kind) =>
-        $"{name} · {kind} @{fromSeat.Trim().ToUpperInvariant()} → @{toSeat.Trim().ToUpperInvariant()}";
+    /// <summary>Face meta: name only (Slack/MM). Seat routing stays in StatusText / dig, not bubble chrome.</summary>
+    internal static string FormatIntercomRole(string fromSeat, string toSeat, string name, string kind)
+    {
+        _ = fromSeat;
+        _ = toSeat;
+        if (!string.IsNullOrWhiteSpace(name))
+            return name.Trim();
+        return string.IsNullOrWhiteSpace(kind) ? "?" : kind.Trim();
+    }
 }
