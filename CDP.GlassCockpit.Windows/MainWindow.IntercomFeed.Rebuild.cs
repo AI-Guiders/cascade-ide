@@ -41,11 +41,15 @@ public partial class MainWindow
                 _selectedTopicId, clustered, entries[^1].Id);
         }
 
-        // Unbind during mutate — ObservableCollection Clear+Add otherwise paints mid-rebuild
-        // (wrong scroll = stack of Radio/topic tiles at top for a frame; Send flash).
-        TopicCards.ItemsSource = null;
-        TopicOverviewCards.ItemsSource = null;
-        MessageFeed.ItemsSource = null;
+        // Stick-end send/receive always leaves overview (All selection must not keep tile grid).
+        if (stickEnd)
+            _isTopicOverviewMode = false;
+
+        // Hide while mutate — Clear+Add at scroll 0 painted tile stack for a frame (Send flash).
+        // Do NOT null ItemsSource: tears down N RichTextBox/FlowDocuments mid-layout → PtsHost FailFast
+        // («Unknown Hard Error», 2026-08-06 07:58).
+        if (!_isTopicOverviewMode)
+            FeedScroll.Opacity = 0;
 
         _topics.Clear();
         foreach (var t in clustered)
@@ -68,19 +72,13 @@ public partial class MainWindow
             _selectedTopicEntryIds = [];
 
         // Face: flat feed default — topic catalog is opt-in via Overview (no adaptive overview slap).
-        // Stick-end send/receive always leaves overview (All selection must not keep tile grid).
-        if (stickEnd)
-            _isTopicOverviewMode = false;
-
         SyncTopicOverviewChrome();
         SyncProductSpineChrome();
 
         if (_isTopicOverviewMode)
         {
             _feed.Clear();
-            TopicCards.ItemsSource = _topics;
-            TopicOverviewCards.ItemsSource = _topics;
-            MessageFeed.ItemsSource = _feed;
+            FeedScroll.Opacity = 1;
             ApplyFeedScrollAfterRebuild(stickEnd, wasPinned, priorOffset);
             return;
         }
@@ -125,9 +123,6 @@ public partial class MainWindow
         while (_feed.Count > 81)
             _feed.RemoveAt(1);
 
-        TopicCards.ItemsSource = _topics;
-        TopicOverviewCards.ItemsSource = _topics;
-        MessageFeed.ItemsSource = _feed;
         ApplyFeedScrollAfterRebuild(stickEnd, wasPinned, priorOffset);
     }
 
@@ -139,19 +134,16 @@ public partial class MainWindow
         var target = CascadeIDE.Intercom.GlassIntercomFeedScroll.ResolveOffsetAfterRebuild(
             stickEnd, wasPinned, priorOffset);
 
-        void ApplyScroll()
+        // Scroll after layout — never sync UpdateLayout here (PTS/RTB measure FailFast under load).
+        Dispatcher.BeginInvoke(() =>
         {
             if (double.IsPositiveInfinity(target))
                 FeedScroll.ScrollToEnd();
             else
                 FeedScroll.ScrollToVerticalOffset(target);
+            FeedScroll.Opacity = 1;
             SyncNewMsgCue();
-        }
-
-        // Sync pass first — BeginInvoke-only left one paint frame at offset 0 (tile stack flash).
-        FeedScroll.UpdateLayout();
-        ApplyScroll();
-        Dispatcher.BeginInvoke(ApplyScroll, DispatcherPriority.Loaded);
+        }, DispatcherPriority.Loaded);
     }
 
     void SyncNewMsgCue()

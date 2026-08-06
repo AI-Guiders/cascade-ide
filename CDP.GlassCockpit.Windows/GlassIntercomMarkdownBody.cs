@@ -10,8 +10,11 @@ using CascadeIDE.Intercom;
 namespace CDP.GlassCockpit.Windows;
 
 /// <summary>WPF Intercom feed body — ADR 0129/0170 subset via GlassCore <see cref="IntercomMarkdown"/>.</summary>
-/// <remarks>StackPanel (not ContentControl): setting Content during DataTemplate expand double-parents the built tree.
-/// Body uses read-only RichTextBox so operators can select/copy (TextBlock has no selection on this desktop pack).</remarks>
+/// <remarks>
+/// StackPanel (not ContentControl): setting Content during DataTemplate expand double-parents the built tree.
+/// One read-only RichTextBox per bubble (single FlowDocument) — select/copy without N× PTS contexts
+/// (lived FailFast PtsHost.CreateDocContext → «Unknown Hard Error» when every line was its own RTB).
+/// </remarks>
 public sealed class GlassIntercomMarkdownBody : StackPanel
 {
     public static readonly DependencyProperty MarkdownProperty = DependencyProperty.Register(
@@ -56,139 +59,30 @@ internal static class GlassIntercomMarkdownRenderer
 
     public static FrameworkElement Build(string? markdown)
     {
-        var root = new StackPanel { Orientation = Orientation.Vertical };
-        foreach (var seg in IntercomMarkdown.SplitSegments(markdown))
-        {
-            if (seg.Kind == IntercomMarkdownSegmentKind.Code)
-                root.Children.Add(BuildCodeBlock(seg.Text));
-            else
-                root.Children.Add(BuildProse(seg.Text));
-        }
-
-        if (root.Children.Count == 0)
-            root.Children.Add(BuildSelectable([], 13, FontWeights.Normal, new Thickness(0), BodyFg));
-
-        return root;
-    }
-
-    static FrameworkElement BuildCodeBlock(string code)
-    {
-        var rtb = BuildSelectable(
-            [new IntercomMarkdownRun(code, IntercomMarkdownStyle.Code)],
-            fontSize: 12,
-            FontWeights.Normal,
-            new Thickness(0),
-            CodeFg);
-        rtb.FontFamily = Mono;
-        return new Border
-        {
-            Background = CodeBg,
-            BorderBrush = CodeBorder,
-            BorderThickness = new Thickness(1),
-            CornerRadius = new CornerRadius(4),
-            Padding = new Thickness(8, 6, 8, 6),
-            Margin = new Thickness(0, 4, 0, 4),
-            Child = rtb,
-        };
-    }
-
-    static FrameworkElement BuildProse(string prose)
-    {
-        if (string.IsNullOrEmpty(prose))
-            return BuildSelectable([], 13, FontWeights.Normal, new Thickness(0), BodyFg);
-
-        if (IntercomMarkdown.ShouldUseDocumentLayout(prose))
-            return BuildDocument(prose);
-
-        return BuildInlineProse(prose);
-    }
-
-    static FrameworkElement BuildDocument(string prose)
-    {
-        var panel = new StackPanel { Orientation = Orientation.Vertical };
-        foreach (var row in IntercomMarkdown.LayoutDocument(prose, maxChars: 10_000))
-        {
-            switch (row.Kind)
-            {
-                case IntercomMarkdownBlockKind.Blank:
-                    panel.Children.Add(new Border { Height = 8 });
-                    break;
-                case IntercomMarkdownBlockKind.HorizontalRule:
-                    panel.Children.Add(new Border
-                    {
-                        Height = 1,
-                        Background = HrBrush,
-                        Margin = new Thickness(0, 8, 0, 8),
-                    });
-                    break;
-                default:
-                    panel.Children.Add(BuildRow(row));
-                    break;
-            }
-        }
-
-        return panel;
-    }
-
-    static FrameworkElement BuildRow(IntercomMarkdownRow row)
-    {
-        var (fontSize, weight, margin) = row.Kind switch
-        {
-            IntercomMarkdownBlockKind.Heading1 => (18.0, FontWeights.SemiBold, new Thickness(0, 8, 0, 4)),
-            IntercomMarkdownBlockKind.Heading2 => (16.0, FontWeights.SemiBold, new Thickness(0, 6, 0, 3)),
-            IntercomMarkdownBlockKind.Heading3 => (14.0, FontWeights.SemiBold, new Thickness(0, 4, 0, 2)),
-            IntercomMarkdownBlockKind.Bullet => (13.0, FontWeights.Normal, new Thickness(0, 1, 0, 1)),
-            _ => (13.0, FontWeights.Normal, new Thickness(0, 1, 0, 1)),
-        };
-
-        return BuildSelectable(row.Runs, fontSize, weight, margin, BodyFg);
-    }
-
-    static FrameworkElement BuildInlineProse(string prose)
-    {
-        var panel = new StackPanel { Orientation = Orientation.Vertical };
-        var lines = prose.Replace("\r\n", "\n", StringComparison.Ordinal).Split('\n');
-        for (var i = 0; i < lines.Length; i++)
-        {
-            var line = lines[i];
-            if (line.Length == 0)
-            {
-                panel.Children.Add(new Border { Height = 8 });
-                continue;
-            }
-
-            panel.Children.Add(BuildSelectable(
-                IntercomMarkdown.ParseInline(line),
-                13,
-                FontWeights.Normal,
-                new Thickness(0, i == 0 ? 0 : 1, 0, 0),
-                BodyFg));
-        }
-
-        return panel;
-    }
-
-    static RichTextBox BuildSelectable(
-        IReadOnlyList<IntercomMarkdownRun> runs,
-        double fontSize,
-        FontWeight weight,
-        Thickness margin,
-        Brush foreground)
-    {
-        var para = new Paragraph
-        {
-            Margin = new Thickness(0),
-            LineHeight = fontSize + 5,
-            TextAlignment = TextAlignment.Left,
-        };
-        AppendDocRuns(para, runs);
-
-        var doc = new FlowDocument(para)
+        var doc = new FlowDocument
         {
             PagePadding = new Thickness(0),
             TextAlignment = TextAlignment.Left,
             Background = Brushes.Transparent,
+            Foreground = BodyFg,
         };
+
+        var any = false;
+        foreach (var seg in IntercomMarkdown.SplitSegments(markdown))
+        {
+            if (seg.Kind == IntercomMarkdownSegmentKind.Code)
+            {
+                AppendCodeBlock(doc, seg.Text);
+                any = true;
+            }
+            else
+            {
+                any |= AppendProse(doc, seg.Text);
+            }
+        }
+
+        if (!any)
+            doc.Blocks.Add(MakeParagraph([], 13, FontWeights.Normal, new Thickness(0)));
 
         return new RichTextBox
         {
@@ -197,16 +91,135 @@ internal static class GlassIntercomMarkdownRenderer
             IsDocumentEnabled = true,
             BorderThickness = new Thickness(0),
             Background = Brushes.Transparent,
-            Foreground = foreground,
-            FontSize = fontSize,
-            FontWeight = weight,
-            Margin = margin,
+            Foreground = BodyFg,
+            FontSize = 13,
+            Margin = new Thickness(0),
             Padding = new Thickness(0),
             VerticalScrollBarVisibility = ScrollBarVisibility.Disabled,
             HorizontalScrollBarVisibility = ScrollBarVisibility.Disabled,
             CaretBrush = Brushes.Transparent,
             Focusable = true,
         };
+    }
+
+    static void AppendCodeBlock(FlowDocument doc, string code)
+    {
+        var para = new Paragraph(new Run(code)
+        {
+            FontFamily = Mono,
+            Foreground = CodeFg,
+            Background = CodeBg,
+            FontSize = 12,
+        })
+        {
+            Margin = new Thickness(0, 4, 0, 4),
+            Padding = new Thickness(8, 6, 8, 6),
+            BorderBrush = CodeBorder,
+            BorderThickness = new Thickness(1),
+            Background = CodeBg,
+            LineHeight = 17,
+        };
+        doc.Blocks.Add(para);
+    }
+
+    static bool AppendProse(FlowDocument doc, string prose)
+    {
+        if (string.IsNullOrEmpty(prose))
+        {
+            doc.Blocks.Add(MakeParagraph([], 13, FontWeights.Normal, new Thickness(0)));
+            return true;
+        }
+
+        if (IntercomMarkdown.ShouldUseDocumentLayout(prose))
+        {
+            AppendDocument(doc, prose);
+            return true;
+        }
+
+        AppendInlineProse(doc, prose);
+        return true;
+    }
+
+    static void AppendDocument(FlowDocument doc, string prose)
+    {
+        foreach (var row in IntercomMarkdown.LayoutDocument(prose, maxChars: 10_000))
+        {
+            switch (row.Kind)
+            {
+                case IntercomMarkdownBlockKind.Blank:
+                    doc.Blocks.Add(new Paragraph(new Run(" "))
+                    {
+                        Margin = new Thickness(0),
+                        LineHeight = 8,
+                        FontSize = 4,
+                    });
+                    break;
+                case IntercomMarkdownBlockKind.HorizontalRule:
+                    doc.Blocks.Add(new Paragraph
+                    {
+                        Margin = new Thickness(0, 8, 0, 8),
+                        BorderBrush = HrBrush,
+                        BorderThickness = new Thickness(0, 0, 0, 1),
+                        Padding = new Thickness(0, 0, 0, 1),
+                    });
+                    break;
+                default:
+                    var (fontSize, weight, margin) = row.Kind switch
+                    {
+                        IntercomMarkdownBlockKind.Heading1 => (18.0, FontWeights.SemiBold, new Thickness(0, 8, 0, 4)),
+                        IntercomMarkdownBlockKind.Heading2 => (16.0, FontWeights.SemiBold, new Thickness(0, 6, 0, 3)),
+                        IntercomMarkdownBlockKind.Heading3 => (14.0, FontWeights.SemiBold, new Thickness(0, 4, 0, 2)),
+                        IntercomMarkdownBlockKind.Bullet => (13.0, FontWeights.Normal, new Thickness(0, 1, 0, 1)),
+                        _ => (13.0, FontWeights.Normal, new Thickness(0, 1, 0, 1)),
+                    };
+                    doc.Blocks.Add(MakeParagraph(row.Runs, fontSize, weight, margin));
+                    break;
+            }
+        }
+    }
+
+    static void AppendInlineProse(FlowDocument doc, string prose)
+    {
+        var lines = prose.Replace("\r\n", "\n", StringComparison.Ordinal).Split('\n');
+        for (var i = 0; i < lines.Length; i++)
+        {
+            var line = lines[i];
+            if (line.Length == 0)
+            {
+                doc.Blocks.Add(new Paragraph(new Run(" "))
+                {
+                    Margin = new Thickness(0),
+                    LineHeight = 8,
+                    FontSize = 4,
+                });
+                continue;
+            }
+
+            doc.Blocks.Add(MakeParagraph(
+                IntercomMarkdown.ParseInline(line),
+                13,
+                FontWeights.Normal,
+                new Thickness(0, i == 0 ? 0 : 1, 0, 0)));
+        }
+    }
+
+    static Paragraph MakeParagraph(
+        IReadOnlyList<IntercomMarkdownRun> runs,
+        double fontSize,
+        FontWeight weight,
+        Thickness margin)
+    {
+        var para = new Paragraph
+        {
+            Margin = margin,
+            LineHeight = fontSize + 5,
+            FontSize = fontSize,
+            FontWeight = weight,
+            TextAlignment = TextAlignment.Left,
+            Foreground = BodyFg,
+        };
+        AppendDocRuns(para, runs);
+        return para;
     }
 
     static void AppendDocRuns(Paragraph para, IReadOnlyList<IntercomMarkdownRun> runs)
