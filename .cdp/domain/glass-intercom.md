@@ -33,6 +33,7 @@
 - **Seeming messenger Done (operator 2026-08-06):** claiming `messenger-ready-verify` / CabinReady messenger as Face Done when dig shows no contact/DM address book, no browsable model directory (HudModelPicker Combo ≠ list), chrome ≠ Slack/MM flat feed. Hands (rail XOR · Send · channel filter) ≠ messenger. NorthStar Open: DM address book. Dig before claim — live shot alone without directory/Face checklist = seeming.
 
 ## last_ship
+- **2026-08-06 A6 residual find/relate/anchors DIG REJECT + spine slash** · `/intercom message find|relate|anchors` honest refuse (Avalonia IntercomCodeRef SSOT) · `/intercom spine show|toggle` → ProductSpineStrip · SoftFL REJECT invent code↔message peel
 - **2026-08-06 A6 attach*/topic* slash EXTEND** · catalog + Commands wire · attach_scope refuse (not false attach) · topic slash → ShowIntercomTopicOverview / next|prev / open(+N) · SoftFL REJECT · residual: find/relate/anchors/spine*
 - **2026-08-06 A6 ADR 0136/0138 message select ADOPTED denser** · multi-bracket `[a;b]…` · `/intercom message next|prev` · ПКМ · melody `chat_select_*`→ordinal · contiguous+clear+gutter · SoftFL REJECT · residual: find/relate/anchors · attach* · topic*/spine* slash parity
 - **2026-08-06 A6 ADR 0136 message select ADOPTED thin** · contiguous first ship (superseded denser same day)
