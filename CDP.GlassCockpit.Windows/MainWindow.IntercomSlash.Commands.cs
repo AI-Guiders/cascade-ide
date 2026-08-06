@@ -25,6 +25,16 @@ public partial class MainWindow
             return false;
         }
 
+        // Universal empty-args gate (palette / typed Enter / melody) — park composer, no usage bubble.
+        // select: bare → last message (falls through). attach: bare tries editor selection (not RequiresArgs).
+        if (cmd.RequiresArgs
+            && string.IsNullOrWhiteSpace(argsTail)
+            && cmd.Id != "select")
+        {
+            PrefillComposerForSlashArgs(cmd);
+            return true;
+        }
+
         if (cmd.Id == "fds")
         {
             SelectMfdPage("FlightDataStorage", sticky: true);
@@ -38,6 +48,12 @@ public partial class MainWindow
         if (cmd.Id == "open")
         {
             var openBody = TryOpenPathSlash(argsTail);
+            if (openBody.StartsWith("usage:", StringComparison.OrdinalIgnoreCase))
+            {
+                PrefillComposerForSlashArgs(cmd);
+                return true;
+            }
+
             AppendSlashBubble(cmd.Path, openBody);
             ComposerBox.Clear();
             HideSlashPopup();
@@ -48,6 +64,12 @@ public partial class MainWindow
         if (cmd.Id == "attach")
         {
             var attachBody = TryAttachSlash(argsTail);
+            if (attachBody.StartsWith("usage:", StringComparison.OrdinalIgnoreCase))
+            {
+                PrefillComposerForSlashArgs(cmd);
+                return true;
+            }
+
             AppendSlashBubble(cmd.Path, attachBody);
             HideSlashPopup();
             StatusText.Text = $"glass · slash · {cmd.Path} · {DateTime.Now:HH:mm:ss}";
@@ -56,15 +78,6 @@ public partial class MainWindow
 
         if (cmd.Id == "citizen")
         {
-            if (string.IsNullOrWhiteSpace(argsTail))
-            {
-                AppendSlashBubble(cmd.Path, "usage: /citizen your message\nTalks to habitat citizen (dialog), not guest Кир @PF.");
-                ComposerBox.Clear();
-                HideSlashPopup();
-                StatusText.Text = $"glass · slash · {cmd.Path} · usage · {DateTime.Now:HH:mm:ss}";
-                return true;
-            }
-
             var sent = GlassCitizenDialogRequest.TryEnqueue(argsTail, workspaceRoot: _session.WorkspaceRoot);
             if (sent is null)
             {
@@ -342,6 +355,16 @@ public partial class MainWindow
             display = "(attach)";
         _feed.Add(new ChatBubble("slash", $"{path}\n{display}", DateTime.Now.ToString("HH:mm:ss"), chips));
         FeedScroll.ScrollToEnd();
+    }
+
+    void PrefillComposerForSlashArgs(GlassSlashCatalog.Command cmd)
+    {
+        var insert = GlassSlashCatalog.ComposerInsertForArgs(cmd);
+        ComposerBox.Text = insert;
+        ComposerBox.CaretIndex = insert.Length;
+        HideSlashPopup();
+        ComposerBox.Focus();
+        StatusText.Text = $"glass · slash · type args · {cmd.Path} · {DateTime.Now:HH:mm:ss}";
     }
 
     string BuildGlassStatusSlashBody()

@@ -125,27 +125,20 @@ public partial class MainWindow
         }
 
         var pick = SlashList.SelectedItem as GlassSlashSuggestion ?? _slashSuggestions[_slashIndex];
-        // Enter on arg-required slash (select/open/…) must NOT run bare path → usage bubble with no highlight.
-        if (run
-            && GlassSlashCatalog.TryResolve(pick.InsertText.TrimEnd(), out var cmd, out _)
-            && cmd.RequiresArgs)
-        {
-            ComposerBox.Text = pick.InsertText.EndsWith(' ')
-                ? pick.InsertText
-                : pick.InsertText.TrimEnd() + " ";
-            ComposerBox.CaretIndex = ComposerBox.Text.Length;
-            HideSlashPopup();
-            ComposerBox.Focus();
-            StatusText.Text = $"glass · slash · type args · {cmd.Path} · {DateTime.Now:HH:mm:ss}";
-            return;
-        }
-
-        ComposerBox.Text = pick.InsertText.TrimEnd() + (run ? "" : " ");
-        ComposerBox.CaretIndex = ComposerBox.Text.Length;
+        var insert = pick.InsertText.EndsWith(' ')
+            ? pick.InsertText
+            : pick.InsertText.TrimEnd() + " ";
+        ComposerBox.Text = insert;
+        ComposerBox.CaretIndex = insert.Length;
         HideSlashPopup();
         ComposerBox.Focus();
 
-        if (run)
-            TryRunGlassSlash(ComposerBox.Text);
+        // Universal: never auto-run RequiresArgs bare (open/citizen/select…) — park for typing.
+        // Bare-ok commands (help/status/attach/…) still run on Enter.
+        if (run && GlassSlashCatalog.ShouldAutoRunOnCommit(insert.TrimEnd()))
+            TryRunGlassSlash(insert.TrimEnd());
+        else if (run)
+            StatusText.Text =
+                $"glass · slash · type args · {pick.Title} · {DateTime.Now:HH:mm:ss}";
     }
 }

@@ -54,6 +54,12 @@ public sealed class GlassIntercomMessageSelectTests
         Assert.Equal("select", bare.Id);
         Assert.True(bare.RequiresArgs);
         Assert.Equal("", args);
+        Assert.False(GlassSlashCatalog.ShouldAutoRunOnCommit("/intercom message select"));
+        Assert.True(GlassSlashCatalog.ShouldAutoRunOnCommit("/select 3"));
+        Assert.False(GlassSlashCatalog.ShouldAutoRunOnCommit("/open"));
+        Assert.False(GlassSlashCatalog.ShouldAutoRunOnCommit("/citizen"));
+        Assert.True(GlassSlashCatalog.ShouldAutoRunOnCommit("/help"));
+        Assert.True(GlassSlashCatalog.ShouldAutoRunOnCommit("/attach"));
 
         var hits = GlassSlashCatalog.Suggest("/sel");
         Assert.Contains(hits, h => h.InsertText.StartsWith("/select", StringComparison.Ordinal));

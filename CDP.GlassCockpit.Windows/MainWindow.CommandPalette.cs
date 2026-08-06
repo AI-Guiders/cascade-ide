@@ -191,10 +191,13 @@ public partial class MainWindow
                 TryRunGlassSlash("/attach");
                 break;
             case "slash_open":
-                TryRunGlassSlash("/open");
+                TryRunGlassSlash("/open"); // empty → park composer (no usage bubble)
                 break;
             case "slash_citizen":
                 TryRunGlassSlash("/citizen");
+                break;
+            case "slash_select":
+                TryRunGlassSlash("/select"); // bare → last message
                 break;
             case "topics_all":
             case "topic_overview":

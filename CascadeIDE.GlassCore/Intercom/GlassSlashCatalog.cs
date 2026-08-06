@@ -16,9 +16,11 @@ public static class GlassSlashCatalog
         new("topics", "/topics", "List topic cards (30m gap) · /topics N to select"),
         new("fds", "/fds", "Open Flight Data Storage MFD (plans/reports/notes)"),
         new("open", "/open", "Open path[:line] in AvalonEdit (thin attach↔code)", RequiresArgs: true),
-        new("attach", "/attach", "Insert [path:line] chip from editor selection (ADR 0128 thin)", RequiresArgs: true),
+        // attach: bare OK when AvalonEdit has a selection — Autocomplete may auto-run; fail → park composer (no usage bubble).
+        new("attach", "/attach", "Insert [path:line] chip from editor selection (ADR 0128 thin)"),
         new("citizen", "/citizen", "Talk to habitat citizen (dialog peer · GigaChat) — not guest @PF", RequiresArgs: true),
         new("letter", "/letter", "Where the Agent Who letter lives (CDP canon)"),
+        // select: Autocomplete waits for N; bare TryRun → last message (not usage).
         new("select", "/intercom message select", "Select #N · N:M · [3;5] [8;15] · clear · bare=last (ADR 0136/0138)", RequiresArgs: true),
         new("message_next", "/intercom message next", "Select next feed message (ordinal)"),
         new("message_prev", "/intercom message prev", "Select previous feed message (ordinal)"),
@@ -88,6 +90,19 @@ public static class GlassSlashCatalog
 
         return false;
     }
+
+    /// <summary>CIDE parity: Autocomplete Enter auto-runs only when args are present or command allows bare.</summary>
+    public static bool ShouldAutoRunOnCommit(string? raw)
+    {
+        if (!TryResolve(raw, out var cmd, out var argsTail))
+            return false;
+        if (cmd.RequiresArgs && string.IsNullOrWhiteSpace(argsTail))
+            return false;
+        return true;
+    }
+
+    public static string ComposerInsertForArgs(Command cmd) =>
+        cmd.Id == "select" ? "/select " : cmd.Path.TrimEnd() + " ";
 
     public static string FormatHelp()
     {
