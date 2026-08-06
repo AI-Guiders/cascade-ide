@@ -43,6 +43,7 @@
 - Hand-wiring Folded AutoI Korry while Review — green paint ≠ consume path; fix ignite-cmd consumer later.
 
 ## last_ship
+- 2026-08-06 · **messenger Ready to Interact VERIFY** · MCP PF→PM → Radio feed (untagged journal = Radio) · #crew empty = channel filter · rail XOR + CIT/HOST/PF Send hand live · evidence `tmp-glass-shots/messenger-radio-verify-20260806.png` · probes `14edf8ee938c`/`f1c3ed7c3900`
 - 2026-08-05 · **citizen multiturn post-fix verify** · turn1+turn2 latch → jsonl 4 lines · journal `ac16e559e218`/`b3d8f2f744a9` channel=crew · turn2 body=sierra · pairs cdp-mcp 74786d1 turn2 persist fix · evidence `tmp-glass-shots/citizen-multiturn-post-fix-20260805.png`
 - 2026-08-05 · **citizen journal dedupe** · habitat AppendJournal owns citizen kind (+ channel) · Glass feed watcher skips TryJournalFromView for kind=citizen (was Radio default duplicate) · needs Glass restart · pairs cdp-mcp crew-channel bridge ship
 - 2026-08-05 · **channel tag on Send/journal** · `channel` wire crew|radio|dm · XOR feed filter · bubble `· #crew` · tests `MatchesFeed` 11/11 · evidence `tmp-glass-shots/channel-tag-send-crew-20260805.png` · live journal ids 7256d165839c/9f22f63f0a58/e41fb8e72a62
