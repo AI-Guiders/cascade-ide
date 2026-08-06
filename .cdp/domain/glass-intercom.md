@@ -40,9 +40,11 @@
 - Silent Cursor Write past PathMutateGate for these files.
 - Human Intercom send that only latches PF without writing `.cdp/share` — agent cannot `share from=operator`.
 - Claiming Radio Done via SA wall / Autoi dump / File.Exists alone.
+- **Seeming messenger Done (operator 2026-08-06):** claiming `messenger-ready-verify` / CabinReady messenger as Face Done when dig shows no contact/DM address book, no browsable model directory (HudModelPicker Combo ≠ list), chrome ≠ Slack/MM flat feed. Hands (rail XOR · Send · channel filter) ≠ messenger. NorthStar Open: DM address book. Dig before claim — live shot alone without directory/Face checklist = seeming.
 - Hand-wiring Folded AutoI Korry while Review — green paint ≠ consume path; fix ignite-cmd consumer later.
 
 ## last_ship
+- **2026-08-06 CORRECT seeming messenger Done** — operator: no contact list · no model directory · chrome ≠ Slack/MM. Prior `messenger-ready-verify` = **hands only** (rail/Send/channel). Face OPEN: DM address book (northstar Open) · browsable model list · Face chrome-strip. Dig=northstar Open + live shot + operator. SoftFL REJECT.
 - 2026-08-06 · **mode-picker Ready to Interact VERIFY** · live UIA: CIT→HudModelPicker enabled=True Expand ok · HOST→enabled=False (lane XOR) · Message @CIT · status `glass · lane · CIT` · window_list→title=`CDP GlassCockpit · Windows`→PrintWindow + `cdp_see` · evidence `tmp-glass-shots/mode-picker-cit-axes-20260806.png` + `mode-picker-host-disabled-20260806.png` (+ full `mode-picker-cit-open-20260806.png`) · SoftFL invent REJECT · CabinReadyToInteract 6/6
 - 2026-08-06 · **messenger Ready to Interact VERIFY** · MCP PF→PM → Radio feed (untagged journal = Radio) · #crew empty = channel filter · rail XOR + CIT/HOST/PF Send hand live · evidence `tmp-glass-shots/messenger-radio-verify-20260806.png` · probes `14edf8ee938c`/`f1c3ed7c3900`
 - 2026-08-05 · **citizen multiturn post-fix verify** · turn1+turn2 latch → jsonl 4 lines · journal `ac16e559e218`/`b3d8f2f744a9` channel=crew · turn2 body=sierra · pairs cdp-mcp 74786d1 turn2 persist fix · evidence `tmp-glass-shots/citizen-multiturn-post-fix-20260805.png`
