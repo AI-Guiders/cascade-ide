@@ -12,7 +12,7 @@ internal static partial class GlassFdsGlance
     public static GlassGlanceCards.FdsShelfStatus Probe(string? workspaceRoot)
     {
         var plan = ProbePlan();
-        var share = ProbeShared();
+        var share = ProbeShared(workspaceRoot);
         var report = ProbeReport();
         var pressure = ProbePressure();
         var wake = ProbeWake();
@@ -53,15 +53,21 @@ internal static partial class GlassFdsGlance
         }
     }
 
-    static (bool on, string? file) ProbeShared()
+    static (bool on, string? file) ProbeShared(string? workspaceRoot = null)
     {
-        var path = CdpHabitatPaths.SharedLatchPath;
-        if (!File.Exists(path))
+        // Prefer IdeShare operator delivery (share/v1) — what agent share with=operator writes.
+        // Fall back to shared_file_latch co-presence (open-buffer ∩ human focus).
+        var ide = GlassIdeShareGlance.TryReadOperatorLatest(workspaceRoot);
+        if (ide is not null)
+            return (true, ide.FileName);
+
+        var latch = CdpHabitatPaths.SharedLatchPath;
+        if (!File.Exists(latch))
             return (false, null);
 
         try
         {
-            var view = LatchPaint.PaintShared(File.ReadAllText(path));
+            var view = LatchPaint.PaintShared(File.ReadAllText(latch));
             if (view is null)
                 return (true, null);
             var file = view.Path is { Length: > 0 } p ? Path.GetFileName(p) : null;

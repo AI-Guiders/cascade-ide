@@ -28,6 +28,7 @@
 - DomainBoard / WorkspaceHealth / Hypotheses `glance · unavailable` with empty WorkspaceRoot = seeming (climb / latch-only must paint).
 
 ## last_ship
+- **2026-08-06 share-glass-axb** — IdeShare `with=operator` → FDS SHARE chip (share/v1 LATEST, project-first via `GlassIdeShareGlance`) · not co-presence latch · tests GlassGlanceCards 9/9 · live PNG `tmp-glass-shots/fds-share-ideShare-20260806.png` (M·MFD · SHARE=`share-20260806-0…`) · cdp-mcp mirror habitat+project (sibling hard deploy)
 - **2026-08-06 glance-pages-ac CLOSED** — DIG ACCEPT SA glance Ready-to-Interact: Events READY · Env READY · Hyp paints MISSING · WH climb paints (was unavailable) · `GlassWorkspaceClimb` + always-build WH/Hyp · tests TryProbe_null_root 2/2 · evidence `tmp-glass-shots/glance-{events,wh-climb,env,hyp}-ac-20260806.png` (M·MFD). Extra hands beyond refresh DIG REJECT.
 - **2026-08-06 climb score** — Prefer .git/.sln/workspace.toml over thin .cascade-ide/.cdp (was GIT no / SLN none on project folder) · Score unit 1/1 · live WH READY · GIT yes · CascadeIDE.sln · `tmp-glass-shots/glance-wh-score-20260806.png`. Polish empty space = later.
 - 2026-08-05 · cabin glass_scene ROLE human-face parity · `IdeGlassSurfaceChannel.BuildRoleInGraph` → ROLE=`сирота`/`в карте` + hops/look (not `ORPHAN·IN-MAP·map on MFD`) · GlassSurfaceIpcTests 2/2 · dig=domain antipattern Packing ROLE

@@ -1,4 +1,5 @@
 #nullable enable
+using System.IO;
 using CascadeIDE.SoftOrgan;
 using Xunit;
 
@@ -83,6 +84,47 @@ public sealed class GlassGlanceCardsTests
         Assert.Contains(new GlassGlanceChip("PRESSURE", "human-faced", "warn"), chips);
         Assert.Contains(new GlassGlanceChip("WAKE", "leaf wake", "warn"), chips);
         Assert.Contains(new GlassGlanceChip(".CDP", "yes", "ok"), chips);
+    }
+
+    [Fact]
+    public void IdeShareGlance_and_BuildFds_prefer_operator_latest()
+    {
+        var root = Path.Combine(Path.GetTempPath(), "glass-fds-share-" + Guid.NewGuid().ToString("N"));
+        var shareDir = Path.Combine(root, ".cdp", "share");
+        try
+        {
+            Directory.CreateDirectory(shareDir);
+            File.WriteAllText(Path.Combine(shareDir, "LATEST.json"), """
+                {
+                  "schema": "share/v1",
+                  "with": "operator",
+                  "status": "shared",
+                  "path": "C:\\tmp\\share-hello.md",
+                  "what": "note"
+                }
+                """);
+            var hit = GlassIdeShareGlance.TryReadOperatorLatest(root);
+            Assert.NotNull(hit);
+            Assert.Equal("share-hello.md", hit!.FileName);
+
+            var chips = GlassGlanceCards.BuildFds(new GlassGlanceCards.FdsShelfStatus(
+                PlanReady: false,
+                PlanPulse: null,
+                SharedOn: true,
+                SharedFile: hit.FileName,
+                ReportReady: false,
+                ReportPulse: null,
+                PressureReady: false,
+                PressureLine: null,
+                WakeReady: false,
+                WakeHint: null,
+                WorkspaceCdp: true));
+            Assert.Contains(new GlassGlanceChip("SHARE", "share-hello.md", "ok"), chips);
+        }
+        finally
+        {
+            try { Directory.Delete(root, recursive: true); } catch { /* ignore */ }
+        }
     }
 
     [Fact]

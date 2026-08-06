@@ -4,6 +4,7 @@ using System.IO;
 using System.Text;
 using System.Text.Json;
 using CascadeIDE.Features.Cdp;
+using CascadeIDE.SoftOrgan;
 
 namespace CDP.GlassCockpit.Windows;
 
@@ -22,7 +23,7 @@ internal static partial class GlassFdsGlance
         sb.AppendLine("│ ≠ FDR flight_data    │");
 
         AppendPlan(sb);
-        AppendShared(sb);
+        AppendShared(sb, workspaceRoot);
         AppendReport(sb);
         AppendPressure(sb);
         AppendIgniteWake(sb);
@@ -65,10 +66,17 @@ internal static partial class GlassFdsGlance
         }
     }
 
-    static void AppendShared(StringBuilder sb)
+    static void AppendShared(StringBuilder sb, string? workspaceRoot)
     {
-        var path = CdpHabitatPaths.SharedLatchPath;
-        if (!File.Exists(path))
+        var ide = GlassIdeShareGlance.TryReadOperatorLatest(workspaceRoot);
+        if (ide is not null)
+        {
+            sb.AppendLine($"│ SHARE on · {Truncate(ide.FileName, 20)}");
+            return;
+        }
+
+        var latch = CdpHabitatPaths.SharedLatchPath;
+        if (!File.Exists(latch))
         {
             AppendMark(sb, "shared", false);
             return;
@@ -76,7 +84,7 @@ internal static partial class GlassFdsGlance
 
         try
         {
-            var raw = File.ReadAllText(path);
+            var raw = File.ReadAllText(latch);
             var view = LatchPaint.PaintShared(raw);
             if (view is null)
             {
