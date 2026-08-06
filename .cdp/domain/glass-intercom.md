@@ -47,6 +47,7 @@
 - Hand-wiring Folded AutoI Korry while Review — green paint ≠ consume path; fix ignite-cmd consumer later.
 
 ## last_ship
+- **2026-08-06 Face Who sticky residual CLOSED** · TypingCue/subtitle prefer presence.`who` (Citizen Turn) over identity sticky (AutoI remount) · Glass `GlassIntercomPresence` who+kind parity · pairs cdp-mcp 0.5.669 bridge Claim+orphan recover · **restart Glass** · SoftFL REJECT · DoD: `Citizen is busy…` visible while Sierra thinks
 - **2026-08-06 Radio journal → intercom.witdb SHIPPED** · Glass `GlassIntercomJournal` + linked `Cdp.IntercomJournal` sources · OutWit 12.2.0 on GlassCore · LoadTail/Append → shared StateRoot `intercom.witdb` (not jsonl mutex) · pairs cdp-mcp 0.5.668 · **restart Glass** to live reader · SoftFL REJECT
 - **2026-08-06 face-typing-cue SHIPPED (thin)** · Slack/MM cue above composer: `TypingCue` ← presence latch (`TryTypingCue` + sticky Who) · not subtitle-only · not bubble invent · Citizen bridge marks `pf` busy during Turn → idle in finally · test `TryProcessOnce_marks_pf_busy_during_turn_then_idle` · live UIA `AutoI is typing…` + evidence `tmp-glass-shots/face-typing-cue-20260806.png` (title=`CDP GlassCockpit · Windows`) · SoftFL REJECT · residual: observe ack/pulse; Who on cue = sticky (AutoI vs Citizen) · SoftFL REJECT
 - **2026-08-06 Radio duplex tip-filter** · `GlassAutoiWakeFeed.LooksLikeRadioPointer` — Autoi remount face mis-attributed as Citizen stays SoftOrgan tip, not chat · journal Mutex parity with habitat · pairs cdp-mcp duplex fix · SoftFL REJECT

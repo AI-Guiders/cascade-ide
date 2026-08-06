@@ -32,7 +32,7 @@ internal static class GlassIntercomPresence
     };
 
     /// <summary>Publish this seat's presence (merge dual map). Returns false on bad state/IO.</summary>
-    public static bool TryPublish(string seat, string state, int? ttlSeconds = null)
+    public static bool TryPublish(string seat, string state, int? ttlSeconds = null, string? who = null, string? kind = null)
     {
         seat = seat.Trim().ToLowerInvariant();
         if (seat is not ("pf" or "pm"))
@@ -61,10 +61,20 @@ internal static class GlassIntercomPresence
             var doc = TryReadRaw() ?? new PresenceDoc { Schema = Schema };
             doc.Schema = Schema;
 
+            var whoTrim = string.IsNullOrWhiteSpace(who) ? null : who.Trim();
+            var kindTrim = string.IsNullOrWhiteSpace(kind) ? null : kind.Trim().ToLowerInvariant();
+            if (state == "idle")
+            {
+                whoTrim = null;
+                kindTrim = null;
+            }
+
             var now = DateTimeOffset.UtcNow;
             var existing = seat == "pm" ? doc.Pm : doc.Pf;
             if (existing is not null
                 && string.Equals(existing.State, state, StringComparison.OrdinalIgnoreCase)
+                && string.Equals(existing.Who, whoTrim, StringComparison.Ordinal)
+                && string.Equals(existing.Kind, kindTrim, StringComparison.OrdinalIgnoreCase)
                 && (now - existing.StampedUtc).TotalSeconds < 2)
                 return true;
 
@@ -72,7 +82,9 @@ internal static class GlassIntercomPresence
             {
                 State = state,
                 StampedUtc = now,
-                TtlSeconds = ttl > 0 ? ttl : null
+                TtlSeconds = ttl > 0 ? ttl : null,
+                Who = whoTrim,
+                Kind = kindTrim
             };
             if (seat == "pm")
                 doc.Pm = slot;
@@ -91,7 +103,7 @@ internal static class GlassIntercomPresence
         }
     }
 
-    /// <summary>Partner line for Glass (viewer=PM → @PF · state). Null when idle/missing.</summary>
+    /// <summary>Partner line for Glass (viewer=PM → Who · state or @PF · state). Null when idle/missing.</summary>
     public static string? TryPartnerLine(string? json = null)
     {
         try
@@ -101,6 +113,9 @@ internal static class GlassIntercomPresence
                 return null;
             if (string.Equals(partner.State, "idle", StringComparison.OrdinalIgnoreCase))
                 return null;
+
+            if (!string.IsNullOrWhiteSpace(partner.Who))
+                return $"{partner.Who.Trim()} · {partner.State}";
 
             return $"@PF · {partner.State}";
         }
@@ -113,6 +128,7 @@ internal static class GlassIntercomPresence
     /// <summary>
     /// Slack/MM Face cue above composer — human eyes, not subtitle-only.
     /// Null when partner idle/missing/stale.
+    /// Prefer presence.who (Citizen Turn) over sticky Who (AutoI remount).
     /// </summary>
     public static string? TryTypingCue(string? json = null, string? whoName = null)
     {
@@ -126,7 +142,9 @@ internal static class GlassIntercomPresence
             if (state is "idle" or "stale")
                 return null;
 
-            var who = string.IsNullOrWhiteSpace(whoName) ? "PF" : whoName.Trim();
+            var who = !string.IsNullOrWhiteSpace(partner.Who)
+                ? partner.Who.Trim()
+                : (string.IsNullOrWhiteSpace(whoName) ? "PF" : whoName.Trim());
             return state switch
             {
                 "composing" => $"{who} is typing…",
@@ -211,7 +229,14 @@ internal static class GlassIntercomPresence
             _ => 0
         };
         if (ttl > 0 && (now - seat.StampedUtc).TotalSeconds > ttl)
-            return new PresenceSeat { State = "stale", StampedUtc = seat.StampedUtc, TtlSeconds = seat.TtlSeconds };
+            return new PresenceSeat
+            {
+                State = "stale",
+                StampedUtc = seat.StampedUtc,
+                TtlSeconds = seat.TtlSeconds,
+                Who = seat.Who,
+                Kind = seat.Kind
+            };
 
         return seat;
     }
@@ -228,5 +253,7 @@ internal static class GlassIntercomPresence
         public string State { get; set; } = "idle";
         public DateTimeOffset StampedUtc { get; set; }
         public int? TtlSeconds { get; set; }
+        public string? Who { get; set; }
+        public string? Kind { get; set; }
     }
 }
