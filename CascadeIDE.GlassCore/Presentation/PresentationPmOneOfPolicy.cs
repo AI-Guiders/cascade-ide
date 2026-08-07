@@ -78,14 +78,18 @@ public static class PresentationPmOneOfPolicy
     public static PresentationAnchorKind? FromPlanLatch() => null;
 
     /// <summary>
-    /// SoftOrgan seats never drive MFD page or OneOf role.
-    /// Desk pin republish is not a show-page command; chrome tip only.
-    /// Page / OneOf change only via agent|operator|citizen intent wire.
+    /// SoftOrgan seats: quiet republish = chrome tip only.
+    /// <paramref name="showFace"/> = PlaceOrgan human attention → SelectMfd when mfd_page set.
     /// </summary>
+    public static bool SeatsMaySelectMfd(bool showFace, string? seatsMfdPage) =>
+        showFace && !string.IsNullOrWhiteSpace(seatsMfdPage);
+
+    /// <summary>Quiet layout pin / cold seats republish — never auto-switch MFD.</summary>
     public static bool SeatsMaySelectMfd(
         string? stickyMfdPage,
         string? seatsMfdPage,
-        bool seatsMOrganChanged) => false;
+        bool seatsMOrganChanged) =>
+        false;
 
     /// <summary>Toggle XOR: P↔M (operator/agent chord).</summary>
     public static PresentationAnchorKind Toggle(PresentationAnchorKind current) =>

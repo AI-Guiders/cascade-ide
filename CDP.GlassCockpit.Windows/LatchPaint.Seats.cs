@@ -3,7 +3,7 @@ using System.Text.Json;
 
 namespace CDP.GlassCockpit.Windows;
 
-/// <summary>seats-LATEST.json → MFD select + cabin SoftOrgan chrome (Avalonia CdpSeatsProjector parity).</summary>
+/// <summary>seats-LATEST.json → SoftOrgan chrome + optional ShowFace attention.</summary>
 internal static partial class LatchPaint
 {
     public const string SeatsSchema = "cide_seats_latch/v1";
@@ -13,6 +13,8 @@ internal static partial class LatchPaint
         string? MfdPage,
         string? ChromeHint,
         string? MOrgan,
+        bool ShowFace,
+        string? FaceSeat,
         string StatusLine);
 
     /// <summary>Null when schema/origin gate fails or JSON is unreadable.</summary>
@@ -34,12 +36,19 @@ internal static partial class LatchPaint
             if (string.IsNullOrWhiteSpace(chrome))
                 chrome = null;
             var mOrgan = TrySeatPin(root, "m");
+            var showFace = PropBool(root, "show_face");
+            var faceSeat = Prop(root, "face_seat");
+            if (string.IsNullOrWhiteSpace(faceSeat))
+                faceSeat = null;
 
+            var faceBit = showFace ? " · show_face" : "";
             return new SeatsView(
                 string.IsNullOrWhiteSpace(mfd) ? null : mfd.Trim(),
                 chrome,
                 mOrgan,
-                $"seats · {mfd ?? "—"} · {(chrome ?? "—")}");
+                showFace,
+                faceSeat,
+                $"seats · {mfd ?? "—"} · {(chrome ?? "—")}{faceBit}");
         }
         catch
         {
@@ -57,5 +66,19 @@ internal static partial class LatchPaint
             return null;
         var s = pin.GetString();
         return string.IsNullOrWhiteSpace(s) ? null : s.Trim();
+    }
+
+    static bool PropBool(JsonElement root, string name)
+    {
+        if (!root.TryGetProperty(name, out var el))
+            return false;
+        return el.ValueKind switch
+        {
+            JsonValueKind.True => true,
+            JsonValueKind.False => false,
+            JsonValueKind.String => bool.TryParse(el.GetString(), out var b) && b,
+            JsonValueKind.Number => el.TryGetInt32(out var n) && n != 0,
+            _ => false
+        };
     }
 }

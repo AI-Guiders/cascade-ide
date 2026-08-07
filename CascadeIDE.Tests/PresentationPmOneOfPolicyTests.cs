@@ -21,7 +21,7 @@ public class PresentationPmOneOfPolicyTests
     }
 
     [Fact]
-    public void SeatsMaySelectMfd_never_auto_switches()
+    public void SeatsMaySelectMfd_quiet_republish_never_auto_switches()
     {
         Assert.False(PresentationPmOneOfPolicy.SeatsMaySelectMfd(
             stickyMfdPage: null,
@@ -35,6 +35,14 @@ public class PresentationPmOneOfPolicyTests
             stickyMfdPage: null,
             seatsMfdPage: "Editor",
             seatsMOrganChanged: false));
+    }
+
+    [Fact]
+    public void SeatsMaySelectMfd_show_face_selects_when_mfd_present()
+    {
+        Assert.True(PresentationPmOneOfPolicy.SeatsMaySelectMfd(showFace: true, seatsMfdPage: "Git"));
+        Assert.False(PresentationPmOneOfPolicy.SeatsMaySelectMfd(showFace: true, seatsMfdPage: null));
+        Assert.False(PresentationPmOneOfPolicy.SeatsMaySelectMfd(showFace: false, seatsMfdPage: "Git"));
     }
 
     [Fact]

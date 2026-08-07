@@ -7,7 +7,7 @@ namespace CascadeIDE.Features.Cdp;
 
 /// <summary>
 /// Agent desk seats → cabin SoftOrgan chrome tip on glass.
-/// Watches seats-LATEST.json; does <b>not</b> flip MFD page (intent wire only).
+/// Quiet republish: chrome tip only. <c>show_face</c> → BringToFront (MFD via WPF Glass).
 /// </summary>
 internal sealed class CdpSeatsProjector : IDisposable
 {
@@ -97,7 +97,7 @@ internal sealed class CdpSeatsProjector : IDisposable
             _lastFingerprint = fingerprint;
         }
 
-        // SoftOrgan seats → chrome only. MFD page is intent wire (presentation/chord/land/citizen), not desk pin.
+        // SoftOrgan seats → chrome tip. ShowFace BringAttention is WPF Glass (CDP.GlassCockpit.Windows).
         _vm.ApplyCabinOrganChromeHint(doc.ChromeHint);
     }
 
@@ -117,6 +117,8 @@ internal sealed class CdpSeatsProjector : IDisposable
         public Dictionary<string, string?>? Seats { get; set; }
         public string? MfdPage { get; set; }
         public string? ChromeHint { get; set; }
+        public bool ShowFace { get; set; }
+        public string? FaceSeat { get; set; }
         public string Origin { get; set; } = OriginAgent;
         public DateTimeOffset StampedUtc { get; set; }
 
@@ -126,7 +128,7 @@ internal sealed class CdpSeatsProjector : IDisposable
                 ? ""
                 : string.Join(';', Seats.OrderBy(kv => kv.Key, StringComparer.OrdinalIgnoreCase)
                     .Select(kv => kv.Key + '=' + (kv.Value ?? "")));
-            return string.Join('|', seats, MfdPage ?? "", ChromeHint ?? "");
+            return string.Join('|', seats, MfdPage ?? "", ChromeHint ?? "", ShowFace ? "1" : "0", FaceSeat ?? "");
         }
     }
 }
