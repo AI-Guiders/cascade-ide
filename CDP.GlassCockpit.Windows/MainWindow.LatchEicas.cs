@@ -62,11 +62,7 @@ public partial class MainWindow
                     ? Visibility.Collapsed
                     : Visibility.Visible;
                 if (PlanLeafBoardList is not null)
-                {
-                    PlanLeafBoardList.Items.Clear();
-                    foreach (var line in view.Board ?? Array.Empty<string>())
-                        PlanLeafBoardList.Items.Add(line);
-                }
+                    ApplyPlanLeaves(view.Leaves);
                 // Legacy mirror (collapsed).
                 PlanReadout.ValueText = view.Headline;
                 PlanReadout.SubText = string.IsNullOrWhiteSpace(view.Detail) ? null : view.Detail;

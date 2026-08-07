@@ -19,7 +19,8 @@ internal static partial class LatchPaint
         string Course = "",
         string? Wall = null,
         string? NextSub = null,
-        IReadOnlyList<string>? Board = null);
+        IReadOnlyList<string>? Board = null,
+        IReadOnlyList<PlanBoardLeaf>? Leaves = null);
 
     public static PlanView PaintPlan(string json)
     {
@@ -32,7 +33,9 @@ internal static partial class LatchPaint
             var task = Prop(root, "task");
             var whyRaw = Prop(root, "why");
             var pulse = Prop(root, "pulse") ?? Prop(root, "chrome_hint");
-            var board = ReadBoard(root);
+            var boardRaw = ReadBoardRaw(root);
+            var leaves = PlanBoardLeaf.ParseAll(boardRaw);
+            var board = leaves.Select(static l => $"{l.Mark} · {l.Title}").ToList();
 
             if (!active && string.IsNullOrWhiteSpace(feature) && string.IsNullOrWhiteSpace(task)
                 && string.IsNullOrWhiteSpace(whyRaw) && board.Count == 0)
@@ -45,7 +48,8 @@ internal static partial class LatchPaint
                     Why: "No sealed course.",
                     Next: "No active leaf.",
                     Course: "Plan quiet",
-                    Board: []);
+                    Board: [],
+                    Leaves: []);
             }
 
             // Shared-SSOT Q1: WHY + NEXT as separate instrument faces (not one ECAM string).
@@ -86,7 +90,8 @@ internal static partial class LatchPaint
                 Course: course,
                 Wall: wall,
                 NextSub: nextSub,
-                Board: board);
+                Board: board,
+                Leaves: leaves);
         }
         catch (Exception ex)
         {
@@ -98,11 +103,12 @@ internal static partial class LatchPaint
                 Why: ex.Message,
                 Next: "Plan",
                 Course: "",
-                Board: []);
+                Board: [],
+                Leaves: []);
         }
     }
 
-    static IReadOnlyList<string> ReadBoard(JsonElement root)
+    static IReadOnlyList<string> ReadBoardRaw(JsonElement root)
     {
         if (!root.TryGetProperty("board", out var arr) || arr.ValueKind != JsonValueKind.Array)
             return [];
@@ -115,8 +121,8 @@ internal static partial class LatchPaint
             var s = el.GetString();
             if (string.IsNullOrWhiteSpace(s))
                 continue;
-            list.Add(HumanizeBoardLine(s.Trim()));
-            if (list.Count >= 32)
+            list.Add(s.Trim());
+            if (list.Count >= 48)
                 break;
         }
 

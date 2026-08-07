@@ -101,9 +101,79 @@
               <uikit:GlassEcamReadout x:Name="PlanNextReadout" Label="NEXT" ValueText="(no leaf)" Margin="0,0,0,8"/>
               <uikit:GlassEcamReadout x:Name="PlanCourseReadout" Label="COURSE" ValueText="—" Margin="0,0,0,8"/>
               <TextBlock Text="leaf board" FontSize="10" Foreground="#888" Margin="0,4,0,4"/>
+              <UniformGrid Columns="3" Margin="0,0,0,8">
+                <Border x:Name="PlanFlyCard" Margin="0,0,4,0" Padding="8,6" CornerRadius="4"
+                        Background="#1A2430" BorderBrush="#4A9EFF" BorderThickness="1" Cursor="Hand">
+                  <StackPanel>
+                    <TextBlock Text="FLY" FontSize="9" Foreground="#888"/>
+                    <TextBlock x:Name="PlanFlyCount" Text="0" FontSize="16" FontWeight="SemiBold"
+                               FontFamily="Consolas" Foreground="#9EC8FF"/>
+                  </StackPanel>
+                </Border>
+                <Border x:Name="PlanOpenCard" Margin="0,0,4,0" Padding="8,6" CornerRadius="4"
+                        Background="#2A2618" BorderBrush="#D7A33C" BorderThickness="1" Cursor="Hand">
+                  <StackPanel>
+                    <TextBlock Text="OPEN" FontSize="9" Foreground="#888"/>
+                    <TextBlock x:Name="PlanOpenCount" Text="0" FontSize="16" FontWeight="SemiBold"
+                               FontFamily="Consolas" Foreground="#E0C878"/>
+                  </StackPanel>
+                </Border>
+                <Border x:Name="PlanDoneCard" Padding="8,6" CornerRadius="4"
+                        Background="#1A2E1A" BorderBrush="#3A3A3A" BorderThickness="1" Cursor="Hand">
+                  <StackPanel>
+                    <TextBlock Text="DONE" FontSize="9" Foreground="#888"/>
+                    <TextBlock x:Name="PlanDoneCount" Text="0" FontSize="16" FontWeight="SemiBold"
+                               FontFamily="Consolas" Foreground="#A8E0A8"/>
+                  </StackPanel>
+                </Border>
+              </UniformGrid>
               <ListBox x:Name="PlanLeafBoardList" Background="Transparent" BorderThickness="0"
-                       FontFamily="Consolas" FontSize="11" Foreground="#CCC"
-                       MaxHeight="280"/>
+                       ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                       MaxHeight="280">
+                <ListBox.ItemContainerStyle>
+                  <Style TargetType="ListBoxItem">
+                    <Setter Property="Padding" Value="0"/>
+                    <Setter Property="Margin" Value="0,0,0,4"/>
+                    <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                    <Setter Property="Background" Value="Transparent"/>
+                  </Style>
+                </ListBox.ItemContainerStyle>
+                <ListBox.ItemTemplate>
+                  <DataTemplate DataType="{x:Type local:PlanBoardLeaf}">
+                    <Border Padding="8,6" CornerRadius="4" BorderThickness="1" BorderBrush="#22FFFFFF" Background="#12000000">
+                      <Grid>
+                        <Grid.ColumnDefinitions>
+                          <ColumnDefinition Width="4"/>
+                          <ColumnDefinition Width="48"/>
+                          <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Border Grid.Column="0" Width="4" CornerRadius="2" Margin="0,0,8,0">
+                          <Border.Style>
+                            <Style TargetType="Border">
+                              <Setter Property="Background" Value="#D7A33C"/>
+                              <Style.Triggers>
+                                <DataTrigger Binding="{Binding Mark}" Value="FLY">
+                                  <Setter Property="Background" Value="#4A9EFF"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding Mark}" Value="DONE">
+                                  <Setter Property="Background" Value="#5A8F5A"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding Mark}" Value="COURSE">
+                                  <Setter Property="Background" Value="#888888"/>
+                                </DataTrigger>
+                              </Style.Triggers>
+                            </Style>
+                          </Border.Style>
+                        </Border>
+                        <TextBlock Grid.Column="1" Text="{Binding Mark}" FontSize="10" FontWeight="SemiBold"
+                                   Foreground="#AAA" VerticalAlignment="Center"/>
+                        <TextBlock Grid.Column="2" Text="{Binding Title}" FontSize="12" FontWeight="SemiBold"
+                                   TextWrapping="Wrap" Foreground="#DDD" VerticalAlignment="Center"/>
+                      </Grid>
+                    </Border>
+                  </DataTemplate>
+                </ListBox.ItemTemplate>
+              </ListBox>
               <!-- Legacy single dump kept collapsed for situ cache / latch paint mirror. -->
               <uikit:GlassEcamReadout x:Name="PlanReadout" Label="PLAN" ValueText="(no solution yet)" Visibility="Collapsed"/>
               <TextBlock x:Name="PlanTitle" Visibility="Collapsed" Text="(no solution yet)"/>
