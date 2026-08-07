@@ -2,7 +2,7 @@
 
 namespace CascadeIDE.Intercom;
 
-/// <summary>Glass-local Ctrl+Q command list (Avalonia-free). Full CIDE palette stays in host.</summary>
+/// <summary>Glass-local Ctrl+Q command list (Avalonia-free). SoftOrgan EICAS family (QRH/ECL/alert) peels here — not Avalonia IdeCommandRegistry dump.</summary>
 public sealed record GlassPaletteEntry(string Id, string Title, string Help, string? Keywords = null);
 
 public static class GlassCommandPaletteCatalog
@@ -51,6 +51,9 @@ public static class GlassCommandPaletteCatalog
         new("mfd_events", "MFD: Events", "Events / latch catalog glance", "mfd events latch"),
         new("mfd_hypotheses", "MFD: Hypotheses", "Debug hypotheses glance", "mfd hypotheses debug"),
         new("mfd_chat", "MFD: Chat", "Intercom presence MFD glance", "mfd chat intercom presence"),
+        new("soft_qrh", "Soft: QRH", "Open eQRH — citizen @intent qrh → PlaceOrgan Face", "soft qrh eqrh handbook eicas softorgan"),
+        new("soft_ecl", "Soft: ECL", "Open ECL checklist — citizen @intent ecl → PlaceOrgan Face", "soft ecl chk checklist eicas softorgan"),
+        new("soft_alert", "Soft: Alert", "Open Alert/SA channel — citizen @intent alert → PlaceOrgan Face", "soft alert eicas sa softorgan"),
         new("toggle_pm_oneof_role", "OneOf P/M toggle", "Toggle P↔M on (P/M)(F) OneOf host", "oneof pm topology toggle slash"),
     ];
 

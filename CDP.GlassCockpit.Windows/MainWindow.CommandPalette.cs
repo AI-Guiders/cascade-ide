@@ -287,6 +287,15 @@ public partial class MainWindow
             case "mfd_chat":
                 SelectMfdPage("Chat", sticky: true);
                 break;
+            case "soft_qrh":
+                OpenSoftOrganFace("qrh", "qrh");
+                break;
+            case "soft_ecl":
+                OpenSoftOrganFace("ecl", "ecl");
+                break;
+            case "soft_alert":
+                OpenSoftOrganFace("alert", "alert");
+                break;
             case "toggle_pm_oneof_role":
                 if (_hosts.TogglePmOneOfRole())
                 {

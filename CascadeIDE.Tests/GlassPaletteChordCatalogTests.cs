@@ -27,6 +27,19 @@ public sealed class GlassPaletteChordCatalogTests
     }
 
     [Fact]
+    public void Palette_Filter_soft_qrh_ecl_alert_lived_SoftFL()
+    {
+        Assert.Contains(GlassCommandPaletteCatalog.Filter("qrh"), e => e.Id == "soft_qrh");
+        Assert.Contains(GlassCommandPaletteCatalog.Filter("ecl"), e => e.Id == "soft_ecl");
+        Assert.Contains(GlassCommandPaletteCatalog.Filter("checklist"), e => e.Id == "soft_ecl");
+        Assert.Contains(GlassCommandPaletteCatalog.Filter("alert"), e => e.Id == "soft_alert");
+        Assert.Contains(GlassCommandPaletteCatalog.Filter("softorgan"), e => e.Id == "soft_qrh");
+        Assert.Equal("soft_qrh", GlassChordCatalog.Exact("qr")!.ActionId);
+        Assert.Equal("soft_ecl", GlassChordCatalog.Exact("ec")!.ActionId);
+        Assert.Equal("soft_alert", GlassChordCatalog.Exact("al")!.ActionId);
+    }
+
+    [Fact]
     public void Chord_Normalize_strips_non_alnum_and_lowercases()
     {
         Assert.Equal("pq", GlassChordCatalog.Normalize("PQ"));

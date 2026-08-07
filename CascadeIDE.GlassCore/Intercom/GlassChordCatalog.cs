@@ -41,6 +41,9 @@ public static class GlassChordCatalog
         new("ev", "MFD Events", "mfd_events", "Events / latch catalog glance"),
         new("hy", "MFD Hypotheses", "mfd_hypotheses", "Debug hypotheses glance"),
         new("ic", "MFD Chat", "mfd_chat", "Intercom presence MFD glance"),
+        new("qr", "Soft QRH", "soft_qrh", "eQRH PlaceOrgan Face"),
+        new("ec", "Soft ECL", "soft_ecl", "ECL PlaceOrgan Face"),
+        new("al", "Soft Alert", "soft_alert", "Alert/SA PlaceOrgan Face"),
         new("pq", "Command palette", "palette", "Open Ctrl+Q palette"),
         new("po", "OneOf channel cycle", "toggle_pm_oneof_role", "Cycle active channel on P/M OneOf stack (sit/world/alert… or legacy P↔M)"),
     ];
