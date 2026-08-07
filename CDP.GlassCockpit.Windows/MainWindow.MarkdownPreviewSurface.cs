@@ -76,13 +76,10 @@ public partial class MainWindow
             && File.Exists(_editorPath))
             return _editorPath;
 
+        // SoftFL: never fall back to pressure-LATEST.md (agent dump wall on Face).
         var report = Path.Combine(CdpHabitatPaths.StateRoot, "report-LATEST.md");
         if (File.Exists(report))
             return report;
-
-        var pressure = Path.Combine(CdpHabitatPaths.StateRoot, "cdp", "pressure-LATEST.md");
-        if (File.Exists(pressure))
-            return pressure;
 
         return null;
     }

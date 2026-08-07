@@ -58,14 +58,8 @@ public static class GlassProductSpineStore
         File.Move(tmp, path, overwrite: true);
     }
 
-    public static string FormatStrip(ChatProductSpine spine)
-    {
-        if (!spine.HasContent)
-            return "";
-        var title = ChatProductSpinePresentation.ResolveLineTitle(spine);
-        var focus = ChatProductSpinePresentation.FormatDetailStripFocus(spine.CurrentFocus);
-        return title + " · " + focus;
-    }
+    public static string FormatStrip(ChatProductSpine spine) =>
+        ChatProductSpinePresentation.FormatFaceStrip(spine);
 
     sealed record SpineDto(
         string? LineTitle,

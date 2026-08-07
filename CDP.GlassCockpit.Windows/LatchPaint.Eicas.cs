@@ -54,7 +54,7 @@ internal static partial class LatchPaint
             if (string.IsNullOrWhiteSpace(text))
                 return null;
 
-            return new EicasView($"EICAS · {tag} · {text.Trim()}");
+            return new EicasView(FormatEicasFace(tag, text));
         }
         catch
         {
@@ -86,7 +86,7 @@ internal static partial class LatchPaint
                 ? pulse!.Trim()
                 : (!string.IsNullOrWhiteSpace(hotTitle) ? hotTitle!.Trim() : hotId!.Trim());
 
-            return new EicasView($"EICAS · ADV · {head}");
+            return new EicasView(FormatEicasFace("ADV", head));
         }
         catch
         {
@@ -118,11 +118,26 @@ internal static partial class LatchPaint
                 ? pulse!.Trim()
                 : (!string.IsNullOrWhiteSpace(hotTitle) ? hotTitle!.Trim() : hotId!.Trim());
 
-            return new EicasView($"EICAS · ECL · {head}");
+            return new EicasView(FormatEicasFace("ECL", head));
         }
         catch
         {
             return null;
         }
+    }
+
+    /// <summary>Face EICAS chip — SoftFL / tip-mill jargon never paints as prose wall.</summary>
+    static string FormatEicasFace(string tag, string raw)
+    {
+        var face = HumanizeChromeHint(raw.Trim());
+        if (string.IsNullOrWhiteSpace(face))
+        {
+            var stripped = StripPlanTheatre(raw.Trim());
+            if (string.IsNullOrWhiteSpace(stripped) || LooksLikePlanJargon(stripped))
+                return $"EICAS · {tag}";
+            face = TruncatePlan(stripped, 72);
+        }
+
+        return $"EICAS · {tag} · {face}";
     }
 }

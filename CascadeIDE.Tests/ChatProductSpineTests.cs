@@ -25,4 +25,19 @@ public sealed class ChatProductSpineTests
         Assert.Equal(8, lines.Count);
         Assert.Equal("a", lines[0]);
     }
+
+    [Fact]
+    public void FormatFaceStrip_HumanizesPreConditionAdoptedJargon()
+    {
+        var spine = new ChatProductSpine(
+            "Glass PreCondition",
+            "A6 ADOPTED denser — message select 0136/0138; residual Intercom slash",
+            ["A6"],
+            IncludeInAgentContext: true);
+        var strip = ChatProductSpinePresentation.FormatFaceStrip(spine);
+        Assert.Equal("Glass Done · message select ready", strip);
+        Assert.DoesNotContain("PreCondition", strip, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain("ADOPTED", strip, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain("0136", strip, StringComparison.Ordinal);
+    }
 }
