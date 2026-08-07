@@ -28,6 +28,7 @@
 - DomainBoard / WorkspaceHealth / Hypotheses `glance · unavailable` with empty WorkspaceRoot = seeming (climb / latch-only must paint).
 
 ## last_ship
+- **2026-08-07 Face live dogfood WHY+NEXT** — stash SEALED-marker → WhyLine=Glass Done (human flight); latch task/feature humanized; Glass FormatGlanceNext SoftFL/nested/agent-refuse fallback · evidence `.cdp/evidence/face-why-next-human-20260807.png` (CDP GlassCockpit · Windows · PLAN) · cdp-mcp `c5c6d1d` · cascade `8bc3e98a`
 - **2026-08-07 Face theatre strip across LatchPaint peels** — Plan WHY/NEXT/board · SoftOrgan chrome · Seats tip · Intercom compact · IgniteWake tip · slash SoftFL jargon out · paired cdp-mcp IdeHumanFacePlan Why/Next/Pulse/Board on PublishGlass · no operator-eyes theatre on Face
 - **2026-08-06 share-glass-axb** — IdeShare `with=operator` → FDS SHARE chip (share/v1 LATEST, project-first via `GlassIdeShareGlance`) · not co-presence latch · tests GlassGlanceCards 9/9 · live PNG `tmp-glass-shots/fds-share-ideShare-20260806.png` (M·MFD · SHARE=`share-20260806-0…`) · cdp-mcp mirror habitat+project (sibling hard deploy)
 - **2026-08-06 glance-pages-ac CLOSED** — DIG ACCEPT SA glance Ready-to-Interact: Events READY · Env READY · Hyp paints MISSING · WH climb paints (was unavailable) · `GlassWorkspaceClimb` + always-build WH/Hyp · tests TryProbe_null_root 2/2 · evidence `tmp-glass-shots/glance-{events,wh-climb,env,hyp}-ac-20260806.png` (M·MFD). Extra hands beyond refresh DIG REJECT.
