@@ -36,6 +36,7 @@
 - **Seeming messenger Done (operator 2026-08-06):** claiming `messenger-ready-verify` / CabinReady messenger as Face Done when dig shows no contact/DM address book, no browsable model directory (HudModelPicker Combo ≠ list), chrome ≠ Slack/MM flat feed. Hands (rail XOR · Send · channel filter) ≠ messenger. NorthStar Open: DM address book. Dig before claim — live shot alone without directory/Face checklist = seeming.
 
 ## last_ship
+- **2026-08-07 Dig Intercom Face Slack/MM densest SoftFL invent REJECT CLOSED** · dig=`glass-intercom.md` + live Face title=`CDP GlassCockpit · Windows` · evidence `tmp-glass-shots/intercom-face-dig-20260807.png` (#crew lit · Models default/GLM-5.1/Qwen · flat Sierra feed · spine Glass Done SoftOrgan) · SoftFL invent REJECT (no lived SoftFL gap) · residual Face Done still axis4 operator eyes · A4 relate/event-log · PreCondition A-rows
 - **2026-08-07 mention axes Seat+Kind+Who → WakeSink** · `@PF`/`@PM` seats · `@guest`/`@citizen`/`@operator` kinds · Who sticky/bootstrap · wake=f(kind): guest→external cannon, citizen|operator→Face · seat follows occupant kind · `ResolveWakes` + FanOut · tests GlassIntercomMention **20/20** · SoftFL REJECT invent
 - **2026-08-07 @PM seat mention + Who cues** · `@PF`/`@PM` = seats; Who sticky for cues; `@PM` → Face BringCabinAttention; tests GlassIntercomMention · SoftFL REJECT person-tag invent
 - **2026-08-07 @PF mention any lane → PF wake** · `GlassIntercomMention` + `TryNotifyPf` from CIT/HOST/`/citizen` · tests **11/11** · SoftFL REJECT invent full mention UX
