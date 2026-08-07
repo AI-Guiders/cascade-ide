@@ -262,6 +262,14 @@ public partial class MainWindow
                 return true;
             }
 
+            var wakeNote = "";
+            if (GlassIntercomMention.MentionsPf(argsTail))
+            {
+                var wake = GlassIntercomSend.TryNotifyPf(argsTail, _session.WorkspaceRoot);
+                if (wake is not null)
+                    wakeNote = " · @PF wake";
+            }
+
             _seenIntercomIds.Add(sent.Id);
             RebuildIntercomFeedFromJournal(stickEnd: true);
             ComposerBox.Clear();
@@ -269,6 +277,7 @@ public partial class MainWindow
             PublishPmIdle();
             StatusText.Text =
                 CascadeIDE.Intercom.CitizenDialogRequestStatus.FormatLine(sent.Id, "pending", null)
+                + wakeNote
                 + $" · {DateTime.Now:HH:mm:ss}";
             return true;
         }

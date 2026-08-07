@@ -248,6 +248,7 @@ public partial class MainWindow
 
         string? id;
         string? roleLabel;
+        var mentionedPf = false;
         if (_lane == GlassIntercomLane.Kind.Cit)
         {
             var cit = GlassCitizenDialogRequest.TryEnqueue(raw, _modelId, _session.WorkspaceRoot, _channel);
@@ -259,6 +260,7 @@ public partial class MainWindow
 
             id = cit.Id;
             roleLabel = cit.RoleLabel;
+            mentionedPf = GlassIntercomMention.MentionsPf(raw);
         }
         else if (_lane == GlassIntercomLane.Kind.Host)
         {
@@ -271,6 +273,7 @@ public partial class MainWindow
 
             id = host.Id;
             roleLabel = host.RoleLabel;
+            mentionedPf = GlassIntercomMention.MentionsPf(raw);
         }
         else
         {
@@ -283,6 +286,13 @@ public partial class MainWindow
 
             id = pf.Id;
             roleLabel = pf.RoleLabel;
+        }
+
+        if (mentionedPf)
+        {
+            var wake = GlassIntercomSend.TryNotifyPf(raw, _session.WorkspaceRoot, _channel);
+            if (wake is not null)
+                roleLabel += " · @PF wake";
         }
 
         _seenIntercomIds.Add(id);

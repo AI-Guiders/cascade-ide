@@ -28,7 +28,25 @@ internal static partial class GlassIntercomSend
     /// Publish human→PF. Body may include leading <c>@PF</c> (stripped). Empty → null.
     /// Also mirrors body onto IdeShare operator inbox (<c>share from=operator</c>).
     /// </summary>
-    public static Sent? TrySend(string? raw, string? workspaceRoot = null, GlassIntercomChannel.Kind channel = GlassIntercomChannel.Kind.Radio)
+    public static Sent? TrySend(string? raw, string? workspaceRoot = null, GlassIntercomChannel.Kind channel = GlassIntercomChannel.Kind.Radio) =>
+        TryPublish(raw, workspaceRoot, channel, journal: true, mirrorShare: true);
+
+    /// <summary>
+    /// Mention notify: PF voice latch for AutoI cannon without journal/share fan-out.
+    /// Lane message already journaled; this only wakes PF (Slack-style @mention).
+    /// </summary>
+    public static Sent? TryNotifyPf(
+        string? raw,
+        string? workspaceRoot = null,
+        GlassIntercomChannel.Kind channel = GlassIntercomChannel.Kind.Radio) =>
+        TryPublish(raw, workspaceRoot, channel, journal: false, mirrorShare: false);
+
+    static Sent? TryPublish(
+        string? raw,
+        string? workspaceRoot,
+        GlassIntercomChannel.Kind channel,
+        bool journal,
+        bool mirrorShare)
     {
         if (string.IsNullOrWhiteSpace(raw))
             return null;
@@ -66,8 +84,10 @@ internal static partial class GlassIntercomSend
             var tmp = path + "." + Guid.NewGuid().ToString("N")[..8] + ".tmp";
             File.WriteAllText(tmp, json);
             File.Move(tmp, path, overwrite: true);
-            GlassIntercomJournal.Append(id, "pm", "pf", body, "human", doc.StampedUtc, name, kind, doc.Channel);
-            _ = GlassOperatorShareShelf.TryPut(body, workspaceRoot, id);
+            if (journal)
+                GlassIntercomJournal.Append(id, "pm", "pf", body, "human", doc.StampedUtc, name, kind, doc.Channel);
+            if (mirrorShare)
+                _ = GlassOperatorShareShelf.TryPut(body, workspaceRoot, id);
             return new Sent(id, body, LatchPaint.FormatIntercomRole("pm", "pf", name, kind));
         }
         catch
