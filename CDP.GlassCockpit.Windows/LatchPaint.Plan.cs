@@ -61,7 +61,11 @@ internal static partial class LatchPaint
 
             // Face WHY: never paint SoftFL / operator-eyes refuse mills.
             var why = HumanizePlanWhy(!string.IsNullOrWhiteSpace(whyRaw) ? whyRaw!.Trim() : "—");
-            var course = !string.IsNullOrWhiteSpace(feature) ? feature!.Trim() : "";
+            var course = !string.IsNullOrWhiteSpace(feature)
+                ? HumanizeBoardLine(feature!.Trim())
+                : "";
+            if (string.IsNullOrWhiteSpace(course))
+                course = TruncatePlan(StripPlanTheatre(feature!.Trim()), 72);
             var wall = ExtractWall(pulse);
 
             var detail = new StringBuilder();
@@ -272,7 +276,7 @@ internal static partial class LatchPaint
         return slice;
     }
 
-/// <summary>PFD NEXT glance — 1 human move; full leaf on Sub when title is a dig/meta dump.</summary>
+/// <summary>PFD NEXT glance — 1 human move; Face Sub = cleaned leaf (no dig=/domain= verify args).</summary>
     internal static (string Glance, string? Sub) FormatGlanceNext(string? raw)
     {
         var full = CleanLeafTitle(raw ?? "");
@@ -281,6 +285,7 @@ internal static partial class LatchPaint
 
         var cleaned = StripActTags(full);
         cleaned = StripPlanTheatre(cleaned);
+        cleaned = StripAgentVerifyArgs(cleaned);
 
         // "Dig densest after … CLOSED — residual" → residual is the move.
         var em = cleaned.IndexOf(" — ", StringComparison.Ordinal);
@@ -290,22 +295,23 @@ internal static partial class LatchPaint
                 || cleaned.Contains("SoftFL", StringComparison.OrdinalIgnoreCase))
             && em + 3 < cleaned.Length)
         {
-            var after = StripPlanTheatre(cleaned[(em + 3)..].Trim());
+            var after = StripAgentVerifyArgs(StripPlanTheatre(cleaned[(em + 3)..].Trim()));
             if (after.Length is >= 8 and <= 96)
-                return (after, string.Equals(after, full, StringComparison.Ordinal) ? null : full);
+                return (after, string.Equals(after, cleaned, StringComparison.Ordinal) ? null : cleaned);
         }
 
         if (cleaned.Length <= 72)
         {
             if (LooksLikePlanJargon(cleaned))
-                return ("Peer residual toward FullReady", full);
-            return (cleaned, string.Equals(cleaned, full, StringComparison.Ordinal) ? null : full);
+                return ("Peer residual toward FullReady", cleaned);
+            return (cleaned, null);
         }
 
         if (LooksLikePlanJargon(cleaned))
-            return ("Peer residual toward FullReady", full);
+            return ("Peer residual toward FullReady", cleaned);
 
-        return (TruncatePlan(cleaned, 72), full);
+        var glance = TruncatePlan(cleaned, 72);
+        return (glance, string.Equals(glance, cleaned, StringComparison.Ordinal) ? null : cleaned);
     }
 
     static string CleanLeafTitle(string s)

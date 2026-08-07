@@ -26,9 +26,11 @@
 - Autoi-in-chat / status-list-as-verify / File.Exists alone = seeming.
 - SoftFL / Meta / board-hygiene / inventory mill as work under sealed course.
 - **DIG REJECT mill** — agent-invented close when operator asked dig=investigate/think/expand/analyze. DIG REJECT ≠ operator refuse.
+- Plan leaf Face painting agent board chrome (`phase mismatch task@… · session=…`) or NEXT Sub with `dig=/domain=` verify args.
 - DomainBoard / WorkspaceHealth / Hypotheses `glance · unavailable` with empty WorkspaceRoot = seeming (climb / latch-only must paint).
 
 ## last_ship
+- **2026-08-07 Plan Face agent-chrome SoftFL** — lived dig: OPEN card painted `phase mismatch task@act · session=explore` + NEXT Sub `dig=…` · Ship: `PlanBoardLeaf.IsAgentBoardChrome` skip · `StripAgentVerifyArgs` · FormatGlanceNext Sub=cleaned · evidence `tmp-glass-shots/plan-face-phase-chrome-softfl-20260807.png` (CDP GlassCockpit · Windows · PLAN) · OPEN 4→3 · phase mismatch gone
 - **2026-08-07 Plan leaf-board SoftFL** — Consolas TM wall → FLY/OPEN/DONE strip + Face cards (`PlanBoardLeaf` + `MainWindow.PlanLeafBoard`) · default hide DONE wall · evidence `tmp-glass-shots/plan-leaf-board-instrument-20260807.png` (CDP GlassCockpit · Windows) · dig=operator ask expand not DIG REJECT theater
 - **2026-08-07 Face live dogfood WHY+NEXT** — stash SEALED-marker → WhyLine=Glass Done (human flight); latch task/feature humanized; Glass FormatGlanceNext SoftFL/nested/agent-refuse fallback · evidence `.cdp/evidence/face-why-next-human-20260807.png` (CDP GlassCockpit · Windows · PLAN) · cdp-mcp `c5c6d1d` · cascade `8bc3e98a`
 - **2026-08-07 Face theatre strip across LatchPaint peels** — Plan WHY/NEXT/board · SoftOrgan chrome · Seats tip · Intercom compact · IgniteWake tip · slash SoftFL jargon out · paired cdp-mcp IdeHumanFacePlan Why/Next/Pulse/Board on PublishGlass · no operator-eyes theatre on Face

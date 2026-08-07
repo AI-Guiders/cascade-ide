@@ -38,6 +38,12 @@ public sealed class PlanBoardLeaf
         : IsOpen ? "#D7A33C"
         : "#666666";
 
+    /// <summary>Agent board chrome — not a human leaf card (phase latch tip).</summary>
+    static bool IsAgentBoardChrome(string s) =>
+        s.Contains("phase mismatch", StringComparison.OrdinalIgnoreCase)
+        || s.StartsWith("·phase", StringComparison.OrdinalIgnoreCase)
+        || s.StartsWith("phase mismatch", StringComparison.OrdinalIgnoreCase);
+
     /// <summary>Parse one latch board line into a Face leaf card.</summary>
     public static PlanBoardLeaf? TryParse(string? raw)
     {
@@ -53,6 +59,10 @@ public sealed class PlanBoardLeaf
 
         s = s.TrimStart('|', ' ');
         if (s.Length == 0)
+            return null;
+
+        // Agent board chrome (phase latch tip) — never Face OPEN card.
+        if (IsAgentBoardChrome(s))
             return null;
 
         if (s.StartsWith('*'))

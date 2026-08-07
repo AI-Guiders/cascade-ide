@@ -46,8 +46,35 @@ internal static partial class LatchPaint
             return raw;
         var s = StripPlanTheatre(raw.Trim());
         s = StripShowFaceSoftFl(s);
+        s = StripAgentVerifyArgs(s);
+        if (LooksLikePlanJargon(s))
+            return "";
         var (glance, _) = FormatGlanceNext(s);
         return glance;
+    }
+
+    /// <summary>Strip dig=/domain=/evidence= verify args from Face titles (agent SSOT ≠ human viz).</summary>
+    static string StripAgentVerifyArgs(string s)
+    {
+        foreach (var key in new[] { "dig=", "domain=", "evidence=", "force=" })
+        {
+            int i;
+            while ((i = s.IndexOf(key, StringComparison.OrdinalIgnoreCase)) >= 0)
+            {
+                var end = i + key.Length;
+                while (end < s.Length && !char.IsWhiteSpace(s[end]) && s[end] is not ('·' or '|' or ';'))
+                    end++;
+                var before = s[..i].Trim().TrimEnd('·', '-', '—', ' ', '/', ';');
+                var after = s[end..].Trim().TrimStart('·', '-', '—', ' ', '/', ';');
+                s = string.IsNullOrWhiteSpace(before)
+                    ? after
+                    : string.IsNullOrWhiteSpace(after)
+                        ? before
+                        : before + " · " + after;
+            }
+        }
+
+        return s.Replace("  ", " ", StringComparison.Ordinal).Trim('·', ' ', '-');
     }
 
     static string StripShowFaceSoftFl(string s)
@@ -133,5 +160,6 @@ internal static partial class LatchPaint
         || line.Contains("Glass eyes", StringComparison.OrdinalIgnoreCase)
         || line.Contains("board hygiene", StringComparison.OrdinalIgnoreCase)
         || line.Contains("board-hygiene", StringComparison.OrdinalIgnoreCase)
-        || line.Contains("ShowFace Place", StringComparison.OrdinalIgnoreCase);
+        || line.Contains("ShowFace Place", StringComparison.OrdinalIgnoreCase)
+        || line.Contains("phase mismatch", StringComparison.OrdinalIgnoreCase);
 }
