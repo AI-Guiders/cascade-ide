@@ -29,6 +29,22 @@ public sealed class GlassAutoiWakeFeedNoiseTests
         Assert.False(GlassAutoiWakeFeed.IsNoise("shipped tint", name: "Кир", kind: "guest"));
 
     [Fact]
+    public void Kir_voice_cannon_face_tip_not_noise_even_as_AutoI()
+    {
+        const string tip = "Radio · Composer Stop · @Kir wake pending (пушка ждёт Voice)";
+        Assert.True(GlassAutoiWakeFeed.IsKirVoiceCannonFaceTip(tip));
+        Assert.False(GlassAutoiWakeFeed.IsNoise(tip, name: "AutoI", kind: "guest"));
+    }
+
+    [Fact]
+    public void Kir_voice_cannon_fail_tip_not_noise()
+    {
+        const string tip = "Radio · @Kir wake fail · click_failed";
+        Assert.True(GlassAutoiWakeFeed.IsKirVoiceCannonFaceTip(tip));
+        Assert.False(GlassAutoiWakeFeed.IsNoise(tip, name: "AutoI", kind: "guest"));
+    }
+
+    [Fact]
     public void Autoi_radio_pointer_misattributed_as_citizen_is_noise() =>
         Assert.True(GlassAutoiWakeFeed.IsNoise(
             "Autoi \u00B7 remount\n\u2192 PFD.NEXT\ndelta \u2192 Plan \u00B7 remount-initialized",

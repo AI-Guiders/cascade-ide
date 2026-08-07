@@ -11,6 +11,10 @@ public static class GlassAutoiWakeFeed
         string? kind = null,
         string? roleLabel = null)
     {
+        // @Kir Face Radio tip under Composer Stop — must stay on Radio feed (not tip-only StatusText).
+        if (IsKirVoiceCannonFaceTip(body))
+            return false;
+
         if (LooksLikeAutoiName(name) || LooksLikeAutoiName(roleLabel))
             return true;
         if (string.Equals(kind, "wake", StringComparison.OrdinalIgnoreCase))
@@ -18,6 +22,16 @@ public static class GlassAutoiWakeFeed
         // Lived: remount painted as kind=citizen name=Citizen with Autoi Radio body —
         // still SoftOrgan tip, not chat (Who ≠ body).
         return LooksLikeCharge(body) || LooksLikeRadioPointer(body);
+    }
+
+    /// <summary>Voice-cannon Face tip under Composer Stop — Radio feed, not Autoi wake tip-only.</summary>
+    public static bool IsKirVoiceCannonFaceTip(string? body)
+    {
+        if (string.IsNullOrWhiteSpace(body))
+            return false;
+        return body.Contains("@Kir wake pending", StringComparison.Ordinal)
+               || body.Contains("@Kir wake fail", StringComparison.Ordinal)
+               || body.Contains("пушка ждёт Voice", StringComparison.Ordinal);
     }
 
     public static bool LooksLikeCharge(string? body)
