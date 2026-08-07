@@ -290,7 +290,14 @@ internal static partial class LatchPaint
         }
 
         if (cleaned.Length <= 72)
+        {
+            if (LooksLikePlanJargon(cleaned))
+                return ("Peer residual toward FullReady", full);
             return (cleaned, string.Equals(cleaned, full, StringComparison.Ordinal) ? null : full);
+        }
+
+        if (LooksLikePlanJargon(cleaned))
+            return ("Peer residual toward FullReady", full);
 
         return (TruncatePlan(cleaned, 72), full);
     }

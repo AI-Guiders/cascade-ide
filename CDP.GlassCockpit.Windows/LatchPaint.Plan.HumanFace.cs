@@ -87,6 +87,14 @@ internal static partial class LatchPaint
                      "SoftFL invent REJECT",
                      "SoftFL REJECT",
                      "SoftFL",
+                     "nested[axb]",
+                     "agent refuse Face Done claim",
+                     "agent refuse Face Done",
+                     "agent refuse #CIDE Done",
+                     "agent refuse",
+                     "YOUR Glass eyes",
+                     "Glass eyes",
+                     "Face axis4 operator",
                      "tip mill ≠ Done",
                      "tip mill != Done",
                      "tip mill",
@@ -120,6 +128,9 @@ internal static partial class LatchPaint
         || line.Contains("tip mill", StringComparison.OrdinalIgnoreCase)
         || line.Contains("operator eyes", StringComparison.OrdinalIgnoreCase)
         || line.Contains("DIG REJECT", StringComparison.OrdinalIgnoreCase)
+        || line.Contains("nested[axb]", StringComparison.OrdinalIgnoreCase)
+        || line.Contains("agent refuse", StringComparison.OrdinalIgnoreCase)
+        || line.Contains("Glass eyes", StringComparison.OrdinalIgnoreCase)
         || line.Contains("board hygiene", StringComparison.OrdinalIgnoreCase)
         || line.Contains("board-hygiene", StringComparison.OrdinalIgnoreCase)
         || line.Contains("ShowFace Place", StringComparison.OrdinalIgnoreCase);
