@@ -32,9 +32,7 @@ internal static partial class LatchPaint
                 return null;
 
             var mfd = Prop(root, "mfd_page");
-            var chrome = Prop(root, "chrome_hint");
-            if (string.IsNullOrWhiteSpace(chrome))
-                chrome = null;
+            var chrome = HumanizeChromeHint(Prop(root, "chrome_hint"));
             var mOrgan = TrySeatPin(root, "m");
             var showFace = PropBool(root, "show_face");
             var faceSeat = Prop(root, "face_seat");

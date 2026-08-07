@@ -68,7 +68,7 @@ public partial class MainWindow
         if (cmd.Id == "attach_scope")
         {
             AppendSlashBubble(cmd.Path,
-                "Glass has no Roslyn caret-scope attach yet (DIG REJECT SoftFL).\n"
+                "Glass has no Roslyn caret-scope attach yet.\n"
                 + "Use /attach or /intercom attach selection · /intercom attach file path[:line]");
             ComposerBox.Clear();
             HideSlashPopup();
@@ -235,7 +235,7 @@ public partial class MainWindow
         if (cmd.Id == "message_relate")
         {
             AppendSlashBubble(cmd.Path,
-                "Glass has no Avalonia IntercomCodeRef relate/event-log peel yet (DIG REJECT SoftFL).\n"
+                "Glass has no Intercom code-ref relate/event-log host yet.\n"
                 + "A4 denser shipped: /intercom message find [path:line] · /intercom message anchors\n"
                 + "CIDE /intercom message relate remains Avalonia SSOT");
             ComposerBox.Clear();

@@ -55,7 +55,8 @@ internal static partial class LatchPaint
                 : TruncatePlan(pulse ?? "Plan", 56);
             var (next, nextSub) = FormatGlanceNext(leafRaw);
 
-            var why = !string.IsNullOrWhiteSpace(whyRaw) ? whyRaw!.Trim() : "—";
+            // Face WHY: never paint SoftFL / operator-eyes refuse mills.
+            var why = HumanizePlanWhy(!string.IsNullOrWhiteSpace(whyRaw) ? whyRaw!.Trim() : "—");
             var course = !string.IsNullOrWhiteSpace(feature) ? feature!.Trim() : "";
             var wall = ExtractWall(pulse);
 
@@ -114,7 +115,7 @@ internal static partial class LatchPaint
             var s = el.GetString();
             if (string.IsNullOrWhiteSpace(s))
                 continue;
-            list.Add(s.Trim());
+            list.Add(HumanizeBoardLine(s.Trim()));
             if (list.Count >= 32)
                 break;
         }
@@ -165,7 +166,7 @@ internal static partial class LatchPaint
             sb.Append(line);
         }
 
-        return sb.ToString().Trim();
+        return StripPlanTheatre(sb.ToString().Trim());
     }
 
     public static bool LooksLikeSaInstrumentWall(string? body)
@@ -273,14 +274,17 @@ internal static partial class LatchPaint
             return ("No active leaf.", null);
 
         var cleaned = StripActTags(full);
+        cleaned = StripPlanTheatre(cleaned);
 
         // "Dig densest after … CLOSED — residual" → residual is the move.
         var em = cleaned.IndexOf(" — ", StringComparison.Ordinal);
         if (em > 0
-            && cleaned.StartsWith("Dig densest", StringComparison.OrdinalIgnoreCase)
+            && (cleaned.StartsWith("Dig densest", StringComparison.OrdinalIgnoreCase)
+                || cleaned.Contains("invent-only", StringComparison.OrdinalIgnoreCase)
+                || cleaned.Contains("SoftFL", StringComparison.OrdinalIgnoreCase))
             && em + 3 < cleaned.Length)
         {
-            var after = cleaned[(em + 3)..].Trim();
+            var after = StripPlanTheatre(cleaned[(em + 3)..].Trim());
             if (after.Length is >= 8 and <= 96)
                 return (after, string.Equals(after, full, StringComparison.Ordinal) ? null : full);
         }

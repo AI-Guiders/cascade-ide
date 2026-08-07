@@ -21,7 +21,7 @@ internal static partial class LatchPaint
                 && hintEl.ValueKind == JsonValueKind.String)
             {
                 var hint = hintEl.GetString();
-                return string.IsNullOrWhiteSpace(hint) ? null : hint.Trim();
+                return HumanizeChromeHint(hint);
             }
 
             // Dark Cockpit: active=false or missing hint → silent
@@ -33,7 +33,7 @@ internal static partial class LatchPaint
                 && pulseEl.ValueKind == JsonValueKind.String)
             {
                 var pulse = pulseEl.GetString();
-                return string.IsNullOrWhiteSpace(pulse) ? null : pulse.Trim();
+                return HumanizeChromeHint(pulse);
             }
 
             return null;

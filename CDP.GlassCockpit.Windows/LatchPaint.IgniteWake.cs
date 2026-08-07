@@ -42,14 +42,14 @@ internal static partial class LatchPaint
                 : $"wake · {channel} · {reasonBit} · {armId}";
             var tip = string.IsNullOrWhiteSpace(reasonBit)
                 ? $"wake·{channel}"
-                : $"wake·{channel}·{reasonBit}";
+                : $"wake·{channel}·{StripPlanTheatre(reasonBit)}";
 
             return new IgniteWakeView(
                 armId,
                 channel,
                 charge,
-                reasonBit,
-                string.IsNullOrWhiteSpace(task) ? null : task.Trim(),
+                reasonBit is null ? null : StripPlanTheatre(reasonBit),
+                string.IsNullOrWhiteSpace(task) ? null : HumanizeBoardLine(task.Trim()),
                 status,
                 tip);
         }
