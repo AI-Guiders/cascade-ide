@@ -80,4 +80,5 @@ Green Korry = latch **paint**. Click → `glass_ignite_cmd`. Halted/folded: `aut
 - Browsable FM model directory (CIT) — **thin shipped 2026-08-06** (`GlassIntercomModels` · `CitModelsPanel`); live `GET /v1/models` merge later.
 - Face chrome-strip toward Slack/MM flat feed — **thin shipped 2026-08-06** (flat rows · quiet meta · topic strip Collapsed / Topics opt-in); residual Autoi/HLD/VAD HUD + CIT/HOST/PF lane strangler.
 - **@PF mention from any lane** — **thin shipped 2026-08-07**: CIT/HOST (and `/citizen`) keep lane message; `GlassIntercomMention` + `TryNotifyPf` writes human→PF latch for AutoI cannon without duplicate journal/share.
+- **@PM seat mention** — **thin shipped 2026-08-07**: `@PF`/`@PM` = meta-role seats (Who from sticky for cues); `@PM` → Glass Face attention (not Cursor CDT). Person @names later.
 - Whether HOST stays a channel or a transport quirk.

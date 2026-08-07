@@ -263,12 +263,9 @@ public partial class MainWindow
             }
 
             var wakeNote = "";
-            if (GlassIntercomMention.MentionsPf(argsTail))
-            {
-                var wake = GlassIntercomSend.TryNotifyPf(argsTail, _session.WorkspaceRoot);
-                if (wake is not null)
-                    wakeNote = " · @PF wake";
-            }
+            wakeNote = FanOutSeatMentions(argsTail, wakeNote).TrimStart(' ', '·').Trim();
+            if (wakeNote.Length > 0)
+                wakeNote = " · " + wakeNote;
 
             _seenIntercomIds.Add(sent.Id);
             RebuildIntercomFeedFromJournal(stickEnd: true);

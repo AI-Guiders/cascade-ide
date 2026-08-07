@@ -94,6 +94,11 @@ public partial class MainWindow
                 else
                     RebuildIntercomFeedFromJournal(); // preserve scroll unless pinned to end
                 NoteArrivalWhileReading(wasPinned);
+
+                // @PM seat ping from agent/citizen → Face attention (Who = sticky PM).
+                if (GlassIntercomMention.MentionsPm(view.Body))
+                    TryNotifyPmFace();
+
                 StatusText.Text = $"glass · {view.StatusLine} · {DateTime.Now:HH:mm:ss}";
             }
             catch (Exception ex)
@@ -248,7 +253,6 @@ public partial class MainWindow
 
         string? id;
         string? roleLabel;
-        var mentionedPf = false;
         if (_lane == GlassIntercomLane.Kind.Cit)
         {
             var cit = GlassCitizenDialogRequest.TryEnqueue(raw, _modelId, _session.WorkspaceRoot, _channel);
@@ -260,7 +264,6 @@ public partial class MainWindow
 
             id = cit.Id;
             roleLabel = cit.RoleLabel;
-            mentionedPf = GlassIntercomMention.MentionsPf(raw);
         }
         else if (_lane == GlassIntercomLane.Kind.Host)
         {
@@ -273,7 +276,6 @@ public partial class MainWindow
 
             id = host.Id;
             roleLabel = host.RoleLabel;
-            mentionedPf = GlassIntercomMention.MentionsPf(raw);
         }
         else
         {
@@ -288,12 +290,7 @@ public partial class MainWindow
             roleLabel = pf.RoleLabel;
         }
 
-        if (mentionedPf)
-        {
-            var wake = GlassIntercomSend.TryNotifyPf(raw, _session.WorkspaceRoot, _channel);
-            if (wake is not null)
-                roleLabel += " · @PF wake";
-        }
+        roleLabel = FanOutSeatMentions(raw, roleLabel);
 
         _seenIntercomIds.Add(id);
         RebuildIntercomFeedFromJournal(stickEnd: true);
@@ -304,6 +301,35 @@ public partial class MainWindow
         StatusText.Text =
             $"glass · intercom · {_lane} · {GlassIntercomChannel.Label(_channel)} · sent {id} · {roleLabel} · {DateTime.Now:HH:mm:ss}";
     }
+
+    /// <summary>
+    /// Seat mentions (@PF/@PM) — not person tags. Who for cues from sticky identity.
+    /// @PF → AutoI cannon latch (skip when lane already PF). @PM → Glass Face attention.
+    /// </summary>
+    string FanOutSeatMentions(string? raw, string roleLabel)
+    {
+        if (GlassIntercomMention.MentionsPf(raw) && _lane != GlassIntercomLane.Kind.Pf)
+        {
+            var wake = GlassIntercomSend.TryNotifyPf(raw, _session.WorkspaceRoot, _channel);
+            if (wake is not null)
+            {
+                var (whoPf, _) = LatchPaint.ResolveIntercomIdentity("pf", "guest", null, null);
+                roleLabel += " · " + GlassIntercomMention.FormatWakeNote(GlassIntercomMention.Seat.Pf, whoPf);
+            }
+        }
+
+        if (GlassIntercomMention.MentionsPm(raw))
+        {
+            TryNotifyPmFace();
+            var (whoPm, _) = LatchPaint.ResolveIntercomIdentity("pm", "human", null, null);
+            roleLabel += " · " + GlassIntercomMention.FormatWakeNote(GlassIntercomMention.Seat.Pm, whoPm);
+        }
+
+        return roleLabel;
+    }
+
+    /// <summary>@PM seat wake — Glass viewer is PM; bring cabin (not Cursor CDT).</summary>
+    void TryNotifyPmFace() => BringCabinAttention();
 
     public sealed record TopicCard(
         string Id,
