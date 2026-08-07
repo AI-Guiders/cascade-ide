@@ -95,9 +95,16 @@ public partial class MainWindow
                     RebuildIntercomFeedFromJournal(); // preserve scroll unless pinned to end
                 NoteArrivalWhileReading(wasPinned);
 
-                // @PM seat ping from agent/citizen → Face attention (Who = sticky PM).
-                if (GlassIntercomMention.MentionsPm(view.Body))
-                    TryNotifyPmFace();
+                // Incoming latch: Face sinks only (no external cannon loop).
+                foreach (var hit in GlassIntercomMention.ResolveWakes(view.Body, CurrentMentionRoster()))
+                {
+                    if (hit.Sink is GlassIntercomMention.WakeSink.HabitatCitizen
+                        or GlassIntercomMention.WakeSink.GlassOperator)
+                    {
+                        TryNotifyPmFace();
+                        break;
+                    }
+                }
 
                 StatusText.Text = $"glass · {view.StatusLine} · {DateTime.Now:HH:mm:ss}";
             }
@@ -303,32 +310,43 @@ public partial class MainWindow
     }
 
     /// <summary>
-    /// Seat mentions (@PF/@PM) — not person tags. Who for cues from sticky identity.
-    /// @PF → AutoI cannon latch (skip when lane already PF). @PM → Glass Face attention.
+    /// Seat / kind / Who mentions → wake sinks (deduped).
+    /// guest → external cannon; citizen|operator → Glass Face.
+    /// Seat wake follows occupant kind (e.g. @PF while Sierra·citizen → Face, not Cursor).
     /// </summary>
     string FanOutSeatMentions(string? raw, string roleLabel)
     {
-        if (GlassIntercomMention.MentionsPf(raw) && _lane != GlassIntercomLane.Kind.Pf)
+        var roster = CurrentMentionRoster();
+        foreach (var hit in GlassIntercomMention.ResolveWakes(raw, roster))
         {
-            var wake = GlassIntercomSend.TryNotifyPf(raw, _session.WorkspaceRoot, _channel);
-            if (wake is not null)
+            switch (hit.Sink)
             {
-                var (whoPf, _) = LatchPaint.ResolveIntercomIdentity("pf", "guest", null, null);
-                roleLabel += " · " + GlassIntercomMention.FormatWakeNote(GlassIntercomMention.Seat.Pf, whoPf);
+                case GlassIntercomMention.WakeSink.ExternalGuest:
+                    // Skip cannon when lane already PF Send (voice latch already written).
+                    if (_lane == GlassIntercomLane.Kind.Pf)
+                        break;
+                    if (GlassIntercomSend.TryNotifyPf(raw, _session.WorkspaceRoot, _channel) is not null)
+                        roleLabel += " · " + hit.Cue;
+                    break;
+                case GlassIntercomMention.WakeSink.HabitatCitizen:
+                case GlassIntercomMention.WakeSink.GlassOperator:
+                    TryNotifyPmFace();
+                    roleLabel += " · " + hit.Cue;
+                    break;
             }
-        }
-
-        if (GlassIntercomMention.MentionsPm(raw))
-        {
-            TryNotifyPmFace();
-            var (whoPm, _) = LatchPaint.ResolveIntercomIdentity("pm", "human", null, null);
-            roleLabel += " · " + GlassIntercomMention.FormatWakeNote(GlassIntercomMention.Seat.Pm, whoPm);
         }
 
         return roleLabel;
     }
 
-    /// <summary>@PM seat wake — Glass viewer is PM; bring cabin (not Cursor CDT).</summary>
+    static GlassIntercomMention.MentionRoster CurrentMentionRoster()
+    {
+        var (pfName, pfKind) = LatchPaint.ResolveIntercomIdentity("pf", "guest", null, null);
+        var (pmName, pmKind) = LatchPaint.ResolveIntercomIdentity("pm", "human", null, null);
+        return new GlassIntercomMention.MentionRoster(pfName, pfKind, pmName, pmKind);
+    }
+
+    /// <summary>Face attention for citizen/operator sinks (Glass viewer).</summary>
     void TryNotifyPmFace() => BringCabinAttention();
 
     public sealed record TopicCard(
