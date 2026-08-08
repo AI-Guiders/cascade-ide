@@ -46,6 +46,28 @@ public class PresentationPmOneOfPolicyTests
     }
 
     [Fact]
+    public void PresentationMaySelectMfd_agent_quiet_holds_stick()
+    {
+        Assert.False(PresentationPmOneOfPolicy.PresentationMaySelectMfd(
+            origin: "agent", showFace: false, mfdPage: "Editor"));
+        Assert.False(PresentationPmOneOfPolicy.PresentationMaySelectMfd(
+            origin: "agent", showFace: false, mfdPage: "WebAiPortal"));
+        Assert.True(PresentationPmOneOfPolicy.PresentationMaySelectMfd(
+            origin: "agent", showFace: true, mfdPage: "Editor"));
+        Assert.False(PresentationPmOneOfPolicy.PresentationMaySelectMfd(
+            origin: "agent", showFace: true, mfdPage: null));
+    }
+
+    [Fact]
+    public void PresentationMaySelectMfd_human_origin_may_switch()
+    {
+        Assert.True(PresentationPmOneOfPolicy.PresentationMaySelectMfd(
+            origin: "human", showFace: false, mfdPage: "WebAiPortal"));
+        Assert.False(PresentationPmOneOfPolicy.PresentationMaySelectMfd(
+            origin: "human", showFace: false, mfdPage: null));
+    }
+
+    [Fact]
     public void Toggle_xor_P_and_M()
     {
         Assert.Equal(

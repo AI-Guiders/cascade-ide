@@ -92,6 +92,20 @@ public static class PresentationPmOneOfPolicy
         bool seatsMOrganChanged) =>
         false;
 
+    /// <summary>
+    /// presentation-LATEST SelectMfd gate (dual-HCI): human origin may switch;
+    /// agent only when <paramref name="showFace"/> invite + mfd_page set.
+    /// Topology apply is separate — this gates PreferSurface steal only.
+    /// </summary>
+    public static bool PresentationMaySelectMfd(string? origin, bool showFace, string? mfdPage)
+    {
+        if (string.IsNullOrWhiteSpace(mfdPage))
+            return false;
+        if (string.Equals(origin, "human", StringComparison.OrdinalIgnoreCase))
+            return true;
+        return showFace;
+    }
+
     /// <summary>Toggle XOR: P↔M (operator/agent chord).</summary>
     public static PresentationAnchorKind Toggle(PresentationAnchorKind current) =>
         current == PresentationAnchorKind.Mfd

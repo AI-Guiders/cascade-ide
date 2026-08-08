@@ -104,7 +104,8 @@ internal sealed class CdpPresentationProjector : IDisposable
             topology: doc.Topology,
             tier: doc.Tier,
             instruments: doc.Instruments,
-            mfdPage: doc.MfdPage);
+            // Dual-HCI: agent mfd_page only when show_face invite (parity Glass LatchEicas).
+            mfdPage: doc.ShowFace ? doc.MfdPage : null);
     }
 
     public void Dispose()
@@ -124,6 +125,7 @@ internal sealed class CdpPresentationProjector : IDisposable
         public string? Tier { get; set; }
         public Dictionary<string, string>? Instruments { get; set; }
         public string? MfdPage { get; set; }
+        public bool ShowFace { get; set; }
         public string Origin { get; set; } = OriginAgent;
         public DateTimeOffset StampedUtc { get; set; }
 
@@ -143,7 +145,8 @@ internal sealed class CdpPresentationProjector : IDisposable
                 Topology ?? "",
                 Tier ?? "",
                 instruments,
-                MfdPage ?? "");
+                MfdPage ?? "",
+                ShowFace ? "1" : "0");
         }
     }
 }

@@ -5,6 +5,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Threading;
+using CascadeIDE.GlassCore.Presentation;
 using CascadeIDE.Intercom;
 
 namespace CDP.GlassCockpit.Windows;
@@ -31,7 +32,9 @@ public partial class MainWindow
                 if (!_hosts.IsMainScanOneOf)
                     WpfMainGridColumns.Apply(MainGrid, layout.ColumnDefinitions);
 
-                SelectMfdPage(view.MfdPage, sticky: true);
+                if (PresentationPmOneOfPolicy.PresentationMaySelectMfd(
+                        view.Origin, view.ShowFace, view.MfdPage))
+                    SelectMfdPage(view.MfdPage, sticky: true);
                 RefreshEicasHealth();
                 StatusText.Text =
                     $"glass · {view.StatusLine} · cols={_session.Layout.ColumnDefinitions} · {DateTime.Now:HH:mm:ss}";
