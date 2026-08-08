@@ -8,7 +8,8 @@ internal static partial class LatchPaint
 {
     public const string LandSchema = "navigation_land_latch/v1";
 
-    public sealed record LandView(string Path, int? Line, string? Member, string StatusLine);
+    /// <param name="ShowFace">True = invite Human Face (AvalonEdit + PreferSurface). False = quiet tip.</param>
+    public sealed record LandView(string Path, int? Line, string? Member, bool ShowFace, string StatusLine);
 
     /// <summary>Null when schema/path gate fails or JSON is unreadable.</summary>
     public static LandView? PaintLand(string json)
@@ -34,12 +35,15 @@ internal static partial class LatchPaint
 
             var member = Prop(root, "member");
             var cmd = Prop(root, "command") ?? "open";
+            var showFace = PropBool(root, "show_face");
             var where = line is { } L ? $"L{L}" : "open";
+            var faceBit = showFace ? " · show_face" : " · quiet";
             return new LandView(
                 path.Trim(),
                 line,
                 string.IsNullOrWhiteSpace(member) ? null : member.Trim(),
-                $"land · {cmd} · {where} · {System.IO.Path.GetFileName(path)}");
+                showFace,
+                $"land · {cmd} · {where}{faceBit} · {System.IO.Path.GetFileName(path)}");
         }
         catch
         {

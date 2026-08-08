@@ -122,7 +122,7 @@ public partial class MainWindow
         OpenCodeFile(src);
     }
 
-    void OpenCodeFile(string path, int? line = null, int? lineEnd = null)
+    void OpenCodeFile(string path, int? line = null, int? lineEnd = null, bool showFace = true)
     {
         EnsureEditorChrome();
         CodeEditor.Load(path);
@@ -135,20 +135,22 @@ public partial class MainWindow
 
         if (line is > 0)
         {
-            SelectOpenDocumentLines(line.Value, lineEnd);
+            SelectOpenDocumentLines(line.Value, lineEnd, showFace);
+            return;
         }
 
         if (_session.IsIntercomForward)
         {
             MountEditor(MfdEditorHost);
-            SelectMfdPage("Editor", sticky: true);
+            if (showFace)
+                SelectMfdPage("Editor", sticky: true);
         }
 
         RefreshMfdEditorVisibility();
     }
 
     /// <summary>Select 1-based line range in the currently open AvalonEdit document (c:els / attach chips).</summary>
-    internal void SelectOpenDocumentLines(int startLine, int? endLine = null)
+    internal void SelectOpenDocumentLines(int startLine, int? endLine = null, bool showFace = true)
     {
         if (CodeEditor?.Document is null || CodeEditor.Document.LineCount < 1)
         {
@@ -174,7 +176,8 @@ public partial class MainWindow
         if (_session.IsIntercomForward)
         {
             MountEditor(MfdEditorHost);
-            SelectMfdPage("Editor", sticky: true);
+            if (showFace)
+                SelectMfdPage("Editor", sticky: true);
         }
 
         RefreshMfdEditorVisibility();

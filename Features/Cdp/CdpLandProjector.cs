@@ -93,6 +93,10 @@ internal sealed class CdpLandProjector : IDisposable
             if (!File.Exists(doc.Path))
                 return;
 
+            // Quiet land (default): Agent-Side locus only — do not steal Human editor Face.
+            if (!doc.ShowFace)
+                return;
+
             if (doc.Line is > 0)
             {
                 var line = doc.Line.Value;
@@ -138,6 +142,7 @@ internal sealed class CdpLandProjector : IDisposable
         public string? Path { get; set; }
         public int? Line { get; set; }
         public string? Member { get; set; }
+        public bool ShowFace { get; set; }
         public DateTimeOffset StampedUtc { get; set; }
     }
 }

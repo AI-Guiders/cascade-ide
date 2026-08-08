@@ -5,7 +5,10 @@ using System.Windows.Threading;
 
 namespace CDP.GlassCockpit.Windows;
 
-/// <summary>land-LATEST → AvalonEdit OpenCodeFile + caret line (Avalonia CdpLandProjector parity).</summary>
+/// <summary>
+/// land-LATEST → optional AvalonEdit OpenCodeFile (Avalonia CdpLandProjector parity).
+/// Quiet default: status tip only — do not steal PreferSurface / Human Portal stick.
+/// </summary>
 public partial class MainWindow
 {
     void OnLandChanged(string path)
@@ -24,7 +27,14 @@ public partial class MainWindow
                     return;
                 }
 
-                OpenCodeFile(view.Path, view.Line);
+                if (!view.ShowFace)
+                {
+                    StatusText.Text =
+                        $"glass · {view.StatusLine} · {DateTime.Now:HH:mm:ss}";
+                    return;
+                }
+
+                OpenCodeFile(view.Path, view.Line, showFace: true);
                 StatusText.Text =
                     $"glass · {view.StatusLine} · {DateTime.Now:HH:mm:ss}";
             }

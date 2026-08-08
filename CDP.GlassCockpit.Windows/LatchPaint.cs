@@ -27,6 +27,8 @@ internal static partial class LatchPaint
         string? Topology,
         string? Tier,
         string? MfdPage,
+        string Origin,
+        bool ShowFace,
         string StatusLine);
 
     public static IntercomView PaintIntercom(string json)
@@ -96,6 +98,7 @@ internal static partial class LatchPaint
             var tier = Prop(root, "tier");
             var mfd = Prop(root, "mfd_page");
             var origin = Prop(root, "origin") ?? "—";
+            var showFace = PropBool(root, "show_face");
 
             var headline = string.Join(" · ", new[]
             {
@@ -111,6 +114,8 @@ internal static partial class LatchPaint
             if (!string.IsNullOrWhiteSpace(mfd))
                 detail.AppendLine($"MFD focus: {mfd}");
             detail.Append($"Origin: {origin}");
+            if (showFace)
+                detail.Append(" · show_face");
 
             return new PresentationView(
                 headline,
@@ -118,6 +123,8 @@ internal static partial class LatchPaint
                 topology,
                 tier,
                 mfd,
+                origin,
+                showFace,
                 $"presentation · {tier ?? "—"} · {mfd ?? "—"}");
         }
         catch (Exception ex)
@@ -128,6 +135,8 @@ internal static partial class LatchPaint
                 null,
                 null,
                 null,
+                "—",
+                false,
                 $"presentation · parse fail · {ex.Message}");
         }
     }

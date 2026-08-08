@@ -51,7 +51,8 @@ public partial class MainWindow
 
                 var caretLine = CodeEditor.TextArea.Caret.Line;
                 _diskSuppressPublishUntil = DateTimeOffset.UtcNow + TimeSpan.FromMilliseconds(400);
-                OpenCodeFile(view.Path, caretLine > 0 ? caretLine : null);
+                // Quiet reload — do not steal PreferSurface / SelectMfd while Human holds Portal.
+                OpenCodeFile(view.Path, caretLine > 0 ? caretLine : null, showFace: false);
                 // MFD host may not host StatusText — mark path chrome for dual-cockpit dogfood.
                 EditorPathLabel.Text = EditorPathLabel.Text + " · disk";
                 StatusText.Text =
