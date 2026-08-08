@@ -294,6 +294,12 @@
           <TextBlock x:Name="GlanceCardsStatusLabel" Text="glance · idle"
                      FontSize="11" Foreground="#888" VerticalAlignment="Center"/>
         </DockPanel>
+        <!-- SoftOrgan QRH/ECL/Alert Face find (hidden on other glance pages). -->
+        <TextBox x:Name="SoftOrganFindBox" DockPanel.Dock="Top" Height="26" Margin="0,0,0,8" Padding="6,3"
+                 Visibility="Collapsed"
+                 Background="#1A1A1A" Foreground="#EEE" BorderBrush="#3A3A3A"
+                 FontFamily="Consolas" FontSize="12"
+                 ToolTip="Find SoftOrgan entry (id / use)"/>
         <ScrollViewer VerticalScrollBarVisibility="Auto">
           <ItemsControl x:Name="GlanceCardsPanel">
             <ItemsControl.ItemsPanel>

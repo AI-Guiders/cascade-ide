@@ -16,9 +16,12 @@ public partial class MainWindow
         var label = SoftOrganChromeDensityPolicy.ShortLabel(organId);
         _eicas.Apply(organId, $"EICAS · {label} · opening…");
 
-        // Lived SoftFL: PreferSurface(alert) alone was chrome tip — no Face page (operator: "где QRH?").
-        SelectMfdPage("MarkdownPreview", sticky: true);
-        ShowSoftOrganHandbookFace(organId, label);
+        // Lived SoftFL (operator eyes): markdown wall ≠ QRH/ECL — Plan-like glance cards + find.
+        var page = SoftOrganFaceHandbook.MfdPageFor(organId);
+        if (SoftOrganFindBox is not null)
+            SoftOrganFindBox.Text = "";
+        SelectMfdPage(page, sticky: true);
+        RefreshGlanceCardsBody();
 
         var sent = GlassCitizenDialogRequest.TryEnqueue(
             $"@intent {intentTail}",
@@ -26,17 +29,6 @@ public partial class MainWindow
 
         StatusText.Text = sent is null
             ? $"glass · soft · {label} · enqueue fail · {DateTime.Now:HH:mm:ss}"
-            : $"glass · soft · {label} · Face+@intent {intentTail} · {sent.Id} · {DateTime.Now:HH:mm:ss}";
-    }
-
-    void ShowSoftOrganHandbookFace(string organId, string label)
-    {
-        if (MarkdownDocumentViewer is null)
-            return;
-
-        var body = SoftOrganFaceHandbook.MarkdownFor(organId, label);
-        MarkdownDocumentViewer.Document = GlassMarkdownFlowDocumentBuilder.Build(body, MarkdownPipe);
-        if (MarkdownStatusLabel is not null)
-            MarkdownStatusLabel.Text = $"markdown · SoftOrgan · {label} · Face";
+            : $"glass · soft · {label} · Face cards+@intent {intentTail} · {sent.Id} · {DateTime.Now:HH:mm:ss}";
     }
 }

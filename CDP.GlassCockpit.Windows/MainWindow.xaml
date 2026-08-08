@@ -609,6 +609,9 @@
             <ListBoxItem Content="RelatedFiles"/>
             <ListBoxItem Content="Correspondence"/>
             <ListBoxItem Content="MarkdownPreview"/>
+            <ListBoxItem Content="QRH"/>
+            <ListBoxItem Content="ECL"/>
+            <ListBoxItem Content="Alert"/>
             <ListBoxItem Content="WebAiPortal"/>
             <ListBoxItem Content="AiChatSettings"/>
             <ListBoxItem Content="FlightDataStorage"/>

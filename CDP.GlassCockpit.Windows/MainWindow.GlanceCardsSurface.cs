@@ -21,6 +21,10 @@ public partial class MainWindow
 
         var show = IsGlancePage(CurrentMfdPage());
         MfdGlanceCardsHost.Visibility = show ? Visibility.Visible : Visibility.Collapsed;
+        if (SoftOrganFindBox is not null)
+            SoftOrganFindBox.Visibility = SoftOrganFaceHandbook.IsSoftOrganGlancePage(CurrentMfdPage())
+                ? Visibility.Visible
+                : Visibility.Collapsed;
         if (show)
             RefreshGlanceCardsBody();
     }
@@ -30,12 +34,20 @@ public partial class MainWindow
 
     internal void GlanceCardsRefresh_OnClick(object sender, RoutedEventArgs e) => RefreshGlanceCardsBody();
 
+    internal void SoftOrganFindBox_OnTextChanged(object sender, TextChangedEventArgs e)
+    {
+        if (SoftOrganFaceHandbook.IsSoftOrganGlancePage(CurrentMfdPage()))
+            RefreshGlanceCardsBody();
+    }
+
     void RefreshGlanceCardsBody()
     {
         if (GlanceCardsPanel is null)
             return;
 
         var page = CurrentMfdPage();
+        var soft = SoftOrganFaceHandbook.IsSoftOrganGlancePage(page);
+        var filter = soft ? SoftOrganFindBox?.Text : null;
         var chips = page switch
         {
             "Events" => GlassGlanceCards.BuildEvents(GlassEventsGlance.ProbeCurrentHabitat()),
@@ -53,10 +65,13 @@ public partial class MainWindow
                 GlassDomainBoardGlance.TryProbe(_session.WorkspaceRoot)
                 ?? new GlassDomainBoardGlance.Snapshot(0, false, null, 0, false, null, [], "domain · unavailable")),
             "Chat" => GlassGlanceCards.BuildChat(GlassIntercomPresence.ProbeChatMfd()),
+            "QRH" or "ECL" or "Alert" => SoftOrganFaceHandbook.ChipsFor(
+                SoftOrganFaceHandbook.OrganIdFromMfdPage(page), filter),
             _ => [],
         };
 
-        var deck = page is "FlightDataStorage" or "Fds" or "DomainBoard" or "Domain";
+        var deck = page is "FlightDataStorage" or "Fds" or "DomainBoard" or "Domain"
+            or "QRH" or "ECL" or "Alert";
         if (deck)
         {
             var factory = new FrameworkElementFactory(typeof(UniformGrid));
@@ -75,18 +90,23 @@ public partial class MainWindow
         if (GlanceCardsStatusLabel is not null)
         {
             GlanceCardsStatusLabel.Text = chips.Count == 0
-                ? "glance · unavailable"
-                : page is "DomainBoard" or "Domain"
-                    ? $"domain · card deck · {chips.Count} · {chips[0].Value}"
-                    : deck
-                        ? $"fds · card deck · {chips.Count} · {chips[0].Value}"
-                        : $"{page} · {chips[0].Value}";
+                ? soft
+                    ? $"soft · {page} · no match"
+                    : "glance · unavailable"
+                : soft
+                    ? $"soft · {page} · card deck · {chips.Count}"
+                    : page is "DomainBoard" or "Domain"
+                        ? $"domain · card deck · {chips.Count} · {chips[0].Value}"
+                        : deck
+                            ? $"fds · card deck · {chips.Count} · {chips[0].Value}"
+                            : $"{page} · {chips[0].Value}";
         }
     }
 
     static bool IsGlancePage(string page) =>
         page is "Events" or "WorkspaceHealth" or "EnvironmentReadiness" or "Hypotheses"
-            or "FlightDataStorage" or "Fds" or "DomainBoard" or "Domain" or "Chat";
+            or "FlightDataStorage" or "Fds" or "DomainBoard" or "Domain" or "Chat"
+            or "QRH" or "ECL" or "Alert";
 
     static Border CreateGlanceChip(GlassGlanceChip chip)
     {

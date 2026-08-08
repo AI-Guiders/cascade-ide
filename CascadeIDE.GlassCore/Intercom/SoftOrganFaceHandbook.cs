@@ -2,66 +2,83 @@
 
 namespace CascadeIDE.SoftOrgan;
 
-/// <summary>Human Face handbook body for SoftOrgan QRH/ECL/alert — not EICAS tip alone.</summary>
+/// <summary>Human SoftOrgan Face — Plan-like glance cards + find, not markdown wall.</summary>
 public static class SoftOrganFaceHandbook
 {
-    public static string MarkdownFor(string organId, string label)
+    public static string MfdPageFor(string organId) =>
+        (organId ?? "").Trim().ToLowerInvariant() switch
+        {
+            "qrh" => "QRH",
+            "ecl" => "ECL",
+            "alert" or "eicas" or "sa" => "Alert",
+            _ => "QRH",
+        };
+
+    public static bool IsSoftOrganGlancePage(string? page) =>
+        page is "QRH" or "ECL" or "Alert";
+
+    public static string OrganIdFromMfdPage(string? page) =>
+        (page ?? "").Trim() switch
+        {
+            "QRH" => "qrh",
+            "ECL" => "ecl",
+            "Alert" => "alert",
+            _ => "qrh",
+        };
+
+    public static IReadOnlyList<GlassGlanceChip> ChipsFor(string organId, string? filter = null)
     {
         var id = (organId ?? "").Trim().ToLowerInvariant();
-        return id switch
+        IReadOnlyList<GlassGlanceChip> chips = id switch
         {
-            "qrh" => QrhMarkdown(label),
-            "ecl" => EclMarkdown(label),
-            "alert" or "eicas" or "sa" => AlertMarkdown(label),
-            _ => $"# SoftOrgan · {label}\n\nHandbook page for `{organId}`.\n"
+            "qrh" => QrhChips(),
+            "ecl" => EclChips(),
+            "alert" or "eicas" or "sa" => AlertChips(),
+            _ => [new("LEVEL", "UNKNOWN", "idle")],
         };
+        return Filter(chips, filter);
     }
 
-    static string QrhMarkdown(string label) =>
-        $"""
-        # {label} · Quick Reference Handbook
+    static IReadOnlyList<GlassGlanceChip> QrhChips() =>
+    [
+        new("LEVEL", "QRH", "ok"),
+        new("FACE", "cards · find", "meta"),
+        new("intake-brief", "cold start / remount", "ok"),
+        new("path-mutate", "buffer edit gate", "warn"),
+        new("dig-before-ask", "habitat dig first", "ok"),
+        new("human-face-shot", "#CIDE evidence PNG", "warn"),
+        new("softfl-invent", "lived residual only", "meta"),
+    ];
 
-        Human Face page (not EICAS tip alone).
+    static IReadOnlyList<GlassGlanceChip> EclChips() =>
+    [
+        new("LEVEL", "ECL", "ok"),
+        new("FACE", "cards · find", "meta"),
+        new("not-connected", "Recover seat remount", "warn"),
+        new("hard-deploy", "terminal · KillRunning", "warn"),
+        new("path-mutate", "dig gate · no Write slap", "warn"),
+        new("composer-stop", "Voice / Face Radio tip", "meta"),
+    ];
 
-        ## How to fly
+    static IReadOnlyList<GlassGlanceChip> AlertChips() =>
+    [
+        new("LEVEL", "ALERT", "ok"),
+        new("FACE", "cards · find", "meta"),
+        new("sa-desk", "situation pulse", "ok"),
+        new("prefer-surface", "chrome ≠ body", "meta"),
+        new("eicas-keys", "clr · ack · list", "idle"),
+    ];
 
-        - Ctrl+Q → Soft: QRH (or chord `qr`)
-        - Agent desk: `go=qrh` / `@intent qrh open id=…`
-        - Citizen peer: `@intent qrh` / `qrh open id=intake-brief`
+    internal static IReadOnlyList<GlassGlanceChip> Filter(IReadOnlyList<GlassGlanceChip> chips, string? filter)
+    {
+        if (string.IsNullOrWhiteSpace(filter))
+            return chips;
 
-        ## Dense entries
-
-        | Id | Use |
-        |----|-----|
-        | intake-brief | cold start / remount |
-        | path-mutate | buffer edit gate |
-        | dig-before-ask | habitat dig before operator ask |
-
-        Full index lives on MCP `go=qrh` (agent M seat). This Face is the human handbook peel.
-        """;
-
-    static string EclMarkdown(string label) =>
-        $"""
-        # {label} · Emergency Checklist
-
-        Human Face page for densest recoveries.
-
-        ## Common
-
-        - Not connected + CdpMcp still up → `Recover-CdpSeatRemount.ps1 -Seat cdp|cdp-debug`
-        - Hard deploy self → terminal_* + KillRunning (never in-proc shell)
-        - PathMutate refuse → dig gate reason, not slap-slap Write
-
-        Agent ECL index: `go=ecl` / `@intent ecl`.
-        """;
-
-    static string AlertMarkdown(string label) =>
-        $"""
-        # {label} · Alert / SA
-
-        SoftBoard / SA desk Face peel.
-
-        - `go=sa_desk` / `@intent sa` — situation pulse
-        - PreferSurface(alert) keeps chrome; this page is the readable body
-        """;
+        var q = filter.Trim();
+        return chips
+            .Where(c =>
+                c.Label.Contains(q, StringComparison.OrdinalIgnoreCase)
+                || c.Value.Contains(q, StringComparison.OrdinalIgnoreCase))
+            .ToList();
+    }
 }

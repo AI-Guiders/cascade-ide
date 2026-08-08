@@ -231,6 +231,13 @@ public partial class MainWindow
             return;
         }
 
+        if (SoftOrganFaceHandbook.IsSoftOrganGlancePage(page))
+        {
+            MfdBody.Text = FormatMfdStub(page, "SoftOrgan Face · card deck + find", "Plan-like glance · not markdown wall");
+            RefreshEicasHealth();
+            return;
+        }
+
         MfdBody.Text = page switch
         {
             "Terminal" => FormatMfdStub("Terminal", "Glass redirected TextBox", "ConPTY later · go=sys"),

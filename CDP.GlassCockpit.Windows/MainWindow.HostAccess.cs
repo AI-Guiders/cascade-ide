@@ -61,6 +61,7 @@ public partial class MainWindow
     Border? MfdGlanceCardsHost => MfdHosts?.MfdGlanceCardsHost;
     TextBlock? GlanceCardsStatusLabel => MfdHosts?.GlanceCardsStatusLabel;
     ItemsControl? GlanceCardsPanel => MfdHosts?.GlanceCardsPanel;
+    TextBox? SoftOrganFindBox => MfdHosts?.SoftOrganFindBox;
 
     Border? MfdSemanticMapHost => MfdHosts?.MfdSemanticMapHost;
     TextBlock? SemanticStatusLabel => MfdHosts?.SemanticStatusLabel;
