@@ -26,7 +26,34 @@ public partial class MainWindow
                 ? Visibility.Visible
                 : Visibility.Collapsed;
         if (show)
+        {
+            // Leaving SoftOrgan pages clears drill; entering HereNext auto-opens PickHere.
+            if (!SoftOrganFaceHandbook.IsSoftOrganGlancePage(CurrentMfdPage()))
+                ExitGuideStepsQuiet();
             RefreshGlanceCardsBody();
+            if (string.Equals(CurrentMfdPage(), "HereNext", StringComparison.OrdinalIgnoreCase)
+                && !_guideStepsMode)
+                EnterGuideSituation(OperatorSituationCatalog.PickHere(ProbeHereLocus()).Id, autoHere: true);
+            else
+                RefreshOperatorGuideChrome();
+        }
+        else
+        {
+            ExitGuideStepsQuiet();
+        }
+    }
+
+    void ExitGuideStepsQuiet()
+    {
+        _guideStepsMode = false;
+        _guideSituation = null;
+        _guideStepIndex = 0;
+        if (OperatorGuideStepsHost is not null)
+            OperatorGuideStepsHost.Visibility = Visibility.Collapsed;
+        if (GlanceCardsScroll is not null)
+            GlanceCardsScroll.Visibility = Visibility.Visible;
+        if (OperatorHereLine is not null)
+            OperatorHereLine.Visibility = Visibility.Collapsed;
     }
 
     bool IsGlanceCardsHostActive() =>
@@ -36,8 +63,11 @@ public partial class MainWindow
 
     internal void SoftOrganFindBox_OnTextChanged(object sender, TextChangedEventArgs e)
     {
-        if (SoftOrganFaceHandbook.IsSoftOrganGlancePage(CurrentMfdPage()))
-            RefreshGlanceCardsBody();
+        if (!SoftOrganFaceHandbook.IsSoftOrganGlancePage(CurrentMfdPage()))
+            return;
+        if (_guideStepsMode)
+            ExitGuideStepsQuiet();
+        RefreshGlanceCardsBody();
     }
 
     void RefreshGlanceCardsBody()
@@ -65,13 +95,13 @@ public partial class MainWindow
                 GlassDomainBoardGlance.TryProbe(_session.WorkspaceRoot)
                 ?? new GlassDomainBoardGlance.Snapshot(0, false, null, 0, false, null, [], "domain · unavailable")),
             "Chat" => GlassGlanceCards.BuildChat(GlassIntercomPresence.ProbeChatMfd()),
-            "QRH" or "ECL" or "Alert" => SoftOrganFaceHandbook.ChipsFor(
+            "QRH" or "ECL" or "Alert" or "HereNext" => SoftOrganFaceHandbook.ChipsFor(
                 SoftOrganFaceHandbook.OrganIdFromMfdPage(page), filter),
             _ => [],
         };
 
         var deck = page is "FlightDataStorage" or "Fds" or "DomainBoard" or "Domain"
-            or "QRH" or "ECL" or "Alert";
+            or "QRH" or "ECL" or "Alert" or "HereNext";
         if (deck)
         {
             var factory = new FrameworkElementFactory(typeof(UniformGrid));
@@ -85,28 +115,38 @@ public partial class MainWindow
 
         GlanceCardsPanel.Items.Clear();
         foreach (var chip in chips)
-            GlanceCardsPanel.Items.Add(deck ? CreateDeckCard(chip) : CreateGlanceChip(chip));
+        {
+            GlanceCardsPanel.Items.Add(soft
+                ? CreateSoftOrganSituationCard(chip)
+                : deck
+                    ? CreateDeckCard(chip)
+                    : CreateGlanceChip(chip));
+        }
 
-        if (GlanceCardsStatusLabel is not null)
+        if (GlanceCardsStatusLabel is not null && !_guideStepsMode)
         {
             GlanceCardsStatusLabel.Text = chips.Count == 0
                 ? soft
                     ? $"soft · {page} · no match"
                     : "glance · unavailable"
                 : soft
-                    ? $"soft · {page} · card deck · {chips.Count}"
+                    ? page is "HereNext"
+                        ? $"here · situations · {chips.Count} · click → steps"
+                        : $"soft · {page} · situations · {chips.Count} · click → steps"
                     : page is "DomainBoard" or "Domain"
                         ? $"domain · card deck · {chips.Count} · {chips[0].Value}"
                         : deck
                             ? $"fds · card deck · {chips.Count} · {chips[0].Value}"
                             : $"{page} · {chips[0].Value}";
         }
+
+        RefreshOperatorGuideChrome();
     }
 
     static bool IsGlancePage(string page) =>
         page is "Events" or "WorkspaceHealth" or "EnvironmentReadiness" or "Hypotheses"
             or "FlightDataStorage" or "Fds" or "DomainBoard" or "Domain" or "Chat"
-            or "QRH" or "ECL" or "Alert";
+            or "QRH" or "ECL" or "Alert" or "HereNext";
 
     static Border CreateGlanceChip(GlassGlanceChip chip)
     {

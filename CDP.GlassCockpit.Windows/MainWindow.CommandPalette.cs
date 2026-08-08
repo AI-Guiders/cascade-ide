@@ -287,6 +287,10 @@ public partial class MainWindow
             case "mfd_chat":
                 SelectMfdPage("Chat", sticky: true);
                 break;
+            case "mfd_here_next":
+                SelectMfdPage("HereNext", sticky: true);
+                StatusText.Text = $"glass · HERE/NEXT · {DateTime.Now:HH:mm:ss}";
+                break;
             case "soft_qrh":
                 OpenSoftOrganFace("qrh", "qrh");
                 break;

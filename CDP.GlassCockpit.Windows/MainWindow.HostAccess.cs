@@ -62,6 +62,17 @@ public partial class MainWindow
     TextBlock? GlanceCardsStatusLabel => MfdHosts?.GlanceCardsStatusLabel;
     ItemsControl? GlanceCardsPanel => MfdHosts?.GlanceCardsPanel;
     TextBox? SoftOrganFindBox => MfdHosts?.SoftOrganFindBox;
+    TextBlock? OperatorHereLine => MfdHosts?.OperatorHereLine;
+    Border? OperatorGuideStepsHost => MfdHosts?.OperatorGuideStepsHost;
+    ScrollViewer? GlanceCardsScroll => MfdHosts?.GlanceCardsScroll;
+    TextBlock? GuideSituationTitle => MfdHosts?.GuideSituationTitle;
+    TextBlock? GuideWhenLabel => MfdHosts?.GuideWhenLabel;
+    TextBlock? GuideStepIndex => MfdHosts?.GuideStepIndex;
+    TextBlock? GuideStepBody => MfdHosts?.GuideStepBody;
+    Button? GuideListBtn => MfdHosts?.GuideListBtn;
+    Button? GuidePrevBtn => MfdHosts?.GuidePrevBtn;
+    Button? GuideNextBtn => MfdHosts?.GuideNextBtn;
+    Button? GuideDoBtn => MfdHosts?.GuideDoBtn;
 
     Border? MfdSemanticMapHost => MfdHosts?.MfdSemanticMapHost;
     TextBlock? SemanticStatusLabel => MfdHosts?.SemanticStatusLabel;

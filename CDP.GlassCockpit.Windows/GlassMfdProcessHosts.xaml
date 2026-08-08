@@ -294,21 +294,51 @@
           <TextBlock x:Name="GlanceCardsStatusLabel" Text="glance · idle"
                      FontSize="11" Foreground="#888" VerticalAlignment="Center"/>
         </DockPanel>
-        <!-- SoftOrgan QRH/ECL/Alert Face find (hidden on other glance pages). -->
+        <!-- SoftOrgan / HERE: human find over situations (not jargon index). -->
         <TextBox x:Name="SoftOrganFindBox" DockPanel.Dock="Top" Height="26" Margin="0,0,0,8" Padding="6,3"
                  Visibility="Collapsed"
                  Background="#1A1A1A" Foreground="#EEE" BorderBrush="#3A3A3A"
                  FontFamily="Consolas" FontSize="12"
-                 ToolTip="Find SoftOrgan entry (id / use)"/>
-        <ScrollViewer VerticalScrollBarVisibility="Auto">
-          <ItemsControl x:Name="GlanceCardsPanel">
-            <ItemsControl.ItemsPanel>
-              <ItemsPanelTemplate>
-                <WrapPanel/>
-              </ItemsPanelTemplate>
-            </ItemsControl.ItemsPanel>
-          </ItemsControl>
-        </ScrollViewer>
+                 ToolTip="Фильтр ситуаций (слова из названия / когда)"/>
+        <TextBlock x:Name="OperatorHereLine" DockPanel.Dock="Top" Text="HERE · —"
+                   Visibility="Collapsed" FontSize="12" Foreground="#9ACDFF"
+                   Margin="0,0,0,8" TextWrapping="Wrap"/>
+        <Grid>
+          <ScrollViewer x:Name="GlanceCardsScroll" VerticalScrollBarVisibility="Auto">
+            <ItemsControl x:Name="GlanceCardsPanel">
+              <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                  <WrapPanel/>
+                </ItemsPanelTemplate>
+              </ItemsControl.ItemsPanel>
+            </ItemsControl>
+          </ScrollViewer>
+          <!-- Situation drill fills same slot as cards (ADR 0014 SoftFL). -->
+          <Border x:Name="OperatorGuideStepsHost" Visibility="Collapsed"
+                  Background="#101010" BorderBrush="#2A2A2A" BorderThickness="1" Padding="12,10">
+            <DockPanel>
+              <DockPanel DockPanel.Dock="Bottom" Margin="0,12,0,0">
+                <Button x:Name="GuideListBtn" DockPanel.Dock="Left" Content="к списку" Padding="10,4" Margin="0,0,8,0"
+                        Background="#2A2A2A" Foreground="#CCC" BorderBrush="#3A3A3A"/>
+                <Button x:Name="GuideDoBtn" DockPanel.Dock="Right" Content="сделать" Padding="10,4" Margin="8,0,0,0"
+                        Background="#1A2E3A" Foreground="#9ACDFF" BorderBrush="#3A5A7A"/>
+                <Button x:Name="GuideNextBtn" DockPanel.Dock="Right" Content="дальше" Padding="10,4" Margin="8,0,0,0"
+                        Background="#1A2E1A" Foreground="#A8E0A8" BorderBrush="#3A5A3A"/>
+                <Button x:Name="GuidePrevBtn" DockPanel.Dock="Right" Content="назад" Padding="10,4"
+                        Background="#2A2A2A" Foreground="#CCC" BorderBrush="#3A3A3A"/>
+              </DockPanel>
+              <TextBlock x:Name="GuideSituationTitle" DockPanel.Dock="Top" FontSize="18" FontWeight="SemiBold"
+                         Foreground="#EEE" TextWrapping="Wrap" Margin="0,0,0,6"/>
+              <TextBlock x:Name="GuideWhenLabel" DockPanel.Dock="Top" FontSize="12" Foreground="#888"
+                         TextWrapping="Wrap" Margin="0,0,0,10"/>
+              <TextBlock x:Name="GuideStepIndex" DockPanel.Dock="Top" FontSize="12" Foreground="#9ACDFF"
+                         Margin="0,0,0,6"/>
+              <ScrollViewer VerticalScrollBarVisibility="Auto">
+                <TextBlock x:Name="GuideStepBody" FontSize="15" Foreground="#DDD" TextWrapping="Wrap"/>
+              </ScrollViewer>
+            </DockPanel>
+          </Border>
+        </Grid>
       </DockPanel>
     </Border>
     <!-- SoftOrgan: SemanticMap Skia + arch board instrument (ADR 0196 as_built roles). -->

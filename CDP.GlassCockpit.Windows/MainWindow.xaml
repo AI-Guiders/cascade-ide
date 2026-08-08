@@ -612,6 +612,7 @@
             <ListBoxItem Content="QRH"/>
             <ListBoxItem Content="ECL"/>
             <ListBoxItem Content="Alert"/>
+            <ListBoxItem Content="HereNext"/>
             <ListBoxItem Content="WebAiPortal"/>
             <ListBoxItem Content="AiChatSettings"/>
             <ListBoxItem Content="FlightDataStorage"/>

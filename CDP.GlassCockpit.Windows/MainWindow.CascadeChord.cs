@@ -86,11 +86,25 @@ public partial class MainWindow
                 ? "мелодия (как c:)"
                 : _chordMelodyTail;
 
-        var hits = GlassChordCatalog.FilterMelodyTail(_chordMelodyTail);
+        var hits = GlassChordCatalog.FilterMelodyTail(_chordMelodyTail).ToList();
+        foreach (var local in GlassChordCatalog.Filter(_chordMelodyTail))
+        {
+            if (hits.Any(h => string.Equals(h.Alias, local.Alias, StringComparison.Ordinal)))
+                continue;
+            hits.Add(new GlassChordMelodyEntry(local.Alias, local.ActionId, local.Help, true));
+        }
+
         _chordMelodyEntries.Clear();
-        foreach (var h in hits)
+        foreach (var h in hits.Take(GlassChordMelody.MaxSuggestions))
             _chordMelodyEntries.Add(h);
         ChordList.SelectedIndex = _chordMelodyEntries.Count > 0 ? 0 : -1;
+
+        if (GlassChordCatalog.Exact(_chordMelodyTail) is not null
+            && !GlassChordMelody.HasStrictLongerAliasPrefix(_chordMelodyTail))
+        {
+            CommitChordMelody(instant: true);
+            return;
+        }
 
         if (GlassChordMelody.TryResolveExactCommand(_chordMelodyTail, out var cmdId)
             && GlassMelodyGlassActions.TryMapCommandId(cmdId, out _))
@@ -263,7 +277,12 @@ public partial class MainWindow
                 out var mapped))
         {
             RunPaletteEntry(mapped);
+            return;
         }
+
+        // Glass-local chords (SoftOrgan SoftFL) — not only CIDE intent-catalog.toml.
+        if (GlassChordCatalog.Exact(tail) is { } local)
+            RunPaletteEntry(local.ActionId);
     }
 
     void RunWebAiPortal(string? urlPayload)

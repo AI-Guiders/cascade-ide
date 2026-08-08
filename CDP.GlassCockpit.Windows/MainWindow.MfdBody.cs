@@ -233,7 +233,7 @@ public partial class MainWindow
 
         if (SoftOrganFaceHandbook.IsSoftOrganGlancePage(page))
         {
-            MfdBody.Text = FormatMfdStub(page, "SoftOrgan Face · card deck + find", "Plan-like glance · not markdown wall");
+            MfdBody.Text = FormatMfdStub(page, "HERE · situations → steps", "ADR 0014 SoftFL · не markdown wall");
             RefreshEicasHealth();
             return;
         }
