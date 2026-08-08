@@ -144,7 +144,7 @@ public partial class MainWindow
             return;
         }
 
-        if (string.Equals(page, "SolutionExplorer", StringComparison.OrdinalIgnoreCase))
+        if (GlassSolutionExplorerFace.PreferTreeHost(page))
         {
             // Face = TreeView ItemsSource (RefreshSolutionExplorerTree) — never FormatMfdStub Avalonia peel.
             MfdBody.Text = "";

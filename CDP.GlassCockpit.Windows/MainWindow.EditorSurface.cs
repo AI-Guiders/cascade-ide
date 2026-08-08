@@ -4,6 +4,7 @@ using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using CascadeIDE.SoftOrgan;
 
 namespace CDP.GlassCockpit.Windows;
 
@@ -59,9 +60,9 @@ public partial class MainWindow
         var editorOnM = ReferenceEquals(EditorChrome.Parent, MfdEditorHost);
         var page = CurrentMfdPage();
         var showEditor = editorOnM && string.Equals(page, "Editor", StringComparison.OrdinalIgnoreCase);
-        // SE Face = TreeView always (empty placeholder or SolutionItem tree) — never Avalonia FormatMfdStub peel.
+        // SE Face = TreeView always via GlassSolutionExplorerFace.PreferTreeHost — never Avalonia FormatMfdStub peel.
         var showSe = MfdSolutionExplorerTree is not null
-            && string.Equals(page, "SolutionExplorer", StringComparison.OrdinalIgnoreCase);
+            && GlassSolutionExplorerFace.PreferTreeHost(page);
 
         MfdEditorHost.Visibility = showEditor ? Visibility.Visible : Visibility.Collapsed;
         if (MfdSolutionExplorerTree is not null)
