@@ -25,7 +25,27 @@ internal static class GlassCitizenDialogRequest
     public sealed record Sent(string Id, string Body, string RoleLabel);
 
     /// <summary>Queue citizen dialog turn. Empty → null.</summary>
-    public static Sent? TryEnqueue(string? raw, string? modelId = null, string? workspaceRoot = null, GlassIntercomChannel.Kind channel = GlassIntercomChannel.Kind.Radio)
+    public static Sent? TryEnqueue(string? raw, string? modelId = null, string? workspaceRoot = null, GlassIntercomChannel.Kind channel = GlassIntercomChannel.Kind.Radio) =>
+        TryPublish(raw, modelId, workspaceRoot, channel, journal: true, mirrorShare: true);
+
+    /// <summary>
+    /// SoftFL densify: @Sierra/@citizen mention wake — request latch only (parity GlassIntercomSend.TryNotifyPf).
+    /// Lane/journal letter already exists; this only wakes Completions bridge.
+    /// </summary>
+    public static Sent? TryNotifyCitizen(
+        string? raw,
+        string? modelId = null,
+        string? workspaceRoot = null,
+        GlassIntercomChannel.Kind channel = GlassIntercomChannel.Kind.Radio) =>
+        TryPublish(raw, modelId, workspaceRoot, channel, journal: false, mirrorShare: false);
+
+    static Sent? TryPublish(
+        string? raw,
+        string? modelId,
+        string? workspaceRoot,
+        GlassIntercomChannel.Kind channel,
+        bool journal,
+        bool mirrorShare)
     {
         if (string.IsNullOrWhiteSpace(raw))
             return null;
@@ -60,13 +80,17 @@ internal static class GlassCitizenDialogRequest
             File.WriteAllText(tmp, json);
             File.Move(tmp, path, overwrite: true);
 
-            // Journal only — do not Publish intercom-LATEST (guest PF unread).
-            GlassIntercomJournal.Append(id, "pm", "cit", body, "human", stamped, name, kind, channelCode);
-            _ = GlassOperatorShareShelf.TryPut(
-                body,
-                workspaceRoot,
-                id,
-                GlassIntercomLane.ShareWhat(GlassIntercomLane.Kind.Cit));
+            if (journal)
+                GlassIntercomJournal.Append(id, "pm", "cit", body, "human", stamped, name, kind, channelCode);
+            if (mirrorShare)
+            {
+                _ = GlassOperatorShareShelf.TryPut(
+                    body,
+                    workspaceRoot,
+                    id,
+                    GlassIntercomLane.ShareWhat(GlassIntercomLane.Kind.Cit));
+            }
+
             return new Sent(id, body, LatchPaint.FormatIntercomRole("pm", "cit", name, kind));
         }
         catch

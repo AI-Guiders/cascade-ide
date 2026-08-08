@@ -106,6 +106,10 @@ public static partial class GlassIntercomMention
         if (MentionsWho(body!, "Кир") || MentionsWho(body!, "Kir"))
             Add(WakeSink.ExternalGuest, "@Kir→guest wake");
 
+        // SoftFL densify: Who bootstrap when PF sticky stomped (parity @Kir).
+        if (MentionsWho(body!, "Sierra"))
+            Add(WakeSink.HabitatCitizen, "@Sierra→citizen wake");
+
         return hits.Select(kv => new WakeHit(kv.Key, kv.Value)).ToArray();
     }
 

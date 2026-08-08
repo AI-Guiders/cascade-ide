@@ -89,6 +89,14 @@ public sealed class GlassIntercomMentionTests
         Assert.Equal("@PM→Света wake", GlassIntercomMention.FormatWakeNote(GlassIntercomMention.Seat.Pm, "Света"));
     }
 
+
+    [Fact]
+    public void ResolveWakes_Sierra_bootstrap_even_if_PF_sticky_is_guest()
+    {
+        var stomped = new GlassIntercomMention.MentionRoster("Кир", "guest", "Света", "operator");
+        var hits = GlassIntercomMention.ResolveWakes("@Sierra go", stomped);
+        Assert.Contains(hits, h => h.Sink == GlassIntercomMention.WakeSink.HabitatCitizen);
+    }
     [Fact]
     public void TryGetAtToken_and_Suggest_filter_by_prefix()
     {

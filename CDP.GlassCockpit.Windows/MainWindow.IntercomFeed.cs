@@ -95,14 +95,29 @@ public partial class MainWindow
                     RebuildIntercomFeedFromJournal(); // preserve scroll unless pinned to end
                 NoteArrivalWhileReading(wasPinned);
 
-                // Incoming latch: Face sinks only (no external cannon loop).
-                foreach (var hit in GlassIntercomMention.ResolveWakes(view.Body, CurrentMentionRoster()))
+                // Incoming latch: Face sinks wake Completions (+BringCabinAttention);
+                // no ExternalGuest cannon loop (agent→agent).
+                // Skip kind=citizen self-loop (Sierra letter with @Sierra).
+                if (!string.Equals(view.Kind, "citizen", StringComparison.OrdinalIgnoreCase))
                 {
-                    if (hit.Sink is GlassIntercomMention.WakeSink.HabitatCitizen
-                        or GlassIntercomMention.WakeSink.GlassOperator)
+                    foreach (var hit in GlassIntercomMention.ResolveWakes(view.Body, CurrentMentionRoster()))
                     {
-                        TryNotifyPmFace();
-                        break;
+                        if (hit.Sink is GlassIntercomMention.WakeSink.HabitatCitizen)
+                        {
+                            _ = GlassCitizenDialogRequest.TryNotifyCitizen(
+                                view.Body,
+                                _modelId,
+                                _session.WorkspaceRoot,
+                                GlassIntercomChannel.Parse(view.Channel));
+                            TryNotifyPmFace();
+                            break;
+                        }
+
+                        if (hit.Sink is GlassIntercomMention.WakeSink.GlassOperator)
+                        {
+                            TryNotifyPmFace();
+                            break;
+                        }
                     }
                 }
 
@@ -334,6 +349,13 @@ public partial class MainWindow
                     }
                     break;
                 case GlassIntercomMention.WakeSink.HabitatCitizen:
+                    // CIT lane already TryEnqueue'd the letter — skip double dialog wake.
+                    if (_lane != GlassIntercomLane.Kind.Cit)
+                        _ = GlassCitizenDialogRequest.TryNotifyCitizen(
+                            raw, _modelId, _session.WorkspaceRoot, _channel);
+                    TryNotifyPmFace();
+                    roleLabel += " · " + hit.Cue;
+                    break;
                 case GlassIntercomMention.WakeSink.GlassOperator:
                     TryNotifyPmFace();
                     roleLabel += " · " + hit.Cue;
