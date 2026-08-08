@@ -36,8 +36,7 @@ public partial class MainWindow
         _openFamilyAwait = true;
         _openFamilyRecentMode = false;
         ShowOpenFamilyChoices();
-        if (OpenFamilyOverlay is not null)
-            OpenFamilyOverlay.Visibility = Visibility.Visible;
+        SetFloatingOverlay(OpenFamilyOverlay, true);
         Focus();
         ArmOpenFamilyTimeout();
         StatusText.Text = "open · F файл · P проект · D папка · R недавние";
@@ -49,8 +48,7 @@ public partial class MainWindow
         _openFamilyRecentMode = false;
         DisarmOpenFamilyTimeout();
         _openFamilyRows.Clear();
-        if (OpenFamilyOverlay is not null)
-            OpenFamilyOverlay.Visibility = Visibility.Collapsed;
+        SetFloatingOverlay(OpenFamilyOverlay, false);
     }
 
     void ArmOpenFamilyTimeout()
@@ -115,8 +113,7 @@ public partial class MainWindow
 
         if (OpenFamilyList is not null)
             OpenFamilyList.SelectedIndex = 0;
-        if (OpenFamilyOverlay is not null)
-            OpenFamilyOverlay.Visibility = Visibility.Visible;
+        SetFloatingOverlay(OpenFamilyOverlay, true);
         Focus();
         StatusText.Text = $"open · recent · {_openFamilyRows.Count} · {DateTime.Now:HH:mm:ss}";
     }

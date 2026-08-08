@@ -10,6 +10,7 @@
       <Style TargetType="ListBoxItem" BasedOn="{StaticResource Glass.DarkListItem}"/>
     </ResourceDictionary>
   </UserControl.Resources>
+  <!-- In-tree overlays (not Popup): Popup HWND floats above other apps. Airspace vs WebView2/VT = park hosts while open. -->
   <Grid>
     <Border x:Name="PaletteOverlay"
             Visibility="Collapsed"

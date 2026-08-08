@@ -197,14 +197,14 @@ public partial class MainWindow
             return;
         }
 
-        if (e.Key == Key.Escape && ChordOverlay.Visibility == Visibility.Visible)
+        if (e.Key == Key.Escape && ChordOverlay?.Visibility == Visibility.Visible)
         {
             CloseCascadeChord();
             e.Handled = true;
             return;
         }
 
-        if (e.Key == Key.Escape && PaletteOverlay.Visibility == Visibility.Visible)
+        if (e.Key == Key.Escape && PaletteOverlay?.Visibility == Visibility.Visible)
         {
             CloseCommandPalette();
             e.Handled = true;

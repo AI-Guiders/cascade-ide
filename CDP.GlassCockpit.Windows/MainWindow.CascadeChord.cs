@@ -28,7 +28,7 @@ public partial class MainWindow
 
     void ToggleCascadeChord()
     {
-        if (ChordOverlay.Visibility == Visibility.Visible)
+        if (ChordOverlay?.Visibility == Visibility.Visible)
         {
             CloseCascadeChord();
             return;
@@ -44,7 +44,7 @@ public partial class MainWindow
         _chordMelodyAwait = true;
         _chordMelodyTail = "";
         RefreshChordMelodyUi();
-        ChordOverlay.Visibility = Visibility.Visible;
+        SetFloatingOverlay(ChordOverlay, true);
         Focus();
         ArmChordTimeout();
     }
@@ -53,7 +53,7 @@ public partial class MainWindow
     {
         _chordMelodyAwait = false;
         _chordMelodyTail = "";
-        ChordOverlay.Visibility = Visibility.Collapsed;
+        SetFloatingOverlay(ChordOverlay, false);
         _chordMelodyEntries.Clear();
         if (ChordQuery is not null)
             ChordQuery.Text = "";
@@ -116,7 +116,7 @@ public partial class MainWindow
 
     bool TryConsumeChordMelodyKeyDown(KeyEventArgs e)
     {
-        if (!_chordMelodyAwait || ChordOverlay.Visibility != Visibility.Visible)
+        if (!_chordMelodyAwait || ChordOverlay?.Visibility != Visibility.Visible)
             return false;
 
         if (e.Key == Key.Escape)

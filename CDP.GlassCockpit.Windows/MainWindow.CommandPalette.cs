@@ -25,7 +25,7 @@ public partial class MainWindow
 
     void ToggleCommandPalette()
     {
-        if (PaletteOverlay.Visibility == Visibility.Visible)
+        if (PaletteOverlay?.Visibility == Visibility.Visible)
         {
             CloseCommandPalette();
             return;
@@ -35,14 +35,14 @@ public partial class MainWindow
         RefreshPaletteFilter();
         CloseCascadeChord();
         CloseOpenFamily();
-        PaletteOverlay.Visibility = Visibility.Visible;
+        SetFloatingOverlay(PaletteOverlay, true);
         PaletteQuery.Focus();
         Keyboard.Focus(PaletteQuery);
     }
 
     void CloseCommandPalette()
     {
-        PaletteOverlay.Visibility = Visibility.Collapsed;
+        SetFloatingOverlay(PaletteOverlay, false);
         _paletteEntries.Clear();
     }
 
@@ -93,7 +93,7 @@ public partial class MainWindow
         CloseOpenFamily();
         PaletteQuery.Text = GlassCommandPaletteCatalog.GoToFilePrefix;
         RefreshPaletteFilter();
-        PaletteOverlay.Visibility = Visibility.Visible;
+        SetFloatingOverlay(PaletteOverlay, true);
         PaletteQuery.CaretIndex = PaletteQuery.Text.Length;
         PaletteQuery.Focus();
         Keyboard.Focus(PaletteQuery);
@@ -398,12 +398,12 @@ public partial class MainWindow
     /// <summary>Agent surface: open Ctrl+Q palette, optional query, optional execute (melody dogfood).</summary>
     internal string AgentSurfacePalette(string? query, bool execute)
     {
-        if (PaletteOverlay.Visibility != Visibility.Visible)
+        if (PaletteOverlay?.Visibility != Visibility.Visible)
         {
             PaletteQuery.Text = "";
             RefreshPaletteFilter();
             CloseCascadeChord();
-            PaletteOverlay.Visibility = Visibility.Visible;
+            SetFloatingOverlay(PaletteOverlay, true);
         }
 
         if (!string.IsNullOrWhiteSpace(query))
@@ -434,7 +434,7 @@ public partial class MainWindow
         return System.Text.Json.JsonSerializer.Serialize(new
         {
             ok = true,
-            open = PaletteOverlay.Visibility == Visibility.Visible,
+            open = PaletteOverlay?.Visibility == Visibility.Visible,
             query = PaletteQuery.Text ?? "",
             hits = _paletteEntries.Count,
             top = _paletteEntries.Count > 0 ? _paletteEntries[0].Title : null,
