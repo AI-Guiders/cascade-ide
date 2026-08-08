@@ -86,6 +86,7 @@ public class PresentationPmOneOfPolicyTests
     [InlineData("Events", "alert")]
     [InlineData("DebugStack", "probe")]
     [InlineData("Editor", "m")]
+    [InlineData("MarkdownPreview", "m")]
     public void PreferSurfaceFromMfdPage_maps_intent(string page, string surface) =>
         Assert.Equal(surface, PresentationPmOneOfPolicy.PreferSurfaceFromMfdPage(page));
 
@@ -102,9 +103,10 @@ public class PresentationPmOneOfPolicyTests
     }
 
     [Fact]
-    public void ResolveStackSurface_Editor_hits_m_on_FPM_scan()
+    public void ResolveStackSurface_document_Face_hits_m_on_FPM_scan()
     {
         string[] stack = ["f", "p", "m"];
         Assert.Equal("m", PresentationPmOneOfPolicy.ResolveStackSurface(stack, "Editor"));
+        Assert.Equal("m", PresentationPmOneOfPolicy.ResolveStackSurface(stack, "MarkdownPreview"));
     }
 }

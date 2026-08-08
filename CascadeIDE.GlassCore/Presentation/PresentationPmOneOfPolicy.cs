@@ -33,11 +33,10 @@ public static class PresentationPmOneOfPolicy
             "hypotheses" or "debugstack" => "probe",
             "build" or "tests" or "hybridindex" or "workspacehealth" or "environmentreadiness"
                 => "probe",
-            "semanticmap" or "relatedfiles" or "correspondence" or "markdownpreview"
-                => "world",
+            "semanticmap" or "relatedfiles" or "correspondence" => "world",
             "chat" => "intercom",
-            // MFD Editor Face paints on M (AvalonEdit host) — not Forward "work" (that stuck OneOf on F·Intercom).
-            "editor" => "m",
+            // Document Face (Editor + MarkdownPreview) paints on M — not world (WebAi).
+            "editor" or "markdownpreview" => "m",
             _ => null,
         };
     }

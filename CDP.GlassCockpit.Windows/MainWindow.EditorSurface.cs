@@ -4,6 +4,7 @@ using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using CascadeIDE.GlassCore.Presentation;
 using CascadeIDE.SoftOrgan;
 
 namespace CDP.GlassCockpit.Windows;
@@ -143,7 +144,7 @@ public partial class MainWindow
         {
             MountEditor(MfdEditorHost);
             if (showFace)
-                SelectMfdPage("Editor", sticky: true);
+                PreferFacePageForPath(path);
         }
 
         RefreshMfdEditorVisibility();
@@ -177,10 +178,19 @@ public partial class MainWindow
         {
             MountEditor(MfdEditorHost);
             if (showFace)
-                SelectMfdPage("Editor", sticky: true);
+                PreferFacePageForPath(_editorPath);
         }
 
         RefreshMfdEditorVisibility();
+    }
+
+    /// <summary>Face invite → <see cref="GlassFacePagePolicy"/> (not MainWindow extension ifs).</summary>
+    void PreferFacePageForPath(string? path, string? mfdOverride = null)
+    {
+        var page = GlassFacePagePolicy.Resolve(path, mfdOverride);
+        SelectMfdPage(page, sticky: true);
+        if (page.Equals(GlassFacePagePolicy.MarkdownPreview, StringComparison.OrdinalIgnoreCase))
+            RefreshMarkdownPreview();
     }
 
     void OpenFileBtn_OnClick(object sender, RoutedEventArgs e) => TryPickOpenFile();
