@@ -9,10 +9,9 @@ namespace CascadeIDE.SoftOrgan;
 /// MFD instrument glance: SoftOrgan latch pulse → human body text (stub peel).
 /// Build ← toolchain; Terminal ← sys (Glass WPF latch; CIDE Avalonia owns live hosts).
 /// SolutionExplorer intentionally unbound: Glass .sln TreeView/glance is the instrument peel;
-/// SoftOrganKind.FilesDesk is FM utility (CabinGlass pin only) — do not overlay FM latch.
-/// RelatedFiles SoftOrganMfdGlance stays ←refactor; SoftOrganKind.FindDesk shares CabinGlass pin
-/// but SoftOrganMfdGlance is 1:1 — do not displace refactor with find_desk (search ≠ debt/blast).
-/// Live related host SSOT = Avalonia RelatedFilesMfdPageView — Glass stays latch glance until WPF peel.
+/// SoftOrganKind.FilesDesk → Glass MFD <c>FilesDesk</c> Face (latch entries); SE≠FM — do not overlay FM onto SolutionExplorer.
+/// RelatedFiles SoftOrganMfdGlance stays ←refactor; FindDesk SoftOrganMfdGlance ←find_desk (unpin SoftFL).
+/// Live related host SSOT = Avalonia RelatedFilesMfdPageView — Glass RelatedFiles stays refactor Face.
 /// SemanticMap SoftOrganMfdGlance ← arch SoftOrgan; live graph SSOT = Avalonia WorkspaceNavigationMapView
 /// (Skia) — Glass stays latch glance until WPF peel (do not dump adjacency into TextBlock).
 /// Problems SoftOrganMfdGlance ← review SoftOrgan; live list SSOT = Avalonia ProblemsMfdPageView
@@ -40,6 +39,8 @@ public static class SoftOrganMfdGlance
             "MarkdownPreview" => "report",
             "DomainBoard" or "Domain" => "domain",
             "RelatedFiles" => "refactor",
+            "FilesDesk" => "files_desk",
+            "FindDesk" => "find_desk",
             _ => null
         };
     }
@@ -161,6 +162,8 @@ public static class SoftOrganMfdGlance
             "mcp" => ("■ AiChatSettings SoftOrgan", "□ options host"),
             "report" => ("■ Glass Markdig FlowDocument", "□ Avalonia MarkdownPreview"),
             "refactor" => ("■ Glass RelatedFiles WNM-shape feed", "□ Avalonia RelatedFilesMfd / IdeMcp"),
+            "find_desk" => ("■ Glass FindDesk list + /search", "□ Avalonia Find desk"),
+            "files_desk" => ("■ Glass FilesDesk SoftKeys Up/Open/List", "□ Avalonia Files desk"),
             _ => ((string?)null, (string?)null)
         };
         if (host.Item1 is null)
