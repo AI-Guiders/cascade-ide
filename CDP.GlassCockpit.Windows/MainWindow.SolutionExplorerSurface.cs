@@ -21,7 +21,7 @@ public partial class MainWindow
         if (!string.Equals(page, "SolutionExplorer", StringComparison.OrdinalIgnoreCase))
             return;
 
-        var projects = GlassSolutionExplorerGlance.TryLoadProjectsFromWorkspaceRoot(_session.WorkspaceRoot);
+        var projects = GlassSolutionExplorerGlance.TryLoadProjects(_session.WorkspaceRoot, _session.SolutionPath);
         if (projects is null)
             return;
 

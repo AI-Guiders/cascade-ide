@@ -161,7 +161,7 @@ public partial class MainWindow
         }
 
         if (string.Equals(page, "SolutionExplorer", StringComparison.OrdinalIgnoreCase)
-            && GlassSolutionExplorerGlance.TryFormatFromWorkspaceRoot(_session.WorkspaceRoot) is { } seGlance)
+            && GlassSolutionExplorerGlance.TryFormat(_session.WorkspaceRoot, _session.SolutionPath) is { } seGlance)
         {
             MfdBody.Text = seGlance;
             RefreshEicasHealth();
@@ -245,7 +245,7 @@ public partial class MainWindow
             "SolutionExplorer" => FormatMfdStub(
                 "SolutionExplorer",
                 "SolutionExplorerView",
-                "no .sln · " + (_session.WorkspaceRoot ?? "?")),
+                "no solution/project · " + (_session.SolutionPath ?? _session.WorkspaceRoot ?? "?") + " · Ctrl+O → P"),
             "SemanticMap" => FormatMfdStub("SemanticMap", "Glass Skia + arch board", "ADR 0196 roles"),
             "Problems" => FormatMfdStub("Problems", "severity board · ERR/WARN/ALL + jump list", "Shared-SSOT quality"),
             "Tests" => FormatMfdStub("Tests", "Glass log + fail ListBox", "Avalonia TestsMfdPageView SSOT"),

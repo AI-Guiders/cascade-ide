@@ -65,4 +65,49 @@ public class GlassSolutionExplorerGlanceTests
         Assert.Null(GlassSolutionExplorerGlance.TryFormatFromSlnText(""));
         Assert.Empty(GlassSolutionExplorerGlance.ParseProjects(""));
     }
+
+    [Fact]
+    public void TryLoadProjects_standalone_csproj_like_cide()
+    {
+        var dir = Path.Combine(Path.GetTempPath(), "glass-standalone-" + Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(dir);
+        try
+        {
+            var csproj = Path.Combine(dir, "CdpMcp.csproj");
+            File.WriteAllText(csproj, "<Project Sdk=\"Microsoft.NET.Sdk\"/>");
+            var projects = GlassSolutionExplorerGlance.TryLoadProjects(dir, csproj);
+            Assert.NotNull(projects);
+            Assert.Single(projects!);
+            Assert.Equal("CdpMcp", projects![0].Name);
+            Assert.Equal("CdpMcp.csproj", projects[0].RelativePath);
+
+            var body = GlassSolutionExplorerGlance.TryFormat(dir, csproj);
+            Assert.NotNull(body);
+            Assert.Contains("standalone project", body);
+            Assert.Contains("· CdpMcp", body);
+        }
+        finally
+        {
+            try { Directory.Delete(dir, recursive: true); } catch { /* ignore */ }
+        }
+    }
+
+    [Fact]
+    public void TryLoadLoneProjects_lists_csproj_without_sln()
+    {
+        var dir = Path.Combine(Path.GetTempPath(), "glass-lone-" + Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(dir);
+        try
+        {
+            File.WriteAllText(Path.Combine(dir, "CdpMcp.csproj"), "<Project Sdk=\"Microsoft.NET.Sdk\"/>");
+            var projects = GlassSolutionExplorerGlance.TryLoadProjectsFromWorkspaceRoot(dir);
+            Assert.NotNull(projects);
+            Assert.Single(projects!);
+            Assert.Equal("CdpMcp", projects![0].Name);
+        }
+        finally
+        {
+            try { Directory.Delete(dir, recursive: true); } catch { /* ignore */ }
+        }
+    }
 }

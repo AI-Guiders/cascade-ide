@@ -14,42 +14,115 @@ public static partial class GlassSolutionExplorerGlance
 
     static readonly Regex ProjectLine = ProjectLineRegex();
 
-    /// <summary>Discover a .sln under workspace and load projects (null if none).</summary>
+    /// <summary>
+    /// CIDE <c>SolutionParser.Load</c> peel for Glass SE:
+    /// .csproj/.fsproj → standalone one project; .sln → parse; else discover under workspace root.
+    /// </summary>
+    public static IReadOnlyList<SlnProject>? TryLoadProjects(string? workspaceRoot, string? solutionOrProjectPath = null)
+    {
+        if (!string.IsNullOrWhiteSpace(solutionOrProjectPath) && File.Exists(solutionOrProjectPath))
+        {
+            var path = solutionOrProjectPath.Trim();
+            var ext = Path.GetExtension(path);
+            if (ext is ".csproj" or ".fsproj")
+            {
+                // CIDE LoadStandaloneProject — virtual solution with one project node.
+                return [new SlnProject(Path.GetFileNameWithoutExtension(path)!, Path.GetFileName(path)!)];
+            }
+
+            if (ext is ".sln" or ".slnx" or ".slnf")
+            {
+                try
+                {
+                    var projects = ParseProjects(File.ReadAllText(path));
+                    if (projects.Count > 0)
+                        return projects;
+                }
+                catch
+                {
+                    // fall through to workspace discovery
+                }
+            }
+        }
+
+        return TryLoadProjectsFromWorkspaceRoot(workspaceRoot);
+    }
+
+    /// <summary>Discover a .sln under workspace and load projects; else lone *.csproj/*.fsproj (null if none).</summary>
     public static IReadOnlyList<SlnProject>? TryLoadProjectsFromWorkspaceRoot(string? workspaceRoot)
     {
         if (string.IsNullOrWhiteSpace(workspaceRoot) || !Directory.Exists(workspaceRoot))
             return null;
 
-        var sln = TryFindSln(workspaceRoot.Trim());
-        if (sln is null)
-            return null;
+        var root = workspaceRoot.Trim();
+        var sln = TryFindSln(root);
+        if (sln is not null)
+        {
+            try
+            {
+                var text = File.ReadAllText(sln);
+                var projects = ParseProjects(text);
+                if (projects.Count > 0)
+                    return projects;
+            }
+            catch
+            {
+                // fall through to lone projects
+            }
+        }
 
-        try
-        {
-            var text = File.ReadAllText(sln);
-            var projects = ParseProjects(text);
-            return projects.Count == 0 ? null : projects;
-        }
-        catch
-        {
-            return null;
-        }
+        return TryLoadLoneProjects(root);
     }
 
-    /// <summary>Discover a .sln under workspace and format project list (null if none).</summary>
-    public static string? TryFormatFromWorkspaceRoot(string? workspaceRoot)
+    /// <summary>CIDE-aligned format: prefer open solution/project path, else workspace discovery.</summary>
+    public static string? TryFormat(string? workspaceRoot, string? solutionOrProjectPath = null)
+    {
+        var projects = TryLoadProjects(workspaceRoot, solutionOrProjectPath);
+        if (projects is null || projects.Count == 0)
+            return null;
+
+        var sb = new StringBuilder();
+        sb.Append("SolutionExplorer glance");
+        if (!string.IsNullOrWhiteSpace(solutionOrProjectPath) && File.Exists(solutionOrProjectPath))
+        {
+            var ext = Path.GetExtension(solutionOrProjectPath);
+            if (ext is ".csproj" or ".fsproj")
+                sb.Append(" · standalone project (CIDE LoadStandaloneProject)");
+            else
+                sb.Append(" · ").Append(Path.GetFileName(solutionOrProjectPath.Trim()));
+        }
+        else if (TryFindSln(workspaceRoot?.Trim() ?? "") is { } sln)
+            sb.Append(" · ").Append(Path.GetFileName(sln));
+        else
+            sb.Append(" · lone project");
+
+        sb.Append(" · projects=").Append(projects.Count).AppendLine();
+        sb.AppendLine();
+        foreach (var p in projects)
+            sb.Append("· ").AppendLine(p.Name);
+        sb.AppendLine();
+        sb.Append("(Full tree = CIDE Avalonia SolutionExplorerView; Glass WPF TreeView = flat projects.)");
+        return sb.ToString().TrimEnd();
+    }
+
+    /// <summary>Discover a .sln under workspace and format project list; else lone project peel (null if none).</summary>
+    public static string? TryFormatFromWorkspaceRoot(string? workspaceRoot) =>
+        TryFormat(workspaceRoot, solutionOrProjectPath: null);
+
+    /// <summary>Workspace without .sln: top-level *.csproj / *.fsproj as SE nodes.</summary>
+    public static IReadOnlyList<SlnProject>? TryLoadLoneProjects(string workspaceRoot)
     {
         if (string.IsNullOrWhiteSpace(workspaceRoot) || !Directory.Exists(workspaceRoot))
             return null;
 
-        var sln = TryFindSln(workspaceRoot.Trim());
-        if (sln is null)
-            return null;
-
         try
         {
-            var text = File.ReadAllText(sln);
-            return TryFormatFromSlnText(text, sln);
+            var list = Directory.EnumerateFiles(workspaceRoot, "*.csproj", SearchOption.TopDirectoryOnly)
+                .Concat(Directory.EnumerateFiles(workspaceRoot, "*.fsproj", SearchOption.TopDirectoryOnly))
+                .OrderBy(static p => p, StringComparer.OrdinalIgnoreCase)
+                .Select(static p => new SlnProject(Path.GetFileNameWithoutExtension(p)!, Path.GetFileName(p)!))
+                .ToList();
+            return list.Count == 0 ? null : list;
         }
         catch
         {

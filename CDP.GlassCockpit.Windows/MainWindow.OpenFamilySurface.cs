@@ -338,16 +338,19 @@ public partial class MainWindow
 
     void ApplyWorkspaceFromProjectPath(string path)
     {
-        var dir = Path.GetDirectoryName(path);
-        if (string.IsNullOrWhiteSpace(dir) || !Directory.Exists(dir))
+        // CIDE LoadSolution(path): SolutionPath = file; workspace dir = WorkspaceDirectoryFromSolutionPath.
+        if (!_session.SetSolutionOrProjectPath(path))
         {
-            StatusText.Text = $"open · project fail · no dir · {path}";
+            StatusText.Text = $"open · project fail · {path}";
             return;
         }
 
-        ApplyWorkspaceRoot(dir, "project");
         GlassOpenRecentStore.Remember(path, "project");
-        StatusText.Text = $"open · project · {Path.GetFileName(path)} · root={Path.GetFileName(dir)} · {DateTime.Now:HH:mm:ss}";
+        SelectMfdPage("SolutionExplorer", sticky: true);
+        UpdateMfdBody();
+        var rootName = Path.GetFileName((_session.WorkspaceRoot ?? "").TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar));
+        StatusText.Text =
+            $"open · project · {Path.GetFileName(path)} · root={rootName} · {DateTime.Now:HH:mm:ss}";
     }
 
     void ApplyWorkspaceRoot(string root, string kind)

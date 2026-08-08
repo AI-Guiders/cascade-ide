@@ -15,6 +15,10 @@ internal sealed class GlassSession
     public CascadeIdeSettings Settings { get; private set; }
     public string SettingsPath { get; private set; }
     public string? WorkspaceRoot { get; private set; }
+
+    /// <summary>CIDE <c>Workspace.SolutionPath</c> peel — .sln/.csproj/.fsproj or folder path.</summary>
+    public string? SolutionPath { get; private set; }
+
     public GlassPresentationLayout.Snapshot Layout { get; private set; }
 
     public GlassSession(string? workspaceRoot = null)
@@ -23,6 +27,7 @@ internal sealed class GlassSession
         WorkspaceRoot = string.IsNullOrWhiteSpace(workspaceRoot)
             ? WorkspaceCascadePaths.TryDiscoverWorkspaceRoot()
             : workspaceRoot.Trim();
+        SolutionPath = null;
         Settings = SettingsService.Load(WorkspaceRoot);
         Layout = GlassPresentationLayout.Resolve(Settings);
     }
@@ -33,7 +38,7 @@ internal sealed class GlassSession
         Layout = GlassPresentationLayout.Resolve(Settings, Layout.Topology);
     }
 
-    /// <summary>Operator Open-family: set workspace root and reload settings for the new root.</summary>
+    /// <summary>Open folder as workspace (CIDE <c>FolderWorkspaceTreeBuilder</c> path).</summary>
     public bool SetWorkspaceRoot(string? path)
     {
         if (string.IsNullOrWhiteSpace(path))
@@ -42,6 +47,31 @@ internal sealed class GlassSession
         if (!Directory.Exists(root))
             return false;
         WorkspaceRoot = root;
+        SolutionPath = root;
+        ReloadSettings();
+        return true;
+    }
+
+    /// <summary>
+    /// CIDE <c>LoadSolution</c> peel: keep file as <see cref="SolutionPath"/>;
+    /// workspace dir = directory of that file (same rule as <c>WorkspaceDirectoryFromSolutionPath</c>).
+    /// </summary>
+    public bool SetSolutionOrProjectPath(string? path)
+    {
+        if (string.IsNullOrWhiteSpace(path))
+            return false;
+        var trimmed = path.Trim();
+        if (Directory.Exists(trimmed))
+            return SetWorkspaceRoot(trimmed);
+        if (!File.Exists(trimmed))
+            return false;
+
+        SolutionPath = trimmed;
+        // Same semantics as Features/Workspace/Application/WorkspaceDirectoryFromSolutionPath.Resolve
+        var ws = Path.GetDirectoryName(CanonicalFilePath.Normalize(trimmed)) ?? "";
+        if (string.IsNullOrWhiteSpace(ws) || !Directory.Exists(ws))
+            return false;
+        WorkspaceRoot = ws;
         ReloadSettings();
         return true;
     }
