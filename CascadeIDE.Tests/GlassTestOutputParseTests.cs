@@ -6,7 +6,7 @@ namespace CascadeIDE.Tests;
 
 public sealed class GlassTestOutputParseTests
 {
-  const string Sample = """
+    const string Sample = """
         Passed  CascadeIDE.Tests.FooTest.Bar [12 ms]
         Failed  CascadeIDE.Tests.FooTest.Baz [3 ms]
           Error Message:
@@ -34,5 +34,33 @@ public sealed class GlassTestOutputParseTests
         Assert.Equal(1, summary.Failed);
         Assert.False(summary.Success);
         Assert.Contains("2 passed", summary.Label);
+    }
+
+    [Fact]
+    public void ParseFails_keeps_stack_path_for_jump()
+    {
+        var tmp = Path.Combine(Path.GetTempPath(), "SoftFlBrokenTests.cs");
+        File.WriteAllText(tmp, "// softfl jump fixture\n");
+        try
+        {
+            var sample = $"""
+                Failed  SoftFlTestFail.BrokenTests.FailsOnPurpose [3 ms]
+                  Error Message:
+                   softfl-tests-fail-jump
+                  Stack Trace:
+                     at SoftFlTestFail.BrokenTests.FailsOnPurpose() in {tmp}:line 10
+                Failed!  - Failed:     1, Passed:     0, Skipped:     0, Total:     1
+                """;
+            var rows = GlassTestOutputParse.ParseFails(sample);
+            Assert.Single(rows);
+            Assert.Contains(".cs", rows[0].Message);
+            Assert.True(GlassTestOutputParse.TryResolveFailJump(rows[0], workspaceRoot: null, out var path, out var line));
+            Assert.Equal(tmp, path);
+            Assert.Equal(10, line);
+        }
+        finally
+        {
+            File.Delete(tmp);
+        }
     }
 }

@@ -79,8 +79,19 @@ public static partial class GlassTestOutputParse
                 continue;
             }
 
-            if (messageLines.Count > 0 || line.StartsWith("Assert.", StringComparison.Ordinal) || line.Contains("Failure", StringComparison.Ordinal))
-                messageLines.Add(line);
+            // Stop before VSTest summary / Glass pump footers (keep Display jump-sized).
+            if (SummaryLine().IsMatch(line)
+                || line.StartsWith("Failed!", StringComparison.OrdinalIgnoreCase)
+                || line.StartsWith("Passed!", StringComparison.OrdinalIgnoreCase)
+                || line.StartsWith("┌", StringComparison.Ordinal))
+            {
+                Flush();
+                continue;
+            }
+
+            // Collect body/stack while inside a Failed block — empty "Error Message:"/
+            // "Stack Trace:" headers alone must not gate jump paths (SoftFL Tests fail).
+            messageLines.Add(line);
         }
 
         Flush();
@@ -165,7 +176,7 @@ public static partial class GlassTestOutputParse
     }
 
     [GeneratedRegex(
-        @"((?:[A-Za-z]:)?[^:\r\n]+?\.(?:cs|fs|vb))\s*(?::|[\(,])\s*(\d+)",
+        @"((?:[A-Za-z]:)?[^:\r\n]+?\.(?:cs|fs|vb))\s*(?::\s*(?:line\s+)?|[\(,])\s*(\d+)",
         RegexOptions.CultureInvariant)]
     private static partial Regex StackPathLine();
 }
