@@ -63,6 +63,7 @@ public class PresentationPmOneOfPolicyTests
     [InlineData("DomainBoard", "sit")]
     [InlineData("Events", "alert")]
     [InlineData("DebugStack", "probe")]
+    [InlineData("Editor", "m")]
     public void PreferSurfaceFromMfdPage_maps_intent(string page, string surface) =>
         Assert.Equal(surface, PresentationPmOneOfPolicy.PreferSurfaceFromMfdPage(page));
 
@@ -74,6 +75,14 @@ public class PresentationPmOneOfPolicyTests
         Assert.Equal("sit", PresentationPmOneOfPolicy.ResolveStackSurface(stack, "DomainBoard"));
         // Terminal→shell not in stack; zone(shell)=Mfd → first Mfd paint in stack = world
         Assert.Equal("world", PresentationPmOneOfPolicy.ResolveStackSurface(stack, "Terminal"));
-        Assert.Null(PresentationPmOneOfPolicy.ResolveStackSurface(stack, "Editor")); // work→Forward, not in P/M stack zones
+        // Editor→m (MFD Face), not work→Forward — zone(m)=Mfd → world
+        Assert.Equal("world", PresentationPmOneOfPolicy.ResolveStackSurface(stack, "Editor"));
+    }
+
+    [Fact]
+    public void ResolveStackSurface_Editor_hits_m_on_FPM_scan()
+    {
+        string[] stack = ["f", "p", "m"];
+        Assert.Equal("m", PresentationPmOneOfPolicy.ResolveStackSurface(stack, "Editor"));
     }
 }
