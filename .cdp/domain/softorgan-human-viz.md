@@ -4,7 +4,8 @@
 - Human-faced SoftOrgan zones = tree / graph / instrument cards — not status/ribbon text dumps.
 - SoftOrgan seats (P|F|M) = chrome only; never steal MFD page.
 - #CIDE done needs evidence= absolute `.png` of the right window (Read into chat); `shot=true` alone illegal.
-- Editor situ WHY·BLAST text ribbon = REJECT; human face = situ card deck (WHY/BLAST/ROLE/DIFF/APPLIES).
+- Editor situ WHY·BLAST text ribbon = REJECT. Default Editor Face: situ card deck **off** (WHY on P·Plan; BLAST/ROLE via RelatedFiles/SemanticMap on demand; DIFF/APPLIES gutter tint OK). Optional situ MFD mode later — not always-on Editor overlay.
+- Document Face invite page = `GlassFacePagePolicy` (not MainWindow `EndsWith(.md)`); SoftOrgan Face stays glance cards — not MarkdownPreview wall.
 
 ## Entry
 - Map SSOT: `scratch/softorgan-human-viz-map-2026-08-04.md`

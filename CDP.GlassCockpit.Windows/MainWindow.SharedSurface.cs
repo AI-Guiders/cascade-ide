@@ -61,12 +61,15 @@ public partial class MainWindow
         if (EditorSituPanel is null || EditorSituCardsPanel is null)
             return;
 
+        // Operator: situ card deck on Editor = tank HUD (code and prose). Keep path bar;
+        // WHY/BLAST/ROLE live on Plan/FDS — not over AvalonEdit. Diff/applies tint stays in gutter.
+        EditorSituCardsPanel.Items.Clear();
+        if (EditorSituStatusLabel is not null)
+            EditorSituStatusLabel.Text = "situ · off · editor";
+        EditorSituPanel.Visibility = Visibility.Collapsed;
+
         if (string.IsNullOrWhiteSpace(_editorPath))
         {
-            EditorSituCardsPanel.Items.Clear();
-            if (EditorSituStatusLabel is not null)
-                EditorSituStatusLabel.Text = "situ · empty";
-            EditorSituPanel.Visibility = Visibility.Collapsed;
             _diffHunkRenderer?.Apply(null);
             _appliesTintRenderer?.Apply(null);
             CodeEditor?.TextArea.TextView.InvalidateLayer(ICSharpCode.AvalonEdit.Rendering.KnownLayer.Background);
@@ -82,23 +85,6 @@ public partial class MainWindow
             sourceText: CodeEditor?.Text,
             buildProblems: MergeAppliesProblemSources(),
             testFails: _testFails);
-
-        var chips = GlassGlanceCards.BuildEditorSitu(face);
-        var factory = new FrameworkElementFactory(typeof(UniformGrid));
-        factory.SetValue(UniformGrid.ColumnsProperty, 3);
-        EditorSituCardsPanel.ItemsPanel = new ItemsPanelTemplate(factory);
-        EditorSituCardsPanel.Items.Clear();
-        foreach (var chip in chips)
-            EditorSituCardsPanel.Items.Add(CreateDeckCard(chip));
-
-        if (EditorSituStatusLabel is not null)
-            EditorSituStatusLabel.Text = face.HasAny
-                ? $"situ · card deck · {chips.Count} · {chips[0].Value}"
-                : "situ · empty";
-
-        EditorSituPanel.Visibility = face.HasAny
-            ? Visibility.Visible
-            : Visibility.Collapsed;
 
         EnsureDiffHunkRenderer();
         EnsureAppliesTintRenderer();
