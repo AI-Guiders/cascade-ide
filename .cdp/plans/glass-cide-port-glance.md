@@ -8,6 +8,7 @@ Glance · CIDE SSOT · **not** Seeming-Done · **цейтнот**
 ## Honest status
 | Claim | Truth |
 |-------|--------|
+| Glass Done PreCondition | **STAMPED** 2026-08-08 · dig=PreCondition A/B + ALL SURFACES + Face Done · PNG `tmp-glass-shots/glass-done-precondition-20260808.png` |
 | ALL SURFACES ADOPTED | **Done** 2026-08-08 · Themes Dig REJECT · Intercom relate Dig REJECT (Avalonia SSOT) · densest Live families shipped |
 | nested[axb] densest wave | **shipped** Open·GoTo·Attach·Git·Build·Debug · Themes Dig REJECT · Intercom relate Dig REJECT |
 | SoftOrgan Face Done | Soft:QRH cards VERIFY · dig=PNG + operator in-thread steer nested |

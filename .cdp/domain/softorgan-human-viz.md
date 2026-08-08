@@ -30,6 +30,7 @@
 - DomainBoard / WorkspaceHealth / Hypotheses `glance · unavailable` with empty WorkspaceRoot = seeming (climb / latch-only must paint).
 
 ## last_ship
+- **2026-08-08 Glass Done PreCondition STAMPED** — dig=`glass.md` PreCondition + plan ALL SURFACES + SoftOrgan Face Done · PrintWindow `CDP GlassCockpit · Windows` Soft:QRH cards live · evidence `tmp-glass-shots/glass-done-precondition-20260808.png` + `cdp_see`. SoftOrgan Meta CLOSED.
 - **2026-08-08 SoftOrgan Face Done axis4** — Soft:QRH cards VERIFY (M·QRH situations+find) · dig=`tmp-glass-shots/softorgan-qrh-face-cards-20260808.png` + `cdp_see` · operator in-thread (chat open ≠ Soft:QRH fail; nested axb steer) · SoftOrgan Meta CLOSED.
 - **2026-08-08 SoftFL Soft:QRH Face cards VERIFY** — Soft:QRH → `M · QRH` · situations cards (cabin-start/open-project/where-am-i/hung-glass) · find · not markdown wall. Evidence `tmp-glass-shots/softorgan-qrh-face-cards-20260808.png` (title=`CDP GlassCockpit · Windows`). SoftOrgan Meta CLOSED. Face Done axis4 = Soft:QRH VERIFY + operator steer.
 - **2026-08-08 Glass Open/SE = CIDE SolutionParser SSOT** — linked `SolutionParser`+`ProjectFileTreeBuilder`+`FolderWorkspaceTreeBuilder`+`SolutionItem` into GlassCore; `GlassSession.SetSolutionOrProjectPath` = CIDE LoadSolution; WPF SE paints `SolutionItem` children. Evidence path: Ctrl+O→P→CdpMcp.csproj → tree. SoftOrgan Meta CLOSED.
