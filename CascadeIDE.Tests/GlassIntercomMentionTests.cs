@@ -88,4 +88,17 @@ public sealed class GlassIntercomMentionTests
         Assert.Equal("@PF→Sierra wake", GlassIntercomMention.FormatWakeNote(GlassIntercomMention.Seat.Pf, "Sierra"));
         Assert.Equal("@PM→Света wake", GlassIntercomMention.FormatWakeNote(GlassIntercomMention.Seat.Pm, "Света"));
     }
+
+    [Fact]
+    public void TryGetAtToken_and_Suggest_filter_by_prefix()
+    {
+        Assert.True(GlassIntercomMention.TryGetAtToken("hey @Ki", 7, out var start, out var prefix));
+        Assert.Equal(4, start);
+        Assert.Equal("Ki", prefix);
+
+        var hits = GlassIntercomMention.Suggest("Ki", LiveRoster);
+        Assert.Contains(hits, h => h.Title.Equals("@Kir", StringComparison.OrdinalIgnoreCase));
+        Assert.DoesNotContain(hits, h => h.Title.Equals("@PM", StringComparison.OrdinalIgnoreCase));
+    }
+
 }

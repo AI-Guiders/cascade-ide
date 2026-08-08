@@ -16,6 +16,9 @@ public partial class MainWindow
     readonly ObservableCollection<GlassSlashSuggestion> _slashSuggestions = new();
     readonly WorkspaceFileIndex _slashFileIndex = new();
     int _slashIndex;
+    bool _composerSuggestIsMention;
+    int _atTokenStart = -1;
+    int _atTokenEnd = -1;
 
     void InitIntercomSlash()
     {
@@ -50,13 +53,41 @@ public partial class MainWindow
     void RefreshSlashPopup()
     {
         var text = ComposerBox.Text ?? "";
-        if (GlassIntercomLane.IsComposerPlaceholder(text) || !GlassSlashCatalog.IsSlashLine(text))
+        if (GlassIntercomLane.IsComposerPlaceholder(text))
         {
             HideSlashPopup();
             return;
         }
 
-        var hits = GlassSlashCatalog.Suggest(text, MatchWorkspaceFilesForSlash);
+        if (GlassSlashCatalog.IsSlashLine(text))
+        {
+            _composerSuggestIsMention = false;
+            _atTokenStart = -1;
+            _atTokenEnd = -1;
+            var hits = GlassSlashCatalog.Suggest(text, MatchWorkspaceFilesForSlash);
+            ShowComposerSuggestions(hits);
+            return;
+        }
+
+        // SoftFL densify: @ mentions reuse SlashPopup (was / only).
+        var caret = ComposerBox.CaretIndex;
+        if (GlassIntercomMention.TryGetAtToken(text, caret, out var atStart, out var prefix))
+        {
+            _composerSuggestIsMention = true;
+            _atTokenStart = atStart;
+            _atTokenEnd = atStart + 1 + prefix.Length;
+            var mentionHits = GlassIntercomMention.Suggest(prefix, CurrentMentionRoster())
+                .Select(h => new GlassSlashSuggestion(h.Insert, h.Title, h.Help))
+                .ToList();
+            ShowComposerSuggestions(mentionHits);
+            return;
+        }
+
+        HideSlashPopup();
+    }
+
+    void ShowComposerSuggestions(IReadOnlyList<GlassSlashSuggestion> hits)
+    {
         _slashSuggestions.Clear();
         foreach (var h in hits)
             _slashSuggestions.Add(h);
@@ -78,6 +109,9 @@ public partial class MainWindow
         if (SlashPopup.IsOpen)
             SlashPopup.IsOpen = false;
         _slashSuggestions.Clear();
+        _composerSuggestIsMention = false;
+        _atTokenStart = -1;
+        _atTokenEnd = -1;
     }
 
     void SlashList_OnPreviewKeyDown(object sender, KeyEventArgs e)
@@ -145,6 +179,22 @@ public partial class MainWindow
         }
 
         var pick = SlashList.SelectedItem as GlassSlashSuggestion ?? _slashSuggestions[_slashIndex];
+
+        // SoftFL densify: @ mention replaces token under caret (keep surrounding prose).
+        if (_composerSuggestIsMention && _atTokenStart >= 0)
+        {
+            var text = ComposerBox.Text ?? "";
+            var end = Math.Clamp(_atTokenEnd, _atTokenStart, text.Length);
+            var before = text[.._atTokenStart];
+            var after = end < text.Length ? text[end..] : "";
+            var insert = pick.InsertText;
+            ComposerBox.Text = before + insert + after;
+            ComposerBox.CaretIndex = before.Length + insert.Length;
+            HideSlashPopup();
+            ComposerBox.Focus();
+            return;
+        }
+
         // ADR 0150: insert catalog InsertText; auto-run only when ArgTail policy allows (required needs N).
         ComposerBox.Text = pick.InsertText;
         ComposerBox.CaretIndex = pick.InsertText.Length;

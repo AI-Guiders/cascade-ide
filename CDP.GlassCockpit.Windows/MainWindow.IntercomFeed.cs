@@ -325,8 +325,13 @@ public partial class MainWindow
                     // Skip cannon when lane already PF Send (voice latch already written).
                     if (_lane == GlassIntercomLane.Kind.Pf)
                         break;
-                    if (GlassIntercomSend.TryNotifyPf(raw, _session.WorkspaceRoot, _channel) is not null)
+                    // SoftFL: latch-only TryNotifyPf must register id — else Face watcher
+                    // TryJournalFromView duplicates the @Kir wake as a second Intercom letter.
+                    if (GlassIntercomSend.TryNotifyPf(raw, _session.WorkspaceRoot, _channel) is { } notified)
+                    {
+                        _seenIntercomIds.Add(notified.Id);
                         roleLabel += " · " + hit.Cue;
+                    }
                     break;
                 case GlassIntercomMention.WakeSink.HabitatCitizen:
                 case GlassIntercomMention.WakeSink.GlassOperator:

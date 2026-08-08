@@ -147,6 +147,74 @@ public static partial class GlassIntercomMention
         return Regex.IsMatch(body, pat, RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
     }
 
+    /// <summary>
+    /// SoftFL densify: @ autocomplete — token under caret (prefix after @, no spaces).
+    /// </summary>
+    public static bool TryGetAtToken(string? text, int caret, out int start, out string prefix)
+    {
+        start = -1;
+        prefix = "";
+        if (string.IsNullOrEmpty(text))
+            return false;
+
+        caret = Math.Clamp(caret, 0, text.Length);
+        var i = caret - 1;
+        while (i >= 0 && IsMentionBodyChar(text[i]))
+            i--;
+
+        if (i < 0 || text[i] != '@')
+            return false;
+        if (i > 0 && IsMentionBodyChar(text[i - 1]))
+            return false;
+
+        start = i;
+        prefix = text[(i + 1)..caret];
+        if (prefix.IndexOfAny([' ', '\t', '\r', '\n']) >= 0)
+            return false;
+        return true;
+    }
+
+    /// <summary>
+    /// SoftFL densify: roster + seats/kinds/Kir for Glass SlashPopup reuse.
+    /// </summary>
+    public static IReadOnlyList<(string Insert, string Title, string Help)> Suggest(
+        string? prefix,
+        MentionRoster roster,
+        int limit = 12)
+    {
+        var needle = (prefix ?? "").Trim().TrimStart('@');
+        var bag = new List<(string Insert, string Title, string Help)>
+        {
+            ("@PF ", "@PF", "seat · wake by PF Who.kind"),
+            ("@PM ", "@PM", "seat · wake by PM Who.kind"),
+            ("@guest ", "@guest", "kind · external harness"),
+            ("@citizen ", "@citizen", "kind · Glass Face"),
+            ("@operator ", "@operator", "kind · Glass Face"),
+            ("@Kir ", "@Kir", "Who · guest cannon (Cursor)"),
+            ("@Кир ", "@Кир", "Who · guest cannon (Cursor)"),
+        };
+
+        foreach (var (name, kind, seatTag) in WhoCandidates(roster))
+        {
+            if (string.IsNullOrWhiteSpace(name))
+                continue;
+            var n = name.Trim();
+            bag.Add(("@" + n + " ", "@" + n, seatTag + " · " + (NormalizeKind(kind) ?? "?")));
+        }
+
+        return bag
+            .Where(x =>
+                needle.Length == 0
+                || x.Title.AsSpan(1).StartsWith(needle, StringComparison.OrdinalIgnoreCase))
+            .GroupBy(x => x.Insert, StringComparer.OrdinalIgnoreCase)
+            .Select(g => g.First())
+            .Take(Math.Max(1, limit))
+            .ToList();
+    }
+
+    static bool IsMentionBodyChar(char c) =>
+        char.IsLetterOrDigit(c) || c is '_' or '-';
+
     static IEnumerable<(string? Name, string? Kind, string SeatTag)> WhoCandidates(MentionRoster r)
     {
         yield return (r.PfName, r.PfKind, "@PF");
