@@ -161,7 +161,7 @@ public partial class MainWindow
         }
 
         if (string.Equals(page, "SolutionExplorer", StringComparison.OrdinalIgnoreCase)
-            && GlassSolutionExplorerGlance.TryFormat(_session.WorkspaceRoot, _session.SolutionPath) is { } seGlance)
+            && GlassSolutionExplorerGlance.TryFormat(_session.SolutionRoot, _session.SolutionPath) is { } seGlance)
         {
             MfdBody.Text = seGlance;
             RefreshEicasHealth();

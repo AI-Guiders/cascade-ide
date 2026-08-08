@@ -26,6 +26,8 @@
     <ProjectReference Include="..\CascadeIDE.Contracts\CascadeIDE.Contracts.csproj" />
     <ProjectReference Include="..\hybrid-codebase-index-core\HybridCodebaseIndex.Core.csproj" Condition="Exists('..\hybrid-codebase-index-core\HybridCodebaseIndex.Core.csproj')" />
     <PackageReference Include="AIGuiders.HybridCodebaseIndex.Core" Version="0.1.2" Condition="!Exists('..\hybrid-codebase-index-core\HybridCodebaseIndex.Core.csproj')" />
+    <PackageReference Include="Microsoft.VisualStudio.SolutionPersistence" Version="1.0.52" />
+    <PackageReference Include="DotNet.Glob" Version="3.1.3" />
   </ItemGroup>
 
   <!-- Shared Radio journal WitDB (same sources as cdp-mcp) — StateRoot/intercom.witdb. -->
@@ -151,6 +153,12 @@
     <Compile Include="..\Features\Settings\DataAcquisition\UserSettingsTomlFileAccess.cs" Link="Features\Settings\DataAcquisition\UserSettingsTomlFileAccess.cs" />
     <!-- Peel6c: workspace.toml path + root discovery (typed overlay stays host). -->
     <Compile Include="..\Features\Workspace\DataAcquisition\WorkspaceCascadePaths.cs" Link="Features\Workspace\DataAcquisition\WorkspaceCascadePaths.cs" />
+    <!-- Peel16: CIDE SolutionParser SSOT for Glass Open/SE (Avalonia-free DAL). -->
+    <Compile Include="..\Models\SolutionItem.cs" Link="Models\SolutionItem.cs" />
+    <Compile Include="..\Services\WorkspaceIgnoreMatcher.cs" Link="Services\WorkspaceIgnoreMatcher.cs" />
+    <Compile Include="..\Features\Workspace\DataAcquisition\ProjectFileTreeBuilder.cs" Link="Features\Workspace\DataAcquisition\ProjectFileTreeBuilder.cs" />
+    <Compile Include="..\Features\Workspace\DataAcquisition\SolutionParser.cs" Link="Features\Workspace\DataAcquisition\SolutionParser.cs" />
+    <Compile Include="..\Features\Workspace\DataAcquisition\FolderWorkspaceTreeBuilder.cs" Link="Features\Workspace\DataAcquisition\FolderWorkspaceTreeBuilder.cs" />
     <!-- Peel7: defaults-settings.toml discovery (host SettingsDefaultsLoader still owns BundledAppContent merge). -->
     <Compile Include="..\Features\Settings\DataAcquisition\SettingsDefaultsPaths.cs" Link="Features\Settings\DataAcquisition\SettingsDefaultsPaths.cs" />
     <!-- Peel8: cdp-mcp latch state root + named LATEST paths (watchers stay host). -->

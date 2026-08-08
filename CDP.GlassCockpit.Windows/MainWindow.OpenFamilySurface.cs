@@ -341,7 +341,7 @@ public partial class MainWindow
         // CIDE LoadSolution(path): SolutionPath = file; workspace dir = WorkspaceDirectoryFromSolutionPath.
         if (!_session.SetSolutionOrProjectPath(path))
         {
-            StatusText.Text = $"open · project fail · {path}";
+            StatusText.Text = $"open · project fail · {_session.SolutionLoadError ?? path}";
             return;
         }
 

@@ -16,8 +16,13 @@ internal sealed class GlassSession
     public string SettingsPath { get; private set; }
     public string? WorkspaceRoot { get; private set; }
 
-    /// <summary>CIDE <c>Workspace.SolutionPath</c> peel — .sln/.csproj/.fsproj or folder path.</summary>
+    /// <summary>CIDE <c>Workspace.SolutionPath</c> — .sln/.csproj/.fsproj or folder.</summary>
     public string? SolutionPath { get; private set; }
+
+    /// <summary>CIDE solution tree root from <see cref="SolutionParser"/> / <see cref="FolderWorkspaceTreeBuilder"/>.</summary>
+    public SolutionItem? SolutionRoot { get; private set; }
+
+    public string? SolutionLoadError { get; private set; }
 
     public GlassPresentationLayout.Snapshot Layout { get; private set; }
 
@@ -28,6 +33,8 @@ internal sealed class GlassSession
             ? WorkspaceCascadePaths.TryDiscoverWorkspaceRoot()
             : workspaceRoot.Trim();
         SolutionPath = null;
+        SolutionRoot = null;
+        SolutionLoadError = null;
         Settings = SettingsService.Load(WorkspaceRoot);
         Layout = GlassPresentationLayout.Resolve(Settings);
     }
@@ -38,7 +45,7 @@ internal sealed class GlassSession
         Layout = GlassPresentationLayout.Resolve(Settings, Layout.Topology);
     }
 
-    /// <summary>Open folder as workspace (CIDE <c>FolderWorkspaceTreeBuilder</c> path).</summary>
+    /// <summary>CIDE open-folder path: <see cref="FolderWorkspaceTreeBuilder.TryBuild"/>.</summary>
     public bool SetWorkspaceRoot(string? path)
     {
         if (string.IsNullOrWhiteSpace(path))
@@ -46,15 +53,25 @@ internal sealed class GlassSession
         var root = path.Trim();
         if (!Directory.Exists(root))
             return false;
+
+        var tree = FolderWorkspaceTreeBuilder.TryBuild(root, out var err);
+        if (tree is null)
+        {
+            SolutionLoadError = err ?? "Не удалось открыть папку.";
+            return false;
+        }
+
         WorkspaceRoot = root;
         SolutionPath = root;
+        SolutionRoot = tree;
+        SolutionLoadError = null;
         ReloadSettings();
         return true;
     }
 
     /// <summary>
-    /// CIDE <c>LoadSolution</c> peel: keep file as <see cref="SolutionPath"/>;
-    /// workspace dir = directory of that file (same rule as <c>WorkspaceDirectoryFromSolutionPath</c>).
+    /// CIDE <c>LoadSolution</c> SSOT: <see cref="SolutionParser.Load"/> for file,
+    /// <see cref="FolderWorkspaceTreeBuilder"/> for directory.
     /// </summary>
     public bool SetSolutionOrProjectPath(string? path)
     {
@@ -66,9 +83,18 @@ internal sealed class GlassSession
         if (!File.Exists(trimmed))
             return false;
 
-        SolutionPath = trimmed;
-        // Same semantics as Features/Workspace/Application/WorkspaceDirectoryFromSolutionPath.Resolve
-        var ws = Path.GetDirectoryName(CanonicalFilePath.Normalize(trimmed)) ?? "";
+        var root = SolutionParser.Load(trimmed, out var err);
+        if (root is null)
+        {
+            SolutionLoadError = err ?? "Не удалось загрузить решение.";
+            return false;
+        }
+
+        SolutionPath = root.FullPath ?? trimmed;
+        SolutionRoot = root;
+        SolutionLoadError = null;
+        // Same as CIDE WorkspaceDirectoryFromSolutionPath.Resolve
+        var ws = Path.GetDirectoryName(CanonicalFilePath.Normalize(SolutionPath)) ?? "";
         if (string.IsNullOrWhiteSpace(ws) || !Directory.Exists(ws))
             return false;
         WorkspaceRoot = ws;
@@ -76,7 +102,6 @@ internal sealed class GlassSession
         return true;
     }
 
-    /// <summary>Apply live presentation latch topology (same patch idea as CIDE ApplyPresentationGlassPatch).</summary>
     public GlassPresentationLayout.Snapshot ApplyTopology(string? topology)
     {
         if (!string.IsNullOrWhiteSpace(topology))
@@ -86,10 +111,6 @@ internal sealed class GlassSession
         return Layout;
     }
 
-    /// <summary>
-    /// Keep session SSOT in sync with live single-TopLevel OneOf XOR
-    /// (<see cref="GlassHostWindows.PreferSurface"/>) so /status cols match paint.
-    /// </summary>
     public void PatchScanOneOfActive(string surface)
     {
         var s = surface.Trim().ToLowerInvariant();

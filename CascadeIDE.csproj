@@ -227,6 +227,11 @@
     <Compile Remove="Services\SettingsValidationSpecifications.cs" />
     <Compile Remove="Services\TomlTableMerge.cs" />
     <Compile Remove="Services\CanonicalFilePath.cs" />
+    <Compile Remove="Models\SolutionItem.cs" />
+    <Compile Remove="Services\WorkspaceIgnoreMatcher.cs" />
+    <Compile Remove="Features\Workspace\DataAcquisition\ProjectFileTreeBuilder.cs" />
+    <Compile Remove="Features\Workspace\DataAcquisition\SolutionParser.cs" />
+    <Compile Remove="Features\Workspace\DataAcquisition\FolderWorkspaceTreeBuilder.cs" />
     <Compile Remove="CasaField.Core.Bench\**\*.cs" />
     <!-- Внешний субмодуль/вендор: не компилировать в IDE (иначе sandbox с top-level Main перехватывает входную точку). -->
     <Compile Remove="externals\**\*.cs" />

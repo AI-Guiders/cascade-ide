@@ -3,13 +3,15 @@
 using System.IO;
 using System.Windows.Controls;
 using System.Windows.Input;
-using CascadeIDE.SoftOrgan;
+using CascadeIDE.Models;
 
 namespace CDP.GlassCockpit.Windows;
 
-/// <summary>Glass MFD SolutionExplorer — nested TreeView: projects + *.cs children (cap 200).</summary>
+/// <summary>Glass MFD SolutionExplorer — paints CIDE <see cref="SolutionItem"/> tree (SolutionParser SSOT).</summary>
 public partial class MainWindow
 {
+    const int MaxTreeNodes = 400;
+
     void RefreshSolutionExplorerTree()
     {
         if (MfdSolutionExplorerTree is null)
@@ -21,34 +23,48 @@ public partial class MainWindow
         if (!string.Equals(page, "SolutionExplorer", StringComparison.OrdinalIgnoreCase))
             return;
 
-        var projects = GlassSolutionExplorerGlance.TryLoadProjects(_session.WorkspaceRoot, _session.SolutionPath);
-        if (projects is null)
+        var root = _session.SolutionRoot;
+        if (root is null)
             return;
 
-        foreach (var project in projects)
+        var budget = MaxTreeNodes;
+        foreach (var child in root.Children)
         {
-            var projectPath = GlassSolutionExplorerGlance.TryResolveProjectPath(_session.WorkspaceRoot, project);
-            var item = new TreeViewItem
-            {
-                Header = project.Name,
-                Tag = projectPath,
-                IsExpanded = false,
-            };
-
-            if (!string.IsNullOrWhiteSpace(projectPath))
-            {
-                foreach (var csPath in GlassSolutionExplorerGlance.EnumerateProjectCsFiles(projectPath))
-                {
-                    item.Items.Add(new TreeViewItem
-                    {
-                        Header = Path.GetFileName(csPath),
-                        Tag = csPath,
-                    });
-                }
-            }
-
-            MfdSolutionExplorerTree.Items.Add(item);
+            if (budget <= 0)
+                break;
+            MfdSolutionExplorerTree.Items.Add(ToTreeItem(child, ref budget));
         }
+
+        // Standalone / flat: if root itself is the only useful node (rare), still show children of root.
+        if (MfdSolutionExplorerTree.Items.Count == 0 && root.Children.Count == 0
+            && !string.IsNullOrWhiteSpace(root.FullPath) && File.Exists(root.FullPath))
+        {
+            MfdSolutionExplorerTree.Items.Add(new TreeViewItem
+            {
+                Header = root.Title,
+                Tag = root.FullPath,
+            });
+        }
+    }
+
+    static TreeViewItem ToTreeItem(SolutionItem item, ref int budget)
+    {
+        budget--;
+        var node = new TreeViewItem
+        {
+            Header = item.Title,
+            Tag = item.FullPath,
+            IsExpanded = item.IsExpanded,
+        };
+
+        foreach (var child in item.Children)
+        {
+            if (budget <= 0)
+                break;
+            node.Items.Add(ToTreeItem(child, ref budget));
+        }
+
+        return node;
     }
 
     void MfdSolutionExplorerTree_OnMouseDoubleClick(object sender, MouseButtonEventArgs e)

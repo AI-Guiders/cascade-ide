@@ -3,6 +3,7 @@ using System.Xml.Linq;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
 using CascadeIDE.Models;
+using CascadeIDE.Services;
 using Microsoft.VisualStudio.SolutionPersistence.Model;
 using Microsoft.VisualStudio.SolutionPersistence.Serializer;
 using CascadeIDE.Contracts;
