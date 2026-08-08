@@ -3,7 +3,10 @@
 using System.Collections.ObjectModel;
 using System.Windows.Controls;
 using System.Windows.Input;
+using CascadeIDE.Features.Workspace.Application;
 using CascadeIDE.Intercom;
+using CascadeIDE.Models;
+using CascadeIDE.SoftOrgan;
 
 namespace CDP.GlassCockpit.Windows;
 
@@ -11,6 +14,7 @@ namespace CDP.GlassCockpit.Windows;
 public partial class MainWindow
 {
     readonly ObservableCollection<GlassSlashSuggestion> _slashSuggestions = new();
+    readonly WorkspaceFileIndex _slashFileIndex = new();
     int _slashIndex;
 
     void InitIntercomSlash()
@@ -19,6 +23,22 @@ public partial class MainWindow
         ComposerBox.TextChanged += ComposerBox_OnTextChanged;
         SlashList.PreviewKeyDown += SlashList_OnPreviewKeyDown;
         SlashList.MouseDoubleClick += (_, _) => CommitSlashSuggestion(run: true);
+    }
+
+    IReadOnlyList<(string InsertPath, string Help)> MatchWorkspaceFilesForSlash(string pathPrefix, int limit)
+    {
+        var root = _session.SolutionRoot;
+        if (root is null)
+            return [];
+
+        var roots = new ObservableCollection<SolutionItem>(GlassSolutionExplorerFace.ResolveItems(root));
+        if (roots.Count == 0)
+            return [];
+
+        _slashFileIndex.Invalidate(roots, _session.SolutionPath, _session.WorkspaceRoot ?? "");
+        return _slashFileIndex.Search(pathPrefix, limit)
+            .Select(m => (m.InsertPath, m.Help))
+            .ToList();
     }
 
     void ComposerBox_OnTextChanged(object sender, TextChangedEventArgs e)
@@ -36,7 +56,7 @@ public partial class MainWindow
             return;
         }
 
-        var hits = GlassSlashCatalog.Suggest(text);
+        var hits = GlassSlashCatalog.Suggest(text, MatchWorkspaceFilesForSlash);
         _slashSuggestions.Clear();
         foreach (var h in hits)
             _slashSuggestions.Add(h);

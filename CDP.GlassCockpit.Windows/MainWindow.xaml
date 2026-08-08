@@ -601,6 +601,8 @@
                    Width="0" Height="0"
                    SelectionChanged="MfdPages_OnSelectionChanged">
             <ListBoxItem Content="SolutionExplorer"/>
+            <ListBoxItem Content="FilesDesk"/>
+            <ListBoxItem Content="FindDesk"/>
             <ListBoxItem Content="Terminal" IsSelected="True"/>
             <ListBoxItem Content="Build"/>
             <ListBoxItem Content="Tests"/>
@@ -630,24 +632,59 @@
           <Grid>
             <TextBlock x:Name="MfdBody" TextWrapping="Wrap" FontSize="13" Foreground="#CCCCCC"
                        Margin="12" Text="Select an MFD page."/>
-            <TreeView x:Name="MfdSolutionExplorerTree" Visibility="Collapsed"
-                      Margin="8" FontSize="13" Background="Transparent" BorderThickness="0"
-                      Foreground="#E8E8E8"
-                      ItemContainerStyle="{StaticResource Glass.DarkTreeItem}"
-                      MouseDoubleClick="MfdSolutionExplorerTree_OnMouseDoubleClick">
-              <TreeView.Resources>
-                <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="#1A2830"/>
-                <SolidColorBrush x:Key="{x:Static SystemColors.HighlightTextBrushKey}" Color="#F0F0F0"/>
-                <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightBrushKey}" Color="#1A2830"/>
-                <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightTextBrushKey}" Color="#F0F0F0"/>
-                <SolidColorBrush x:Key="{x:Static SystemColors.ControlTextBrushKey}" Color="#E8E8E8"/>
-              </TreeView.Resources>
-              <TreeView.ItemTemplate>
-                <HierarchicalDataTemplate DataType="{x:Type models:SolutionItem}" ItemsSource="{Binding Children}">
-                  <TextBlock Text="{Binding Title}" Foreground="#E8E8E8"/>
-                </HierarchicalDataTemplate>
-              </TreeView.ItemTemplate>
-            </TreeView>
+            <DockPanel x:Name="MfdSolutionExplorerHost" Visibility="Collapsed" Margin="8">
+              <TextBox x:Name="MfdSolutionExplorerFilter" DockPanel.Dock="Top" Height="26" Margin="0,0,0,8"
+                       Padding="6,3" Background="#1A1A1A" Foreground="#EEE" BorderBrush="#3A3A3A"
+                       FontFamily="Consolas" FontSize="12"
+                       ToolTip="Filter solution tree"
+                       TextChanged="MfdSolutionExplorerFilter_OnTextChanged"/>
+              <TreeView x:Name="MfdSolutionExplorerTree"
+                        FontSize="13" Background="Transparent" BorderThickness="0"
+                        Foreground="#E8E8E8"
+                        ItemContainerStyle="{StaticResource Glass.DarkTreeItem}"
+                        MouseDoubleClick="MfdSolutionExplorerTree_OnMouseDoubleClick">
+                <TreeView.Resources>
+                  <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="#1A2830"/>
+                  <SolidColorBrush x:Key="{x:Static SystemColors.HighlightTextBrushKey}" Color="#F0F0F0"/>
+                  <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightBrushKey}" Color="#1A2830"/>
+                  <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightTextBrushKey}" Color="#F0F0F0"/>
+                  <SolidColorBrush x:Key="{x:Static SystemColors.ControlTextBrushKey}" Color="#E8E8E8"/>
+                </TreeView.Resources>
+                <TreeView.ItemTemplate>
+                  <HierarchicalDataTemplate DataType="{x:Type models:SolutionItem}" ItemsSource="{Binding Children}">
+                    <TextBlock Text="{Binding Title}" Foreground="#E8E8E8"/>
+                  </HierarchicalDataTemplate>
+                </TreeView.ItemTemplate>
+              </TreeView>
+            </DockPanel>
+            <DockPanel x:Name="MfdFilesDeskHost" Visibility="Collapsed" Margin="8">
+              <uikit:GlassSoftKeyBar x:Name="FilesDeskSoftKeys" DockPanel.Dock="Right"
+                                     Key1Text="Up" Key2Text="Open" Key3Text="List"/>
+              <ListBox x:Name="MfdFilesDeskList"
+                       FontSize="13" Background="Transparent" BorderThickness="0"
+                       Foreground="#E8E8E8"
+                       ItemContainerStyle="{StaticResource Glass.DarkListItem}">
+                <ListBox.ItemTemplate>
+                  <DataTemplate>
+                    <TextBlock Text="{Binding Line}" Foreground="#E8E8E8"/>
+                  </DataTemplate>
+                </ListBox.ItemTemplate>
+              </ListBox>
+            </DockPanel>
+            <DockPanel x:Name="MfdFindDeskHost" Visibility="Collapsed" Margin="8">
+              <TextBlock x:Name="FindDeskStatusLabel" DockPanel.Dock="Top" Text="find · idle"
+                         FontSize="11" Foreground="#888" Margin="0,0,0,6"/>
+              <ListBox x:Name="MfdFindDeskList"
+                       FontSize="13" Background="Transparent" BorderThickness="0"
+                       Foreground="#E8E8E8"
+                       ItemContainerStyle="{StaticResource Glass.DarkListItem}">
+                <ListBox.ItemTemplate>
+                  <DataTemplate>
+                    <TextBlock Text="{Binding Display}" Foreground="#E8E8E8"/>
+                  </DataTemplate>
+                </ListBox.ItemTemplate>
+              </ListBox>
+            </DockPanel>
             <ContentControl x:Name="MfdEditorHost" Visibility="Collapsed"/>
             <local:GlassMfdProcessHosts x:Name="MfdHosts"/>
           </Grid>

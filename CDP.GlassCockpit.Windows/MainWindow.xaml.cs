@@ -54,6 +54,9 @@ public partial class MainWindow : Window
         _latches.EclChanged += OnEclChanged;
         _latches.Start();
 
+        InitFilesDeskFace();
+        InitFindDeskFace();
+
         _surface = new GlassSurfaceCommandHub(this);
         _surface.Start();
 

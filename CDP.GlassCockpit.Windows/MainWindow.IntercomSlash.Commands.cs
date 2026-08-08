@@ -3,6 +3,7 @@
 using System.IO;
 using System.Windows;
 using CascadeIDE.Intercom;
+using Microsoft.Win32;
 
 namespace CDP.GlassCockpit.Windows;
 
@@ -39,6 +40,104 @@ public partial class MainWindow
         {
             var openBody = TryOpenPathSlash(argsTail);
             AppendSlashBubble(cmd.Path, openBody);
+            ComposerBox.Clear();
+            HideSlashPopup();
+            StatusText.Text = $"glass · slash · {cmd.Path} · {DateTime.Now:HH:mm:ss}";
+            return true;
+        }
+
+        if (cmd.Id == "file_open")
+        {
+            var fileOpenBody = TryOpenPathSlash(argsTail);
+            AppendSlashBubble(cmd.Path, fileOpenBody);
+            ComposerBox.Clear();
+            HideSlashPopup();
+            StatusText.Text = $"glass · slash · {cmd.Path} · {DateTime.Now:HH:mm:ss}";
+            return true;
+        }
+
+        if (cmd.Id == "file_pick")
+        {
+            TryPickOpenFile();
+            AppendSlashBubble(cmd.Path, "file pick · dialog");
+            ComposerBox.Clear();
+            HideSlashPopup();
+            StatusText.Text = $"glass · slash · {cmd.Path} · {DateTime.Now:HH:mm:ss}";
+            return true;
+        }
+
+        if (cmd.Id == "file_save")
+        {
+            TrySaveEditor();
+            AppendSlashBubble(cmd.Path, StatusText.Text ?? "file save");
+            ComposerBox.Clear();
+            HideSlashPopup();
+            return true;
+        }
+
+        if (cmd.Id == "folder_open")
+        {
+            TryPickOpenFolder();
+            AppendSlashBubble(cmd.Path, "folder open · dialog");
+            ComposerBox.Clear();
+            HideSlashPopup();
+            StatusText.Text = $"glass · slash · {cmd.Path} · {DateTime.Now:HH:mm:ss}";
+            return true;
+        }
+
+        if (cmd.Id == "solution_open")
+        {
+            TryPickOpenProject();
+            AppendSlashBubble(cmd.Path, "solution open · dialog");
+            ComposerBox.Clear();
+            HideSlashPopup();
+            StatusText.Text = $"glass · slash · {cmd.Path} · {DateTime.Now:HH:mm:ss}";
+            return true;
+        }
+
+        if (cmd.Id == "solution_load")
+        {
+            var loadBody = TrySolutionLoadSlash(argsTail);
+            AppendSlashBubble(cmd.Path, loadBody);
+            ComposerBox.Clear();
+            HideSlashPopup();
+            StatusText.Text = $"glass · slash · {cmd.Path} · {DateTime.Now:HH:mm:ss}";
+            return true;
+        }
+
+        if (cmd.Id == "solution_new")
+        {
+            var newBody = TrySolutionNewSlash(argsTail);
+            AppendSlashBubble(cmd.Path, newBody);
+            ComposerBox.Clear();
+            HideSlashPopup();
+            StatusText.Text = $"glass · slash · {cmd.Path} · {DateTime.Now:HH:mm:ss}";
+            return true;
+        }
+
+        if (cmd.Id == "solution_explorer_show")
+        {
+            SelectMfdPage("SolutionExplorer", sticky: true);
+            AppendSlashBubble(cmd.Path, "SolutionExplorer · shown");
+            ComposerBox.Clear();
+            HideSlashPopup();
+            StatusText.Text = $"glass · slash · {cmd.Path} · {DateTime.Now:HH:mm:ss}";
+            return true;
+        }
+
+        if (cmd.Id == "search")
+        {
+            if (string.IsNullOrWhiteSpace(argsTail))
+            {
+                AppendSlashBubble(cmd.Path, "usage: /search pattern");
+                ComposerBox.Clear();
+                HideSlashPopup();
+                StatusText.Text = $"glass · slash · {cmd.Path} · usage · {DateTime.Now:HH:mm:ss}";
+                return true;
+            }
+
+            var searchBody = RunWorkspaceSearchToFindDesk(argsTail);
+            AppendSlashBubble(cmd.Path, searchBody);
             ComposerBox.Clear();
             HideSlashPopup();
             StatusText.Text = $"glass · slash · {cmd.Path} · {DateTime.Now:HH:mm:ss}";
@@ -408,6 +507,95 @@ public partial class MainWindow
 
         OpenCodeFile(path, line);
         return line is int L ? $"opened {path}:{L}" : $"opened {path}";
+    }
+
+    string TrySolutionLoadSlash(string argsTail)
+    {
+        if (string.IsNullOrWhiteSpace(argsTail))
+            return "usage: /solution load path";
+
+        var path = argsTail.Trim().Trim('"');
+        if (!Path.IsPathRooted(path) && !string.IsNullOrWhiteSpace(_session.WorkspaceRoot))
+            path = Path.Combine(_session.WorkspaceRoot, path);
+
+        if (Directory.Exists(path))
+        {
+            ApplyWorkspaceRoot(path, "folder");
+            return $"loaded folder {path}";
+        }
+
+        if (!File.Exists(path))
+            return $"not found: {path}";
+
+        var ext = Path.GetExtension(path);
+        if (ext is ".sln" or ".slnx" or ".slnf" or ".csproj" or ".fsproj")
+        {
+            ApplyWorkspaceFromProjectPath(path);
+            return $"loaded {Path.GetFileName(path)}";
+        }
+
+        OpenCodeFile(path);
+        return $"opened file {path} (not a solution)";
+    }
+
+    string TrySolutionNewSlash(string argsTail)
+    {
+        var dlg = new OpenFolderDialog
+        {
+            Title = "New solution folder · Glass",
+            Multiselect = false,
+        };
+        if (!string.IsNullOrWhiteSpace(_session.WorkspaceRoot) && Directory.Exists(_session.WorkspaceRoot))
+            dlg.InitialDirectory = _session.WorkspaceRoot;
+
+        if (dlg.ShowDialog(this) != true || string.IsNullOrWhiteSpace(dlg.FolderName))
+            return "solution new · cancelled";
+
+        var folder = dlg.FolderName;
+        var template = string.IsNullOrWhiteSpace(argsTail) ? "sln" : argsTail.Trim().Split(' ', 2)[0];
+        try
+        {
+            var psi = new System.Diagnostics.ProcessStartInfo
+            {
+                FileName = "dotnet",
+                WorkingDirectory = folder,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                UseShellExecute = false,
+                CreateNoWindow = true
+            };
+            if (template.Equals("sln", StringComparison.OrdinalIgnoreCase)
+                || template.Equals("solution", StringComparison.OrdinalIgnoreCase))
+            {
+                psi.ArgumentList.Add("new");
+                psi.ArgumentList.Add("sln");
+            }
+            else
+            {
+                psi.ArgumentList.Add("new");
+                psi.ArgumentList.Add(template);
+                psi.ArgumentList.Add("-n");
+                psi.ArgumentList.Add(Path.GetFileName(folder.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar)));
+            }
+
+            using var p = System.Diagnostics.Process.Start(psi);
+            p?.WaitForExit(30_000);
+            var exit = p?.ExitCode ?? -1;
+            if (exit != 0)
+                return $"dotnet new {template} failed (exit {exit}) in {folder}";
+
+            var sln = Directory.EnumerateFiles(folder, "*.sln").FirstOrDefault()
+                      ?? Directory.EnumerateFiles(folder, "*.csproj").FirstOrDefault();
+            if (sln is not null)
+                ApplyWorkspaceFromProjectPath(sln);
+            else
+                ApplyWorkspaceRoot(folder, "folder");
+            return $"solution new · {template} · {folder}";
+        }
+        catch (Exception ex)
+        {
+            return $"solution new fail · {ex.Message}";
+        }
     }
 
     string TryAttachSlash(string argsTail)

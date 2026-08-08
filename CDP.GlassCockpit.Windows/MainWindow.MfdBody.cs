@@ -86,6 +86,8 @@ public partial class MainWindow
         RefreshMfdAiChatSettingsVisibility();
         RefreshMfdDebugVisibility();
         RefreshMfdWebAiVisibility();
+        RefreshFilesDeskVisibility();
+        RefreshFindDeskVisibility();
 
         if (MfdBody is null)
             return;
@@ -152,6 +154,31 @@ public partial class MainWindow
         {
             // Face = TreeView ItemsSource (RefreshSolutionExplorerTree) — never FormatMfdStub Avalonia peel.
             MfdBody.Text = "";
+            RefreshEicasHealth();
+            return;
+        }
+
+        if (string.Equals(page, "FilesDesk", StringComparison.OrdinalIgnoreCase))
+        {
+            // Face = FilesDesk list from files_desk latch (SE≠FM).
+            if (_filesDeskRows.Count > 0)
+                MfdBody.Text = "";
+            else if (SoftOrganMfdGlance.TryFormatFromOrganId("files_desk") is { } fmGlance)
+                MfdBody.Text = fmGlance;
+            else
+                MfdBody.Text = "files · idle — SoftKeys Up/Open/List · DoubleClick/Enter";
+            RefreshEicasHealth();
+            return;
+        }
+
+        if (string.Equals(page, "FindDesk", StringComparison.OrdinalIgnoreCase))
+        {
+            if (_findDeskRows.Count > 0)
+                MfdBody.Text = "";
+            else if (SoftOrganMfdGlance.TryFormatFromOrganId("find_desk") is { } findGlance)
+                MfdBody.Text = findGlance;
+            else
+                MfdBody.Text = "find · idle — /search pattern · DoubleClick hit opens";
             RefreshEicasHealth();
             return;
         }
