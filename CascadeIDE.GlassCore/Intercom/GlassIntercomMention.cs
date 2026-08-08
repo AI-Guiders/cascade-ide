@@ -190,7 +190,7 @@ public static partial class GlassIntercomMention
             ("@guest ", "@guest", "kind · external harness"),
             ("@citizen ", "@citizen", "kind · Glass Face"),
             ("@operator ", "@operator", "kind · Glass Face"),
-            ("@Kir ", "@Kir", "Who · guest cannon (Cursor)"),
+            // Canonical Cyrillic Who — Latin Kir is an alias (MentionsWho), not a second roster row.
             ("@Кир ", "@Кир", "Who · guest cannon (Cursor)"),
         };
 
@@ -198,18 +198,34 @@ public static partial class GlassIntercomMention
         {
             if (string.IsNullOrWhiteSpace(name))
                 continue;
-            var n = name.Trim();
+            var n = CanonicalWhoLabel(name.Trim());
             bag.Add(("@" + n + " ", "@" + n, seatTag + " · " + (NormalizeKind(kind) ?? "?")));
         }
 
         return bag
             .Where(x =>
                 needle.Length == 0
-                || x.Title.AsSpan(1).StartsWith(needle, StringComparison.OrdinalIgnoreCase))
-            .GroupBy(x => x.Insert, StringComparer.OrdinalIgnoreCase)
+                || x.Title.AsSpan(1).StartsWith(needle, StringComparison.OrdinalIgnoreCase)
+                || WhoAliasMatches(x.Title.AsSpan(1), needle))
+            .GroupBy(x => CanonicalWhoLabel(x.Title.TrimStart('@')), StringComparer.OrdinalIgnoreCase)
             .Select(g => g.First())
             .Take(Math.Max(1, limit))
             .ToList();
+    }
+
+    /// <summary>Latin <c>Kir</c> ≡ Cyrillic <c>Кир</c> for roster dedupe / Suggest.</summary>
+    public static string CanonicalWhoLabel(string name) =>
+        string.Equals(name, "Kir", StringComparison.OrdinalIgnoreCase) ? "Кир" : name;
+
+    static bool WhoAliasMatches(ReadOnlySpan<char> titleSansAt, string needle)
+    {
+        if (needle.Length == 0)
+            return true;
+        // Typing Latin Ki… should still hit canonical @Кир.
+        if (CanonicalWhoLabel(titleSansAt.ToString()).Equals("Кир", StringComparison.Ordinal)
+            && "Kir".StartsWith(needle, StringComparison.OrdinalIgnoreCase))
+            return true;
+        return false;
     }
 
     static bool IsMentionBodyChar(char c) =>

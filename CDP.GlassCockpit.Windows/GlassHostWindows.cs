@@ -10,7 +10,7 @@ namespace CDP.GlassCockpit.Windows;
 /// Secondary TopLevels for multi-screen presentation topologies (()()() / (P)(F)(M) / (P+F)(M) / (P/M)(F) …).
 /// Reuses GlassCore <see cref="PresentationTopologyFlags"/> — same rules as Avalonia CIDE hosts.
 /// </summary>
-internal sealed class GlassHostWindows : IDisposable
+internal sealed partial class GlassHostWindows : IDisposable
 {
     readonly MainWindow _main;
     ZoneHostWindow? _pfdHost;
@@ -268,7 +268,7 @@ internal sealed class GlassHostWindows : IDisposable
             _pfdHost = null;
         };
         pfd.Mount(zone);
-        PlaceSatellite(_pfdHost, screenHint: 0);
+        PlaceSatellite(_pfdHost, screenHint: 0, role: SatelliteRole.Pfd);
         _pfdHost.Show();
     }
 
@@ -292,7 +292,7 @@ internal sealed class GlassHostWindows : IDisposable
             _mfdHost = null;
         };
         mfd.Mount(zone);
-        PlaceSatellite(_mfdHost, screenHint: 1);
+        PlaceSatellite(_mfdHost, screenHint: 1, role: SatelliteRole.Mfd);
         _mfdHost.Show();
     }
 
@@ -337,7 +337,7 @@ internal sealed class GlassHostWindows : IDisposable
             _pmHost = null;
         };
         pm.Mount(split);
-        PlaceSatellite(_pmHost, screenHint: 1);
+        PlaceSatellite(_pmHost, screenHint: 1, role: SatelliteRole.Pm);
         _pmHost.Show();
     }
 
@@ -373,7 +373,7 @@ internal sealed class GlassHostWindows : IDisposable
         };
 
         RemountPmOneOfActive();
-        PlaceSatellite(_pmOneOfHost, screenHint: 1);
+        PlaceSatellite(_pmOneOfHost, screenHint: 1, role: SatelliteRole.Pm);
         _pmOneOfHost.Show();
     }
 
@@ -481,28 +481,6 @@ internal sealed class GlassHostWindows : IDisposable
             return;
         Grid.SetColumn(fe, column);
         _main.MainGrid.Children.Add(fe);
-    }
-
-    void PlaceSatellite(Window host, int screenHint)
-    {
-        host.Width = Math.Max(640, _main.Width * 0.7);
-        host.Height = Math.Max(480, _main.Height * 0.85);
-
-        var virtualLeft = SystemParameters.VirtualScreenLeft;
-        var virtualTop = SystemParameters.VirtualScreenTop;
-        var primaryW = SystemParameters.PrimaryScreenWidth;
-        var virtualW = SystemParameters.VirtualScreenWidth;
-
-        if (screenHint > 0 && virtualW > primaryW + 80)
-        {
-            host.Left = virtualLeft + primaryW + 24;
-            host.Top = virtualTop + 48;
-        }
-        else
-        {
-            host.Left = _main.Left + 36 + screenHint * 28;
-            host.Top = _main.Top + 36 + screenHint * 28;
-        }
     }
 
     public void Dispose()

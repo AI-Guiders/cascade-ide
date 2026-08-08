@@ -9,6 +9,8 @@ public partial class MainWindow : Window
     readonly GlassSurfaceCommandHub _surface;
     readonly GlassSession _session;
 
+    internal GlassSession Session => _session;
+
     public MainWindow()
     {
         InitializeComponent();

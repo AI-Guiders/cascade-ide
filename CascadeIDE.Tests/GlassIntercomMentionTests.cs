@@ -97,7 +97,11 @@ public sealed class GlassIntercomMentionTests
         Assert.Equal("Ki", prefix);
 
         var hits = GlassIntercomMention.Suggest("Ki", LiveRoster);
-        Assert.Contains(hits, h => h.Title.Equals("@Kir", StringComparison.OrdinalIgnoreCase));
+        Assert.Contains(hits, h => h.Title.Equals("@Кир", StringComparison.OrdinalIgnoreCase)
+            || h.Title.Equals("@Kir", StringComparison.OrdinalIgnoreCase));
+        Assert.Single(hits.Where(h =>
+            h.Title.Equals("@Кир", StringComparison.OrdinalIgnoreCase)
+            || h.Title.Equals("@Kir", StringComparison.OrdinalIgnoreCase)));
         Assert.DoesNotContain(hits, h => h.Title.Equals("@PM", StringComparison.OrdinalIgnoreCase));
     }
 
