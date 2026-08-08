@@ -5,6 +5,16 @@
              xmlns:wv2="clr-namespace:Microsoft.Web.WebView2.Wpf;assembly=Microsoft.Web.WebView2.Wpf"
              xmlns:local="clr-namespace:CDP.GlassCockpit.Windows"
              xmlns:uikit="clr-namespace:CDP.GlassCockpit.Windows.UiKit">
+  <UserControl.Resources>
+    <ResourceDictionary>
+      <ResourceDictionary.MergedDictionaries>
+        <ResourceDictionary Source="GlassDarkCockpit.xaml"/>
+        <ResourceDictionary Source="GlassChromeStyles.xaml"/>
+      </ResourceDictionary.MergedDictionaries>
+      <!-- Face: all MFD lists inherit light FG — no per-page whack-a-mole. -->
+      <Style TargetType="ListBoxItem" BasedOn="{StaticResource Glass.DarkListItem}"/>
+    </ResourceDictionary>
+  </UserControl.Resources>
   <Grid>
     <Border x:Name="MfdTerminalHost" Visibility="Collapsed" Background="#121212">
       <DockPanel Margin="8">

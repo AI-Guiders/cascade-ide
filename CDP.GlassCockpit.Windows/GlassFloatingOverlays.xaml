@@ -1,6 +1,15 @@
 <UserControl x:Class="CDP.GlassCockpit.Windows.GlassFloatingOverlays"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <UserControl.Resources>
+    <ResourceDictionary>
+      <ResourceDictionary.MergedDictionaries>
+        <ResourceDictionary Source="GlassDarkCockpit.xaml"/>
+        <ResourceDictionary Source="GlassChromeStyles.xaml"/>
+      </ResourceDictionary.MergedDictionaries>
+      <Style TargetType="ListBoxItem" BasedOn="{StaticResource Glass.DarkListItem}"/>
+    </ResourceDictionary>
+  </UserControl.Resources>
   <Grid>
     <Border x:Name="PaletteOverlay"
             Visibility="Collapsed"

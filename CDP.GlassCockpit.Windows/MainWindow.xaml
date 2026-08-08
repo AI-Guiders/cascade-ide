@@ -4,6 +4,7 @@
         xmlns:avalonEdit="http://icsharpcode.net/sharpdevelop/avalonedit"
         xmlns:uikit="clr-namespace:CDP.GlassCockpit.Windows.UiKit"
         xmlns:local="clr-namespace:CDP.GlassCockpit.Windows"
+        xmlns:models="clr-namespace:CascadeIDE.Models;assembly=CascadeIDE.GlassCore"
         Title="CDP GlassCockpit · Windows"
         Height="800" Width="1400"
         WindowState="Maximized"
@@ -16,6 +17,9 @@
         <ResourceDictionary Source="GlassDarkCockpit.xaml"/>
         <ResourceDictionary Source="GlassChromeStyles.xaml"/>
       </ResourceDictionary.MergedDictionaries>
+      <!-- Face: all cabin lists/trees inherit light FG — no per-page whack-a-mole. -->
+      <Style TargetType="ListBoxItem" BasedOn="{StaticResource Glass.DarkListItem}"/>
+      <Style TargetType="TreeViewItem" BasedOn="{StaticResource Glass.DarkTreeItem}"/>
     </ResourceDictionary>
   </Window.Resources>
 
@@ -131,11 +135,10 @@
                        ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                        MaxHeight="280">
                 <ListBox.ItemContainerStyle>
-                  <Style TargetType="ListBoxItem">
+                  <Style TargetType="ListBoxItem" BasedOn="{StaticResource Glass.DarkListItem}">
                     <Setter Property="Padding" Value="0"/>
                     <Setter Property="Margin" Value="0,0,0,4"/>
                     <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
-                    <Setter Property="Background" Value="Transparent"/>
                   </Style>
                 </ListBox.ItemContainerStyle>
                 <ListBox.ItemTemplate>
@@ -578,7 +581,7 @@
           <Border DockPanel.Dock="Top" Background="#1E1E1E" Padding="10,6" BorderBrush="#2A2A2A" BorderThickness="0,0,0,1">
             <TextBlock x:Name="MfdZoneTitle" Text="M · Terminal" FontWeight="SemiBold" FontSize="12" Foreground="{StaticResource Glass.FgTitle}"/>
           </Border>
-          <Border DockPanel.Dock="Top" Background="{StaticResource Glass.BgRaised}" Padding="8,6" BorderBrush="#2A2A2A" BorderThickness="0,0,0,1">
+          <Border x:Name="MfdEicasChrome" DockPanel.Dock="Top" Background="{StaticResource Glass.BgRaised}" Padding="8,6" BorderBrush="#2A2A2A" BorderThickness="0,0,0,1">
             <DockPanel>
               <uikit:GlassSoftKeyBar x:Name="EicasSoftKeys" DockPanel.Dock="Right"
                                      Key1Text="clr" Key2Text="ack" Key3Text="list"
@@ -629,8 +632,22 @@
                        Margin="12" Text="Select an MFD page."/>
             <TreeView x:Name="MfdSolutionExplorerTree" Visibility="Collapsed"
                       Margin="8" FontSize="13" Background="Transparent" BorderThickness="0"
-                      Foreground="#CCCCCC"
-                      MouseDoubleClick="MfdSolutionExplorerTree_OnMouseDoubleClick"/>
+                      Foreground="#E8E8E8"
+                      ItemContainerStyle="{StaticResource Glass.DarkTreeItem}"
+                      MouseDoubleClick="MfdSolutionExplorerTree_OnMouseDoubleClick">
+              <TreeView.Resources>
+                <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="#1A2830"/>
+                <SolidColorBrush x:Key="{x:Static SystemColors.HighlightTextBrushKey}" Color="#F0F0F0"/>
+                <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightBrushKey}" Color="#1A2830"/>
+                <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightTextBrushKey}" Color="#F0F0F0"/>
+                <SolidColorBrush x:Key="{x:Static SystemColors.ControlTextBrushKey}" Color="#E8E8E8"/>
+              </TreeView.Resources>
+              <TreeView.ItemTemplate>
+                <HierarchicalDataTemplate DataType="{x:Type models:SolutionItem}" ItemsSource="{Binding Children}">
+                  <TextBlock Text="{Binding Title}" Foreground="#E8E8E8"/>
+                </HierarchicalDataTemplate>
+              </TreeView.ItemTemplate>
+            </TreeView>
             <ContentControl x:Name="MfdEditorHost" Visibility="Collapsed"/>
             <local:GlassMfdProcessHosts x:Name="MfdHosts"/>
           </Grid>

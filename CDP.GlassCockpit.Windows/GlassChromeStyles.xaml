@@ -62,4 +62,19 @@
       </DataTrigger>
     </Style.Triggers>
   </Style>
+
+  <!-- Dark cabin lists/trees: system ControlText is near-black — unselected rows vanish without this. -->
+  <SolidColorBrush x:Key="Glass.DarkList.Highlight" Color="#1A2830"/>
+  <SolidColorBrush x:Key="Glass.DarkList.HighlightText" Color="#F0F0F0"/>
+  <Style x:Key="Glass.DarkListItem" TargetType="ListBoxItem">
+    <Setter Property="Foreground" Value="#E8E8E8"/>
+    <Setter Property="Background" Value="Transparent"/>
+    <Setter Property="Padding" Value="4,2"/>
+  </Style>
+  <Style x:Key="Glass.DarkTreeItem" TargetType="TreeViewItem">
+    <Setter Property="Foreground" Value="#E8E8E8"/>
+    <Setter Property="Background" Value="Transparent"/>
+    <Setter Property="Padding" Value="2,1"/>
+    <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}"/>
+  </Style>
 </ResourceDictionary>

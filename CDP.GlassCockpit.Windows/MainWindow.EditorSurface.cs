@@ -59,13 +59,20 @@ public partial class MainWindow
         var editorOnM = ReferenceEquals(EditorChrome.Parent, MfdEditorHost);
         var page = CurrentMfdPage();
         var showEditor = editorOnM && string.Equals(page, "Editor", StringComparison.OrdinalIgnoreCase);
+        // SE Face = TreeView always (empty placeholder or SolutionItem tree) — never Avalonia FormatMfdStub peel.
         var showSe = MfdSolutionExplorerTree is not null
-            && string.Equals(page, "SolutionExplorer", StringComparison.OrdinalIgnoreCase)
-            && MfdSolutionExplorerTree.Items.Count > 0;
+            && string.Equals(page, "SolutionExplorer", StringComparison.OrdinalIgnoreCase);
 
         MfdEditorHost.Visibility = showEditor ? Visibility.Visible : Visibility.Collapsed;
         if (MfdSolutionExplorerTree is not null)
             MfdSolutionExplorerTree.Visibility = showSe ? Visibility.Visible : Visibility.Collapsed;
+
+        // SE Face: SoftOrgan EICAS band (opening… + clr/ack/list) is not the file tree.
+        if (MfdEicasChrome is not null)
+        {
+            var onSe = string.Equals(page, "SolutionExplorer", StringComparison.OrdinalIgnoreCase);
+            MfdEicasChrome.Visibility = onSe ? Visibility.Collapsed : Visibility.Visible;
+        }
 
         var showTerminal = MfdTerminalHost is not null
             && string.Equals(page, "Terminal", StringComparison.OrdinalIgnoreCase);

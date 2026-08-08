@@ -144,9 +144,9 @@ public partial class MainWindow
             return;
         }
 
-        if (string.Equals(page, "SolutionExplorer", StringComparison.OrdinalIgnoreCase)
-            && MfdSolutionExplorerTree is { Items.Count: > 0 })
+        if (string.Equals(page, "SolutionExplorer", StringComparison.OrdinalIgnoreCase))
         {
+            // Face = TreeView ItemsSource (RefreshSolutionExplorerTree) — never FormatMfdStub Avalonia peel.
             MfdBody.Text = "";
             RefreshEicasHealth();
             return;
@@ -156,14 +156,6 @@ public partial class MainWindow
             && SoftOrganMfdGlance.TryFormatFromOrganId(organId) is { } glance)
         {
             MfdBody.Text = glance;
-            RefreshEicasHealth();
-            return;
-        }
-
-        if (string.Equals(page, "SolutionExplorer", StringComparison.OrdinalIgnoreCase)
-            && GlassSolutionExplorerGlance.TryFormat(_session.SolutionRoot, _session.SolutionPath) is { } seGlance)
-        {
-            MfdBody.Text = seGlance;
             RefreshEicasHealth();
             return;
         }
@@ -242,10 +234,6 @@ public partial class MainWindow
         {
             "Terminal" => FormatMfdStub("Terminal", "Glass redirected TextBox", "ConPTY later · go=sys"),
             "Build" => FormatMfdStub("Build", "Glass log + MSBuild ListBox", "parity Avalonia log MFD"),
-            "SolutionExplorer" => FormatMfdStub(
-                "SolutionExplorer",
-                "SolutionExplorerView",
-                "no solution/project · " + (_session.SolutionPath ?? _session.WorkspaceRoot ?? "?") + " · Ctrl+O → P"),
             "SemanticMap" => FormatMfdStub("SemanticMap", "Glass Skia + arch board", "ADR 0196 roles"),
             "Problems" => FormatMfdStub("Problems", "severity board · ERR/WARN/ALL + jump list", "Shared-SSOT quality"),
             "Tests" => FormatMfdStub("Tests", "Glass log + fail ListBox", "Avalonia TestsMfdPageView SSOT"),

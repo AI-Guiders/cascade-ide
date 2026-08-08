@@ -1,80 +1,104 @@
 #nullable enable
 
+using System.Collections;
 using System.IO;
 using System.Windows.Controls;
 using System.Windows.Input;
 using CascadeIDE.Models;
+using CascadeIDE.SoftOrgan;
 
 namespace CDP.GlassCockpit.Windows;
 
-/// <summary>Glass MFD SolutionExplorer — paints CIDE <see cref="SolutionItem"/> tree (SolutionParser SSOT).</summary>
+/// <summary>Glass MFD SolutionExplorer — ItemsSource = CIDE <see cref="SolutionItem"/> tree (SolutionParser SSOT).</summary>
 public partial class MainWindow
 {
-    const int MaxTreeNodes = 400;
-
     void RefreshSolutionExplorerTree()
     {
         if (MfdSolutionExplorerTree is null)
             return;
 
-        MfdSolutionExplorerTree.Items.Clear();
-
         var page = (MfdPages?.SelectedItem as ListBoxItem)?.Content?.ToString();
         if (!string.Equals(page, "SolutionExplorer", StringComparison.OrdinalIgnoreCase))
+        {
+            MfdSolutionExplorerTree.ItemsSource = null;
             return;
+        }
+
+        EnsureSolutionTreeForFace();
 
         var root = _session.SolutionRoot;
         if (root is null)
-            return;
-
-        var budget = MaxTreeNodes;
-        foreach (var child in root.Children)
         {
-            if (budget <= 0)
-                break;
-            MfdSolutionExplorerTree.Items.Add(ToTreeItem(child, ref budget));
+            // Face empty — still ItemsSource, never FormatMfdStub Avalonia peel.
+            MfdSolutionExplorerTree.ItemsSource = new[]
+            {
+                SolutionItem.CreateFolder("no solution · Ctrl+O → open .sln / folder")
+            };
+            return;
         }
 
-        // Standalone / flat: if root itself is the only useful node (rare), still show children of root.
-        if (MfdSolutionExplorerTree.Items.Count == 0 && root.Children.Count == 0
-            && !string.IsNullOrWhiteSpace(root.FullPath) && File.Exists(root.FullPath))
+        ExpandProjectRootsForFace(root);
+
+        // Standalone: single file node with no Children — bind the root itself.
+        if (root.Children.Count == 0
+            && !string.IsNullOrWhiteSpace(root.FullPath)
+            && File.Exists(root.FullPath))
         {
-            MfdSolutionExplorerTree.Items.Add(new TreeViewItem
-            {
-                Header = root.Title,
-                Tag = root.FullPath,
-            });
+            MfdSolutionExplorerTree.ItemsSource = new[] { root };
+            return;
+        }
+
+        MfdSolutionExplorerTree.ItemsSource = root.Children.Count > 0
+            ? root.Children
+            : new[] { root };
+    }
+
+    /// <summary>If session has workspace but no tree yet — load .sln/.csproj under it (same SSOT as open).</summary>
+    void EnsureSolutionTreeForFace()
+    {
+        if (_session.SolutionRoot is not null)
+            return;
+
+        var hint = GlassSolutionExplorerGlance.TryResolveSlnPath(_session.WorkspaceRoot);
+        if (hint is null)
+            return;
+
+        _ = _session.SetSolutionOrProjectPath(hint);
+    }
+
+    static void ExpandProjectRootsForFace(SolutionItem root)
+    {
+        foreach (var child in root.Children)
+        {
+            if (child.Children.Count > 0)
+                child.IsExpanded = true;
         }
     }
 
-    static TreeViewItem ToTreeItem(SolutionItem item, ref int budget)
+    static bool SolutionExplorerHasRows(TreeView? tree)
     {
-        budget--;
-        var node = new TreeViewItem
-        {
-            Header = item.Title,
-            Tag = item.FullPath,
-            IsExpanded = item.IsExpanded,
-        };
+        if (tree?.ItemsSource is not IEnumerable src)
+            return tree is { Items.Count: > 0 };
 
-        foreach (var child in item.Children)
+        var e = src.GetEnumerator();
+        try
         {
-            if (budget <= 0)
-                break;
-            node.Items.Add(ToTreeItem(child, ref budget));
+            return e.MoveNext();
         }
-
-        return node;
+        finally
+        {
+            (e as IDisposable)?.Dispose();
+        }
     }
 
     void MfdSolutionExplorerTree_OnMouseDoubleClick(object sender, MouseButtonEventArgs e)
     {
-        if (MfdSolutionExplorerTree?.SelectedItem is not TreeViewItem { Tag: string path }
-            || string.IsNullOrWhiteSpace(path)
-            || !File.Exists(path))
+        if (MfdSolutionExplorerTree?.SelectedItem is not SolutionItem item
+            || string.IsNullOrWhiteSpace(item.FullPath)
+            || !File.Exists(item.FullPath))
             return;
 
-        OpenCodeFile(path);
+        OpenCodeFile(item.FullPath);
         e.Handled = true;
     }
 }
