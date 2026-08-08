@@ -6,7 +6,7 @@ using CascadeIDE.SoftOrgan;
 namespace CDP.GlassCockpit.Windows;
 
 /// <summary>MFD page select + latch glance / stub body (CabinGlass + SoftOrganMfdGlance).
-/// Editor: AvalonEdit mounts on MfdEditorHost when Forward=intercom (ADR 0120); stub only if editor stays on Forward.</summary>
+/// Editor Face: AvalonEdit always on MfdEditorHost when page=Editor (GlassEditorFace) — never FormatMfdStub peel.</summary>
 public partial class MainWindow
 {
     /// <summary>Last presentation/chord/SoftOrgan-M instrument page — seats P/F republish must not yank it.</summary>
@@ -29,7 +29,12 @@ public partial class MainWindow
             _hosts.PreferPmOneOf(oneOf);
 
         if (string.Equals(CurrentMfdPage(), trimmed, StringComparison.OrdinalIgnoreCase))
+        {
+            // Re-select Editor while AvalonEdit still on Forward → force Face mount (no SelectionChanged).
+            if (GlassEditorFace.PreferEditorHost(trimmed))
+                RefreshMfdEditorVisibility();
             return;
+        }
 
         foreach (var item in MfdPages.Items)
         {
@@ -86,8 +91,7 @@ public partial class MainWindow
             return;
 
         var page = CurrentMfdPage();
-        if (string.Equals(page, "Editor", StringComparison.OrdinalIgnoreCase)
-            && ReferenceEquals(EditorChrome.Parent, MfdEditorHost))
+        if (GlassEditorFace.PreferEditorHost(page))
         {
             MfdBody.Text = "";
             RefreshEicasHealth();
@@ -248,7 +252,7 @@ public partial class MainWindow
             "EnvironmentReadiness" => FormatMfdStub("EnvironmentReadiness", "Glass env probe glance", "Avalonia EnvReady SSOT"),
             "Events" => FormatMfdStub("Events", "Glass latch/catalog glance", "Avalonia EventsMFD SSOT"),
             "Hypotheses" => FormatMfdStub("Hypotheses", "Glass JSON status glance", "Avalonia Hypotheses SSOT"),
-            "Editor" => FormatMfdStub("Editor", "on Forward", "primary_work_surface=editor"),
+            // Editor Face: PreferEditorHost early-return above — never Avalonia peel.
             "Chat" => GlassIntercomPresence.FormatChatMfdGlance(),
             "FlightDataStorage" or "Fds" => FormatMfdStub("FlightDataStorage", "FDS card deck · PLAN/SHARE/PRESSURE/WAKE", "Shared-SSOT shelf instrument"),
             "DomainBoard" or "Domain" => FormatMfdStub("DomainBoard", "domain card deck · .cdp/domain", "SoftOrgan ownership instrument"),

@@ -33,7 +33,7 @@ public partial class MainWindow
         _editorTextMate = null;
     }
 
-    void MountEditor(ContentControl host)
+    void MountEditor(ContentControl host, bool refreshVisibility = true)
     {
         if (ReferenceEquals(EditorChrome.Parent, host))
             return;
@@ -49,7 +49,8 @@ public partial class MainWindow
         }
 
         host.Content = EditorChrome;
-        RefreshMfdEditorVisibility();
+        if (refreshVisibility)
+            RefreshMfdEditorVisibility();
     }
 
     void RefreshMfdEditorVisibility()
@@ -57,9 +58,23 @@ public partial class MainWindow
         if (MfdEditorHost is null || MfdBody is null)
             return;
 
-        var editorOnM = ReferenceEquals(EditorChrome.Parent, MfdEditorHost);
         var page = CurrentMfdPage();
-        var showEditor = editorOnM && string.Equals(page, "Editor", StringComparison.OrdinalIgnoreCase);
+        // Editor Face: MFD page=Editor always shows AvalonEdit on M — never FormatMfdStub peel.
+        if (GlassEditorFace.PreferEditorHost(page))
+        {
+            if (!ReferenceEquals(EditorChrome.Parent, MfdEditorHost))
+                MountEditor(MfdEditorHost, refreshVisibility: false);
+        }
+        else if (ReferenceEquals(EditorChrome.Parent, MfdEditorHost)
+                 && !GlassEditorFace.PreferParkOnMfdWhenReleased(_session.IsIntercomForward)
+                 && ForwardEditorHost is not null)
+        {
+            // Face released + Forward owns primary → restore AvalonEdit to Forward (ADR 0120).
+            MountEditor(ForwardEditorHost, refreshVisibility: false);
+        }
+
+        var editorOnM = ReferenceEquals(EditorChrome.Parent, MfdEditorHost);
+        var showEditor = editorOnM && GlassEditorFace.PreferEditorHost(page);
         // SE Face = TreeView always via GlassSolutionExplorerFace.PreferTreeHost — never Avalonia FormatMfdStub peel.
         var showSe = MfdSolutionExplorerTree is not null
             && GlassSolutionExplorerFace.PreferTreeHost(page);

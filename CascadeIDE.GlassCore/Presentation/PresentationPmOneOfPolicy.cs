@@ -36,7 +36,8 @@ public static class PresentationPmOneOfPolicy
             "semanticmap" or "relatedfiles" or "correspondence" or "markdownpreview"
                 => "world",
             "chat" => "intercom",
-            "editor" => "work",
+            // MFD Editor Face paints on M (AvalonEdit host) — not Forward "work" (that stuck OneOf on F·Intercom).
+            "editor" => "m",
             _ => null,
         };
     }

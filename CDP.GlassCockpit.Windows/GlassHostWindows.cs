@@ -192,13 +192,7 @@ internal sealed class GlassHostWindows : IDisposable
         {
             if (kind is not (PresentationAnchorKind.Pfd or PresentationAnchorKind.Mfd or PresentationAnchorKind.Forward))
                 return;
-            if (GlassPresentationLayout.ZoneForSurface(_pmOneOfActiveSurface) != kind)
-            {
-                var match = _pmOneOfStack.FirstOrDefault(s => GlassPresentationLayout.ZoneForSurface(s) == kind);
-                if (match is not null)
-                    _pmOneOfActiveSurface = match;
-            }
-
+            AlignActiveSurfaceToZone(kind);
             _pmOneOfActive = kind;
             ApplyMainScanOneOfColumns();
             return;
@@ -207,18 +201,34 @@ internal sealed class GlassHostWindows : IDisposable
         if (kind is not (PresentationAnchorKind.Pfd or PresentationAnchorKind.Mfd))
             return;
         // Keep surface label aligned when called from MFD page path.
-        if (GlassPresentationLayout.ZoneForSurface(_pmOneOfActiveSurface) != kind)
-        {
-            var match = _pmOneOfStack.FirstOrDefault(s => GlassPresentationLayout.ZoneForSurface(s) == kind);
-            if (match is not null)
-                _pmOneOfActiveSurface = match;
-        }
+        AlignActiveSurfaceToZone(kind);
 
         _pmOneOfActive = kind;
         if (!IsPmOneOfActive && _pmOneOfHost is null)
             return;
         if (IsPmOneOfActive)
             RemountPmOneOfActive();
+    }
+
+    void AlignActiveSurfaceToZone(PresentationAnchorKind kind)
+    {
+        if (GlassPresentationLayout.ZoneForSurface(_pmOneOfActiveSurface) == kind)
+            return;
+
+        var match = _pmOneOfStack.FirstOrDefault(s => GlassPresentationLayout.ZoneForSurface(s) == kind);
+        if (match is not null)
+        {
+            _pmOneOfActiveSurface = match;
+            return;
+        }
+
+        // Stack may omit zone token — still XOR-paint the zone (MFD Editor Face / chords).
+        _pmOneOfActiveSurface = kind switch
+        {
+            PresentationAnchorKind.Pfd => "p",
+            PresentationAnchorKind.Mfd => "m",
+            _ => "f",
+        };
     }
 
     void ApplyMainScanOneOfColumns()
