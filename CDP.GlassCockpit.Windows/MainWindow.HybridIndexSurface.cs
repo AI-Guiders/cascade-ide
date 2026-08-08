@@ -93,11 +93,23 @@ public partial class MainWindow
         StatusText.Text = $"glass · hci · {Path.GetFileName(path)}";
     }
 
+    /// <summary>SoftFL: HCI status always paints short workspace leaf so fixture vs repo scope is Face-honest.</summary>
+    string ShortHybridWs()
+    {
+        var ws = _session.WorkspaceRoot;
+        if (string.IsNullOrWhiteSpace(ws))
+            return "—";
+        return Path.GetFileName(ws.TrimEnd('\\', '/'));
+    }
+
     void RunHybridIndexSearch()
     {
         var q = HybridIndexSearchBox?.Text ?? "";
+        // Workspace-root DB key (same as MCP without solution_path). Do not pass .sln —
+        // HybridIndex Core scopes a separate DB per (workspace, solution_path).
         var result = GlassHybridIndexStatusProbe.TrySearch(_session.WorkspaceRoot, q);
         _hybridScopeLines.Clear();
+        var wsTag = ShortHybridWs();
 
         if (!string.IsNullOrWhiteSpace(result.Error))
         {
@@ -105,7 +117,7 @@ public partial class MainWindow
                 HybridScopeList.DisplayMemberPath = string.Empty;
             _hybridScopeLines.Add($"search · {result.Error}");
             if (HybridIndexStatusLabel is not null)
-                HybridIndexStatusLabel.Text = $"hci · search · {result.Error}";
+                HybridIndexStatusLabel.Text = $"hci · search · {result.Error} · ws={wsTag}";
             return;
         }
 
@@ -113,7 +125,7 @@ public partial class MainWindow
         {
             if (HybridScopeList is not null)
                 HybridScopeList.DisplayMemberPath = string.Empty;
-            _hybridScopeLines.Add("search · 0 hits");
+            _hybridScopeLines.Add($"search · 0 hits · ws={wsTag}");
         }
         else
         {
@@ -124,7 +136,8 @@ public partial class MainWindow
         }
 
         if (HybridIndexStatusLabel is not null)
-            HybridIndexStatusLabel.Text = $"hci · search · {result.Hits.Count} hits · {q.Trim()}";
+            HybridIndexStatusLabel.Text =
+                $"hci · search · {result.Hits.Count} hits · {q.Trim()} · ws={wsTag}";
     }
 
     void StartHybridIndexReindex()
@@ -140,9 +153,10 @@ public partial class MainWindow
             return;
         }
 
+        var wsTag = ShortHybridWs();
         _hybridReindexBusy = true;
         if (HybridIndexStatusLabel is not null)
-            HybridIndexStatusLabel.Text = "hci · reindex · running…";
+            HybridIndexStatusLabel.Text = $"hci · reindex · running… · ws={wsTag}";
 
         _ = Task.Run(() =>
         {
@@ -152,11 +166,11 @@ public partial class MainWindow
                 _hybridReindexBusy = false;
                 if (HybridIndexStatusLabel is not null)
                     HybridIndexStatusLabel.Text = result.Ok
-                        ? $"hci · {result.Message}"
-                        : $"hci · reindex · fail · {result.Message}";
+                        ? $"hci · {result.Message} · ws={wsTag}"
+                        : $"hci · reindex · fail · {result.Message} · ws={wsTag}";
                 StatusText.Text = result.Ok
-                    ? $"glass · hci · {result.Message}"
-                    : $"glass · hci · reindex fail";
+                    ? $"glass · hci · {result.Message} · ws={wsTag}"
+                    : $"glass · hci · reindex fail · ws={wsTag}";
                 RefreshHybridIndexBody(forceScopeLines: true);
             });
         });
@@ -210,9 +224,10 @@ public partial class MainWindow
 
         if (HybridIndexStatusLabel is not null && !_hybridReindexBusy && !keepSearchHits)
         {
+            var wsTag = ShortHybridWs();
             HybridIndexStatusLabel.Text = live is null
-                ? "hci · unavailable"
-                : $"hci · map · {_hybridGraph.Nodes.Count}n/{_hybridGraph.Edges.Count}e · docs {live.Value.DocumentCount}";
+                ? $"hci · unavailable · ws={wsTag}"
+                : $"hci · map · {_hybridGraph.Nodes.Count}n/{_hybridGraph.Edges.Count}e · docs {live.Value.DocumentCount} · ws={wsTag}";
         }
     }
 
