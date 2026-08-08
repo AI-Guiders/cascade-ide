@@ -36,6 +36,10 @@ public partial class MainWindow
                         SelectMfdPage(view.MfdPage, sticky: true);
                     else if (string.Equals(view.FaceSeat, "p", StringComparison.OrdinalIgnoreCase))
                         _hosts.PreferPmOneOf(PresentationAnchorKind.Pfd);
+
+                    // Citizen/agent browser open|search → navigate human WebView2 Face (lynx stays peer text).
+                    if (view.WebAiUrl is { Length: > 0 })
+                        RunWebAiPortal(view.WebAiUrl);
                 }
 
                 UpdateMfdBody();

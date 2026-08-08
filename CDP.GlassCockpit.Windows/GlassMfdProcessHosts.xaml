@@ -494,7 +494,7 @@
           <TextBox x:Name="WebAiUrl" Padding="6,4"
                    Background="#1A1A1A" Foreground="#EEE" BorderBrush="#3A3A3A"
                    FontFamily="Consolas" FontSize="12"
-                   Text="https://chatgpt.com"/>
+                   Text="https://duckduckgo.com"/>
         </DockPanel>
         <TextBlock x:Name="WebAiStatusLabel" DockPanel.Dock="Bottom" Margin="0,6,0,0"
                    Text="webai · WebView2 · idle"

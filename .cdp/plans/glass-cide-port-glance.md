@@ -8,8 +8,8 @@ Glance · CIDE SSOT · **not** Seeming-Done · **цейтнот**
 ## Honest status
 | Claim | Truth |
 |-------|--------|
-| Glass Done PreCondition | **STAMPED** 2026-08-08 · dig=PreCondition A/B + ALL SURFACES + Face Done · PNG `tmp-glass-shots/glass-done-precondition-20260808.png` |
-| Citizen Done toward 15.08 | **STAMPED** 2026-08-08 full-ready · invite_ready · SoftFL invent REJECT · lived dialog+vision · PNG `tmp-glass-shots/citizen-done-fullready-20260808.png` |
+| Glass Done PreCondition | **REOPENED** 2026-08-08 throw-Cursor honesty · prior STAMPED half-a vs max DoD standalone without Cursor · sit-internet Face gap |
+| Citizen Done toward 15.08 | **REOPENED** 2026-08-08 · prior full-ready stamp seeming vs throw-Cursor · peer sit-internet missing |
 | ALL SURFACES ADOPTED | **Done** 2026-08-08 · Themes Dig REJECT · Intercom relate Dig REJECT (Avalonia SSOT) · densest Live families shipped |
 | nested[axb] densest wave | **shipped** Open·GoTo·Attach·Git·Build·Debug · Themes Dig REJECT · Intercom relate Dig REJECT |
 | SoftOrgan Face Done | Soft:QRH cards VERIFY · dig=PNG + operator in-thread steer nested |

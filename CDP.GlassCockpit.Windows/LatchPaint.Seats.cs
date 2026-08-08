@@ -15,6 +15,7 @@ internal static partial class LatchPaint
         string? MOrgan,
         bool ShowFace,
         string? FaceSeat,
+        string? WebAiUrl,
         string StatusLine);
 
     /// <summary>Null when schema/origin gate fails or JSON is unreadable.</summary>
@@ -38,15 +39,20 @@ internal static partial class LatchPaint
             var faceSeat = Prop(root, "face_seat");
             if (string.IsNullOrWhiteSpace(faceSeat))
                 faceSeat = null;
+            var webAi = Prop(root, "web_ai_url");
+            if (string.IsNullOrWhiteSpace(webAi))
+                webAi = null;
 
             var faceBit = showFace ? " · show_face" : "";
+            var navBit = webAi is null ? "" : " · webai_nav";
             return new SeatsView(
                 string.IsNullOrWhiteSpace(mfd) ? null : mfd.Trim(),
                 chrome,
                 mOrgan,
                 showFace,
                 faceSeat,
-                $"seats · {mfd ?? "—"} · {(chrome ?? "—")}{faceBit}");
+                webAi?.Trim(),
+                $"seats · {mfd ?? "—"} · {(chrome ?? "—")}{faceBit}{navBit}");
         }
         catch
         {
