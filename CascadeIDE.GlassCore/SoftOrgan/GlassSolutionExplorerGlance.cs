@@ -68,7 +68,10 @@ public static class GlassSolutionExplorerGlance
 
             return Directory.EnumerateFiles(root, "*.sln", SearchOption.TopDirectoryOnly)
                 .OrderBy(static p => p, StringComparer.OrdinalIgnoreCase)
-                .FirstOrDefault();
+                .FirstOrDefault()
+                ?? Directory.EnumerateFiles(root, "*.csproj", SearchOption.TopDirectoryOnly)
+                    .OrderBy(static p => p, StringComparer.OrdinalIgnoreCase)
+                    .FirstOrDefault();
         }
         catch
         {

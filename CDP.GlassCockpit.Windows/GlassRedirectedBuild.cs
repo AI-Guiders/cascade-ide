@@ -26,14 +26,13 @@ internal sealed class GlassRedirectedBuild : IDisposable
 
     public string DisplayTarget { get; private set; } = "?";
 
-    public void Start(string workingDirectory)
+    public void Start(string workingDirectory, string? solutionOrProjectPath = null)
     {
         if (IsRunning)
             return;
 
         var cwd = ResolveCwd(workingDirectory);
-        var target = GlassSolutionExplorerGlance.TryResolveSlnPath(cwd)
-                     ?? Path.Combine(cwd, "CascadeIDE.sln");
+        var target = ResolveBuildTarget(cwd, solutionOrProjectPath);
         DisplayTarget = Path.GetFileName(target);
 
         var startInfo = new ProcessStartInfo
@@ -175,4 +174,30 @@ internal sealed class GlassRedirectedBuild : IDisposable
 
         return Environment.CurrentDirectory;
     }
+
+    /// <summary>Prefer open <paramref name="solutionOrProjectPath"/> (CIDE session SSOT), then glance sln under cwd.</summary>
+    static string ResolveBuildTarget(string cwd, string? solutionOrProjectPath)
+    {
+        if (!string.IsNullOrWhiteSpace(solutionOrProjectPath))
+        {
+            try
+            {
+                var full = Path.GetFullPath(solutionOrProjectPath.Trim());
+                if (File.Exists(full) && IsBuildableProjectFile(full))
+                    return full;
+            }
+            catch
+            {
+            }
+        }
+
+        return GlassSolutionExplorerGlance.TryResolveSlnPath(cwd)
+               ?? Path.Combine(cwd, "CascadeIDE.sln");
+    }
+
+    static bool IsBuildableProjectFile(string path) =>
+        path.EndsWith(".sln", StringComparison.OrdinalIgnoreCase)
+        || path.EndsWith(".slnx", StringComparison.OrdinalIgnoreCase)
+        || path.EndsWith(".csproj", StringComparison.OrdinalIgnoreCase)
+        || path.EndsWith(".fsproj", StringComparison.OrdinalIgnoreCase);
 }

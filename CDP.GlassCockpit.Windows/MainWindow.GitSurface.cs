@@ -133,6 +133,32 @@ public partial class MainWindow
         }
     }
 
+    internal void GitFetch_OnClick(object sender, RoutedEventArgs e)
+    {
+        var cwd = _session.WorkspaceRoot ?? Environment.CurrentDirectory;
+        if (GitStatusLabel is not null)
+            GitStatusLabel.Text = "git · fetch…";
+        var r = GlassGitProcess.Run(cwd, "fetch", "--prune");
+        SetGitOutput(string.IsNullOrWhiteSpace(r.Output) ? (r.Ok ? "(fetched)" : "fetch failed") : r.Output);
+        if (GitStatusLabel is not null)
+            GitStatusLabel.Text = r.Ok ? "git · fetched" : "git · fetch fail";
+        if (r.Ok)
+            StartGitRefresh();
+    }
+
+    internal void GitPull_OnClick(object sender, RoutedEventArgs e)
+    {
+        var cwd = _session.WorkspaceRoot ?? Environment.CurrentDirectory;
+        if (GitStatusLabel is not null)
+            GitStatusLabel.Text = "git · pull…";
+        var r = GlassGitProcess.Run(cwd, "pull", "--ff-only");
+        SetGitOutput(string.IsNullOrWhiteSpace(r.Output) ? (r.Ok ? "(pulled)" : "pull failed") : r.Output);
+        if (GitStatusLabel is not null)
+            GitStatusLabel.Text = r.Ok ? "git · pulled" : "git · pull fail";
+        if (r.Ok)
+            StartGitRefresh();
+    }
+
     internal void GitPush_OnClick(object sender, RoutedEventArgs e)
     {
         var cwd = _session.WorkspaceRoot ?? Environment.CurrentDirectory;

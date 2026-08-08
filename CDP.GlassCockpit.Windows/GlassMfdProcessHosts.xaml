@@ -93,6 +93,10 @@
                     Background="#2A2A2A" Foreground="#CCC" BorderBrush="#3A3A3A"/>
             <Button x:Name="GitCommitBtn" Content="commit" Padding="8,2" Margin="0,0,6,0"
                     Background="#2A2A2A" Foreground="#CCC" BorderBrush="#3A3A3A"/>
+            <Button x:Name="GitFetchBtn" Content="fetch" Padding="8,2" Margin="0,0,6,0"
+                    Background="#2A2A2A" Foreground="#CCC" BorderBrush="#3A3A3A"/>
+            <Button x:Name="GitPullBtn" Content="pull" Padding="8,2" Margin="0,0,6,0"
+                    Background="#2A2A2A" Foreground="#CCC" BorderBrush="#3A3A3A"/>
             <Button x:Name="GitPushBtn" Content="push" Padding="8,2" Margin="0,0,6,0"
                     Background="#2A2A2A" Foreground="#CCC" BorderBrush="#3A3A3A"/>
             <Button x:Name="GitSubmoduleBtn" Content="submodule" Padding="8,2" Margin="0,0,6,0"
@@ -423,6 +427,8 @@
       <DockPanel Margin="8">
         <DockPanel DockPanel.Dock="Top" Margin="0,0,0,6">
           <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
+            <Button x:Name="DebugLaunchBtn" Content="▶▶" Padding="8,2" Margin="0,0,4,0" ToolTip="Launch (debug_launch latch)"
+                    Background="#2A2A2A" Foreground="#CCC" BorderBrush="#3A3A3A"/>
             <Button x:Name="DebugContinueBtn" Content="▶" Padding="8,2" Margin="0,0,4,0" ToolTip="Continue (F5)"
                     Background="#2A2A2A" Foreground="#CCC" BorderBrush="#3A3A3A"/>
             <Button x:Name="DebugStepIntoBtn" Content="↓" Padding="8,2" Margin="0,0,4,0" ToolTip="Step into"

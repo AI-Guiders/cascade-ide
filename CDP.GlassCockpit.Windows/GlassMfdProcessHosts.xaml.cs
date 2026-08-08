@@ -25,6 +25,8 @@ public partial class GlassMfdProcessHosts : UserControl
         GitStageBtn.Click += host.GitStage_OnClick;
         GitUnstageBtn.Click += host.GitUnstage_OnClick;
         GitCommitBtn.Click += host.GitCommit_OnClick;
+        GitFetchBtn.Click += host.GitFetch_OnClick;
+        GitPullBtn.Click += host.GitPull_OnClick;
         GitPushBtn.Click += host.GitPush_OnClick;
         GitSubmoduleBtn.Click += host.GitSubmodule_OnClick;
         GitCancelBtn.Click += host.GitCancel_OnClick;
@@ -54,6 +56,7 @@ public partial class GlassMfdProcessHosts : UserControl
         MarkdownRefreshBtn.Click += host.MarkdownRefresh_OnClick;
         AiChatSettingsRefreshBtn.Click += host.AiChatSettingsRefresh_OnClick;
         DebugRefreshBtn.Click += host.DebugRefresh_OnClick;
+        DebugLaunchBtn.Click += host.DebugLaunch_OnClick;
         DebugContinueBtn.Click += host.DebugContinue_OnClick;
         DebugStepIntoBtn.Click += host.DebugStepInto_OnClick;
         DebugStepOverBtn.Click += host.DebugStepOver_OnClick;

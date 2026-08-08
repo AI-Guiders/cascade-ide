@@ -40,6 +40,9 @@ public partial class MainWindow
 
     internal void DebugRefresh_OnClick(object sender, RoutedEventArgs e) => RefreshDebugSpectator();
 
+    internal void DebugLaunch_OnClick(object sender, RoutedEventArgs e) =>
+        SendDapCommand(GlassDapCommandBridge.Launch);
+
     internal void DebugContinue_OnClick(object sender, RoutedEventArgs e) =>
         SendDapCommand(GlassDapCommandBridge.Continue);
 

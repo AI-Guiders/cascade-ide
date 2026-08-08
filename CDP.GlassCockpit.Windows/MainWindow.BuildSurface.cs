@@ -109,7 +109,9 @@ public partial class MainWindow
         {
             if (BuildStatusLabel is not null)
                 BuildStatusLabel.Text = "redirected · building";
-            _buildRunner.Start(_session.WorkspaceRoot ?? Environment.CurrentDirectory);
+            _buildRunner.Start(
+                _session.WorkspaceRoot ?? Environment.CurrentDirectory,
+                _session.SolutionPath);
             if (BuildStatusLabel is not null)
                 BuildStatusLabel.Text = $"redirected · {_buildRunner.DisplayTarget}";
         }

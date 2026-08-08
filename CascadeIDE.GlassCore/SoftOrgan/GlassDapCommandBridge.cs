@@ -17,6 +17,8 @@ public static class GlassDapCommandBridge
     public const string StepOver = "step_over";
     public const string StepOut = "step_out";
     public const string Variables = "variables";
+    /// <summary>CIDE <c>debug_launch</c> / habitat DAP start — Glass publishes; CDP consumes.</summary>
+    public const string Launch = "launch";
 
     static readonly JsonSerializerOptions WriteOpts = new()
     {
