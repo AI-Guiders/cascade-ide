@@ -72,5 +72,37 @@
         </DockPanel>
       </Border>
     </Border>
+
+    <Border x:Name="OpenFamilyOverlay"
+            Visibility="Collapsed"
+            Background="{StaticResource Glass.OverlayScrim}"
+            Panel.ZIndex="102">
+      <Border Width="480" MaxHeight="400"
+              VerticalAlignment="Center" HorizontalAlignment="Center"
+              Background="{StaticResource Glass.BgRaised}" BorderBrush="{StaticResource Glass.Border}" BorderThickness="1"
+              Padding="12" CornerRadius="4">
+        <DockPanel>
+          <TextBlock x:Name="OpenFamilyTitle"
+                     DockPanel.Dock="Top"
+                     Text="Open · F файл · P проект · D папка · R недавние"
+                     FontWeight="SemiBold" Margin="0,0,0,8"/>
+          <TextBlock DockPanel.Dock="Bottom"
+                     Text="Ctrl+O · Esc · timeout → файл"
+                     Foreground="{StaticResource Glass.FgMuted}" FontSize="11" Margin="0,8,0,0"/>
+          <ListBox x:Name="OpenFamilyList"
+                   Background="Transparent" BorderThickness="0" Foreground="#EEE"
+                   FontFamily="Segoe UI" FontSize="12">
+            <ListBox.ItemTemplate>
+              <DataTemplate>
+                <StackPanel Margin="2,3">
+                  <TextBlock Text="{Binding Title}" FontWeight="SemiBold"/>
+                  <TextBlock Text="{Binding Help}" Foreground="{StaticResource Glass.FgMuted}" FontSize="11" TextWrapping="Wrap"/>
+                </StackPanel>
+              </DataTemplate>
+            </ListBox.ItemTemplate>
+          </ListBox>
+        </DockPanel>
+      </Border>
+    </Border>
   </Grid>
 </UserControl>

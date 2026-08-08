@@ -44,10 +44,10 @@ public static class OperatorSituationCatalog
             "qrh",
             "warn",
             [
-                new("Ctrl+O — открой файл из проекта, или MFD SolutionExplorer.", "open_file"),
-                new("Ctrl+K → wh — WorkspaceHealth: ROOT / GIT / SLN должны стать READY.", "mfd_workspace_health"),
-                new("Открой любой рабочий .cs — Editor покажет situ."),
-                new("Вернись в HERE/NEXT — HERE должен показать имя проекта.", "mfd_here_next"),
+                new("Ctrl+O → P проект / D папка (или F файл). Timeout → файл.", "open_family"),
+                new("Ctrl+K → os / od / or — решение · папка · недавние.", "open_solution"),
+                new("Ctrl+K → wh — WorkspaceHealth: ROOT / GIT / SLN → READY.", "mfd_workspace_health"),
+                new("HERE/NEXT — HERE должен показать имя проекта.", "mfd_here_next"),
             ]),
         new(
             "where-am-i",

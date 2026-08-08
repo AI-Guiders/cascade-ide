@@ -15,6 +15,9 @@ public partial class MainWindow
     Border? ChordOverlay => Overlays?.ChordOverlay;
     TextBox? ChordQuery => Overlays?.ChordQuery;
     ListBox? ChordList => Overlays?.ChordList;
+    Border? OpenFamilyOverlay => Overlays?.OpenFamilyOverlay;
+    TextBlock? OpenFamilyTitle => Overlays?.OpenFamilyTitle;
+    ListBox? OpenFamilyList => Overlays?.OpenFamilyList;
 
     Border? MfdTerminalHost => MfdHosts?.MfdTerminalHost;
     TextBlock? TerminalShellLabel => MfdHosts?.TerminalShellLabel;

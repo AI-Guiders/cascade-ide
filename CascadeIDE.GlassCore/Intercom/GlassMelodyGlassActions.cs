@@ -34,6 +34,10 @@ public static class GlassMelodyGlassActions
             // File/IOP peels already on Glass palette — DIG REJECT solution/portal/Markdig/correspondence hosts.
             ["open_file"] = "open_file",
             ["open_file_dialog"] = "open_file",
+            ["open_solution_dialog"] = "open_solution",
+            ["open_folder_dialog"] = "open_folder",
+            ["open_recent"] = "open_recent",
+            ["open_family"] = "open_family",
             ["intercom.attach_selection"] = "slash_attach",
             // attach_scope: DIG REJECT SoftFL — melody discoverability-only (no false → slash_attach).
             // Intercom IOP keyboard — topic overview/nav + open (was browse-only melody).

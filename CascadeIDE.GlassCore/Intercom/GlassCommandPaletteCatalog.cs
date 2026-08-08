@@ -12,7 +12,11 @@ public static class GlassCommandPaletteCatalog
 
     static readonly GlassPaletteEntry[] Entries =
     [
+        new("open_family", "Open… (F/P/D/R)", "Ctrl+O chord: file · project · folder · recent", "ctrl+o open family f p d r"),
         new("open_file", "Open file…", "Open a file in AvalonEdit", "ctrl+o file open"),
+        new("open_solution", "Open solution / project…", "Open .sln/.slnx/.csproj → workspace root", "open solution project sln csproj"),
+        new("open_folder", "Open folder…", "Open folder as workspace root", "open folder directory workspace"),
+        new("open_recent", "Open recent…", "MRU file / project / folder", "open recent mru"),
         new("save_file", "Save file", "Save the open editor buffer", "ctrl+s save"),
         new("focus_composer", "Focus Intercom composer", "Move keyboard focus to the message box", "chat composer intercom"),
         new("slash_help", "Slash: /help", "List Glass slash commands", "/help slash"),

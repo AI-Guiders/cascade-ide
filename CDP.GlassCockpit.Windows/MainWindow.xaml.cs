@@ -31,6 +31,7 @@ public partial class MainWindow : Window
         InitIntercomHud();
         InitCommandPalette();
         InitCascadeChord();
+        InitOpenFamily();
 
         EnsureEditorChrome();
         TryOpenDogfoodFile();

@@ -4,7 +4,6 @@ using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using Microsoft.Win32;
 
 namespace CDP.GlassCockpit.Windows;
 
@@ -162,8 +161,18 @@ public partial class MainWindow
 
     void MainWindow_OnPreviewKeyDown(object sender, KeyEventArgs e)
     {
+        if (_openFamilyAwait && TryConsumeOpenFamilyKeyDown(e))
+            return;
+
         if (_chordMelodyAwait && TryConsumeChordMelodyKeyDown(e))
             return;
+
+        if (e.Key == Key.Escape && OpenFamilyOverlay?.Visibility == Visibility.Visible)
+        {
+            CloseOpenFamily();
+            e.Handled = true;
+            return;
+        }
 
         if (e.Key == Key.Escape && ChordOverlay.Visibility == Visibility.Visible)
         {
@@ -204,28 +213,9 @@ public partial class MainWindow
         }
         else if (e.Key == Key.O)
         {
-            TryPickOpenFile();
+            BeginOpenFamilyChord();
             e.Handled = true;
         }
-    }
-
-    void TryPickOpenFile()
-    {
-        var dlg = new OpenFileDialog
-        {
-            Title = "Open in Glass editor",
-            Filter = "Code|*.cs;*.xaml;*.csproj;*.json;*.md;*.toml;*.txt|All|*.*",
-            CheckFileExists = true,
-            Multiselect = false,
-        };
-
-        if (!string.IsNullOrWhiteSpace(_editorPath) && File.Exists(_editorPath))
-            dlg.InitialDirectory = Path.GetDirectoryName(_editorPath);
-        else if (!string.IsNullOrWhiteSpace(_session.WorkspaceRoot) && Directory.Exists(_session.WorkspaceRoot))
-            dlg.InitialDirectory = _session.WorkspaceRoot;
-
-        if (dlg.ShowDialog(this) == true)
-            OpenCodeFile(dlg.FileName);
     }
 
     void TrySaveEditor()

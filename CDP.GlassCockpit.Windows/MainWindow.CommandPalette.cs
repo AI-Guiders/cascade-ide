@@ -33,6 +33,7 @@ public partial class MainWindow
         PaletteQuery.Text = "";
         RefreshPaletteFilter();
         CloseCascadeChord();
+        CloseOpenFamily();
         PaletteOverlay.Visibility = Visibility.Visible;
         PaletteQuery.Focus();
         Keyboard.Focus(PaletteQuery);
@@ -165,6 +166,20 @@ public partial class MainWindow
                 break;
             case "open_file":
                 TryPickOpenFile();
+                break;
+            case "open_solution":
+            case "open_solution_dialog":
+                TryPickOpenProject();
+                break;
+            case "open_folder":
+            case "open_folder_dialog":
+                TryPickOpenFolder();
+                break;
+            case "open_recent":
+                ShowOpenFamilyRecent();
+                break;
+            case "open_family":
+                BeginOpenFamilyChord();
                 break;
             case "save_file":
                 TrySaveEditor();

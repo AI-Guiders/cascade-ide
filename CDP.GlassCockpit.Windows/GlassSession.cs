@@ -1,4 +1,5 @@
 #nullable enable
+using System.IO;
 using CascadeIDE.Features.Settings.DataAcquisition;
 using CascadeIDE.Features.Workspace.DataAcquisition;
 using CascadeIDE.GlassCore.Presentation;
@@ -30,6 +31,19 @@ internal sealed class GlassSession
     {
         Settings = SettingsService.Load(WorkspaceRoot);
         Layout = GlassPresentationLayout.Resolve(Settings, Layout.Topology);
+    }
+
+    /// <summary>Operator Open-family: set workspace root and reload settings for the new root.</summary>
+    public bool SetWorkspaceRoot(string? path)
+    {
+        if (string.IsNullOrWhiteSpace(path))
+            return false;
+        var root = path.Trim();
+        if (!Directory.Exists(root))
+            return false;
+        WorkspaceRoot = root;
+        ReloadSettings();
+        return true;
     }
 
     /// <summary>Apply live presentation latch topology (same patch idea as CIDE ApplyPresentationGlassPatch).</summary>

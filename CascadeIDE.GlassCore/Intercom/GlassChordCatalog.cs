@@ -10,6 +10,10 @@ public static class GlassChordCatalog
     static readonly GlassChordEntry[] Entries =
     [
         new("of", "Open file", "open_file", "Open a file in AvalonEdit"),
+        new("os", "Open solution", "open_solution", "Open .sln/.csproj → workspace"),
+        new("od", "Open folder", "open_folder", "Open folder as workspace"),
+        new("or", "Open recent", "open_recent", "MRU file / project / folder"),
+        new("oo", "Open family", "open_family", "Ctrl+O style F/P/D/R"),
         new("sf", "Save file", "save_file", "Save the open editor buffer"),
         new("fc", "Focus composer", "focus_composer", "Focus Intercom message box"),
         new("h", "Slash /help", "slash_help", "List Glass slash commands"),

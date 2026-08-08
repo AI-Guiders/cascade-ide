@@ -35,6 +35,7 @@ public partial class MainWindow
         }
 
         CloseCommandPalette();
+        CloseOpenFamily();
         BeginChordMelodyAwait();
     }
 
