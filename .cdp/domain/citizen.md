@@ -26,6 +26,7 @@
 
 ## last_ship
 
+- **2026-08-08 Citizen Done toward 15.08 STAMPED (full-ready)** — dig=SSOT `cdp-mcp/.cdp/domain/citizen.md` DoD · invite_ready · Glass Done + SoftOrgan Face Done closed · SoftFL invent REJECT · lived dialog+vision Full Ready · evidence `tmp-glass-shots/citizen-done-fullready-20260808.png`.
 - **2026-08-08 Dig densest Citizen Done residual SoftFL invent REJECT CLOSED** — dig=SSOT `cdp-mcp/.cdp/domain/citizen.md`+`glass.md`+plan · SoftOrgan Face Done SHIPPED · ALL SURFACES Dig REJECT · SoftFL invent REJECT · densest next Glass Done PreCondition STAMPED same wave · evidence `tmp-glass-shots/glass-done-precondition-20260808.png` · invite_ready.
 - **2026-08-05** — turn2+ jsonl persist fix + post-fix verify (SSOT `cdp-mcp` `74786d1`); live 4 jsonl · PNG `tmp-glass-shots/citizen-multiturn-post-fix-20260805.png`.
 - **2026-08-05** — full-ready E2E dogfood stamped on SSOT sibling; see `cdp-mcp/.cdp/domain/citizen.md` entry 2026-08-05 live full-ready E2E.
