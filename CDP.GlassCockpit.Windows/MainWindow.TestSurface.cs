@@ -148,4 +148,21 @@ public partial class MainWindow
         if (TestsStatusLabel is not null)
             TestsStatusLabel.Text = "redirected · idle";
     }
+
+    internal void TestsFailList_OnMouseDoubleClick(object sender, System.Windows.Input.MouseButtonEventArgs e)
+    {
+        if (TestsFailList?.SelectedItem is not GlassTestOutputParse.FailRow row)
+            return;
+
+        // denser SoftFL: jump when stack/message carries path:line; else honest status (no invent).
+        if (GlassTestOutputParse.TryResolveFailJump(row, _session.WorkspaceRoot, out var path, out var line)
+            && System.IO.File.Exists(path))
+        {
+            OpenCodeFile(path, line);
+            StatusText.Text = $"glass · tests · {row.Name}";
+            return;
+        }
+
+        StatusText.Text = $"glass · tests · no path yet · {row.Name}";
+    }
 }

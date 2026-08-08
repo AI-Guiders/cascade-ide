@@ -126,4 +126,46 @@ public static partial class GlassTestOutputParse
 
         return new Summary(passed + failed + skipped, passed, failed, skipped);
     }
+
+    /// <summary>Best-effort path:line from fail message/stack (dotnet test). SoftFL denser — no invent.</summary>
+    public static bool TryResolveFailJump(FailRow row, string? workspaceRoot, out string path, out int? line)
+    {
+        path = "";
+        line = null;
+        var hay = string.IsNullOrWhiteSpace(row.Message) ? row.Display : $"{row.Display}\n{row.Message}";
+        var m = StackPathLine().Match(hay);
+        if (!m.Success)
+            return false;
+
+        var raw = m.Groups[1].Value.Trim();
+        if (raw.Length == 0)
+            return false;
+
+        if (int.TryParse(m.Groups[2].ValueSpan, out var ln) && ln > 0)
+            line = ln;
+
+        if (Path.IsPathRooted(raw) && File.Exists(raw))
+        {
+            path = raw;
+            return true;
+        }
+
+        if (!string.IsNullOrWhiteSpace(workspaceRoot))
+        {
+            var combined = Path.GetFullPath(Path.Combine(workspaceRoot, raw));
+            if (File.Exists(combined))
+            {
+                path = combined;
+                return true;
+            }
+        }
+
+        path = raw;
+        return File.Exists(raw);
+    }
+
+    [GeneratedRegex(
+        @"((?:[A-Za-z]:)?[^:\r\n]+?\.(?:cs|fs|vb))\s*(?::|[\(,])\s*(\d+)",
+        RegexOptions.CultureInvariant)]
+    private static partial Regex StackPathLine();
 }

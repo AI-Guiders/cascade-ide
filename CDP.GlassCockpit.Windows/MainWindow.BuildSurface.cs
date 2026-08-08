@@ -137,4 +137,18 @@ public partial class MainWindow
         if (BuildOutput is not null)
             BuildOutput.Text = "";
     }
+
+    internal void BuildProblemsList_OnMouseDoubleClick(object sender, System.Windows.Input.MouseButtonEventArgs e)
+    {
+        if (BuildProblemsList?.SelectedItem is not GlassProblemItem item)
+            return;
+        if (!System.IO.File.Exists(item.FilePath))
+        {
+            StatusText.Text = $"glass · build · missing {item.FileName}";
+            return;
+        }
+
+        OpenCodeFile(item.FilePath, item.Line);
+        StatusText.Text = $"glass · build · {item.HeaderLine}";
+    }
 }
