@@ -61,6 +61,13 @@ public static partial class GlassIntercomMention
         };
     }
 
+    public static bool MentionsAll(string? body)
+    {
+        if (!BodyOk(body))
+            return false;
+        return AllMention().IsMatch(body!);
+    }
+
     public static IReadOnlyList<WakeHit> ResolveWakes(string? body, MentionRoster roster)
     {
         if (!BodyOk(body))
@@ -261,4 +268,7 @@ public static partial class GlassIntercomMention
 
     [GeneratedRegex(@"(?<!\w)@operator\b", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant)]
     private static partial Regex OperatorKindMention();
+
+    [GeneratedRegex(@"(?<!\w)@all\b", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant)]
+    private static partial Regex AllMention();
 }
