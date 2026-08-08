@@ -1,30 +1,31 @@
 # Glass ← CIDE · port plan
 
-Glance · CIDE SSOT · **not** Seeming-Done
+Glance · CIDE SSOT · **not** Seeming-Done · **цейтнот**
+
+## Why EOL Avalonia
+Сохранить драйв. Seeming-Done его сжёг. Честный порт = час-два realtime, не вола.
 
 ## Honest status
 | Claim | Truth |
 |-------|--------|
-| ALL SURFACES ADOPTED | **NOT Done** — half-a / Intercom+viz slices stamped Done |
-| W0 Open/Load | SSOT `SolutionParser` linked · dogfood owed after csproj |
-| Glass Done | open until full **a** per surface + operator PNG |
+| ALL SURFACES ADOPTED | **NOT Done** |
+| Glass Done | open · dogfood per family |
+| W0 Open/Load | `SolutionParser` SSOT in GlassCore · **operator dogfood:** Ctrl+O→P→csproj |
 
-## Fly (order free · densest first)
-| W | Family | Bar |
-|---|--------|-----|
-| 0 | Open/Load | CIDE LoadSolution path · SE tree from SolutionItem |
-| 1 | Keyboard | chord/melody denser = IdeCommands map |
-| 2 | Edit | attach-scope |
-| 3 | Build/Test | MFD denser |
-| 4 | Git | IdeCommands gaps |
-| 5 | Debug | DAP beyond spectator |
-| 6 | MFD/SA | □ Avalonia residuals |
-| 7 | Intercom | relate / find residuals |
-| 8 | Settings | themes/modes |
+## Full-a bar (per family)
+dig CIDE → wire **same** type/API → PNG → stamp. Invent REJECT.
 
-## Ritual / surface
-dig CIDE SSOT → full **a** → wire (no invent peel) → PNG → stamp  
-**Done** only after dogfood. Thin ADOPTED ≠ Done.
+## Fly densest
+| # | Family | CIDE SSOT | Glass now |
+|---|--------|-----------|-----------|
+| 0 | Open/SE | `SolutionParser` / `FolderWorkspaceTreeBuilder` | LIVE SSOT · dogfood |
+| 1 | GoToFile | `IdeCommands.GoToFile` | **MISSING** ← next |
+| 2 | Attach-scope | ADR attach_scope | peel/refuse |
+| 3 | Build/Test | IdeCommands build/test | MFD thin LIVE |
+| 4 | Git | porcelain cmds | MFD LIVE · denser gaps |
+| 5 | Debug | DAP launch/continue | spectator |
+| 6 | Themes | apply_*_theme | partial CFG |
+| 7 | Intercom residual | find/relate | residual |
 
-## LIVE (verify not invent)
-SoftOrgan Face · HERE/NEXT · Plan · FDS · Intercom core (A1–A6 slices — not whole cabin)
+## Ritual
+1 surface · dig · ship · PNG · next. No Done name until dogfood.
