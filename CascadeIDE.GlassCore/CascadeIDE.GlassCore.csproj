@@ -159,6 +159,10 @@
     <Compile Include="..\Features\Workspace\DataAcquisition\ProjectFileTreeBuilder.cs" Link="Features\Workspace\DataAcquisition\ProjectFileTreeBuilder.cs" />
     <Compile Include="..\Features\Workspace\DataAcquisition\SolutionParser.cs" Link="Features\Workspace\DataAcquisition\SolutionParser.cs" />
     <Compile Include="..\Features\Workspace\DataAcquisition\FolderWorkspaceTreeBuilder.cs" Link="Features\Workspace\DataAcquisition\FolderWorkspaceTreeBuilder.cs" />
+    <!-- Peel17: ADR 0125 workspace file slash index (Glass /open steps). Home = GlassCore; CascadeIDE Compile Remove. -->
+    <Compile Include="..\Features\Workspace\Application\McpSolutionTree.cs" Link="Features\Workspace\Application\McpSolutionTree.cs" />
+    <Compile Include="..\Features\Workspace\Application\WorkspaceFileIndex.cs" Link="Features\Workspace\Application\WorkspaceFileIndex.cs" />
+    <Compile Include="..\Features\Workspace\Application\SolutionExplorerTreeFilter.cs" Link="Features\Workspace\Application\SolutionExplorerTreeFilter.cs" />
     <!-- Peel7: defaults-settings.toml discovery (host SettingsDefaultsLoader still owns BundledAppContent merge). -->
     <Compile Include="..\Features\Settings\DataAcquisition\SettingsDefaultsPaths.cs" Link="Features\Settings\DataAcquisition\SettingsDefaultsPaths.cs" />
     <!-- Peel8: cdp-mcp latch state root + named LATEST paths (watchers stay host). -->

@@ -80,7 +80,9 @@ public partial class MainWindow
             && GlassSolutionExplorerFace.PreferTreeHost(page);
 
         MfdEditorHost.Visibility = showEditor ? Visibility.Visible : Visibility.Collapsed;
-        if (MfdSolutionExplorerTree is not null)
+        if (MfdSolutionExplorerHost is not null)
+            MfdSolutionExplorerHost.Visibility = showSe ? Visibility.Visible : Visibility.Collapsed;
+        else if (MfdSolutionExplorerTree is not null)
             MfdSolutionExplorerTree.Visibility = showSe ? Visibility.Visible : Visibility.Collapsed;
 
         // SE Face: SoftOrgan EICAS band (opening… + clr/ack/list) is not the file tree.

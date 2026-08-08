@@ -232,6 +232,10 @@
     <Compile Remove="Features\Workspace\DataAcquisition\ProjectFileTreeBuilder.cs" />
     <Compile Remove="Features\Workspace\DataAcquisition\SolutionParser.cs" />
     <Compile Remove="Features\Workspace\DataAcquisition\FolderWorkspaceTreeBuilder.cs" />
+    <!-- Peel17: ADR 0125 slash index lives in GlassCore (shared with Glass /open). -->
+    <Compile Remove="Features\Workspace\Application\McpSolutionTree.cs" />
+    <Compile Remove="Features\Workspace\Application\WorkspaceFileIndex.cs" />
+    <Compile Remove="Features\Workspace\Application\SolutionExplorerTreeFilter.cs" />
     <Compile Remove="CasaField.Core.Bench\**\*.cs" />
     <!-- Внешний субмодуль/вендор: не компилировать в IDE (иначе sandbox с top-level Main перехватывает входную точку). -->
     <Compile Remove="externals\**\*.cs" />
