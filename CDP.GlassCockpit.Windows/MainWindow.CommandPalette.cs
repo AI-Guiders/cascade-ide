@@ -1,6 +1,7 @@
 #nullable enable
 
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -47,11 +48,56 @@ public partial class MainWindow
 
     void RefreshPaletteFilter()
     {
-        var hits = GlassCommandPaletteCatalog.Filter(PaletteQuery.Text);
         _paletteEntries.Clear();
-        foreach (var h in hits)
+        var q = PaletteQuery?.Text;
+
+        if (GlassCommandPaletteCatalog.TryGetGoToFileTail(q, out var term))
+        {
+            var hits = CascadeIDE.SoftOrgan.GlassGoToFileIndex.Search(
+                _session.SolutionRoot,
+                _session.WorkspaceRoot,
+                term);
+            foreach (var h in hits)
+            {
+                _paletteEntries.Add(new GlassPaletteEntry(
+                    "goto:" + h.FullPath,
+                    h.Title,
+                    h.Relative,
+                    "f: goto file"));
+            }
+
+            if (_paletteEntries.Count == 0)
+            {
+                _paletteEntries.Add(new GlassPaletteEntry(
+                    "goto_empty",
+                    "Нет файлов",
+                    string.IsNullOrEmpty(term)
+                        ? "Открой проект (Ctrl+O → P) или уточни f:имя"
+                        : $"Нет совпадений для «{term}»",
+                    null));
+            }
+
+            PaletteList.SelectedIndex = 0;
+            return;
+        }
+
+        var hitsCatalog = GlassCommandPaletteCatalog.Filter(q);
+        foreach (var h in hitsCatalog)
             _paletteEntries.Add(h);
         PaletteList.SelectedIndex = _paletteEntries.Count > 0 ? 0 : -1;
+    }
+
+    void OpenGoToFilePalette()
+    {
+        CloseCascadeChord();
+        CloseOpenFamily();
+        PaletteQuery.Text = GlassCommandPaletteCatalog.GoToFilePrefix;
+        RefreshPaletteFilter();
+        PaletteOverlay.Visibility = Visibility.Visible;
+        PaletteQuery.CaretIndex = PaletteQuery.Text.Length;
+        PaletteQuery.Focus();
+        Keyboard.Focus(PaletteQuery);
+        StatusText.Text = "goto · f: · Ctrl+P";
     }
 
     void PaletteQuery_OnPreviewKeyDown(object sender, KeyEventArgs e)
@@ -104,6 +150,20 @@ public partial class MainWindow
         }
 
         if (GlassCommandPaletteCatalog.IsNonExecutableMelodyRow(entry.Id))
+            return;
+
+        if (entry.Id.StartsWith("goto:", StringComparison.Ordinal))
+        {
+            var path = entry.Id["goto:".Length..];
+            CloseCommandPalette();
+            if (File.Exists(path))
+                OpenCodeFile(path);
+            else
+                StatusText.Text = $"goto · missing · {path}";
+            return;
+        }
+
+        if (entry.Id == "goto_empty")
             return;
 
         if (GlassMelodyGlassActions.TryMapRowId(entry.Id, out var glassAction))
@@ -180,6 +240,10 @@ public partial class MainWindow
                 break;
             case "open_family":
                 BeginOpenFamilyChord();
+                break;
+            case "go_to_file":
+            case "workspace_go_to_file":
+                OpenGoToFilePalette();
                 break;
             case "save_file":
                 TrySaveEditor();

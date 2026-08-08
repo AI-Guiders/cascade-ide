@@ -14,6 +14,7 @@ public static class GlassChordCatalog
         new("od", "Open folder", "open_folder", "Open folder as workspace"),
         new("or", "Open recent", "open_recent", "MRU file / project / folder"),
         new("oo", "Open family", "open_family", "Ctrl+O style F/P/D/R"),
+        new("gf", "Go to File", "go_to_file", "CIDE f: / Ctrl+P"),
         new("sf", "Save file", "save_file", "Save the open editor buffer"),
         new("fc", "Focus composer", "focus_composer", "Focus Intercom message box"),
         new("h", "Slash /help", "slash_help", "List Glass slash commands"),

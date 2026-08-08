@@ -199,6 +199,13 @@ public partial class MainWindow
             return;
         }
 
+        if (e.Key == Key.P)
+        {
+            OpenGoToFilePalette();
+            e.Handled = true;
+            return;
+        }
+
         if (e.Key == Key.K)
         {
             ToggleCascadeChord();

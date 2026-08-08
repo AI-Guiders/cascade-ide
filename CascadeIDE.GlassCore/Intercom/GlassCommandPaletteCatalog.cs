@@ -9,10 +9,25 @@ public static class GlassCommandPaletteCatalog
 {
     public const string MelodyHintId = "melody_hint";
     public const string MelodyNoMatchId = "melody_no_match";
+    public const string GoToFilePrefix = "f:";
+
+    /// <summary>CIDE Go to File prefix <c>f:</c> (Ctrl+P).</summary>
+    public static bool TryGetGoToFileTail(string? raw, out string filterTerm)
+    {
+        filterTerm = "";
+        if (string.IsNullOrWhiteSpace(raw))
+            return false;
+        var t = raw.TrimStart();
+        if (t.Length < 2 || char.ToLowerInvariant(t[0]) != 'f' || t[1] != ':')
+            return false;
+        filterTerm = t.Length > 2 ? t[2..].Trim() : "";
+        return true;
+    }
 
     static readonly GlassPaletteEntry[] Entries =
     [
         new("open_family", "Open… (F/P/D/R)", "Ctrl+O chord: file · project · folder · recent", "ctrl+o open family f p d r"),
+        new("go_to_file", "Go to File…", "CIDE workspace_go_to_file — palette f: (Ctrl+P)", "ctrl+p goto file f: workspace_go_to_file"),
         new("open_file", "Open file…", "Open a file in AvalonEdit", "ctrl+o file open"),
         new("open_solution", "Open solution / project…", "Open .sln/.slnx/.csproj → workspace root", "open solution project sln csproj"),
         new("open_folder", "Open folder…", "Open folder as workspace root", "open folder directory workspace"),
@@ -84,6 +99,9 @@ public static class GlassCommandPaletteCatalog
 
     public static IReadOnlyList<GlassPaletteEntry> Filter(string? query)
     {
+        if (TryGetGoToFileTail(query, out _))
+            return []; // Host fills from GlassGoToFileIndex (SolutionItem SSOT).
+
         if (TryGetMelodyTail(query, out var tail))
             return FilterMelody(tail);
 

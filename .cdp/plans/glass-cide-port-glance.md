@@ -19,8 +19,8 @@ dig CIDE → wire **same** type/API → PNG → stamp. Invent REJECT.
 | # | Family | CIDE SSOT | Glass now |
 |---|--------|-----------|-----------|
 | 0 | Open/SE | `SolutionParser` / `FolderWorkspaceTreeBuilder` | LIVE SSOT · dogfood |
-| 1 | GoToFile | `IdeCommands.GoToFile` | **MISSING** ← next |
-| 2 | Attach-scope | ADR attach_scope | peel/refuse |
+| 1 | GoToFile | `IdeCommands.GoToFile` / f: | **LIVE** wire · dogfood PNG ← now |
+| 2 | Attach-scope | ADR attach_scope | peel/refuse ← next densest |
 | 3 | Build/Test | IdeCommands build/test | MFD thin LIVE |
 | 4 | Git | porcelain cmds | MFD LIVE · denser gaps |
 | 5 | Debug | DAP launch/continue | spectator |
