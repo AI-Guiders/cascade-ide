@@ -51,9 +51,10 @@ public static class GlassCommandPaletteCatalog
         new("mfd_events", "MFD: Events", "Events / latch catalog glance", "mfd events latch"),
         new("mfd_hypotheses", "MFD: Hypotheses", "Debug hypotheses glance", "mfd hypotheses debug"),
         new("mfd_chat", "MFD: Chat", "Intercom presence MFD glance", "mfd chat intercom presence"),
-        new("soft_qrh", "Soft: QRH", "Open eQRH — citizen @intent qrh → PlaceOrgan Face", "soft qrh eqrh handbook eicas softorgan"),
-        new("soft_ecl", "Soft: ECL", "Open ECL checklist — citizen @intent ecl → PlaceOrgan Face", "soft ecl chk checklist eicas softorgan"),
-        new("soft_alert", "Soft: Alert", "Open Alert/SA channel — citizen @intent alert → PlaceOrgan Face", "soft alert eicas sa softorgan"),
+        new("mfd_here_next", "HERE/NEXT", "Where you are in IDE + next steps (ADR 0014)", "here next situ guide checklist where am i"),
+        new("soft_qrh", "Soft: QRH", "Situations → steps (eQRH human Face)", "soft qrh eqrh handbook eicas softorgan situations"),
+        new("soft_ecl", "Soft: ECL", "ECL situations → steps", "soft ecl chk checklist eicas softorgan"),
+        new("soft_alert", "Soft: Alert", "Alert/SA situations → steps", "soft alert eicas sa softorgan"),
         new("toggle_pm_oneof_role", "OneOf P/M toggle", "Toggle P↔M on (P/M)(F) OneOf host", "oneof pm topology toggle slash"),
     ];
 
