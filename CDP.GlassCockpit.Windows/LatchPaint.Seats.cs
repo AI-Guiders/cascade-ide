@@ -1,5 +1,6 @@
 #nullable enable
 using System.Text.Json;
+using CascadeIDE.GlassCore.Presentation;
 
 namespace CDP.GlassCockpit.Windows;
 
@@ -15,8 +16,16 @@ internal static partial class LatchPaint
         string? MOrgan,
         bool ShowFace,
         string? FaceSeat,
+        string? FaceOrgan,
         string? WebAiUrl,
-        string StatusLine);
+        string StatusLine)
+    {
+        /// <summary>
+        /// Sticky web_ai_url may survive non-browser PlaceOrgan; navigate WebAi only when Face targets the portal.
+        /// </summary>
+        public bool WantsWebAiNavigate =>
+            SeatsWebAiNavigateGate.WantsNavigate(ShowFace, WebAiUrl, MfdPage, FaceOrgan, MOrgan, FaceSeat);
+    }
 
     /// <summary>Null when schema/origin gate fails or JSON is unreadable.</summary>
     public static SeatsView? PaintSeats(string json)
@@ -39,20 +48,26 @@ internal static partial class LatchPaint
             var faceSeat = Prop(root, "face_seat");
             if (string.IsNullOrWhiteSpace(faceSeat))
                 faceSeat = null;
+            var faceOrgan = faceSeat is null ? null : TrySeatPin(root, faceSeat);
             var webAi = Prop(root, "web_ai_url");
             if (string.IsNullOrWhiteSpace(webAi))
                 webAi = null;
 
             var faceBit = showFace ? " · show_face" : "";
-            var navBit = webAi is null ? "" : " · webai_nav";
-            return new SeatsView(
+            var view = new SeatsView(
                 string.IsNullOrWhiteSpace(mfd) ? null : mfd.Trim(),
                 chrome,
                 mOrgan,
                 showFace,
                 faceSeat,
+                faceOrgan,
                 webAi?.Trim(),
-                $"seats · {mfd ?? "—"} · {(chrome ?? "—")}{faceBit}{navBit}");
+                "");
+            var navBit = view.WantsWebAiNavigate ? " · webai_nav" : "";
+            return view with
+            {
+                StatusLine = $"seats · {mfd ?? "—"} · {(chrome ?? "—")}{faceBit}{navBit}"
+            };
         }
         catch
         {
