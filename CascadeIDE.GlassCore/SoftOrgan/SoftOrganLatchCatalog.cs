@@ -12,11 +12,14 @@ public static class SoftOrganLatchCatalog
     /// <summary>Canonical SoftOrgan sa-desk latch stem (<c>sa-desk-LATEST.json</c>).</summary>
     public const string SaDesk = "sa-desk";
 
+    /// <summary>Citizen hands receipt SoftOrgan latch stem (<c>hands-LATEST.json</c>) — Face chips, not letter laundry.</summary>
+    public const string Hands = "hands";
+
     /// <summary>Canonical Glass SoftOrgan latch ids (ordinal-ignore case).</summary>
     public static IReadOnlyCollection<string> Ids { get; } =
         new HashSet<string>(StringComparer.OrdinalIgnoreCase)
         {
-            "pressure", "ignite", "plan", "cabin", "scope", "review", "refactor", "plugins",
+            "pressure", "ignite", "plan", Hands, "cabin", "scope", "review", "refactor", "plugins",
             "toolchain", "test_desk", "debug_desk", "build_desk", "files_desk", "find_desk", "crm", "report", "webcam", "sys", "onboard", "arch", "mcp", "learn", "domain",
             "md_author", "rules", "calendar", "fdr", "teeth", "postmortem", "glass", "problems",
             SaDesk
@@ -84,6 +87,12 @@ public static class SoftOrganLatchCatalog
             || id.Equals("cdp_problems", StringComparison.OrdinalIgnoreCase)
             || id.Equals("problems", StringComparison.OrdinalIgnoreCase))
             return "problems";
+        if (id.Equals("hand", StringComparison.OrdinalIgnoreCase)
+            || id.Equals("receipt", StringComparison.OrdinalIgnoreCase)
+            || id.Equals("hands_receipt", StringComparison.OrdinalIgnoreCase)
+            || id.Equals("cdp_hands", StringComparison.OrdinalIgnoreCase)
+            || id.Equals(Hands, StringComparison.OrdinalIgnoreCase))
+            return Hands;
         if (id.Equals("cdp_md_author", StringComparison.OrdinalIgnoreCase)
             || id.Equals("md_author", StringComparison.OrdinalIgnoreCase))
             return "md_author";

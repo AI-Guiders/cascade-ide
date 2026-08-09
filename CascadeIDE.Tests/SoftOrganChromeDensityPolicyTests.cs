@@ -84,12 +84,12 @@ public sealed class SoftOrganChromeDensityPolicyTests
         var h = SoftOrganChromeDensityPolicy.From("sa_desk", "hint");
         Assert.NotNull(h);
         Assert.Equal(SoftOrganLatchCatalog.SaDesk, h.Value.Id);
-        Assert.Equal(26, h.Value.Priority);
+        Assert.Equal(27, h.Value.Priority);
 
         var facade = AgentChromeHintDensityPolicy.From("SA_DESK", "hint");
         Assert.NotNull(facade);
         Assert.Equal(SoftOrganLatchCatalog.SaDesk, facade.Value.Id);
-        Assert.Equal(26, facade.Value.Priority);
+        Assert.Equal(27, facade.Value.Priority);
     }
 
     [Fact]
@@ -97,7 +97,7 @@ public sealed class SoftOrganChromeDensityPolicyTests
     {
         string[] avaloniaSeats =
         [
-            "pressure", "ignite", "plan", "cabin", "scope", "review", "refactor", "plugins",
+            "pressure", "ignite", "plan", SoftOrganLatchCatalog.Hands, "cabin", "scope", "review", "refactor", "plugins",
             "toolchain", "test_desk", "debug_desk", "build_desk", "files_desk", "find_desk", "crm", "report", "webcam", "sys", "onboard", "arch", "mcp", "learn", "domain",
             "md_author", "rules", "calendar", "fdr", "teeth", "postmortem", "glass", "problems",
             SoftOrganLatchCatalog.SaDesk,
@@ -110,5 +110,17 @@ public sealed class SoftOrganChromeDensityPolicyTests
         Assert.True(
             SoftOrganLatchCatalog.Ids.ToHashSet(StringComparer.OrdinalIgnoreCase)
                 .SetEquals(avaloniaSeats));
+    }
+
+    [Fact]
+    public void Hands_organ_is_face_receipt_chip()
+    {
+        Assert.True(SoftOrganLatchCatalog.Contains("hands"));
+        Assert.Equal(SoftOrganLatchCatalog.Hands, SoftOrganLatchCatalog.Canonicalize("cdp_hands"));
+        Assert.Equal("HND", SoftOrganChromeDensityPolicy.ShortLabel(SoftOrganLatchCatalog.Hands));
+        Assert.Equal(3, SoftOrganChromeDensityPolicy.PriorityFor(SoftOrganLatchCatalog.Hands));
+        Assert.Equal(GlassChipLevel.Caution, SoftOrganChromeDensityPolicy.ChipLevelFromHint("CAUTION · RUNNING · 12s"));
+        Assert.Equal(GlassChipLevel.Fail, SoftOrganChromeDensityPolicy.ChipLevelFromHint("FAIL · kb · 12s"));
+        Assert.Equal(GlassChipLevel.Quiet, SoftOrganChromeDensityPolicy.ChipLevelFromHint("OK · kb · 12s"));
     }
 }
