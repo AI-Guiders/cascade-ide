@@ -27,6 +27,10 @@ public sealed class CitizenDialogRequestStatusTests
         var err = CitizenDialogRequestStatus.TryPaint(
             """{"id":"abc123456789","status":"error","error":"boom"}""");
         Assert.Contains("error · boom", err!.StatusLine, StringComparison.Ordinal);
+
+        var reconnect = CitizenDialogRequestStatus.TryPaint(
+            """{"id":"abc123456789","status":"reconnecting","error":"reconnecting 1/3 · timeout"}""");
+        Assert.Contains("reconnecting 1/3", reconnect!.StatusLine, StringComparison.Ordinal);
     }
 
     [Fact]

@@ -37,7 +37,12 @@ public static class CitizenDialogRequestStatus
         return status switch
         {
             "pending" => $"glass · citizen · queued {shortId} · waiting habitat bridge",
-            "running" => $"glass · citizen · {shortId} · running",
+            "running" => string.IsNullOrWhiteSpace(error)
+                ? $"glass · citizen · {shortId} · running"
+                : $"glass · citizen · {shortId} · {error}",
+            "reconnecting" => string.IsNullOrWhiteSpace(error)
+                ? $"glass · citizen · {shortId} · reconnecting"
+                : $"glass · citizen · {shortId} · {error}",
             "done" => string.IsNullOrWhiteSpace(peer)
                 ? $"glass · citizen · {shortId} · done"
                 : $"glass · citizen · {shortId} · done · {peer}",
