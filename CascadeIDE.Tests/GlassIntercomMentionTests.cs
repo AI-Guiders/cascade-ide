@@ -97,6 +97,18 @@ public sealed class GlassIntercomMentionTests
         var hits = GlassIntercomMention.ResolveWakes("@Sierra go", stomped);
         Assert.Contains(hits, h => h.Sink == GlassIntercomMention.WakeSink.HabitatCitizen);
     }
+
+    [Fact]
+    public void ResolveWakes_PF_prefers_Face_citizen_over_tip_guest()
+    {
+        // Lived tip≠Face: tip Кир·guest + Face Sierra·citizen — @PF must Face not Cursor cannon.
+        var roster = new GlassIntercomMention.MentionRoster(
+            "Кир", "guest", "Света", "operator", PfFaceName: "Sierra", PfFaceKind: "citizen");
+        var hits = GlassIntercomMention.ResolveWakes("@PF look", roster);
+        Assert.Contains(hits, h => h.Sink == GlassIntercomMention.WakeSink.HabitatCitizen);
+        Assert.DoesNotContain(hits, h => h.Sink == GlassIntercomMention.WakeSink.ExternalGuest);
+        Assert.Contains(hits, h => h.Cue.Contains("Sierra", StringComparison.Ordinal));
+    }
     [Fact]
     public void TryGetAtToken_and_Suggest_filter_by_prefix()
     {

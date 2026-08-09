@@ -1,4 +1,5 @@
 #nullable enable
+using System.Collections.Generic;
 using System.IO;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -46,6 +47,44 @@ internal static class GlassIntercomIdentity
     }
 
     /// <summary>
+    /// FM Face on seat (profiles) — tip plane ≠ Face after multi-principal.
+    /// Prefers non-harness citizen profile for mention wake sink.
+    /// </summary>
+    public static (string? Name, string? Kind) TryCitizenFace(string seat)
+    {
+        lock (Gate)
+        {
+            var doc = TryReadUnlocked();
+            if (doc is null)
+                return (null, null);
+            var profiles = string.Equals(seat, "pm", StringComparison.OrdinalIgnoreCase)
+                ? doc.PmProfiles
+                : doc.PfProfiles;
+            if (profiles is null || profiles.Count == 0)
+                return (null, null);
+
+            IdentitySeat? best = null;
+            foreach (var kv in profiles)
+            {
+                if (kv.Key.StartsWith("harness:", StringComparison.OrdinalIgnoreCase))
+                    continue;
+                var p = kv.Value;
+                if (p is null || string.IsNullOrWhiteSpace(p.Name))
+                    continue;
+                var kind = (p.Kind ?? "").Trim().ToLowerInvariant();
+                if (kind is not ("citizen" or "fm" or "peer"))
+                    continue;
+                if (best is null || p.StampedUtc > best.StampedUtc)
+                    best = p;
+            }
+
+            if (best is null)
+                return (null, null);
+            return (best.Name.Trim(), string.IsNullOrWhiteSpace(best.Kind) ? "citizen" : best.Kind.Trim());
+        }
+    }
+
+    /// <summary>
     /// Sealed — CDP <c>CideIntercomIdentityLatch.Claim</c> is the sole writer
     /// (harness:* vs FM model slots + citizen demote). Glass is read-only.
     /// </summary>
@@ -81,12 +120,15 @@ internal static class GlassIntercomIdentity
         public string Schema { get; set; } = GlassIntercomIdentity.Schema;
         public IdentitySeat? Pf { get; set; }
         public IdentitySeat? Pm { get; set; }
+        public Dictionary<string, IdentitySeat>? PfProfiles { get; set; }
+        public Dictionary<string, IdentitySeat>? PmProfiles { get; set; }
     }
 
     sealed class IdentitySeat
     {
         public string Name { get; set; } = "";
         public string? Kind { get; set; }
+        public string? Model { get; set; }
         public DateTimeOffset StampedUtc { get; set; }
     }
 }

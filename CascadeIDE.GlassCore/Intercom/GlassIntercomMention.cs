@@ -25,11 +25,17 @@ public static partial class GlassIntercomMention
         GlassOperator
     }
 
+    /// <summary>
+    /// Tip Who (Cursor harness) + optional Face Who (FM citizen).
+    /// Seat @PF wake prefers Face kind when tip≠Face (0.5.688+ SoftFL).
+    /// </summary>
     public readonly record struct MentionRoster(
         string? PfName,
         string? PfKind,
         string? PmName,
-        string? PmKind);
+        string? PmKind,
+        string? PfFaceName = null,
+        string? PfFaceKind = null);
 
     public readonly record struct WakeHit(WakeSink Sink, string Cue);
 
@@ -83,8 +89,10 @@ public static partial class GlassIntercomMention
 
         if (MentionsSeat(body, Seat.Pf))
         {
-            var kind = NormalizeKind(roster.PfKind) ?? "guest";
-            Add(SinkForKind(kind), FormatWakeNote(Seat.Pf, roster.PfName));
+            // tip≠Face: harness tip guest must not steal @PF → Cursor when Face lives.
+            var kind = NormalizeKind(roster.PfFaceKind) ?? NormalizeKind(roster.PfKind) ?? "guest";
+            var who = !string.IsNullOrWhiteSpace(roster.PfFaceName) ? roster.PfFaceName : roster.PfName;
+            Add(SinkForKind(kind), FormatWakeNote(Seat.Pf, who));
         }
 
         if (MentionsSeat(body, Seat.Pm))

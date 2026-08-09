@@ -370,7 +370,9 @@ public partial class MainWindow
     {
         var (pfName, pfKind) = LatchPaint.ResolveIntercomIdentity("pf", "guest", null, null);
         var (pmName, pmKind) = LatchPaint.ResolveIntercomIdentity("pm", "human", null, null);
-        return new GlassIntercomMention.MentionRoster(pfName, pfKind, pmName, pmKind);
+        var (pfFaceName, pfFaceKind) = GlassIntercomIdentity.TryCitizenFace("pf");
+        return new GlassIntercomMention.MentionRoster(
+            pfName, pfKind, pmName, pmKind, pfFaceName, pfFaceKind);
     }
 
     /// <summary>Face attention for citizen/operator sinks (Glass viewer).</summary>
