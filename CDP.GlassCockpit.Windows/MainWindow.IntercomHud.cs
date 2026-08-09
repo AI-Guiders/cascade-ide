@@ -232,13 +232,10 @@ public partial class MainWindow
 
     void LoadDmContactsLatch()
     {
-        // Day-1 roster SSOT = ResolveIntercomIdentity (sticky → bootstrap) + citizen display from Who when tip is citizen.
+        // DM book = operator + Face Who (profiles). Tip Кир/guest = PF lane, not a second DM row.
         var (op, _) = LatchPaint.ResolveIntercomIdentity("pm", "human", null, null);
-        var (partner, partnerKind) = LatchPaint.ResolveIntercomIdentity("pf", "guest", null, null);
-        string? citizenDisplay = null;
-        if (string.Equals(partnerKind, "citizen", StringComparison.OrdinalIgnoreCase))
-            citizenDisplay = partner;
-        var roster = GlassIntercomContacts.DefaultRoster(op, partner, citizenDisplay);
+        var (faceWho, _) = GlassIntercomIdentity.TryCitizenFace("pf");
+        var roster = GlassIntercomContacts.DefaultRoster(op, citizenDisplay: faceWho);
         string? selected = null;
         try
         {
@@ -251,7 +248,7 @@ public partial class MainWindow
         }
 
         _dmRoster = roster;
-        _dmPeerId = GlassIntercomContacts.ResolveSelectedId(roster, selected);
+        _dmPeerId = GlassIntercomContacts.ResolveSelectedId(roster, selected ?? "citizen");
     }
 
     void TrySaveDmContactsLatch()
@@ -282,6 +279,8 @@ public partial class MainWindow
         {
             if (!lit)
             {
+                HudModelPicker.DisplayMemberPath = string.Empty;
+                HudModelPicker.SelectedValuePath = string.Empty;
                 HudModelPicker.ItemsSource = new[] { "—" };
                 HudModelPicker.SelectedItem = "—";
                 HudModelPicker.IsEnabled = false;
@@ -290,14 +289,18 @@ public partial class MainWindow
                 return;
             }
 
-            _modelDirectory = GlassIntercomModels.BuildDirectory(_modelId);
-            var ids = GlassIntercomModels.PickerIds(_modelDirectory);
-            HudModelPicker.ItemsSource = ids;
-            var pick = GlassIntercomModels.ResolveSelectedId(_modelDirectory, _modelId) ?? GlassIntercomModels.DefaultId;
-            HudModelPicker.SelectedItem = ids.Contains(pick, StringComparer.OrdinalIgnoreCase) ? pick : ids[0];
+            var cfg = GlassCitizenAiKeys.TryReadOpenAiModel();
+            _modelDirectory = GlassIntercomModels.BuildDirectory(_modelId, cfg);
+            HudModelPicker.DisplayMemberPath = nameof(GlassIntercomModels.Entry.Display);
+            HudModelPicker.SelectedValuePath = nameof(GlassIntercomModels.Entry.Id);
+            HudModelPicker.ItemsSource = _modelDirectory;
+            var pick = GlassIntercomModels.ResolveSelectedId(_modelDirectory, _modelId, cfg)
+                ?? _modelDirectory[0].Id;
+            HudModelPicker.SelectedValue = pick;
             HudModelPicker.IsEnabled = true;
             HudModelPicker.Opacity = 1.0;
-            HudModelPicker.ToolTip = "FM model directory · sealed shortlist + sticky (CFG secrets)";
+            HudModelPicker.ToolTip =
+                $"FM Face directory · Cloud.ru internal · tariff {GlassIntercomModels.TariffRev} · pick writes CFG open_ai_model";
         }
         finally
         {
@@ -314,9 +317,10 @@ public partial class MainWindow
         _citModelSuppress = true;
         try
         {
-            _modelDirectory = GlassIntercomModels.BuildDirectory(_modelId);
+            var cfg = GlassCitizenAiKeys.TryReadOpenAiModel();
+            _modelDirectory = GlassIntercomModels.BuildDirectory(_modelId, cfg);
             CitModelList.ItemsSource = _modelDirectory;
-            var pickId = GlassIntercomModels.ResolveSelectedId(_modelDirectory, _modelId);
+            var pickId = GlassIntercomModels.ResolveSelectedId(_modelDirectory, _modelId, cfg);
             CitModelList.SelectedItem = GlassIntercomModels.Find(_modelDirectory, pickId);
         }
         finally
@@ -328,15 +332,40 @@ public partial class MainWindow
     void ApplyModelSelection(string? selectedId)
     {
         var next = GlassIntercomModels.ToLatchModelId(selectedId);
-        if (string.Equals(_modelId, next, StringComparison.OrdinalIgnoreCase)
-            || (_modelId is null && next is null))
+        if (next is null)
+        {
+            if (_modelId is null)
+                return;
+            _modelId = null;
+            TrySaveLaneLatch();
+            var cfg = GlassCitizenAiKeys.TryReadOpenAiModel();
+            StatusText.Text = cfg is null
+                ? "glass · model · CFG"
+                : $"glass · model · {GlassIntercomModels.ShortLabel(cfg)} · CFG";
+            PaintHudModelAxis();
+            return;
+        }
+
+        var cfgNow = GlassCitizenAiKeys.TryReadOpenAiModel();
+        var alreadyCfg = string.Equals(cfgNow, next, StringComparison.OrdinalIgnoreCase);
+        if (alreadyCfg && _modelId is null)
             return;
 
-        _modelId = next;
+        if (!alreadyCfg)
+        {
+            if (!GlassCitizenAiKeys.TryWriteOpenAiModel(next, out var err))
+            {
+                StatusText.Text = $"glass · model · CFG write failed · {err}";
+                return;
+            }
+        }
+
+        // CFG is SSOT after pick — clear sticky override so Face Autoi + dialog agree.
+        _modelId = null;
         TrySaveLaneLatch();
-        StatusText.Text = next is null
-            ? "glass · model · default (CFG)"
-            : $"glass · model · {GlassIntercomModels.ShortLabel(next)}";
+        var entry = GlassIntercomModels.Find(_modelDirectory, next)
+            ?? new GlassIntercomModels.Entry(next, GlassIntercomModels.ShortLabel(next));
+        StatusText.Text = GlassIntercomModels.FormatStatusLine(entry, wroteCfg: true);
         PaintHudModelAxis();
     }
 
@@ -358,6 +387,18 @@ public partial class MainWindow
             return;
         if (!GlassIntercomLane.ModelAxisLit(_lane))
             return;
+        if (HudModelPicker.SelectedItem is GlassIntercomModels.Entry entry)
+        {
+            ApplyModelSelection(entry.Id);
+            return;
+        }
+
+        if (HudModelPicker.SelectedValue is string id)
+        {
+            ApplyModelSelection(id);
+            return;
+        }
+
         if (HudModelPicker.SelectedItem is not string s)
             return;
         if (string.Equals(s, "—", StringComparison.Ordinal))
