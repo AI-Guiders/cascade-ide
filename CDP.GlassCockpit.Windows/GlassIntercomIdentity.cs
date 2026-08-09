@@ -45,44 +45,17 @@ internal static class GlassIntercomIdentity
         }
     }
 
+    /// <summary>
+    /// Sealed — CDP <c>CideIntercomIdentityLatch.Claim</c> is the sole writer
+    /// (harness:* vs FM model slots + citizen demote). Glass is read-only.
+    /// </summary>
+    [Obsolete("Identity SSOT write = cdp-mcp CideIntercomIdentityLatch.Claim; Glass read-only.")]
     public static bool Claim(string seat, string name, string? kind = null)
     {
-        var trimmed = name.Trim();
-        if (trimmed.Length == 0)
-            return false;
-        var kindNorm = string.IsNullOrWhiteSpace(kind)
-            ? (string.Equals(seat, "pm", StringComparison.OrdinalIgnoreCase) ? "operator" : "guest")
-            : kind.Trim().ToLowerInvariant();
-
-        lock (Gate)
-        {
-            try
-            {
-                CdpHabitatPaths.EnsureStateRoot();
-                var doc = TryReadUnlocked() ?? new IdentityDoc { Schema = Schema };
-                doc.Schema = Schema;
-                var slot = new IdentitySeat
-                {
-                    Name = trimmed,
-                    Kind = kindNorm,
-                    StampedUtc = DateTimeOffset.UtcNow
-                };
-                if (string.Equals(seat, "pm", StringComparison.OrdinalIgnoreCase))
-                    doc.Pm = slot;
-                else
-                    doc.Pf = slot;
-
-                var json = JsonSerializer.Serialize(doc, JsonOpts);
-                var tmp = LatchPath + "." + Guid.NewGuid().ToString("N")[..8] + ".tmp";
-                File.WriteAllText(tmp, json);
-                File.Move(tmp, LatchPath, overwrite: true);
-                return true;
-            }
-            catch
-            {
-                return false;
-            }
-        }
+        _ = seat;
+        _ = name;
+        _ = kind;
+        return false;
     }
 
     static IdentityDoc? TryReadUnlocked()
