@@ -45,22 +45,23 @@ public static class GlassIntercomContacts
         };
     }
 
-    /// <summary>Day-1 roster: operator + habitat partner + Citizen — equal standing lines.</summary>
+    /// <summary>
+    /// Day-1 DM book for operator Glass: you + Face Who (equal standing).
+    /// Partner/Кир = PF lane tip (Cursor) — not a second DM row (lived confuse: two «Citizen»).
+    /// <paramref name="partnerDisplay"/> kept for call-site compat; ignored in rows.
+    /// </summary>
     public static IReadOnlyList<Contact> DefaultRoster(string? operatorDisplay = null, string? partnerDisplay = null, string? citizenDisplay = null)
     {
+        _ = partnerDisplay;
         var op = string.IsNullOrWhiteSpace(operatorDisplay) ? "Operator" : operatorDisplay.Trim();
-        var partner = string.IsNullOrWhiteSpace(partnerDisplay) ? "Кир" : partnerDisplay.Trim();
-        // Collision with Citizen seat id — guest bootstrap (LatchPaint) when sticky nick is "Citizen".
-        if (string.Equals(partner, "Citizen", StringComparison.OrdinalIgnoreCase))
-            partner = "Кир";
-
-        var citizen = string.IsNullOrWhiteSpace(citizenDisplay) ? "Citizen" : citizenDisplay.Trim();
+        var face = string.IsNullOrWhiteSpace(citizenDisplay) ? "Citizen" : citizenDisplay.Trim();
+        if (string.Equals(face, op, StringComparison.OrdinalIgnoreCase))
+            face = "Citizen";
 
         return
         [
             new("operator", op, Standing.Human),
-            new("partner", partner, Standing.Agent),
-            new("citizen", citizen, Standing.Agent)
+            new("citizen", face, Standing.Agent)
         ];
     }
 
@@ -84,6 +85,11 @@ public static class GlassIntercomContacts
         if (Find(roster, preferred) is not null)
             return preferred!.Trim();
 
+        // Pre-2-row latch: partner row removed — DM to Face.
+        if (string.Equals(preferred, "partner", StringComparison.OrdinalIgnoreCase)
+            && Find(roster, "citizen") is not null)
+            return "citizen";
+
         return roster.Count > 0 ? roster[0].Id : null;
     }
 
@@ -106,7 +112,10 @@ public static class GlassIntercomContacts
             else if (root.TryGetProperty("peer_id", out var peer) && peer.ValueKind == JsonValueKind.String)
                 selected = peer.GetString();
 
-            if (root.TryGetProperty("contacts", out var arr) && arr.ValueKind == JsonValueKind.Array)
+            // When caller passes live SSOT roster — selected_id only (latch contacts may be poisoned).
+            if (roster is null
+                && root.TryGetProperty("contacts", out var arr)
+                && arr.ValueKind == JsonValueKind.Array)
             {
                 var custom = new List<Contact>();
                 foreach (var el in arr.EnumerateArray())
