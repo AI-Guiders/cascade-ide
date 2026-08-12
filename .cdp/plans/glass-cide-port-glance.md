@@ -12,7 +12,7 @@ Glance · CIDE SSOT · **not** Seeming-Done · **цейтнот**
 | Citizen Done toward 15.08 | **REOPENED** 2026-08-08 · prior full-ready stamp seeming vs throw-Cursor · peer sit-internet missing |
 | ALL SURFACES ADOPTED | **Done** 2026-08-08 · Themes Dig REJECT · Intercom relate Dig REJECT (Avalonia SSOT) · densest Live families shipped |
 | nested[axb] densest wave | **shipped** Open·GoTo·Attach·Git·Build·Debug · Themes Dig REJECT · Intercom relate Dig REJECT |
-| SoftOrgan Face Done | Soft:QRH cards VERIFY · dig=PNG + operator in-thread steer nested |
+| SoftInstrument Face Done | Soft:QRH cards VERIFY · dig=PNG + operator in-thread steer nested |
 
 ## Full-a bar (per family)
 dig CIDE → wire **same** type/API → PNG → stamp. Invent REJECT. No same-type SSOT for WPF → Dig REJECT stamp (not leave partial forever / not biped await).

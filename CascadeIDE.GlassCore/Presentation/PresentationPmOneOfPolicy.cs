@@ -78,7 +78,7 @@ public static class PresentationPmOneOfPolicy
     public static PresentationAnchorKind? FromPlanLatch() => null;
 
     /// <summary>
-    /// SoftOrgan seats: quiet republish = chrome tip only.
+    /// SoftInstrument seats: quiet republish = chrome tip only.
     /// <paramref name="showFace"/> = PlaceOrgan human attention → SelectMfd when mfd_page set.
     /// </summary>
     public static bool SeatsMaySelectMfd(bool showFace, string? seatsMfdPage) =>

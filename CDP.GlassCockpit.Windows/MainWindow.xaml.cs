@@ -50,7 +50,7 @@ public partial class MainWindow : Window
         _latches.DiskChanged += OnDiskChanged;
         _latches.IgniteWakeChanged += OnIgniteWakeChanged;
         _latches.IgniteChanged += OnIgniteChanged;
-        _latches.SoftOrganChanged += OnSoftOrganChanged;
+        _latches.SoftInstrumentChanged += OnSoftInstrumentChanged;
         _latches.AlertChanged += OnAlertChanged;
         _latches.QrhChanged += OnQrhChanged;
         _latches.EclChanged += OnEclChanged;

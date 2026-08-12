@@ -22,7 +22,7 @@ public static class GlassChordCatalog
         new("tp", "Slash /topics", "slash_topics", "List Intercom topics"),
         new("lt", "Slash /letter", "slash_letter", "Agent Who letter links"),
         new("fd", "MFD FDS", "mfd_fds", "Flight Data Storage shelf"),
-        new("db", "MFD DomainBoard", "mfd_domain_board", "SoftOrgan domain cards board"),
+        new("db", "MFD DomainBoard", "mfd_domain_board", "SoftInstrument domain cards board"),
         new("at", "Slash /attach", "slash_attach", "Attach chip from editor selection"),
         new("op", "Slash /open", "slash_open", "Open path[:line] via slash"),
         new("cz", "Slash /citizen", "slash_citizen", "Habitat citizen dialog"),

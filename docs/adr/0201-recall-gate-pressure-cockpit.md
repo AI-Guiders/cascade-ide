@@ -12,7 +12,7 @@ Lifecycle already has `recall`, but agents skipped it under AutoIgnition and con
 
 ## Decision (product)
 
-Cockpit-visible recall gate on pressure soft-organ: **pull → reconcile (self-steer) → align → ready**. Reconcile includes internal-locus steer when memo+SSOT suffice. Not a new top-level `CdpPhase`.
+Cockpit-visible recall gate on pressure soft-instrument: **pull → reconcile (self-steer) → align → ready**. Reconcile includes internal-locus steer when memo+SSOT suffice. Not a new top-level `CdpPhase`.
 
 ## Consequences
 

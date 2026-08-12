@@ -9,7 +9,7 @@ namespace CascadeIDE.Features.Cdp;
 /// <summary>
 /// Agent Find desk pulse → quiet chrome band.
 /// Watches find_desk-LATEST.json; paints <see cref="MainWindowViewModel.AgentFindDeskChromeHint"/>.
-/// Idle (no chrome_hint) stays silent — not EICAS. SoftOrganMfdGlance RelatedFiles stays ←refactor.
+/// Idle (no chrome_hint) stays silent — not EICAS. SoftInstrumentMfdGlance RelatedFiles stays ←refactor.
 /// </summary>
 internal sealed class CdpFindDeskProjector : IDisposable
 {

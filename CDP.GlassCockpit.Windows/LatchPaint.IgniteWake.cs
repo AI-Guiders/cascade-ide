@@ -3,7 +3,7 @@ using System.Text.Json;
 
 namespace CDP.GlassCockpit.Windows;
 
-/// <summary>ignite-wake-LATEST.json → StatusText + SoftOrgan tip (Autoi wake consumer).</summary>
+/// <summary>ignite-wake-LATEST.json → StatusText + SoftInstrument tip (Autoi wake consumer).</summary>
 internal static partial class LatchPaint
 {
     public const string IgniteWakeSchema = "ignite_wake_latch/v0";

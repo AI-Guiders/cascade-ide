@@ -4,7 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
-using CascadeIDE.SoftOrgan;
+using CascadeIDE.SoftInstrument;
 
 namespace CDP.GlassCockpit.Windows;
 
@@ -51,11 +51,11 @@ internal sealed class GlassRedirectedTest : IDisposable
         startInfo.ArgumentList.Add("-nologo");
         startInfo.ArgumentList.Add("--verbosity");
         startInfo.ArgumentList.Add("minimal");
-        // Prefer a fast SoftOrgan glance filter for dogfood; full suite still available via Avalonia SSOT.
+        // Prefer a fast SoftInstrument glance filter for dogfood; full suite still available via Avalonia SSOT.
         if (DisplayTarget.Contains("CascadeIDE.Tests", StringComparison.OrdinalIgnoreCase))
         {
             startInfo.ArgumentList.Add("--filter");
-            startInfo.ArgumentList.Add("FullyQualifiedName~SoftOrganMfdGlanceTests");
+            startInfo.ArgumentList.Add("FullyQualifiedName~SoftInstrumentMfdGlanceTests");
         }
 
         startInfo.Environment["DOTNET_CLI_UI_LANGUAGE"] = "en-US";

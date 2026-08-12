@@ -39,11 +39,11 @@ IdeCockpit вырос peel'ами. `op=as_built` уже сканирует пр�
 | ccu | 0097 ComputingUnits | **real-ish** multi-unit + Build peel | Attention/DeskDetail/WorldScene/Focus/DeskLoci/DeskNext/SniperLocus/SysOrgan/GoVerbs/OrganJsonPulse; BuildAsync thin; **Ingress** + **Nav** + WorldGo + LegacyTiles peels (0.5.280) |
 | dal | 0102 DAL | **real-ish** `Cockpit/DataAcquisition` | Toolchain PATH probe |
 | databus | 0099 IDataBus | **real** + host | DeskDataBusHost publishes DeskSurfaceBuilt |
-| channel | IChannel | **real** `DeferredSoftOrganChannel` | Peel delegates Peek; ApplyDeferred → IdeSoftOrganBoard (0.5.279) |
+| channel | IChannel | **real** `DeferredSoftInstrumentChannel` | Peel delegates Peek; ApplyDeferred → IdeSoftInstrumentBoard (0.5.279) |
 | cds | ICdsRouter | **real** `AttentionCdsRouter` + `DeskGoMapCatalog` | Peel NormalizeAttentionRouting; GoMap → CDS catalog |
 | ids | IdeDisplay | **real** `FeatureSearchUnit` | Peel SearchFeatures; Cockpit/Ids |
 | compositor | ISurfaceCompositor | **real** seats+tiles compositors | Peel projects; compose under Cockpit/ |
-| surface | Surface mounts | **real-ish** gate/match/presenter/alias/meta+presentMode/pin+layout+placeable/world+editor+fallbackSnap + SoftOrgans | **ISoftOrganBoard** seats+SoftDispatch; Quality Present wantFull; **ArchDesk**/**RefactorPlan** SoftOrganKind (0.5.278) |
+| surface | Surface mounts | **real-ish** gate/match/presenter/alias/meta+presentMode/pin+layout+placeable/world+editor+fallbackSnap + SoftInstruments | **ISoftInstrumentBoard** seats+SoftDispatch; Quality Present wantFull; **ArchDesk**/**RefactorPlan** SoftInstrumentKind (0.5.278) |
 | instrument | Instrument deck | **real** `DeskInstrumentMountRegistry` | Seats sync → deck; JSON pulse on surface |
 | gun | CASCOPE* | **CDPCOPE*** | ADR 0200 |
 
@@ -74,6 +74,6 @@ IdeCockpit вырос peel'ами. `op=as_built` уже сканирует пр�
 
 ## Ship notes (cdp-mcp)
 
-- **0.5.281** — DeskWireParityTests split SoftOrgans + Ccu (file_lines).
-- **0.5.282** — **ps1_scene** PowerShell ISE-analogue habitat (`cdp_ps1_scene` / `go=ps1_*`): put→buffer→AST check→`pwsh -File`→last under `.cdp/ps1/`. Soft-organ Meta (off ListTools thrash). Full-ready habitat axis — not Avalonia ISE clone.
-- **0.5.283** — **Ps1Desk SoftBoard**: SoftOrganKind + seat pin on M (`ps1_scene` pulse); put/run stay tool ops.
+- **0.5.281** — DeskWireParityTests split SoftInstruments + Ccu (file_lines).
+- **0.5.282** — **ps1_scene** PowerShell ISE-analogue habitat (`cdp_ps1_scene` / `go=ps1_*`): put→buffer→AST check→`pwsh -File`→last under `.cdp/ps1/`. Soft-instrument Meta (off ListTools thrash). Full-ready habitat axis — not Avalonia ISE clone.
+- **0.5.283** — **Ps1Desk SoftBoard**: SoftInstrumentKind + seat pin on M (`ps1_scene` pulse); put/run stay tool ops.

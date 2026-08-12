@@ -9,7 +9,7 @@ using CascadeIDE.Services.Presentation;
 namespace CDP.GlassCockpit.Windows;
 
 /// <summary>
-/// seats-LATEST → SoftOrganBand cabin chrome.
+/// seats-LATEST → SoftInstrumentBand cabin chrome.
 /// Quiet republish: chrome tip only (no MFD steal).
 /// <c>show_face</c> (PlaceOrgan / Citizen go): BringCabinAttention + SelectMfd or Prefer P.
 /// </summary>
@@ -27,7 +27,7 @@ public partial class MainWindow
                     return;
 
                 _softOrgans.Apply("cabin", view.ChromeHint);
-                PaintSoftOrganBand();
+                PaintSoftInstrumentBand();
 
                 if (view.ShowFace)
                 {

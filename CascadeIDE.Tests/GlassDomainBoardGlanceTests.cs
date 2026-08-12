@@ -1,6 +1,6 @@
 #nullable enable
 using Xunit;
-using CascadeIDE.SoftOrgan;
+using CascadeIDE.SoftInstrument;
 
 namespace CascadeIDE.Tests;
 
@@ -19,8 +19,8 @@ public sealed class GlassDomainBoardGlanceTests
             ## last_ship
             - 2026-07-31: Autonomous Continuity Contract stamped
             """);
-        File.WriteAllText(Path.Combine(dir, "softorgan-human-viz.md"), """
-            # Domain: softorgan-human-viz
+        File.WriteAllText(Path.Combine(dir, "softinstrument-human-viz.md"), """
+            # Domain: softinstrument-human-viz
 
             ## last_ship
             - 2026-08-04 · Arch board
@@ -32,7 +32,7 @@ public sealed class GlassDomainBoardGlanceTests
             Assert.NotNull(snap);
             Assert.Equal(2, snap!.CardCount);
             Assert.Contains(snap.Cards, c => c.Id == "ignite");
-            Assert.Contains(snap.Cards, c => c.Id == "softorgan-human-viz");
+            Assert.Contains(snap.Cards, c => c.Id == "softinstrument-human-viz");
 
             var chips = GlassDomainBoardGlance.BuildInstrument(snap);
             Assert.Equal(new GlassGlanceChip("DOM", "LIVE", "ok"), chips[0]);

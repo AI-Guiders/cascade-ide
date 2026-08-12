@@ -1,7 +1,7 @@
 #nullable enable
 using System.IO;
 using CascadeIDE.Features.Cdp;
-using CascadeIDE.SoftOrgan;
+using CascadeIDE.SoftInstrument;
 
 namespace CDP.GlassCockpit.Windows;
 
@@ -34,7 +34,7 @@ internal sealed class LatchHub : IDisposable
     /// <summary>ecl-LATEST.json path (EICAS checklist advisory).</summary>
     public event Action<string>? EclChanged;
 
-    /// <summary>seats-LATEST.json path (MFD select + cabin SoftOrgan chrome).</summary>
+    /// <summary>seats-LATEST.json path (MFD select + cabin SoftInstrument chrome).</summary>
     public event Action<string>? SeatsChanged;
 
     /// <summary>land-LATEST.json path (agent cdp_land → AvalonEdit open/goto).</summary>
@@ -53,7 +53,7 @@ internal sealed class LatchHub : IDisposable
     public event Action<string>? IgniteChanged;
 
     /// <summary>organId, chrome_hint (null/blank = clear).</summary>
-    public event Action<string, string?>? SoftOrganChanged;
+    public event Action<string, string?>? SoftInstrumentChanged;
 
     public void Start()
     {
@@ -82,8 +82,8 @@ internal sealed class LatchHub : IDisposable
         TryFireExisting(CdpHabitatPaths.DiskLatchFileName, DiskChanged);
         TryFireExisting(CdpHabitatPaths.IgniteWakeLatchFileName, IgniteWakeChanged);
         TryFireExisting(CdpHabitatPaths.IgniteLatchFileName, IgniteChanged);
-        foreach (var id in SoftOrganLatchCatalog.Ids)
-            TryFireSoftOrgan(id + "-LATEST.json");
+        foreach (var id in SoftInstrumentLatchCatalog.Ids)
+            TryFireSoftInstrument(id + "-LATEST.json");
     }
 
     void OnFs(object sender, FileSystemEventArgs e)
@@ -120,8 +120,8 @@ internal sealed class LatchHub : IDisposable
             CdpLatchIo.PostSettledIfExists(CdpHabitatPaths.GetLatchPath(name), p => IgniteWakeChanged?.Invoke(p));
         else if (name.Equals(CdpHabitatPaths.IgniteLatchFileName, StringComparison.OrdinalIgnoreCase))
             CdpLatchIo.PostSettledIfExists(CdpHabitatPaths.GetLatchPath(name), p => IgniteChanged?.Invoke(p));
-        else if (SoftOrganLatchCatalog.TryParseFileName(name, out var organId))
-            CdpLatchIo.PostSettledIfExists(CdpHabitatPaths.GetLatchPath(name), _ => ApplySoftOrganFromDisk(organId, name));
+        else if (SoftInstrumentLatchCatalog.TryParseFileName(name, out var organId))
+            CdpLatchIo.PostSettledIfExists(CdpHabitatPaths.GetLatchPath(name), _ => ApplySoftInstrumentFromDisk(organId, name));
     }
 
     void TryFireExisting(string fileName, Action<string>? sink)
@@ -131,20 +131,20 @@ internal sealed class LatchHub : IDisposable
             sink?.Invoke(path);
     }
 
-    void TryFireSoftOrgan(string fileName)
+    void TryFireSoftInstrument(string fileName)
     {
-        if (!SoftOrganLatchCatalog.TryParseFileName(fileName, out var organId))
+        if (!SoftInstrumentLatchCatalog.TryParseFileName(fileName, out var organId))
             return;
         if (!File.Exists(CdpHabitatPaths.GetLatchPath(fileName)))
             return;
-        ApplySoftOrganFromDisk(organId, fileName);
+        ApplySoftInstrumentFromDisk(organId, fileName);
     }
 
-    void ApplySoftOrganFromDisk(string organId, string fileName)
+    void ApplySoftInstrumentFromDisk(string organId, string fileName)
     {
         var path = CdpHabitatPaths.GetLatchPath(fileName);
         var hint = LatchPaint.TryReadChromeHint(path);
-        SoftOrganChanged?.Invoke(organId, hint);
+        SoftInstrumentChanged?.Invoke(organId, hint);
     }
 
     public void Dispose()

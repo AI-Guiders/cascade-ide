@@ -4,7 +4,7 @@ using System.Collections.ObjectModel;
 using System.Text;
 using System.Windows;
 using System.Windows.Controls;
-using CascadeIDE.SoftOrgan;
+using CascadeIDE.SoftInstrument;
 
 namespace CDP.GlassCockpit.Windows;
 

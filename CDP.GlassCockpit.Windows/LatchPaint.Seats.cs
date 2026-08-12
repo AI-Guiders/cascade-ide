@@ -4,7 +4,7 @@ using CascadeIDE.GlassCore.Presentation;
 
 namespace CDP.GlassCockpit.Windows;
 
-/// <summary>seats-LATEST.json → SoftOrgan chrome + optional ShowFace attention.</summary>
+/// <summary>seats-LATEST.json → SoftInstrument chrome + optional ShowFace attention.</summary>
 internal static partial class LatchPaint
 {
     public const string SeatsSchema = "cide_seats_latch/v1";

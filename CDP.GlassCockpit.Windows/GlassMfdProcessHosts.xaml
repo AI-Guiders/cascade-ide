@@ -308,8 +308,8 @@
           <TextBlock x:Name="GlanceCardsStatusLabel" Text="glance · idle"
                      FontSize="11" Foreground="#888" VerticalAlignment="Center"/>
         </DockPanel>
-        <!-- SoftOrgan / HERE: human find over situations (not jargon index). -->
-        <TextBox x:Name="SoftOrganFindBox" DockPanel.Dock="Top" Height="26" Margin="0,0,0,8" Padding="6,3"
+        <!-- SoftInstrument / HERE: human find over situations (not jargon index). -->
+        <TextBox x:Name="SoftInstrumentFindBox" DockPanel.Dock="Top" Height="26" Margin="0,0,0,8" Padding="6,3"
                  Visibility="Collapsed"
                  Background="#1A1A1A" Foreground="#EEE" BorderBrush="#3A3A3A"
                  FontFamily="Consolas" FontSize="12"
@@ -355,7 +355,7 @@
         </Grid>
       </DockPanel>
     </Border>
-    <!-- SoftOrgan: SemanticMap Skia + arch board instrument (ADR 0196 as_built roles). -->
+    <!-- SoftInstrument: SemanticMap Skia + arch board instrument (ADR 0196 as_built roles). -->
     <Border x:Name="MfdSemanticMapHost" Visibility="Collapsed" Background="#121212">
       <DockPanel Margin="8">
         <DockPanel DockPanel.Dock="Top" Margin="0,0,0,6">
@@ -397,7 +397,7 @@
         </Grid>
       </DockPanel>
     </Border>
-    <!-- SoftOrgan human viz: CRS instrument cards + thread timeline (not dual FS dump). -->
+    <!-- SoftInstrument human viz: CRS instrument cards + thread timeline (not dual FS dump). -->
     <Border x:Name="MfdCorrespondenceHost" Visibility="Collapsed" Background="#121212">
       <DockPanel Margin="8">
         <DockPanel DockPanel.Dock="Top" Margin="0,0,0,6">

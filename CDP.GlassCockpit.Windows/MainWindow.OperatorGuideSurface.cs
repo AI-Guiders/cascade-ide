@@ -3,12 +3,12 @@
 using System.IO;
 using System.Windows;
 using System.Windows.Input;
-using CascadeIDE.SoftOrgan;
+using CascadeIDE.SoftInstrument;
 using CDP.GlassCockpit.Windows.UiKit;
 
 namespace CDP.GlassCockpit.Windows;
 
-/// <summary>Human HERE + SoftOrgan situations → steps (nested SoftFL Soft:QRH + HereNext).</summary>
+/// <summary>Human HERE + SoftInstrument situations → steps (nested SoftFL Soft:QRH + HereNext).</summary>
 public partial class MainWindow
 {
     OperatorSituation? _guideSituation;
@@ -33,7 +33,7 @@ public partial class MainWindow
 
     void RefreshOperatorGuideChrome()
     {
-        var soft = SoftOrganFaceHandbook.IsSoftOrganGlancePage(CurrentMfdPage());
+        var soft = SoftInstrumentFaceHandbook.IsSoftInstrumentGlancePage(CurrentMfdPage());
         if (OperatorHereLine is not null)
         {
             OperatorHereLine.Visibility = soft ? Visibility.Visible : Visibility.Collapsed;
@@ -139,7 +139,7 @@ public partial class MainWindow
         RunPaletteEntry(cmd);
     }
 
-    FrameworkElement CreateSoftOrganSituationCard(GlassGlanceChip chip)
+    FrameworkElement CreateSoftInstrumentSituationCard(GlassGlanceChip chip)
     {
         var card = GlassDeckCard.FromChip(chip);
         card.Cursor = Cursors.Hand;

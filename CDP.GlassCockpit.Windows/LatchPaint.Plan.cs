@@ -133,13 +133,13 @@ internal static partial class LatchPaint
         return list;
     }
 
-    /// <summary>Autoi wake belongs on SoftOrgan tip / StatusText — not Intercom chat.</summary>
+    /// <summary>Autoi wake belongs on SoftInstrument tip / StatusText — not Intercom chat.</summary>
     public static bool IsAutoiWakeFeedNoise(
         string? body,
         string? name = null,
         string? kind = null,
         string? roleLabel = null) =>
-        CascadeIDE.SoftOrgan.GlassAutoiWakeFeed.IsNoise(body, name, kind, roleLabel);
+        CascadeIDE.SoftInstrument.GlassAutoiWakeFeed.IsNoise(body, name, kind, roleLabel);
 
     /// <summary>Normalize newlines for Intercom display (Autoi filtered out before paint).</summary>
     /// <summary>Human Intercom: drop @intent/@event/@frame and peer-wire tips; keep prose.</summary>
@@ -251,7 +251,7 @@ internal static partial class LatchPaint
     }
 
     public static bool LooksLikeAutoiWake(string? body) =>
-        CascadeIDE.SoftOrgan.GlassAutoiWakeFeed.LooksLikeCharge(body);
+        CascadeIDE.SoftInstrument.GlassAutoiWakeFeed.LooksLikeCharge(body);
 
     static string? ExtractWall(string? pulse)
     {

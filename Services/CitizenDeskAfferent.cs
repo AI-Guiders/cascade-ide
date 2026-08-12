@@ -6,14 +6,14 @@ namespace CascadeIDE.Services;
 
 /// <summary>
 /// Afferent desk pulse for MAF host (citizen wire peel #12).
-/// Transfers Dark Cockpit scan: SoftOrgan-visible board → <c>@frame desk</c> grammar
+/// Transfers Dark Cockpit scan: SoftInstrument-visible board → <c>@frame desk</c> grammar
 /// compatible with CDP <c>CitizenWire.PackDesk</c> — no second SSOT.
 /// </summary>
 internal static class CitizenDeskAfferent
 {
     internal const int MaxPackedChars = 900;
 
-    /// <summary>Pack SoftOrgan + EICAS salience into wire pulse. Empty board → null.</summary>
+    /// <summary>Pack SoftInstrument + EICAS salience into wire pulse. Empty board → null.</summary>
     internal static string? TryPackFromHabitat(
         IEnumerable<string>? chromeVisibleLines,
         IEnumerable<EicasMessage>? eicasMessages,

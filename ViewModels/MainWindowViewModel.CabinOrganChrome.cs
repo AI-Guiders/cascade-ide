@@ -3,7 +3,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace CascadeIDE.ViewModels;
 
-/// <summary>Chrome hint ObservableProperty fields (Apply/Show/density live in SoftOrganChrome).</summary>
+/// <summary>Chrome hint ObservableProperty fields (Apply/Show/density live in SoftInstrumentChrome).</summary>
 public partial class MainWindowViewModel
 {
     [ObservableProperty]

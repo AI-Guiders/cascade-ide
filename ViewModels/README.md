@@ -1,17 +1,17 @@
-# Avalonia MainWindowViewModel — SoftOrgan chrome partials
+# Avalonia MainWindowViewModel — SoftInstrument chrome partials
 
-Context-economy peels for quiet SoftOrgan chrome (parity with Glass `MainWindow.SoftOrganBand`).
-SSOT triangle (Catalog · Density · Aggregator): `CascadeIDE.GlassCore/SoftOrgan/README.md`.
-Density SSOT: `CascadeIDE.GlassCore/SoftOrgan/SoftOrganChromeDensityPolicy.cs`.
-Latch id catalog: `SoftOrganLatchCatalog` (Avalonia seat ids must match — use `SaDesk` / `sa-desk`, not `sa_desk`).
+Context-economy peels for quiet SoftInstrument chrome (parity with Glass `MainWindow.SoftInstrumentBand`).
+SSOT triangle (Catalog · Density · Aggregator): `CascadeIDE.GlassCore/SoftInstrument/README.md`.
+Density SSOT: `CascadeIDE.GlassCore/SoftInstrument/SoftInstrumentChromeDensityPolicy.cs`.
+Latch id catalog: `SoftInstrumentLatchCatalog` (Avalonia seat ids must match — use `SaDesk` / `sa-desk`, not `sa_desk`).
 Avalonia façade: `Features/UiChrome/AgentChromeHintDensityPolicy.cs`.
 
-## SoftOrgan / CabinOrgan (0-sync)
+## SoftInstrument / CabinOrgan (0-sync)
 
 | Partial | Owns |
 | --- | --- |
 | `MainWindowViewModel.CabinOrganChrome.cs` | `Agent*ChromeHint` ObservableProperty fields + `NotifyPropertyChangedFor` (Show*, WorkspaceBand, density props) |
-| `MainWindowViewModel.SoftOrganChrome.cs` | Show* flags, `ShowWorkspaceChromeBand`, `Apply*ChromeHint` + normalize helper, VisibleLines/Overflow/Toggle, seat candidate table |
+| `MainWindowViewModel.SoftInstrumentChrome.cs` | Show* flags, `ShowWorkspaceChromeBand`, `Apply*ChromeHint` + normalize helper, VisibleLines/Overflow/Toggle, seat candidate table |
 | `MainWindowViewModel.ShellConstruction.cs` | Ctor shell: children VM, settings bootstrap, IdeMcp/bus/agent, LSP/DAP |
 | `MainWindowViewModel.ShellConstruction.Panels.cs` | Panel factory + post-construct wire (Chat/Git/Build/…) |
 | `MainWindowViewModel.ShellConstruction.HealthPresentation.cs` | Health/EICAS/presentation factory + post-construct wire |
@@ -31,6 +31,6 @@ Avalonia façade: `Features/UiChrome/AgentChromeHintDensityPolicy.cs`.
 | `MainWindowViewModel.Presentation.Badges.cs` | Safety level + risk/result/LOC/progress badges (~42 LOC; under gate) |
 | `MainWindowViewModel.Presentation.Regions.cs` | Region collapse, panel-hidden, MFD contour + MfdRegion aliases (~30 LOC; under gate) |
 
-Call sites keep public `Apply*ChromeHint` names. New chrome seats: add field (+ Notify attrs) in CabinOrgan, then one row in SoftOrgan seats table + Show/Apply one-liners.
+Call sites keep public `Apply*ChromeHint` names. New chrome seats: add field (+ Notify attrs) in CabinOrgan, then one row in SoftInstrument seats table + Show/Apply one-liners.
 
 Glass map: `CDP.GlassCockpit.Windows/README.md` → MainWindow partials.

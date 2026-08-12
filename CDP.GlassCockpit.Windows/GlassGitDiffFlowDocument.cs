@@ -3,7 +3,7 @@
 using System.Windows;
 using System.Windows.Documents;
 using System.Windows.Media;
-using CascadeIDE.SoftOrgan;
+using CascadeIDE.SoftInstrument;
 
 namespace CDP.GlassCockpit.Windows;
 

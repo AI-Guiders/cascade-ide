@@ -9,7 +9,7 @@ namespace CascadeIDE.Features.Cdp;
 /// <summary>
 /// Agent File Manager pulse → quiet chrome band.
 /// Watches files_desk-LATEST.json; paints <see cref="MainWindowViewModel.AgentFilesDeskChromeHint"/>.
-/// Idle (no chrome_hint) stays silent — not EICAS. SoftOrganMfdGlance unbound for SolutionExplorer.
+/// Idle (no chrome_hint) stays silent — not EICAS. SoftInstrumentMfdGlance unbound for SolutionExplorer.
 /// </summary>
 internal sealed class CdpFilesDeskProjector : IDisposable
 {

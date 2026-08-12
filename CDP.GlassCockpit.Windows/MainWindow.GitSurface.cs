@@ -7,7 +7,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Threading;
-using CascadeIDE.SoftOrgan;
+using CascadeIDE.SoftInstrument;
 
 namespace CDP.GlassCockpit.Windows;
 
@@ -235,7 +235,7 @@ public partial class MainWindow
         if (GitStatusLabel is not null)
             GitStatusLabel.Text = "git · porcelain…";
 
-        var cwd = CascadeIDE.SoftOrgan.GlassGitIgnoreFilter.ResolveToplevel(_session.WorkspaceRoot);
+        var cwd = CascadeIDE.SoftInstrument.GlassGitIgnoreFilter.ResolveToplevel(_session.WorkspaceRoot);
         var psi = new ProcessStartInfo
         {
             FileName = "git",

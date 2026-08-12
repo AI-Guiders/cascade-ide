@@ -1,7 +1,7 @@
 #nullable enable
 
 using CascadeIDE.Intercom;
-using CascadeIDE.SoftOrgan;
+using CascadeIDE.SoftInstrument;
 using Xunit;
 
 namespace CascadeIDE.Tests;

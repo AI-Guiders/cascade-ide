@@ -2,7 +2,7 @@
 
 using System.Windows;
 using System.Windows.Media;
-using CascadeIDE.SoftOrgan;
+using CascadeIDE.SoftInstrument;
 using ICSharpCode.AvalonEdit.Rendering;
 
 namespace CDP.GlassCockpit.Windows;

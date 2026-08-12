@@ -17,7 +17,7 @@
 
 <!-- AUTO:MAIN-WINDOW-SLICE:SUMMARY:BEGIN -->
 
-`MainWindowViewModel` — **композитор окна**: конструктор, подписки, мост `IIdeMcpActions` → `IdeMcpCommandExecutor`, оркестрация решения/сборки/LSP/MCP. Объём **~5.5k строк** суммарно по partial-классу `MainWindowViewModel*.cs` (**~5.5k**) плюс диспетчер `IdeMcpCommandExecutor*.cs` и `Generated/IdeMcpCommandExecutor.Generated.g.cs` (**~0k**); счётчики — ориентир по состоянию репозитория (авто: 2026-07). Чат, Git, терминал, сборка, инструментирование и т.д. — в **`Features/*`** как дочерние VM; цель дальше — **сужать** главный VM по мере доработок (вынос в сервисы, план B).
+`MainWindowViewModel` — **композитор окна**: конструктор, подписки, мост `IIdeMcpActions` → `IdeMcpCommandExecutor`, оркестрация решения/сборки/LSP/MCP. Объём **~5.7k строк** суммарно по partial-классу `MainWindowViewModel*.cs` (**~5.7k**) плюс диспетчер `IdeMcpCommandExecutor*.cs` и `Generated/IdeMcpCommandExecutor.Generated.g.cs` (**~0k**); счётчики — ориентир по состоянию репозитория (авто: 2026-08). Чат, Git, терминал, сборка, инструментирование и т.д. — в **`Features/*`** как дочерние VM; цель дальше — **сужать** главный VM по мере доработок (вынос в сервисы, план B).
 
 <!-- AUTO:MAIN-WINDOW-SLICE:SUMMARY:END -->
 
@@ -32,14 +32,14 @@
 | `MainWindowViewModel.AgentEnvironment.cs` | 121 | AEE: PFD Verify Epoch instrument, chat trace, epoch stale on write (ADR 0148 W3–W5). |
 | `MainWindowViewModel.AgentHarness.cs` | 39 | Agent harness: auto-verify coalescing after .cs writes (ADR 0166 interim). |
 | `MainWindowViewModel.AutonomousAgent.cs` | 113 | Автономный агент (Power). |
-| `MainWindowViewModel.CabinOrganChrome.cs` | 256 | Dual-cockpit cabin packing + L1 pressure / AutoIgnition continuity chrome. |
+| `MainWindowViewModel.CabinOrganChrome.cs` | 76 | Chrome hint ObservableProperty fields (Apply/Show/density live in SoftInstrumentChrome). |
 | `MainWindowViewModel.Capabilities.cs` | 23 | Реестр capabilities. |
 | `MainWindowViewModel.CascadeChord.cs` | 107 | Аккордный слой ADR 0060: корень `cascade_chord` из hotkeys.toml (по умолчанию Ctrl+K), затем тот же хвост мелодии, что после `c:`. Однозначный обычный alias (например `so`) исполняется без Enter при отсутствии более длинного alias-префикса; параметрические (`wai:`, `els:`:…) — только по Enter или из палитры. При конфликте префиксов (`gs` vs `gsu`) — точный хвост или Enter. |
 | `MainWindowViewModel.CockpitCommandLine.cs` | 24 | Cockpit Command Line на Forward host: `primary=intercom` — Skia в ChatPanel; `primary=editor` — оверлей `CockpitCommandLineOverlayView` (ADR 0120). |
 | `MainWindowViewModel.CommandPalette.cs` | 166 | Палитра команд. |
 | `MainWindowViewModel.CompactIdeLayout.cs` | 85 | Compact tier IDE-scan presentation (ADR 0171 §2.3): Forward center, PFD/Intercom right or bottom, MFD bottom. |
 | `MainWindowViewModel.CorrespondenceShell.cs` | 24 | Страница Correspondence (CRS) в оболочке Mfd (ADR 0156). |
-| `MainWindowViewModel.cs` | 379 | Главный композитор окна (partial-класс, несколько `MainWindowViewModel*.cs`). Карта файлов и ответственности — `docs/architecture-migration.md`, раздел «Срез MainWindowViewModel». |
+| `MainWindowViewModel.cs` | 387 | Главный композитор окна (partial-класс, несколько `MainWindowViewModel*.cs`). Карта файлов и ответственности — `docs/architecture-migration.md`, раздел «Срез MainWindowViewModel». |
 | `MainWindowViewModel.CSharpLsp.cs` | 138 | Запуск/перезапуск C# LSP. |
 | `MainWindowViewModel.CursorAcp.cs` | 36 | Путь Cursor ACP и предпочитаемая модель. |
 | `MainWindowViewModel.DebugStackUi.cs` | 35 | Выбор кадра в панели «Стек» Mfd: подгрузка Locals для выбранного кадра (DAP). |
@@ -69,8 +69,14 @@
 | `MainWindowViewModel.McpBreakpointReveal.cs` | 49 | MCP: постановка брейкпоинта с загрузкой решения и показом строки в редакторе. |
 | `MainWindowViewModel.McpHostBridge.cs` | 54 | Внутренний мост для `MainWindowIdeMcpHost` (Wave 2 Big Bang). |
 | `MainWindowViewModel.MfdShell.cs` | 62 | Оболочка Mfd: одна активная страница; навигация — команды и палитра. Якорь на экране задаётся presentation (зона Mfd в main и/или окно-хост). |
-| `MainWindowViewModel.PfdBackgroundStatus.cs` | 235 | Компактная полоса статуса над PFD/Forward: Verify Epoch (AEE W3) и solution warm-up (ADR 0141). |
-| `MainWindowViewModel.Presentation.cs` | 305 | Вычисляемые свойства разметки, Workspace Health и видимости панелей (режимы UI). |
+| `MainWindowViewModel.PfdBackgroundStatus.cs` | 124 | Компактная полоса статуса над PFD/Forward: warmup/HCI refresh (ADR 0141). Verify Epoch → `PfdBackgroundStatus.VerifyEpoch`. |
+| `MainWindowViewModel.PfdBackgroundStatus.VerifyEpoch.cs` | 121 | Verify Epoch (AEE W3) on PFD status strip: apply, commands, ticker, hide timers. |
+| `MainWindowViewModel.Presentation.Badges.cs` | 42 | Safety level badges + risk/result/LOC/progress cards (Presentation slice). |
+| `MainWindowViewModel.Presentation.Capabilities.cs` | 27 | UiMode capabilities + instrumentation dock visibility flags. |
+| `MainWindowViewModel.Presentation.cs` | 73 | Host surface layout (режимы UI). Capabilities → `Presentation.Capabilities`; Skia → `Presentation.Skia`; IdeHealth → `Presentation.IdeHealth`; badges → `Presentation.Badges`; regions → `Presentation.Regions`. |
+| `MainWindowViewModel.Presentation.IdeHealth.cs` | 104 | IDE Health strip / EICAS adjacency / cockpit short lines / Skia mount contexts. |
+| `MainWindowViewModel.Presentation.Regions.cs` | 30 | PFD/MFD region collapse, panel-hidden flags, MFD contour + legacy MfdRegion aliases. |
+| `MainWindowViewModel.Presentation.Skia.cs` | 42 | Skia zone-geometry overlay + instrument mount styles (Presentation slice). |
 | `MainWindowViewModel.PresentationLayout.CockpitSurfaceSnapshot.cs` | 8 | Сборка `CockpitSurfaceState` главного окна (`Build`). |
 | `MainWindowViewModel.PresentationLayout.cs` | 113 | ADR 0017: строка `presentation` и второй `TopLevel` — `MfdHostWindow` с полным вторичным контуром (п. 8). |
 | `MainWindowViewModel.PresentationLayout.HostShell.cs` | 47 | События «окно-хост открыло полный контур» — скрытие колонок в main (`PresentationLayout`). |
@@ -78,14 +84,22 @@
 | `MainWindowViewModel.PresentationLayoutAuthority.cs` | 14 | Запись intent видимости панелей (семантика «хочу»); фактическая поверхность — `MainWindowShellSurfaceCompositor`. |
 | `MainWindowViewModel.PresentationTier.cs` | 75 | Presentation tier compact vs cockpit (ADR 0171). |
 | `MainWindowViewModel.PrimaryWorkSurface.cs` | 77 | Переключатель лобового якоря Intercom / Editor (ADR 0120). |
-| `MainWindowViewModel.SettingsReactive.cs` | 228 | Реакции на изменение полей настроек и ключей API: диск, автономный агент, панели. |
-| `MainWindowViewModel.ShellConstruction.cs` | 376 | Конструктор и композиция shell: дочерние VM, шина, DAP/HCI, топология presentation (ADR 0017). |
-| `MainWindowViewModel.ShellSession.cs` | 192 | Wave 2 этап 3: `ShellChromeViewModel` + прокси на MWVM для привязок и presentation. |
+| `MainWindowViewModel.SettingsReactive.cs` | 99 | Settings reactions: Markdown/MCP/AI mode/keys/chat chords. HCI → `SettingsReactive.HybridIndex`; Intercom transport → `SettingsReactive.Intercom`. |
+| `MainWindowViewModel.SettingsReactive.HybridIndex.cs` | 79 | Settings reactions: workspace splitters + Hybrid Index (HCI). |
+| `MainWindowViewModel.SettingsReactive.Intercom.cs` | 62 | Settings reactions: Intercom transport fields. |
+| `MainWindowViewModel.ShellConstruction.cs` | 158 | Конструктор и композиция shell: дочерние VM, шина, DAP/HCI (ADR 0017). Panels → `ShellConstruction.Panels`; health/presentation → `ShellConstruction.HealthPresentation`; glass patch → `ShellConstruction.GlassPatch`; diagnose → `ShellConstruction.Diagnose`. |
+| `MainWindowViewModel.ShellConstruction.Diagnose.cs` | 31 | Ctor-time diagnose-files helpers for agent environment warmup. |
+| `MainWindowViewModel.ShellConstruction.GlassPatch.cs` | 112 | Live glass/topology patch from agent desk latch → settings.toml display fields. |
+| `MainWindowViewModel.ShellConstruction.HealthPresentation.cs` | 70 | Ctor health/presentation factory — returns values for readonly assign in the constructor. |
+| `MainWindowViewModel.ShellConstruction.Panels.cs` | 115 | Ctor panel factory — returns VMs for readonly/get-only assign in the constructor. |
+| `MainWindowViewModel.ShellSession.cs` | 99 | Wave 2 этап 3: `ShellChromeViewModel` + прокси на MWVM для привязок и presentation. Handlers → `ShellSession.Handlers`. |
+| `MainWindowViewModel.ShellSession.Handlers.cs` | 100 | Shell chrome change handlers: UI mode, region expand, panel visibility, MFD page. |
 | `MainWindowViewModel.ShellState.AiProviders.cs` | 58 | Часть `ShellState`: режим ИИ и облачные ключи привязаны к нижнему приложению/чату. |
 | `MainWindowViewModel.ShellState.AutonomousAgentStripe.cs` | 64 | Часть `ShellState`: полоса/карточки автономной задачи агента, безопасности, LOC и сводки тестов для IDE Health. |
 | `MainWindowViewModel.ShellState.ChatAndSessionConfig.cs` | 34 | Часть `ShellState`: ввод чата и конфиг MCP/ACP для автономной сессии. |
 | `MainWindowViewModel.ShellState.cs` | 12 | Состояние раскладки главного окна: три зоны внимания в `MainGrid` (PFD · Forward · MFD), см. ADR 0021 и `docs/ui-ux/cascade-ide-ui-layout-v1.md`. Терминал, сборка, Git и пр. — во вторичном контуре колонки MFD (`MfdShellView` / `MfdShellPageStack`); отдельной строки «нижней панели» на всю ширину под сеткой нет. Режим ИИ и облачные ключи — `MainWindowViewModel.ShellState.AiProviders.cs`; чат и MCP/ACP — `MainWindowViewModel.ShellState.ChatAndSessionConfig.cs`; полоса агента / тесты для IDE Health — `MainWindowViewModel.ShellState.AutonomousAgentStripe.cs`; регион MFD/PFD и страницы контура — `ShellState.RegionAndContour.cs`; режим/UI-сессия и полосы — `ShellState.UiSessionChrome.cs`; модель/Kroki — `ShellState.ModelPullMarkdown.cs`. |
 | `MainWindowViewModel.ShellState.ModelPullMarkdown.cs` | 20 | Часть `MainWindowViewModel`: pull модели и превью Markdown / Kroki. |
+| `MainWindowViewModel.SoftInstrumentChrome.cs` | 181 | SoftInstrument quiet-chrome — Show*/Apply*/VisibleLines+Overflow (Glass SoftInstrumentBand parity). |
 | `MainWindowViewModel.SolutionBuild.cs` | 125 | Загрузка решения, Ollama install; сборка — `MainWindowBuildSessionViewModel`. |
 | `MainWindowViewModel.SolutionExplorer.cs` | 112 | Solution Explorer: фильтр, compact, track active, индекс файлов (ADR 0167). |
 | `MainWindowViewModel.SolutionWarmup.cs` | 61 | Solution warm-up: оркестратор фаз загрузки решения, лампа статуса и подписка на DataBus (ADR 0141). |

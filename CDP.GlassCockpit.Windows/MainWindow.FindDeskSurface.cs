@@ -20,7 +20,7 @@ public partial class MainWindow
         if (MfdFindDeskList is not null)
             MfdFindDeskList.ItemsSource = _findDeskRows;
         EnsureFindDeskHandsWired();
-        _latches.SoftOrganChanged += OnSoftOrganForFindDesk;
+        _latches.SoftInstrumentChanged += OnSoftInstrumentForFindDesk;
         TryHydrateFindDeskFace();
     }
 
@@ -47,7 +47,7 @@ public partial class MainWindow
         _findDeskHandsWired = true;
     }
 
-    void OnSoftOrganForFindDesk(string organId, string? _)
+    void OnSoftInstrumentForFindDesk(string organId, string? _)
     {
         if (!organId.Equals("find_desk", StringComparison.OrdinalIgnoreCase))
             return;
@@ -100,7 +100,7 @@ public partial class MainWindow
             {
                 MfdBody.Text = view is { Active: true }
                     ? $"{status}\n{view.Pulse ?? ""}\n/search pattern · DoubleClick hit → open"
-                    : "find · idle — /search pattern · SoftOrgan find_desk latch";
+                    : "find · idle — /search pattern · SoftInstrument find_desk latch";
             }
 
             StatusText.Text = $"glass · {status} · {DateTime.Now:HH:mm:ss}";

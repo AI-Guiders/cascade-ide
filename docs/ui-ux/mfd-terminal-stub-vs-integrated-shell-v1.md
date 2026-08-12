@@ -12,11 +12,11 @@
 ## Dual-HCI (Glass WPF)
 
 - **Operator unHOLD 2026-08-03:** full WPF hosts (design later) — dig reject «ConPTY stays Avalonia forever» cancelled for depth wave.
-- **Glass now (2026-08-04):** `EasyWindowsTerminalControl` (WT WPF VT) — Avalonia EOL, cabin takes ready WPF terminal. Launch cmdline from GlassCore `IntegratedShellLaunch`. SoftOrgan: `■ Glass VT`.
+- **Glass now (2026-08-04):** `EasyWindowsTerminalControl` (WT WPF VT) — Avalonia EOL, cabin takes ready WPF terminal. Launch cmdline from GlassCore `IntegratedShellLaunch`. SoftInstrument: `■ Glass VT`.
 - **Glass ConPTY peel path:**
   1. ~~Extract/link DataAcquisition → GlassCore~~ **DONE**
   2. ~~Glass WPF VT host~~ **DONE** (`EasyWindowsTerminalControl` · not TextBox)
-  3. SoftOrgan glance → `■ Glass VT` when lived dogfood.
+  3. SoftInstrument glance → `■ Glass VT` when lived dogfood.
 
 ## Что ещё не заявлено
 

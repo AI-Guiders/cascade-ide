@@ -2,7 +2,7 @@
 
 namespace CascadeIDE.Intercom;
 
-/// <summary>Glass-local Ctrl+Q command list (Avalonia-free). SoftOrgan EICAS family (QRH/ECL/alert) peels here — not Avalonia IdeCommandRegistry dump.</summary>
+/// <summary>Glass-local Ctrl+Q command list (Avalonia-free). SoftInstrument EICAS family (QRH/ECL/alert) peels here — not Avalonia IdeCommandRegistry dump.</summary>
 public sealed record GlassPaletteEntry(string Id, string Title, string Help, string? Keywords = null);
 
 public static class GlassCommandPaletteCatalog
@@ -52,7 +52,7 @@ public static class GlassCommandPaletteCatalog
         new("mfd_editor", "MFD: Editor", "Select MFD Editor page", "mfd editor"),
         new("mfd_terminal", "MFD: Terminal", "Select MFD Terminal page", "mfd terminal"),
         new("mfd_fds", "MFD: Flight Data Storage", "Partner shelf — plans/reports/pressure", "mfd fds flight data storage shelf"),
-        new("mfd_domain_board", "MFD: DomainBoard", "SoftOrgan domain cards instrument (.cdp/domain)", "mfd domain board ownership cards rules learn"),
+        new("mfd_domain_board", "MFD: DomainBoard", "SoftInstrument domain cards instrument (.cdp/domain)", "mfd domain board ownership cards rules learn"),
         new("mfd_build", "MFD: Build", "Select MFD Build redirected log", "mfd build"),
         new("mfd_tests", "MFD: Tests", "Select MFD Tests redirected log", "mfd tests"),
         new("mfd_git", "MFD: Git", "Select MFD Git porcelain+diff host", "mfd git status scm porcelain"),
@@ -71,9 +71,9 @@ public static class GlassCommandPaletteCatalog
         new("mfd_hypotheses", "MFD: Hypotheses", "Debug hypotheses glance", "mfd hypotheses debug"),
         new("mfd_chat", "MFD: Chat", "Intercom presence MFD glance", "mfd chat intercom presence"),
         new("mfd_here_next", "HERE/NEXT", "Where you are in IDE + next steps (ADR 0014)", "here next situ guide checklist where am i"),
-        new("soft_qrh", "Soft: QRH", "Situations → steps (eQRH human Face)", "soft qrh eqrh handbook eicas softorgan situations"),
-        new("soft_ecl", "Soft: ECL", "ECL situations → steps", "soft ecl chk checklist eicas softorgan"),
-        new("soft_alert", "Soft: Alert", "Alert/SA situations → steps", "soft alert eicas sa softorgan"),
+        new("soft_qrh", "Soft: QRH", "Situations → steps (eQRH human Face)", "soft qrh eqrh handbook eicas softinstrument situations"),
+        new("soft_ecl", "Soft: ECL", "ECL situations → steps", "soft ecl chk checklist eicas softinstrument"),
+        new("soft_alert", "Soft: Alert", "Alert/SA situations → steps", "soft alert eicas sa softinstrument"),
         new("toggle_pm_oneof_role", "OneOf P/M toggle", "Toggle P↔M on (P/M)(F) OneOf host", "oneof pm topology toggle slash"),
     ];
 

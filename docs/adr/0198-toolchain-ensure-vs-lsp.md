@@ -12,7 +12,7 @@
 | [0102](0102-data-acquisition-layer-boundary-and-contract.md) | DAL — добыча внешнего |
 | [0190](0190-agent-ide-settings-organ.md) | `lsp_ensure` (intelligence) |
 | [0197](0197-cdp-mcp-cockpit-wire-parity-vs-cide.md) | Шов DAL; gap board |
-| [0196](0196-architecture-staging-board-arch-desk.md) | Soft-organ pattern |
+| [0196](0196-architecture-staging-board-arch-desk.md) | Soft-instrument pattern |
 
 ## Резюме
 

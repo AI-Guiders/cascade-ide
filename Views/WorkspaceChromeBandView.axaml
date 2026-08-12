@@ -8,7 +8,7 @@
         <views:EicasAlertsBarView Grid.Row="0"
                                   IsVisible="{Binding ShowEicasAlertsBar}"/>
         <StackPanel Grid.Row="1">
-            <!-- SoftOrgan chrome density: top-N + overflow (click expand/collapse; Glass parity). -->
+            <!-- SoftInstrument chrome density: top-N + overflow (click expand/collapse; Glass parity). -->
             <ItemsControl ItemsSource="{Binding AgentChromeHintVisibleLines}">
                 <ItemsControl.ItemTemplate>
                     <DataTemplate x:DataType="x:String">
@@ -25,7 +25,7 @@
                     BorderThickness="0"
                     Cursor="Hand"
                     HorizontalAlignment="Left"
-                    ToolTip.Tip="Click to expand / collapse SoftOrgan latches"
+                    ToolTip.Tip="Click to expand / collapse SoftInstrument latches"
                     Command="{Binding ToggleAgentChromeHintOverflowCommand}"
                     IsVisible="{Binding ShowAgentChromeHintOverflow}">
                 <TextBlock Opacity="0.55"

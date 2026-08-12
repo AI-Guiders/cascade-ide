@@ -74,7 +74,7 @@ public partial class MainWindow
                     return;
                 }
 
-                // Autoi wake → SoftOrgan tip / StatusText (ignite-wake latch), not Intercom chat.
+                // Autoi wake → SoftInstrument tip / StatusText (ignite-wake latch), not Intercom chat.
                 if (LatchPaint.IsAutoiWakeFeedNoise(view.Body, view.Name, view.Kind, view.RoleLabel))
                 {
                     StatusText.Text = $"glass · {view.StatusLine} · tip only · {DateTime.Now:HH:mm:ss}";
@@ -390,7 +390,7 @@ public partial class MainWindow
         string Body,
         string When,
         IReadOnlyList<CascadeIDE.Intercom.GlassAttachChip>? Chips = null,
-        IReadOnlyList<CascadeIDE.SoftOrgan.GlassGlanceChip>? Pointers = null,
+        IReadOnlyList<CascadeIDE.SoftInstrument.GlassGlanceChip>? Pointers = null,
         int Ordinal = 0,
         bool IsSelected = false,
         bool IsHighlighted = false)

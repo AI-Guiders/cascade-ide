@@ -34,7 +34,7 @@ Human-face axe + shot protocol `#CIDE`; world dig under doubt.
 ## Shipped evidence (today)
 - Intercom Radio pointer · `daeb2221` · PNG `scratch/intercom-radio-pointer-20260804.png`
 - Editor situ cards · PNG `scratch/editor-situ-cards-20260804.png`
-- Domain: `.cdp/domain/glass-intercom.md` · `softorgan-human-viz.md`
+- Domain: `.cdp/domain/glass-intercom.md` · `softinstrument-human-viz.md`
 
 ## Do not
 - Resume Autoi into discussion chat «Intercom Radio instruments»

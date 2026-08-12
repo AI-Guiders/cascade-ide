@@ -1,17 +1,17 @@
 #nullable enable
 
-using CascadeIDE.SoftOrgan;
+using CascadeIDE.SoftInstrument;
 
 namespace CascadeIDE.Features.UiChrome;
 
 /// <summary>
-/// Avalonia façade — SoftOrgan density SSOT lives in GlassCore
-/// (<see cref="SoftOrganChromeDensityPolicy"/>).
+/// Avalonia façade — SoftInstrument density SSOT lives in GlassCore
+/// (<see cref="SoftInstrumentChromeDensityPolicy"/>).
 /// </summary>
 public static class AgentChromeHintDensityPolicy
 {
-    public const int DefaultMaxVisible = SoftOrganChromeDensityPolicy.DefaultMaxVisible;
-    public const string CollapseLabel = SoftOrganChromeDensityPolicy.CollapseLabel;
+    public const int DefaultMaxVisible = SoftInstrumentChromeDensityPolicy.DefaultMaxVisible;
+    public const string CollapseLabel = SoftInstrumentChromeDensityPolicy.CollapseLabel;
 
     public readonly record struct Hint(string Id, string Text, int Priority);
 
@@ -24,15 +24,15 @@ public static class AgentChromeHintDensityPolicy
         public bool HasOverflow => !string.IsNullOrWhiteSpace(OverflowLine);
     }
 
-    public static int PriorityFor(string id) => SoftOrganChromeDensityPolicy.PriorityFor(id);
+    public static int PriorityFor(string id) => SoftInstrumentChromeDensityPolicy.PriorityFor(id);
 
     public static Result Collapse(
         IEnumerable<Hint> hints,
         int maxVisible = DefaultMaxVisible,
         bool expanded = false)
     {
-        var mapped = hints.Select(h => new SoftOrganChromeDensityPolicy.Hint(h.Id, h.Text, h.Priority));
-        var r = SoftOrganChromeDensityPolicy.Collapse(mapped, maxVisible, expanded);
+        var mapped = hints.Select(h => new SoftInstrumentChromeDensityPolicy.Hint(h.Id, h.Text, h.Priority));
+        var r = SoftInstrumentChromeDensityPolicy.Collapse(mapped, maxVisible, expanded);
         return new Result(r.VisibleLines, r.HiddenCount, r.OverflowLine, r.IsExpanded);
     }
 
@@ -40,11 +40,11 @@ public static class AgentChromeHintDensityPolicy
         bool currentlyExpanded,
         int totalHintCount,
         int maxVisible = DefaultMaxVisible) =>
-        SoftOrganChromeDensityPolicy.ToggleExpanded(currentlyExpanded, totalHintCount, maxVisible);
+        SoftInstrumentChromeDensityPolicy.ToggleExpanded(currentlyExpanded, totalHintCount, maxVisible);
 
     public static Hint? From(string id, string? text)
     {
-        var h = SoftOrganChromeDensityPolicy.From(id, text);
+        var h = SoftInstrumentChromeDensityPolicy.From(id, text);
         return h is null ? null : new Hint(h.Value.Id, h.Value.Text, h.Value.Priority);
     }
 }

@@ -172,8 +172,8 @@ internal static class GlassIntercomPresence
         return Effective(doc.Pf, DateTimeOffset.UtcNow); // Glass watches PF
     }
 
-    /// <summary>MFD Chat secondary card — Forward is primary; no SoftOrgan invent.</summary>
-    public static CascadeIDE.SoftOrgan.GlassGlanceCards.ChatPresenceStatus ProbeChatMfd()
+    /// <summary>MFD Chat secondary card — Forward is primary; no SoftInstrument invent.</summary>
+    public static CascadeIDE.SoftInstrument.GlassGlanceCards.ChatPresenceStatus ProbeChatMfd()
     {
         var now = DateTimeOffset.UtcNow;
         string pf = "—", pm = "—";
@@ -191,7 +191,7 @@ internal static class GlassIntercomPresence
             // keep dashes
         }
 
-        return new CascadeIDE.SoftOrgan.GlassGlanceCards.ChatPresenceStatus(pf, pm);
+        return new CascadeIDE.SoftInstrument.GlassGlanceCards.ChatPresenceStatus(pf, pm);
     }
 
     public static string FormatChatMfdGlance()
@@ -201,7 +201,7 @@ internal static class GlassIntercomPresence
             "Chat\n" +
             "┌ status ──────────────┐\n" +
             "│ ■ Forward Intercom   │\n" +
-            "│ □ SoftOrgan bind     │\n" +
+            "│ □ SoftInstrument bind     │\n" +
             $"│ @PF {status.Pf} · @PM {status.Pm}\n" +
             "└─────────────────────┘";
     }

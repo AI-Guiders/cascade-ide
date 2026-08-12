@@ -12,7 +12,7 @@ public sealed class CitizenWireLoopDogfoodTests
     [Fact]
     public void ClosedLoop_AfferentThenEfferent_Compose()
     {
-        // Afferent: SoftOrgan board → @frame desk → minimized first.
+        // Afferent: SoftInstrument board → @frame desk → minimized first.
         var desk = CitizenDeskAfferent.TryPack(
             ["P:plan · #14 dogfood", "F:editor · Services/CitizenIntentEfferent.cs"],
             sa: "clear",

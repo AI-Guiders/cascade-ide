@@ -3,7 +3,7 @@
 namespace CDP.GlassCockpit.Windows;
 
 /// <summary>
-/// Shared Face projection across LatchPaint peels (Plan / SoftOrgan / Seats / Intercom / wake).
+/// Shared Face projection across LatchPaint peels (Plan / SoftInstrument / Seats / Intercom / wake).
 /// Agent SSOT may keep SoftFL refuse; Face never paints tip-mill / operator-eyes theatre.
 /// </summary>
 internal static partial class LatchPaint
@@ -27,7 +27,7 @@ internal static partial class LatchPaint
         return TruncatePlan(s, 120);
     }
 
-    /// <summary>SoftOrgan / seats chrome tip — never SoftFL ShowFace mill.</summary>
+    /// <summary>SoftInstrument / seats chrome tip — never SoftFL ShowFace mill.</summary>
     internal static string? HumanizeChromeHint(string? raw)
     {
         if (string.IsNullOrWhiteSpace(raw))
@@ -125,7 +125,7 @@ internal static partial class LatchPaint
                      "tip mill ≠ Done",
                      "tip mill != Done",
                      "tip mill",
-                     "Face SoftOrgan/#CIDE Done needs operator eyes",
+                     "Face SoftInstrument/#CIDE Done needs operator eyes",
                      "needs operator eyes",
                      "operator eyes",
                      "DIG REJECT SoftFL",

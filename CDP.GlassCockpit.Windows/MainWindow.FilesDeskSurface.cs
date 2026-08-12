@@ -22,7 +22,7 @@ public partial class MainWindow
         if (MfdFilesDeskList is not null)
             MfdFilesDeskList.ItemsSource = _filesDeskRows;
         EnsureFilesDeskHandsWired();
-        _latches.SoftOrganChanged += OnSoftOrganForFilesDesk;
+        _latches.SoftInstrumentChanged += OnSoftInstrumentForFilesDesk;
         TryHydrateFilesDeskFace();
     }
 
@@ -58,7 +58,7 @@ public partial class MainWindow
         e.Handled = true;
     }
 
-    void OnSoftOrganForFilesDesk(string organId, string? _)
+    void OnSoftInstrumentForFilesDesk(string organId, string? _)
     {
         if (!organId.Equals("files_desk", StringComparison.OrdinalIgnoreCase))
             return;

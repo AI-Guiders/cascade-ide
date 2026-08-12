@@ -7,7 +7,7 @@ using CascadeIDE.ViewModels;
 namespace CascadeIDE.Features.Cdp;
 
 /// <summary>
-/// SoftOrgan sa_desk (cdp_sa) pulse → quiet chrome band.
+/// SoftInstrument sa_desk (cdp_sa) pulse → quiet chrome band.
 /// Watches sa-desk-LATEST.json; paints <see cref="MainWindowViewModel.AgentSaDeskChromeHint"/>.
 /// Idle (no chrome_hint) stays silent — not EICAS go=sa.
 /// </summary>

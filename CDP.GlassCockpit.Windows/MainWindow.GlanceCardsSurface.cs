@@ -4,13 +4,13 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Media;
-using CascadeIDE.SoftOrgan;
+using CascadeIDE.SoftInstrument;
 using CDP.GlassCockpit.Windows.UiKit;
 
 namespace CDP.GlassCockpit.Windows;
 
 /// <summary>
-/// SoftOrgan glance pages — FDS uses card-deck instrument (Shared-SSOT), other pages keep chip wrap.
+/// SoftInstrument glance pages — FDS uses card-deck instrument (Shared-SSOT), other pages keep chip wrap.
 /// </summary>
 public partial class MainWindow
 {
@@ -21,14 +21,14 @@ public partial class MainWindow
 
         var show = IsGlancePage(CurrentMfdPage());
         MfdGlanceCardsHost.Visibility = show ? Visibility.Visible : Visibility.Collapsed;
-        if (SoftOrganFindBox is not null)
-            SoftOrganFindBox.Visibility = SoftOrganFaceHandbook.IsSoftOrganGlancePage(CurrentMfdPage())
+        if (SoftInstrumentFindBox is not null)
+            SoftInstrumentFindBox.Visibility = SoftInstrumentFaceHandbook.IsSoftInstrumentGlancePage(CurrentMfdPage())
                 ? Visibility.Visible
                 : Visibility.Collapsed;
         if (show)
         {
-            // Leaving SoftOrgan pages clears drill; entering HereNext auto-opens PickHere.
-            if (!SoftOrganFaceHandbook.IsSoftOrganGlancePage(CurrentMfdPage()))
+            // Leaving SoftInstrument pages clears drill; entering HereNext auto-opens PickHere.
+            if (!SoftInstrumentFaceHandbook.IsSoftInstrumentGlancePage(CurrentMfdPage()))
                 ExitGuideStepsQuiet();
             RefreshGlanceCardsBody();
             if (string.Equals(CurrentMfdPage(), "HereNext", StringComparison.OrdinalIgnoreCase)
@@ -61,9 +61,9 @@ public partial class MainWindow
 
     internal void GlanceCardsRefresh_OnClick(object sender, RoutedEventArgs e) => RefreshGlanceCardsBody();
 
-    internal void SoftOrganFindBox_OnTextChanged(object sender, TextChangedEventArgs e)
+    internal void SoftInstrumentFindBox_OnTextChanged(object sender, TextChangedEventArgs e)
     {
-        if (!SoftOrganFaceHandbook.IsSoftOrganGlancePage(CurrentMfdPage()))
+        if (!SoftInstrumentFaceHandbook.IsSoftInstrumentGlancePage(CurrentMfdPage()))
             return;
         if (_guideStepsMode)
             ExitGuideStepsQuiet();
@@ -76,8 +76,8 @@ public partial class MainWindow
             return;
 
         var page = CurrentMfdPage();
-        var soft = SoftOrganFaceHandbook.IsSoftOrganGlancePage(page);
-        var filter = soft ? SoftOrganFindBox?.Text : null;
+        var soft = SoftInstrumentFaceHandbook.IsSoftInstrumentGlancePage(page);
+        var filter = soft ? SoftInstrumentFindBox?.Text : null;
         var chips = page switch
         {
             "Events" => GlassGlanceCards.BuildEvents(GlassEventsGlance.ProbeCurrentHabitat()),
@@ -95,8 +95,8 @@ public partial class MainWindow
                 GlassDomainBoardGlance.TryProbe(_session.WorkspaceRoot)
                 ?? new GlassDomainBoardGlance.Snapshot(0, false, null, 0, false, null, [], "domain · unavailable")),
             "Chat" => GlassGlanceCards.BuildChat(GlassIntercomPresence.ProbeChatMfd()),
-            "QRH" or "ECL" or "Alert" or "HereNext" => SoftOrganFaceHandbook.ChipsFor(
-                SoftOrganFaceHandbook.OrganIdFromMfdPage(page), filter),
+            "QRH" or "ECL" or "Alert" or "HereNext" => SoftInstrumentFaceHandbook.ChipsFor(
+                SoftInstrumentFaceHandbook.OrganIdFromMfdPage(page), filter),
             _ => [],
         };
 
@@ -117,7 +117,7 @@ public partial class MainWindow
         foreach (var chip in chips)
         {
             GlanceCardsPanel.Items.Add(soft
-                ? CreateSoftOrganSituationCard(chip)
+                ? CreateSoftInstrumentSituationCard(chip)
                 : deck
                     ? CreateDeckCard(chip)
                     : CreateGlanceChip(chip));

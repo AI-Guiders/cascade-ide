@@ -37,7 +37,7 @@
         </Grid.ColumnDefinitions>
         <uikit:GlassStatusChip Text="ON GND" Level="Caution" Margin="0,0,6,0"/>
         <uikit:GlassStatusChip x:Name="TopologyBadge" Grid.Column="1" Text="(F)" Level="Quiet" Margin="0,0,6,0"/>
-        <!-- Indication strip: GlassStatusChip band (UiKit adapt). Full SoftOrgan text in Tip. -->
+        <!-- Indication strip: GlassStatusChip band (UiKit adapt). Full SoftInstrument text in Tip. -->
         <Border Grid.Column="2" Background="{StaticResource Glass.BgPanel}" BorderBrush="{StaticResource Glass.Border}"
                 BorderThickness="1" CornerRadius="4" Padding="0">
           <DockPanel>
@@ -47,8 +47,8 @@
               <uikit:GlassStatusChip x:Name="ChromeHintChip" DockPanel.Dock="Left" Text="CFG · 1×" Level="Quiet"
                                     Tip="click = UI scale 0.85/1/1.15/1.3 · settings.toml" Margin="0,0,6,0"
                                     Cursor="Hand" MouseLeftButtonUp="ChromeHintChip_OnClick"/>
-              <StackPanel x:Name="SoftOrganBand" Orientation="Horizontal" Visibility="Collapsed">
-                <ItemsControl x:Name="SoftOrganChips">
+              <StackPanel x:Name="SoftInstrumentBand" Orientation="Horizontal" Visibility="Collapsed">
+                <ItemsControl x:Name="SoftInstrumentChips">
                   <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>
                       <StackPanel Orientation="Horizontal"/>
@@ -60,11 +60,11 @@
                     </DataTemplate>
                   </ItemsControl.ItemTemplate>
                 </ItemsControl>
-                <Border x:Name="SoftOrganOverflowHost" Visibility="Collapsed"
+                <Border x:Name="SoftInstrumentOverflowHost" Visibility="Collapsed"
                         Background="{StaticResource Glass.ChipQuietBg}"
                         BorderBrush="{StaticResource Glass.ChipQuietBorder}" BorderThickness="1" CornerRadius="3"
-                        Padding="7,2" Cursor="Hand" MouseLeftButtonUp="SoftOrganOverflow_OnClick">
-                  <TextBlock x:Name="SoftOrganOverflow" Text="" Foreground="{StaticResource Glass.ChipQuietFg}"
+                        Padding="7,2" Cursor="Hand" MouseLeftButtonUp="SoftInstrumentOverflow_OnClick">
+                  <TextBlock x:Name="SoftInstrumentOverflow" Text="" Foreground="{StaticResource Glass.ChipQuietFg}"
                              FontFamily="Consolas" FontSize="10" FontWeight="SemiBold"/>
                 </Border>
               </StackPanel>

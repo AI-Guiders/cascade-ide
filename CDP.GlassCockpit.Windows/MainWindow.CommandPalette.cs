@@ -53,7 +53,7 @@ public partial class MainWindow
 
         if (GlassCommandPaletteCatalog.TryGetGoToFileTail(q, out var term))
         {
-            var hits = CascadeIDE.SoftOrgan.GlassGoToFileIndex.Search(
+            var hits = CascadeIDE.SoftInstrument.GlassGoToFileIndex.Search(
                 _session.SolutionRoot,
                 _session.WorkspaceRoot,
                 term);
@@ -371,13 +371,13 @@ public partial class MainWindow
                 StatusText.Text = $"glass · HERE/NEXT · {DateTime.Now:HH:mm:ss}";
                 break;
             case "soft_qrh":
-                OpenSoftOrganFace("qrh", "qrh");
+                OpenSoftInstrumentFace("qrh", "qrh");
                 break;
             case "soft_ecl":
-                OpenSoftOrganFace("ecl", "ecl");
+                OpenSoftInstrumentFace("ecl", "ecl");
                 break;
             case "soft_alert":
-                OpenSoftOrganFace("alert", "alert");
+                OpenSoftInstrumentFace("alert", "alert");
                 break;
             case "toggle_pm_oneof_role":
                 if (_hosts.TogglePmOneOfRole())

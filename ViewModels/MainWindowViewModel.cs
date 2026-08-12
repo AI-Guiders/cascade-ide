@@ -428,7 +428,7 @@ public partial class MainWindowViewModel : ViewModelBase, IAutonomousAgentSessio
         if (!string.IsNullOrWhiteSpace(telemetry))
             prefix = string.IsNullOrWhiteSpace(prefix) ? telemetry : prefix + "\n\n---\n\n" + telemetry;
 
-        // Afferent desk A: SoftOrgan density band → @frame desk (citizen wire #12).
+        // Afferent desk A: SoftInstrument density band → @frame desk (citizen wire #12).
         var deskPulse = Services.CitizenDeskAfferent.TryPackFromHabitat(
             chromeVisibleLines: AgentChromeHintVisibleLines,
             eicasMessages: EicasMessages,

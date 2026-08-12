@@ -6,7 +6,7 @@ using System.Windows.Input;
 using CascadeIDE.Features.Workspace.Application;
 using CascadeIDE.Intercom;
 using CascadeIDE.Models;
-using CascadeIDE.SoftOrgan;
+using CascadeIDE.SoftInstrument;
 
 namespace CDP.GlassCockpit.Windows;
 

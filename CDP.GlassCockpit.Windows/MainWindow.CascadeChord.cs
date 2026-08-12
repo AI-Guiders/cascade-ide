@@ -281,7 +281,7 @@ public partial class MainWindow
             return;
         }
 
-        // Glass-local chords (SoftOrgan SoftFL) — not only CIDE intent-catalog.toml.
+        // Glass-local chords (SoftInstrument SoftFL) — not only CIDE intent-catalog.toml.
         if (GlassChordCatalog.Exact(tail) is { } local)
             RunPaletteEntry(local.ActionId);
     }

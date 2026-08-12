@@ -9,8 +9,8 @@ One edit-locus for the modern WPF cabin rhythm: tokens in `../GlassDarkCockpit.x
 | `GlassEcamReadout` | `EcamReadout` | Label / value / sub instrument tile |
 | `GlassSection` | `CascadeSection` | Flat inset + electric rail (`ContentControl`) |
 | `GlassSoftKeyBar` | `EcamSoftKeyBar` | Action keys (search/reindex/…) — SoftKey tokens, not ECAM green |
-| `GlassDeckCard` | `EcamMetricCard` (spirit) | Tone deck card (`FromChip`) — SoftOrgan/HCI instruments |
+| `GlassDeckCard` | `EcamMetricCard` (spirit) | Tone deck card (`FromChip`) — SoftInstrument/HCI instruments |
 
-SoftOrgan band uses `GlassStatusChip` + `GlassChipLevel` (GlassCore).
+SoftInstrument band uses `GlassStatusChip` + `GlassChipLevel` (GlassCore).
 Deck surfaces: `CreateDeckCard` → `GlassDeckCard.FromChip`.
 HybridIndex hand: `GlassSoftKeyBar` + search box.

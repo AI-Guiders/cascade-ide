@@ -6,7 +6,7 @@ using CascadeIDE.ViewModels;
 namespace CascadeIDE.Features.Cdp;
 
 /// <summary>
-/// Agent desk seats → cabin SoftOrgan chrome tip on glass.
+/// Agent desk seats → cabin SoftInstrument chrome tip on glass.
 /// Quiet republish: chrome tip only. <c>show_face</c> → BringToFront (MFD via WPF Glass).
 /// </summary>
 internal sealed class CdpSeatsProjector : IDisposable
@@ -97,7 +97,7 @@ internal sealed class CdpSeatsProjector : IDisposable
             _lastFingerprint = fingerprint;
         }
 
-        // SoftOrgan seats → chrome tip. ShowFace BringAttention is WPF Glass (CDP.GlassCockpit.Windows).
+        // SoftInstrument seats → chrome tip. ShowFace BringAttention is WPF Glass (CDP.GlassCockpit.Windows).
         _vm.ApplyCabinOrganChromeHint(doc.ChromeHint);
     }
 

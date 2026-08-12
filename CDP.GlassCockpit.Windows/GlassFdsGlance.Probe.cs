@@ -3,7 +3,7 @@
 using System.IO;
 using System.Text.Json;
 using CascadeIDE.Features.Cdp;
-using CascadeIDE.SoftOrgan;
+using CascadeIDE.SoftInstrument;
 
 namespace CDP.GlassCockpit.Windows;
 

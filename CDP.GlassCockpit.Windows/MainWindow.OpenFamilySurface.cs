@@ -5,7 +5,7 @@ using System.IO;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Threading;
-using CascadeIDE.SoftOrgan;
+using CascadeIDE.SoftInstrument;
 using Microsoft.Win32;
 
 namespace CDP.GlassCockpit.Windows;

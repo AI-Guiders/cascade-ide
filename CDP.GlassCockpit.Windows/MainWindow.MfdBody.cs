@@ -1,15 +1,15 @@
 #nullable enable
 
 using System.Windows.Controls;
-using CascadeIDE.SoftOrgan;
+using CascadeIDE.SoftInstrument;
 
 namespace CDP.GlassCockpit.Windows;
 
-/// <summary>MFD page select + latch glance / stub body (CabinGlass + SoftOrganMfdGlance).
+/// <summary>MFD page select + latch glance / stub body (CabinGlass + SoftInstrumentMfdGlance).
 /// Editor Face: AvalonEdit always on MfdEditorHost when page=Editor (GlassEditorFace) — never FormatMfdStub peel.</summary>
 public partial class MainWindow
 {
-    /// <summary>Last presentation/chord/SoftOrgan-M instrument page — seats P/F republish must not yank it.</summary>
+    /// <summary>Last presentation/chord/SoftInstrument-M instrument page — seats P/F republish must not yank it.</summary>
     string? _stickyMfdPage;
 
     void SelectMfdPage(string? page, bool sticky = false)
@@ -163,7 +163,7 @@ public partial class MainWindow
             // Face = FilesDesk list from files_desk latch (SE≠FM).
             if (_filesDeskRows.Count > 0)
                 MfdBody.Text = "";
-            else if (SoftOrganMfdGlance.TryFormatFromOrganId("files_desk") is { } fmGlance)
+            else if (SoftInstrumentMfdGlance.TryFormatFromOrganId("files_desk") is { } fmGlance)
                 MfdBody.Text = fmGlance;
             else
                 MfdBody.Text = "files · idle — SoftKeys Up/Open/List · DoubleClick/Enter";
@@ -175,7 +175,7 @@ public partial class MainWindow
         {
             if (_findDeskRows.Count > 0)
                 MfdBody.Text = "";
-            else if (SoftOrganMfdGlance.TryFormatFromOrganId("find_desk") is { } findGlance)
+            else if (SoftInstrumentMfdGlance.TryFormatFromOrganId("find_desk") is { } findGlance)
                 MfdBody.Text = findGlance;
             else
                 MfdBody.Text = "find · idle — /search pattern · DoubleClick hit opens";
@@ -183,8 +183,8 @@ public partial class MainWindow
             return;
         }
 
-        if (SoftOrganMfdGlance.TryOrganIdForMfdPage(page) is { } organId
-            && SoftOrganMfdGlance.TryFormatFromOrganId(organId) is { } glance)
+        if (SoftInstrumentMfdGlance.TryOrganIdForMfdPage(page) is { } organId
+            && SoftInstrumentMfdGlance.TryFormatFromOrganId(organId) is { } glance)
         {
             MfdBody.Text = glance;
             RefreshEicasHealth();
@@ -249,12 +249,12 @@ public partial class MainWindow
         if (string.Equals(page, "DomainBoard", StringComparison.OrdinalIgnoreCase)
             || string.Equals(page, "Domain", StringComparison.OrdinalIgnoreCase))
         {
-            MfdBody.Text = FormatMfdStub("DomainBoard", "domain card deck · .cdp/domain", "SoftOrgan ownership instrument");
+            MfdBody.Text = FormatMfdStub("DomainBoard", "domain card deck · .cdp/domain", "SoftInstrument ownership instrument");
             RefreshEicasHealth();
             return;
         }
 
-        if (SoftOrganFaceHandbook.IsSoftOrganGlancePage(page))
+        if (SoftInstrumentFaceHandbook.IsSoftInstrumentGlancePage(page))
         {
             MfdBody.Text = FormatMfdStub(page, "HERE · situations → steps", "ADR 0014 SoftFL · не markdown wall");
             RefreshEicasHealth();
@@ -268,7 +268,7 @@ public partial class MainWindow
             "SemanticMap" => FormatMfdStub("SemanticMap", "Glass Skia + arch board", "ADR 0196 roles"),
             "Problems" => FormatMfdStub("Problems", "severity board · ERR/WARN/ALL + jump list", "Shared-SSOT quality"),
             "Tests" => FormatMfdStub("Tests", "Glass log + fail ListBox", "Avalonia TestsMfdPageView SSOT"),
-            "DebugStack" => FormatMfdStub("DebugStack", "Glass live DAP latch host", "debug_desk SoftOrgan · stack/locals"),
+            "DebugStack" => FormatMfdStub("DebugStack", "Glass live DAP latch host", "debug_desk SoftInstrument · stack/locals"),
             "Git" => FormatMfdStub("Git", "Glass porcelain+diff host", "stage/commit/push/submodule"),
             "RelatedFiles" => FormatMfdStub("RelatedFiles", "companions · Skia graph + list", "Shared-SSOT blast instrument"),
             "Correspondence" => FormatMfdStub("Correspondence", "Glass CRS thread timeline", "cards + rail"),
@@ -282,7 +282,7 @@ public partial class MainWindow
             // Editor Face: PreferEditorHost early-return above — never Avalonia peel.
             "Chat" => GlassIntercomPresence.FormatChatMfdGlance(),
             "FlightDataStorage" or "Fds" => FormatMfdStub("FlightDataStorage", "FDS card deck · PLAN/SHARE/PRESSURE/WAKE", "Shared-SSOT shelf instrument"),
-            "DomainBoard" or "Domain" => FormatMfdStub("DomainBoard", "domain card deck · .cdp/domain", "SoftOrgan ownership instrument"),
+            "DomainBoard" or "Domain" => FormatMfdStub("DomainBoard", "domain card deck · .cdp/domain", "SoftInstrument ownership instrument"),
             _ => FormatMfdStub(page, "instrument peel later", "CabinGlass may select")
         };
         RefreshEicasHealth();

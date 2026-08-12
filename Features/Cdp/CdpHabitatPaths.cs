@@ -24,7 +24,7 @@ public static class CdpHabitatPaths
     public const string LandLatchFileName = "land-LATEST.json";
     public const string SharedLatchFileName = "shared-LATEST.json";
     public const string DiskLatchFileName = "disk-LATEST.json";
-    /// <summary>Agent surface RPC request (CDP → Glass). Not SoftOrgan chrome.</summary>
+    /// <summary>Agent surface RPC request (CDP → Glass). Not SoftInstrument chrome.</summary>
     public const string SurfaceCmdLatchFileName = "surface-cmd-LATEST.json";
     /// <summary>Agent surface RPC reply (Glass → CDP).</summary>
     public const string SurfaceReplyLatchFileName = "surface-reply-LATEST.json";

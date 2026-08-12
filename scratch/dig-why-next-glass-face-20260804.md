@@ -4,7 +4,7 @@
 **DoD:** dig findings + live human face — not SoftFL invent.
 
 ## Dig artifacts
-- Domain: `.cdp/domain/softorgan-human-viz.md` (Plan WHY/NEXT/COURSE entry)
+- Domain: `.cdp/domain/softinstrument-human-viz.md` (Plan WHY/NEXT/COURSE entry)
 - KB: `agent-notes` …/gap-list-shared-ssot-2026-08-04.ru.md · note-shared-ssot-axb-next-why-file-situ
 - Wire: `%LocalAppData%/cdp-mcp/plan-LATEST.json` — `why` = sealed operator_priority; `task` = NEXT
 - Code: `LatchPaint.PaintPlan` · `MainWindow.OnPlanChanged` → PlanWhy/Next/CourseReadout

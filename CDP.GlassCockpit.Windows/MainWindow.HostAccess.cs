@@ -64,7 +64,7 @@ public partial class MainWindow
     Border? MfdGlanceCardsHost => MfdHosts?.MfdGlanceCardsHost;
     TextBlock? GlanceCardsStatusLabel => MfdHosts?.GlanceCardsStatusLabel;
     ItemsControl? GlanceCardsPanel => MfdHosts?.GlanceCardsPanel;
-    TextBox? SoftOrganFindBox => MfdHosts?.SoftOrganFindBox;
+    TextBox? SoftInstrumentFindBox => MfdHosts?.SoftInstrumentFindBox;
     TextBlock? OperatorHereLine => MfdHosts?.OperatorHereLine;
     Border? OperatorGuideStepsHost => MfdHosts?.OperatorGuideStepsHost;
     ScrollViewer? GlanceCardsScroll => MfdHosts?.GlanceCardsScroll;

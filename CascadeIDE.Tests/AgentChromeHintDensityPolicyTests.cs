@@ -56,7 +56,7 @@ public sealed class AgentChromeHintDensityPolicyTests
         Assert.Equal("ignite · await", r.VisibleLines[1]);
         Assert.Equal("plan · focus", r.VisibleLines[2]);
         Assert.Equal(4, r.HiddenCount);
-        Assert.Equal("+4 more · SoftOrgan latches", r.OverflowLine);
+        Assert.Equal("+4 more · SoftInstrument latches", r.OverflowLine);
     }
 
     [Fact]

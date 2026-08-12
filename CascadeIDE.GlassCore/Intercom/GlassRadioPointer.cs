@@ -1,7 +1,7 @@
 #nullable enable
 
 using System.Text;
-using CascadeIDE.SoftOrgan;
+using CascadeIDE.SoftInstrument;
 
 namespace CascadeIDE.Intercom;
 

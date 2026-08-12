@@ -58,10 +58,10 @@ Start-Sleep -Milliseconds 450
 Start-Sleep -Milliseconds 200
 [System.Windows.Forms.SendKeys]::SendWait('{ENTER}')
 Start-Sleep -Milliseconds 1000
-$qrhList = Cap 'softorgan-qrh-situations-20260808.png'
+$qrhList = Cap 'softinstrument-qrh-situations-20260808.png'
 
 Click-Relative 0.22 0.42
-$qrhSteps = Cap 'softorgan-qrh-steps-20260808.png'
+$qrhSteps = Cap 'softinstrument-qrh-steps-20260808.png'
 
 Focus-Glass | Out-Null
 [System.Windows.Forms.SendKeys]::SendWait('^q')
@@ -70,7 +70,7 @@ Start-Sleep -Milliseconds 450
 Start-Sleep -Milliseconds 200
 [System.Windows.Forms.SendKeys]::SendWait('{ENTER}')
 Start-Sleep -Milliseconds 1100
-$here = Cap 'softorgan-here-next-20260808.png'
+$here = Cap 'softinstrument-here-next-20260808.png'
 
 Write-Output "QRH_LIST=$qrhList"
 Write-Output "QRH_STEPS=$qrhSteps"

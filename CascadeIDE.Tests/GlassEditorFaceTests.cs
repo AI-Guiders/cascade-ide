@@ -1,4 +1,4 @@
-using CascadeIDE.SoftOrgan;
+using CascadeIDE.SoftInstrument;
 using Xunit;
 
 namespace CascadeIDE.Tests;
@@ -20,9 +20,9 @@ public sealed class GlassEditorFaceTests
         Assert.Equal(expect, GlassEditorFace.PreferParkOnMfdWhenReleased(intercomForward));
 
     [Fact]
-    public void SoftOrgan_does_not_claim_Editor_for_peel_overlay()
+    public void SoftInstrument_does_not_claim_Editor_for_peel_overlay()
     {
-        Assert.Null(SoftOrganMfdGlance.TryOrganIdForMfdPage(GlassEditorFace.MfdPage));
+        Assert.Null(SoftInstrumentMfdGlance.TryOrganIdForMfdPage(GlassEditorFace.MfdPage));
     }
 
     [Fact]

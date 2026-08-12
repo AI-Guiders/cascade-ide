@@ -5,7 +5,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using CascadeIDE.GlassCore.Presentation;
-using CascadeIDE.SoftOrgan;
+using CascadeIDE.SoftInstrument;
 
 namespace CDP.GlassCockpit.Windows;
 
@@ -86,7 +86,7 @@ public partial class MainWindow
         else if (MfdSolutionExplorerTree is not null)
             MfdSolutionExplorerTree.Visibility = showSe ? Visibility.Visible : Visibility.Collapsed;
 
-        // SE Face: SoftOrgan EICAS band (opening… + clr/ack/list) is not the file tree.
+        // SE Face: SoftInstrument EICAS band (opening… + clr/ack/list) is not the file tree.
         if (MfdEicasChrome is not null)
         {
             var onSe = string.Equals(page, "SolutionExplorer", StringComparison.OrdinalIgnoreCase);

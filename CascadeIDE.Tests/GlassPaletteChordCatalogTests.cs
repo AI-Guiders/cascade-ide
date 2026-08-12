@@ -33,7 +33,7 @@ public sealed class GlassPaletteChordCatalogTests
         Assert.Contains(GlassCommandPaletteCatalog.Filter("ecl"), e => e.Id == "soft_ecl");
         Assert.Contains(GlassCommandPaletteCatalog.Filter("checklist"), e => e.Id == "soft_ecl");
         Assert.Contains(GlassCommandPaletteCatalog.Filter("alert"), e => e.Id == "soft_alert");
-        Assert.Contains(GlassCommandPaletteCatalog.Filter("softorgan"), e => e.Id == "soft_qrh");
+        Assert.Contains(GlassCommandPaletteCatalog.Filter("softinstrument"), e => e.Id == "soft_qrh");
         Assert.Equal("soft_qrh", GlassChordCatalog.Exact("qr")!.ActionId);
         Assert.Equal("soft_ecl", GlassChordCatalog.Exact("ec")!.ActionId);
         Assert.Equal("soft_alert", GlassChordCatalog.Exact("al")!.ActionId);

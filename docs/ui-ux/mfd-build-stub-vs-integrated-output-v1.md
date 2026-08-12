@@ -11,9 +11,9 @@
 ## Dual-HCI (Glass WPF)
 
 - **Build output SSOT** remains CIDE Avalonia (`BuildMfdPageView` + `BuildOutputPanelViewModel`).
-- **Glass WPF** MFD Build is SoftOrgan `toolchain` latch glance / stub text — no live MSBuild log host yet.
+- **Glass WPF** MFD Build is SoftInstrument `toolchain` latch glance / stub text — no live MSBuild log host yet.
 - Dig reject (2026-08-01): do not fork build orchestration into Glass TextBlock; next real peel needs WPF build-log host wired to existing build session APIs.
 
 ## Итог одной строкой
 
-**Сборка в Cascade IDE — Avalonia Build MFD + BuildOutputPanel; Glass остаётся SoftOrgan glance до отдельного WPF host peel.**
+**Сборка в Cascade IDE — Avalonia Build MFD + BuildOutputPanel; Glass остаётся SoftInstrument glance до отдельного WPF host peel.**

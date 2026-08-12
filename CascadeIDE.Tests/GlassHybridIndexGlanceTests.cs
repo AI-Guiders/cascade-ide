@@ -1,6 +1,6 @@
 #nullable enable
 using Xunit;
-using CascadeIDE.SoftOrgan;
+using CascadeIDE.SoftInstrument;
 
 namespace CascadeIDE.Tests;
 

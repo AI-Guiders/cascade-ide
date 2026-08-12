@@ -5,7 +5,7 @@ using System.Windows.Threading;
 
 namespace CDP.GlassCockpit.Windows;
 
-/// <summary>ignite-wake-LATEST → StatusText + SoftOrgan ignite tip (Composer-free Autoi sight).</summary>
+/// <summary>ignite-wake-LATEST → StatusText + SoftInstrument ignite tip (Composer-free Autoi sight).</summary>
 public partial class MainWindow
 {
     string? _lastIgniteWakeArmId;
@@ -30,7 +30,7 @@ public partial class MainWindow
 
                 _lastIgniteWakeArmId = view.ArmId;
                 _softOrgans.Apply("ignite", view.ChromeHint);
-                PaintSoftOrganBand();
+                PaintSoftInstrumentBand();
                 UpdateMfdBody();
                 StatusText.Text =
                     $"glass · {view.StatusLine} · {DateTime.Now:HH:mm:ss}";

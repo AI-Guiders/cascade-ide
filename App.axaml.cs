@@ -105,7 +105,7 @@ public partial class App : Application
     /// <summary>Agent domain ownership → quiet chrome (domain-LATEST.json).</summary>
     static Features.Cdp.CdpDomainProjector? DomainProjector { get; set; }
 
-    /// <summary>SoftOrgan sa_desk (cdp_sa) → quiet chrome (sa-desk-LATEST.json); not EICAS.</summary>
+    /// <summary>SoftInstrument sa_desk (cdp_sa) → quiet chrome (sa-desk-LATEST.json); not EICAS.</summary>
     static Features.Cdp.CdpSaDeskProjector? SaDeskProjector { get; set; }
 
     /// <summary><c>cide://</c> из argv при cold start (ADR 0157).</summary>
