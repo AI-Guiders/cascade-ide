@@ -359,7 +359,7 @@
     <PackageReference Include="Microsoft.Extensions.AI.Ollama" Version="9.7.0-preview.1.25356.2" />
     <PackageReference Include="ModelContextProtocol" Version="1.3.0" />
     <PackageReference Include="OllamaSharp" Version="5.4.25" />
-    <PackageReference Include="OutWit.Common" Version="1.3.2" />
+    <PackageReference Include="OutWit.Common" Version="1.4.0" />
     <PackageReference Include="OutWit.Common.Json" Version="1.1.3" />
     <PackageReference Include="OutWit.Database.Core" Version="12.8.0" />
     <PackageReference Include="OutWit.Database.EntityFramework" Version="12.8.0" />
