@@ -1,25 +1,50 @@
+# Cascade IDE correspondence — Explore full-a substrate (ADR map)
+# ResolveAdrMap = longest prefix match (not union). "*" = baseline when no better key.
+
 [workspace.adr]
 auto_include = "linked"
 max_related = 8
 root_dir = "docs/adr"
-id_regex = "(?:^|/)docs/adr/(?<id>\\d{4})-"
+id_regex = '(?:^|/)docs/adr/(?<id>\d{4})-'
 
 [workspace.adr.map]
+# --- Chat / Intercom / Citizen continuity ---
 "Features/Chat/" = [
   "docs/adr/0119-intercom-slash-commands-and-local-execution.md",
   "docs/adr/0150-slash-line-canonical-resolution.md",
   "docs/adr/0154-slash-route-semantics-domain-object-intent.md",
+  "docs/adr/0183-cockpit-intercom-chat-continuity.md",
+]
+"Features/Intercom/" = [
+  "docs/adr/0137-intercom-message-code-correspondence.md",
+  "docs/adr/0144-intercom-oauth-connect.md",
+  "docs/adr/0173-intercom-intent-card-session-decision-capture.md",
+  "docs/adr/0183-cockpit-intercom-chat-continuity.md",
+  "docs/adr/0203-intercom-ccc-citizen-multi-session-continuity.md",
 ]
 "Intercom/" = [
   "docs/adr/0137-intercom-message-code-correspondence.md",
   "docs/adr/0144-intercom-oauth-connect.md",
+  "docs/adr/0203-intercom-ccc-citizen-multi-session-continuity.md",
 ]
-"Features/WorkspaceNavigation/" = [
-  "docs/adr/0039-workspace-navigation-affordances.md",
-  "docs/adr/0155-documentation-code-correspondence-and-architectural-drift.md",
-  "docs/adr/0061-context-aware-adr-map-pfd-knowledge-indicator.md",
-  "docs/adr/0156-correspondence-mfd-surface-and-reverse-code-anchors.md",
-  "docs/adr/0157-cide-magic-link-protocol.md",
+"Features/Agent/" = [
+  "docs/adr/0172-conversation-first-habitat.md",
+  "docs/adr/0183-cockpit-intercom-chat-continuity.md",
+  "docs/adr/0202-citizen-guest-isolation-and-ai-keys-foundation.md",
+]
+"Features/AutonomousAgent/" = [
+  "docs/adr/0185-life-thread-delayed-self-wake.md",
+  "docs/adr/0202-citizen-guest-isolation-and-ai-keys-foundation.md",
+]
+
+# --- Cockpit / Glass / presentation ---
+"Features/Cockpit/" = [
+  "docs/adr/0021-pfd-mfd-cockpit-attention-model.md",
+  "docs/adr/0066-cockpit-ui-vs-ide-presentation-layer.md",
+  "docs/adr/0189-cockpit-tile-manager.md",
+  "docs/adr/0191-scan-pattern-seats-desk-repl.md",
+  "docs/adr/0197-cdp-mcp-cockpit-wire-parity-vs-cide.md",
+  "docs/adr/0201-recall-gate-pressure-cockpit.md",
 ]
 "CDP.GlassCockpit.Windows/" = [
   "docs/adr/0021-pfd-mfd-cockpit-attention-model.md",
@@ -36,19 +61,161 @@ id_regex = "(?:^|/)docs/adr/(?<id>\\d{4})-"
   "docs/adr/0156-correspondence-mfd-surface-and-reverse-code-anchors.md",
   "docs/adr/0201-recall-gate-pressure-cockpit.md",
 ]
-"*" = "docs/adr/0006-presentation-layers-and-feature-slices.md"
+"Features/UiChrome/" = [
+  "docs/adr/0006-presentation-layers-and-feature-slices.md",
+  "docs/adr/0066-cockpit-ui-vs-ide-presentation-layer.md",
+  "docs/adr/0171-presentation-tiers-compact-vs-cockpit.md",
+]
+"Features/Instrumentation/" = [
+  "docs/adr/0073-pfd-instrument-deck.md",
+  "docs/adr/0171-presentation-tiers-compact-vs-cockpit.md",
+]
+
+# --- Workspace navigation / correspondence / magic-link ---
+"Features/WorkspaceNavigation/" = [
+  "docs/adr/0039-workspace-navigation-affordances.md",
+  "docs/adr/0155-documentation-code-correspondence-and-architectural-drift.md",
+  "docs/adr/0061-context-aware-adr-map-pfd-knowledge-indicator.md",
+  "docs/adr/0156-correspondence-mfd-surface-and-reverse-code-anchors.md",
+  "docs/adr/0157-cide-magic-link-protocol.md",
+]
+"Features/MagicLink/" = [
+  "docs/adr/0157-cide-magic-link-protocol.md",
+  "docs/adr/0186-anchor-families-navigation.md",
+]
+"Features/Workspace/" = [
+  "docs/adr/0039-workspace-navigation-affordances.md",
+  "docs/adr/0155-documentation-code-correspondence-and-architectural-drift.md",
+]
+"Features/Documents/" = [
+  "docs/adr/0155-documentation-code-correspondence-and-architectural-drift.md",
+  "docs/adr/0156-correspondence-mfd-surface-and-reverse-code-anchors.md",
+]
+"Features/Markdown/" = [
+  "docs/adr/0155-documentation-code-correspondence-and-architectural-drift.md",
+]
+"Views/Correspondence" = [
+  "docs/adr/0156-correspondence-mfd-surface-and-reverse-code-anchors.md",
+  "docs/adr/0155-documentation-code-correspondence-and-architectural-drift.md",
+]
+
+# --- Editor / LSP / anchors ---
+"Features/Editor/" = [
+  "docs/adr/0194-anchor-edit-place-before-after.md",
+  "docs/adr/0186-anchor-families-navigation.md",
+  "docs/adr/0006-presentation-layers-and-feature-slices.md",
+]
+"Features/Lsp/" = [
+  "docs/adr/0198-toolchain-ensure-vs-lsp.md",
+  "docs/adr/0186-anchor-families-navigation.md",
+]
+"Features/Search/" = [
+  "docs/adr/0039-workspace-navigation-affordances.md",
+  "docs/adr/0186-anchor-families-navigation.md",
+]
+
+# --- Shell / Terminal / Git / Build / Debug ---
+"Features/Shell/" = [
+  "docs/adr/0180-agent-shell-habitat-tabs-scene.md",
+]
+"Features/Terminal/" = [
+  "docs/adr/0180-agent-shell-habitat-tabs-scene.md",
+]
+"Features/Git/" = [
+  "docs/adr/0178-agent-scm-scene-detect-map-act.md",
+]
+"Features/Build/" = [
+  "docs/adr/0198-toolchain-ensure-vs-lsp.md",
+  "docs/adr/0006-presentation-layers-and-feature-slices.md",
+]
+"Features/Debug/" = [
+  "docs/adr/0006-presentation-layers-and-feature-slices.md",
+  "docs/adr/0198-toolchain-ensure-vs-lsp.md",
+]
+"Features/Launch/" = [
+  "docs/adr/0006-presentation-layers-and-feature-slices.md",
+]
+"Features/SolutionWarmup/" = [
+  "docs/adr/0198-toolchain-ensure-vs-lsp.md",
+]
+"Features/EnvironmentReadiness/" = [
+  "docs/adr/0198-toolchain-ensure-vs-lsp.md",
+  "docs/adr/0199-dual-agent-process-profile-isolation.md",
+]
+
+# --- CDP / IdeMcp / Settings / Os ---
+"Features/Cdp/" = [
+  "docs/adr/0187-cdp-mcp-scene-agent-outlet.md",
+  "docs/adr/0197-cdp-mcp-cockpit-wire-parity-vs-cide.md",
+  "docs/adr/0182-restore-previous-desk-dual-instance.md",
+  "docs/adr/0199-dual-agent-process-profile-isolation.md",
+]
+"Features/IdeMcp/" = [
+  "docs/adr/0187-cdp-mcp-scene-agent-outlet.md",
+  "docs/adr/0177-harness-mcp-presence-signal.md",
+  "docs/adr/0179-mcp-progress-mid-op-not-agent-unblock.md",
+  "docs/adr/0181-mcp-imagecontent-agent-vision-opt-in.md",
+  "docs/adr/0197-cdp-mcp-cockpit-wire-parity-vs-cide.md",
+]
+"Features/Settings/" = [
+  "docs/adr/0190-agent-ide-settings-organ.md",
+]
+"Features/Os/" = [
+  "docs/adr/0176-agent-fs-relocate-and-harness-affordances.md",
+  "docs/adr/0199-dual-agent-process-profile-isolation.md",
+]
+
+# --- Browser / HybridIndex / Forge / Casa / Cursor ---
+"Features/WebAiPortal/" = [
+  "docs/adr/0188-agent-internet-browser-lynx-scene.md",
+]
+"Features/HybridIndex/" = [
+  "docs/adr/0006-presentation-layers-and-feature-slices.md",
+  "docs/adr/0155-documentation-code-correspondence-and-architectural-drift.md",
+]
+"Features/Forge/" = [
+  "docs/adr/0006-presentation-layers-and-feature-slices.md",
+]
+"Features/CasaField/" = [
+  "docs/adr/0006-presentation-layers-and-feature-slices.md",
+]
+"Features/CursorAcp/" = [
+  "docs/adr/0172-conversation-first-habitat.md",
+  "docs/adr/0193-agent-attention-channels-ccl.md",
+]
+
+# --- Task / plan / attention / architecture desk ---
+"IntentWorkspace/" = [
+  "docs/adr/0192-agent-task-manager-plan-mode.md",
+  "docs/adr/0174-sedm-software-engineering-decision-making-ux-spine.md",
+]
+"Views/" = [
+  "docs/adr/0006-presentation-layers-and-feature-slices.md",
+  "docs/adr/0066-cockpit-ui-vs-ide-presentation-layer.md",
+]
+"ViewModels/" = [
+  "docs/adr/0006-presentation-layers-and-feature-slices.md",
+  "docs/adr/0174-sedm-software-engineering-decision-making-ux-spine.md",
+]
+
+# Baseline — arms ExploreCorr for any locus without a longer key
+"*" = [
+  "docs/adr/0006-presentation-layers-and-feature-slices.md",
+]
 
 [workspace.features]
 [[workspace.features.feature]]
 id = "intercom.chat"
 title = "Intercom chat + slash"
-paths = ["Features/Chat/", "IntentMelody/", "Services/Generated/"]
+paths = ["Features/Chat/", "Features/Intercom/", "IntentMelody/", "Services/Generated/"]
 docs = [
   "docs/adr/0119-intercom-slash-commands-and-local-execution.md",
   "docs/adr/0150-slash-line-canonical-resolution.md",
   "docs/adr/0154-slash-route-semantics-domain-object-intent.md",
+  "docs/adr/0183-cockpit-intercom-chat-continuity.md",
+  "docs/adr/0203-intercom-ccc-citizen-multi-session-continuity.md",
 ]
-tags = ["intercom", "slash", "chat"]
+tags = ["intercom", "slash", "chat", "citizen"]
 
 [[workspace.features.feature]]
 id = "workspace.navigation.map"
@@ -63,6 +230,52 @@ docs = [
   "docs/adr/0157-cide-magic-link-protocol.md",
 ]
 tags = ["workspace", "navigation", "pfd", "mfd", "graph", "correspondence", "crs", "magic-link"]
+
+[[workspace.features.feature]]
+id = "glass.cockpit"
+title = "Glass cockpit + wire parity"
+paths = ["CDP.GlassCockpit.Windows/", "CascadeIDE.GlassCore/", "Features/Cockpit/"]
+docs = [
+  "docs/adr/0021-pfd-mfd-cockpit-attention-model.md",
+  "docs/adr/0066-cockpit-ui-vs-ide-presentation-layer.md",
+  "docs/adr/0189-cockpit-tile-manager.md",
+  "docs/adr/0197-cdp-mcp-cockpit-wire-parity-vs-cide.md",
+  "docs/adr/0201-recall-gate-pressure-cockpit.md",
+]
+tags = ["glass", "cockpit", "pfd", "mfd"]
+
+[[workspace.features.feature]]
+id = "agent.shell.git"
+title = "Agent shell habitat + SCM scene"
+paths = ["Features/Shell/", "Features/Terminal/", "Features/Git/"]
+docs = [
+  "docs/adr/0180-agent-shell-habitat-tabs-scene.md",
+  "docs/adr/0178-agent-scm-scene-detect-map-act.md",
+]
+tags = ["shell", "terminal", "git", "scm"]
+
+[[workspace.features.feature]]
+id = "cdp.mcp.outlet"
+title = "CDP MCP outlet + harness presence"
+paths = ["Features/Cdp/", "Features/IdeMcp/"]
+docs = [
+  "docs/adr/0187-cdp-mcp-scene-agent-outlet.md",
+  "docs/adr/0177-harness-mcp-presence-signal.md",
+  "docs/adr/0197-cdp-mcp-cockpit-wire-parity-vs-cide.md",
+  "docs/adr/0182-restore-previous-desk-dual-instance.md",
+]
+tags = ["cdp", "mcp", "outlet"]
+
+[[workspace.features.feature]]
+id = "editor.anchors"
+title = "Editor anchors + LSP toolchain"
+paths = ["Features/Editor/", "Features/Lsp/", "Features/Search/"]
+docs = [
+  "docs/adr/0194-anchor-edit-place-before-after.md",
+  "docs/adr/0186-anchor-families-navigation.md",
+  "docs/adr/0198-toolchain-ensure-vs-lsp.md",
+]
+tags = ["editor", "anchor", "lsp"]
 
 [workspace.docs_templates]
 catalog_path = "docs/templates/catalog.toml"
@@ -95,4 +308,3 @@ kind = "documents"
 [workspace.casa_field]
 store_dir = "../casa-ontology-payload/examples/agent-stores/research-agent-lab-v0"
 payload_repo = "../casa-ontology-payload"
-
