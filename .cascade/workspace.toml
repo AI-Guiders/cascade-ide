@@ -21,6 +21,21 @@ id_regex = "(?:^|/)docs/adr/(?<id>\\d{4})-"
   "docs/adr/0156-correspondence-mfd-surface-and-reverse-code-anchors.md",
   "docs/adr/0157-cide-magic-link-protocol.md",
 ]
+"CDP.GlassCockpit.Windows/" = [
+  "docs/adr/0021-pfd-mfd-cockpit-attention-model.md",
+  "docs/adr/0066-cockpit-ui-vs-ide-presentation-layer.md",
+  "docs/adr/0073-pfd-instrument-deck.md",
+  "docs/adr/0171-presentation-tiers-compact-vs-cockpit.md",
+  "docs/adr/0197-cdp-mcp-cockpit-wire-parity-vs-cide.md",
+  "docs/adr/0201-recall-gate-pressure-cockpit.md",
+]
+"CascadeIDE.GlassCore/" = [
+  "docs/adr/0021-pfd-mfd-cockpit-attention-model.md",
+  "docs/adr/0066-cockpit-ui-vs-ide-presentation-layer.md",
+  "docs/adr/0155-documentation-code-correspondence-and-architectural-drift.md",
+  "docs/adr/0156-correspondence-mfd-surface-and-reverse-code-anchors.md",
+  "docs/adr/0201-recall-gate-pressure-cockpit.md",
+]
 "*" = "docs/adr/0006-presentation-layers-and-feature-slices.md"
 
 [workspace.features]
