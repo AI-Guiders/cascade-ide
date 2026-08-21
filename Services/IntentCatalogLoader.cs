@@ -197,21 +197,14 @@ internal static class IntentCatalogLoader
         }
 
         var kind = ParseSlashKind(row.Kind, path);
-        var cmdId = commandIdFromBlock;
+        // [[command]].command_id is for melody/wire; only IdeCommand slash routes carry it.
+        var cmdId = kind == ChatSlashCommandExecutionKind.IdeCommand
+            ? commandIdFromBlock
+            : "";
         if (kind == ChatSlashCommandExecutionKind.IdeCommand && cmdId.Length == 0)
         {
             throw new InvalidOperationException(
                 $"{path}: slash '{slashPath}' requires command_id on [[command]].");
-        }
-
-        if ((kind is ChatSlashCommandExecutionKind.LocalHelp
-                or ChatSlashCommandExecutionKind.LocalReport
-                or ChatSlashCommandExecutionKind.LocalIntercom
-                or ChatSlashCommandExecutionKind.LocalAgent)
-            && cmdId.Length > 0)
-        {
-            throw new InvalidOperationException(
-                $"{path}: slash '{slashPath}' kind={row.Kind?.Trim().ToLowerInvariant()} must not set command_id.");
         }
 
         var group = NormOptional(row.Group) ?? defaultSlashGroup;
