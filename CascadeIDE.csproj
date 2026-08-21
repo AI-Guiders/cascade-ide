@@ -24,6 +24,8 @@
     <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <GenerateTargetFrameworkAttribute>false</GenerateTargetFrameworkAttribute>
+    <GuidersPlatformRoot Condition="'$(GuidersPlatformRoot)' == ''">..\guiders-platform</GuidersPlatformRoot>
+    <UseLocalGuidersPlatform Condition="'$(UseLocalGuidersPlatform)' == '' AND Exists('$(GuidersPlatformRoot)\AIGuiders.Platform.sln')">true</UseLocalGuidersPlatform>
   </PropertyGroup>
   <PropertyGroup Condition="'$(GenerateIdeProtocolDocs)'=='true'">
     <DefineConstants>$(DefineConstants);IDE_COMMANDS_CODEGEN</DefineConstants>
@@ -306,6 +308,8 @@
     <ProjectReference Include="CasaField.Core\CasaField.Core.csproj" />
     <!-- RoslynMcp передаёт RoslynMcpWorkspace=true: не ссылаться на локальный анализатор, иначе DLL в bin держит процесс MCP и ломает dotnet build. -->
     <ProjectReference Include="CascadeIDE.ArchitectureAnalyzers\CascadeIDE.ArchitectureAnalyzers.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" Condition="'$(RoslynMcpWorkspace)'!='true'" />
+    <PackageReference Include="AIGuiders.Platform.CommandPlane" Version="0.4.0" Condition="'$(UseLocalGuidersPlatform)' != 'true'" />
+    <ProjectReference Include="$(GuidersPlatformRoot)\src\AIGuiders.Platform.CommandPlane\AIGuiders.Platform.CommandPlane.csproj" Condition="'$(UseLocalGuidersPlatform)' == 'true'" />
   </ItemGroup>
   <ItemGroup>
     <!-- ACP C# SDK: вендор externals/acp-csharp (IAcpClient с TerminalOutputResponse). NuGet AgentClientProtocol 0.1.5 расходится по сигнатуре TerminalOutputAsync — не использовать до фикса апстрима. -->

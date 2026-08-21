@@ -206,11 +206,14 @@ public static class ForgeSlashCatalogOverlay
             route.ExecutionKind,
             SlashGroup: route.Group);
 
-    private static SlashArgTailKind ParseArgTail(string? raw) =>
-        (raw ?? "optional").Trim().ToLowerInvariant() switch
+    private static SlashArgTailKind ParseArgTail(string? raw)
+    {
+        var kind = AIGuiders.Platform.CommandPlane.SlashArgTailPolicy.Parse(raw ?? "optional");
+        return kind switch
         {
-            "none" => SlashArgTailKind.None,
-            "required" => SlashArgTailKind.Required,
+            AIGuiders.Platform.CommandPlane.SlashArgTailKind.None => SlashArgTailKind.None,
+            AIGuiders.Platform.CommandPlane.SlashArgTailKind.Required => SlashArgTailKind.Required,
             _ => SlashArgTailKind.Optional,
         };
+    }
 }

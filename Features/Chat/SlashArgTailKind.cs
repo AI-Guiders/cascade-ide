@@ -2,10 +2,11 @@
 
 namespace CascadeIDE.Features.Chat;
 
-/// <summary>Режим хвоста аргументов после канонического slash-пути (ADR 0150).</summary>
+/// <summary>Re-export platform SlashArgTailKind (GUIDERS-ADR-0003 P5).</summary>
 public enum SlashArgTailKind
 {
-    None = 0,
-    Optional = 1,
-    Required = 2,
+    None = AIGuiders.Platform.CommandPlane.SlashArgTailKind.None,
+    Optional = AIGuiders.Platform.CommandPlane.SlashArgTailKind.Optional,
+    Required = AIGuiders.Platform.CommandPlane.SlashArgTailKind.Required,
 }
+
