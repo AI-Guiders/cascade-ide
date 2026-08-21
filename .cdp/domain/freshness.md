@@ -30,5 +30,6 @@
 
 ## last_ship
 
+- **2026-08-22 P5 CommandPlane strangle residual** — `IntentCatalogLoader`: melody `command_id` no longer poisons intercom/local slash routes (unblocked ForgeSlashCatalogOverlay + codegen sync tests **16/16**). Platform `SlashArgTailPolicy` wired in prior eccedf91.
 - **2026-08-15** — W1 map + stub creation (shipped)
 
