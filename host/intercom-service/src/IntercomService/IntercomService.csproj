@@ -16,7 +16,7 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.10" />
     <!-- Выровнять с Core 10.0.3; иначе от OutWit тянется Relational 10.0.1 и LINQ с DateTimeOffset.UtcNow снова «could not be translated». -->
     <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="10.0.10" />
-    <PackageReference Include="OutWit.Database.EntityFramework" Version="12.8.0" />
+    <PackageReference Include="OutWit.Database.EntityFramework" Version="14.0.1" />
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.14.0" />
   </ItemGroup>
 

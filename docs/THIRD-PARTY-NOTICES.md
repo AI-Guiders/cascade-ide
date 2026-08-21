@@ -47,8 +47,8 @@
 | OllamaSharp | 5.4.25 | MIT | https://www.nuget.org/packages/OllamaSharp |
 | OutWit.Common | 1.3.2 | Apache-2.0 | https://www.nuget.org/packages/OutWit.Common |
 | OutWit.Common.Json | 1.1.3 | Apache-2.0 | https://www.nuget.org/packages/OutWit.Common.Json |
-| OutWit.Database.Core | 1.0.0 | Apache-2.0 | https://www.nuget.org/packages/OutWit.Database.Core |
-| OutWit.Database.EntityFramework | 1.0.3 | Apache-2.0 | https://www.nuget.org/packages/OutWit.Database.EntityFramework |
+| OutWit.Database.Core | 14.0.1 | Apache-2.0 | https://www.nuget.org/packages/OutWit.Database.Core |
+| OutWit.Database.EntityFramework | 14.0.1 | Apache-2.0 | https://www.nuget.org/packages/OutWit.Database.EntityFramework |
 | Svg.Controls.Avalonia | 12.0.0.3 | MIT | https://www.nuget.org/packages/Svg.Controls.Avalonia |
 | TextMateSharp | 2.0.3 | MIT | https://www.nuget.org/packages/TextMateSharp |
 | TextMateSharp.Grammars | 2.0.3 | MIT | https://www.nuget.org/packages/TextMateSharp.Grammars |
