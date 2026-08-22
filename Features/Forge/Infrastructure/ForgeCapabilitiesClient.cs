@@ -3,7 +3,7 @@
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text.Json;
-using System.Text.Json.Serialization;
+using AIGuiders.Platform.CommandPlane;
 
 namespace CascadeIDE.Features.Forge.Infrastructure;
 
@@ -16,7 +16,7 @@ public static class ForgeCapabilitiesClient
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
     };
 
-    public static async Task<IReadOnlyList<ForgeCapabilitiesCommand>> FetchCommandsAsync(
+    public static async Task<IReadOnlyList<SlashCommandDescriptor>> FetchCommandsAsync(
         string baseUrl,
         string? apiToken,
         CancellationToken cancellationToken = default)
@@ -37,10 +37,10 @@ public static class ForgeCapabilitiesClient
             return [];
         }
 
-        var list = new List<ForgeCapabilitiesCommand>(commandsElement.GetArrayLength());
+        var list = new List<SlashCommandDescriptor>(commandsElement.GetArrayLength());
         foreach (var item in commandsElement.EnumerateArray())
         {
-            var command = item.Deserialize<ForgeCapabilitiesCommand>(JsonOptions);
+            var command = item.Deserialize<SlashCommandDescriptor>(JsonOptions);
             if (command is null || string.IsNullOrWhiteSpace(command.CommandId))
                 continue;
             list.Add(command);
@@ -48,28 +48,4 @@ public static class ForgeCapabilitiesClient
 
         return list;
     }
-}
-
-public sealed class ForgeCapabilitiesCommand
-{
-    public string Domain { get; init; } = "";
-
-    public string Object { get; init; } = "";
-
-    public string Intent { get; init; } = "";
-
-    public string CommandId { get; init; } = "";
-
-    public string Path { get; init; } = "";
-
-    public IReadOnlyList<string> PathAliases { get; init; } = [];
-
-    public string? Help { get; init; }
-
-    public string? Category { get; init; }
-
-    public string ArgTail { get; init; } = "optional";
-
-    [JsonPropertyName("requiredCapabilities")]
-    public IReadOnlyList<string> RequiredCapabilities { get; init; } = [];
 }

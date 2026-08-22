@@ -1,3 +1,4 @@
+using AIGuiders.Platform.CommandPlane;
 using CascadeIDE.Features.Chat;
 using CascadeIDE.Features.Forge.Infrastructure;
 using Xunit;
@@ -16,23 +17,23 @@ public sealed class ForgeSlashCatalogOverlayTests
     {
         ForgeSlashCatalogOverlay.ApplyForTests(
         [
-            new ForgeCapabilitiesCommand
+            new SlashCommandDescriptor
             {
                 Domain = "forge",
                 Object = "issue",
                 Intent = "open",
                 CommandId = "forge.issue.open",
-                Path = "/issue open",
-                PathAliases = ["/forge issue open"],
+                Path = "issue open",
+                PathAliases = ["forge issue open"],
                 Help = "Open issue by number.",
                 ArgTail = "required",
             },
         ]);
 
-        Assert.True(SlashLineResolver.TryResolveSlashLine("/forge issue open 3", out var resolution));
+        Assert.True(CascadeIDE.Features.Chat.SlashLineResolver.TryResolveSlashLine("/forge issue open 3", out var resolution));
         Assert.Equal("/forge issue open", resolution.CanonicalPath);
         Assert.Equal("3", resolution.ArgTail);
-        Assert.Equal(SlashArgTailKind.Required, resolution.ArgTailKind);
+        Assert.Equal(CascadeIDE.Features.Chat.SlashArgTailKind.Required, resolution.ArgTailKind);
         Assert.True(resolution.IsRunnable);
     }
 
@@ -41,13 +42,14 @@ public sealed class ForgeSlashCatalogOverlayTests
     {
         ForgeSlashCatalogOverlay.ApplyForTests(
         [
-            new ForgeCapabilitiesCommand
+            new SlashCommandDescriptor
             {
+                Domain = "forge",
                 Object = "repo",
                 Intent = "open",
                 CommandId = "forge.repo.open",
-                Path = "/repo open",
-                PathAliases = ["/forge repo open"],
+                Path = "repo open",
+                PathAliases = ["forge repo open"],
                 Help = "Open repo view.",
                 ArgTail = "optional",
             },
@@ -63,19 +65,20 @@ public sealed class ForgeSlashCatalogOverlayTests
     {
         ForgeSlashCatalogOverlay.ApplyForTests(
         [
-            new ForgeCapabilitiesCommand
+            new SlashCommandDescriptor
             {
+                Domain = "forge",
                 Object = "issue",
                 Intent = "open",
                 CommandId = "forge.issue.open",
-                Path = "/issue open",
-                PathAliases = ["/forge issue open"],
+                Path = "issue open",
+                PathAliases = ["forge issue open"],
                 Help = "Open issue.",
             },
         ]);
 
         ForgeSlashCatalogOverlay.Clear();
-        Assert.False(SlashLineResolver.TryResolveSlashLine("/forge issue open 1", out _));
+        Assert.False(CascadeIDE.Features.Chat.SlashLineResolver.TryResolveSlashLine("/forge issue open 1", out _));
     }
 
     [Fact]
@@ -83,13 +86,14 @@ public sealed class ForgeSlashCatalogOverlayTests
     {
         ForgeSlashCatalogOverlay.ApplyForTests(
         [
-            new ForgeCapabilitiesCommand
+            new SlashCommandDescriptor
             {
+                Domain = "forge",
                 Object = "artifact",
                 Intent = "goto",
                 CommandId = "forge.artifact.goto",
-                Path = "/artifact goto",
-                PathAliases = ["/forge artifact goto"],
+                Path = "artifact goto",
+                PathAliases = ["forge artifact goto"],
                 Help = "Open [FRG:…] artifact.",
                 ArgTail = "required",
             },

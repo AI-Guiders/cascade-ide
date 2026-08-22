@@ -1,7 +1,7 @@
 #nullable enable
 
+using AIGuiders.Platform.CommandPlane;
 using CascadeIDE.Features.Chat;
-using CascadeIDE.Models.Intercom;
 using CascadeIDE.Services;
 
 namespace CascadeIDE.Features.Forge.Infrastructure;
@@ -11,10 +11,9 @@ public static class ForgeSlashCatalogOverlay
 {
     private static readonly object Gate = new();
     private static string? _baseUrl;
-    private static Dictionary<string, SlashRouteEntry> _routes = new(StringComparer.OrdinalIgnoreCase);
+    private static SlashCatalogIndex _catalog = SlashCatalogIndex.Empty;
+    private static Dictionary<string, CascadeIDE.Services.SlashRouteEntry> _routes = new(StringComparer.OrdinalIgnoreCase);
     private static Dictionary<string, ChatSlashCommandDescriptor> _descriptors = new(StringComparer.OrdinalIgnoreCase);
-    private static HashSet<string> _pathSet = new(StringComparer.OrdinalIgnoreCase);
-    private static string[] _pathsLongestFirst = [];
 
     public static bool IsActive
     {
@@ -56,21 +55,20 @@ public static class ForgeSlashCatalogOverlay
             }
 
             _baseUrl = null;
-            _routes = new Dictionary<string, SlashRouteEntry>(StringComparer.OrdinalIgnoreCase);
+            _catalog = SlashCatalogIndex.Empty;
+            _routes = new Dictionary<string, CascadeIDE.Services.SlashRouteEntry>(StringComparer.OrdinalIgnoreCase);
             _descriptors = new Dictionary<string, ChatSlashCommandDescriptor>(StringComparer.OrdinalIgnoreCase);
-            _pathSet = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-            _pathsLongestFirst = [];
         }
     }
 
-    internal static void ApplyForTests(IReadOnlyList<ForgeCapabilitiesCommand> commands) =>
+    internal static void ApplyForTests(IReadOnlyList<SlashCommandDescriptor> commands) =>
         Apply("http://forge.test", commands);
 
-    internal static void Apply(string baseUrl, IReadOnlyList<ForgeCapabilitiesCommand> commands)
+    internal static void Apply(string baseUrl, IReadOnlyList<SlashCommandDescriptor> commands)
     {
-        var routes = new Dictionary<string, SlashRouteEntry>(StringComparer.OrdinalIgnoreCase);
+        var overlayDescriptors = new List<SlashCommandDescriptor>();
+        var routes = new Dictionary<string, CascadeIDE.Services.SlashRouteEntry>(StringComparer.OrdinalIgnoreCase);
         var descriptors = new Dictionary<string, ChatSlashCommandDescriptor>(StringComparer.OrdinalIgnoreCase);
-        var pathSet = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
         foreach (var command in commands)
         {
@@ -79,22 +77,23 @@ public static class ForgeSlashCatalogOverlay
                 if (routes.ContainsKey(slashPath))
                     continue;
 
-                var route = ToRouteEntry(command, slashPath);
+                var overlayDescriptor = ForCidePath(command, slashPath);
+                overlayDescriptors.Add(overlayDescriptor);
+
+                var route = ToCideRoute(overlayDescriptor, slashPath);
                 routes[slashPath] = route;
-                descriptors[slashPath] = ToDescriptor(route);
-                pathSet.Add(slashPath);
+                descriptors[slashPath] = ToChatDescriptor(route);
             }
         }
 
-        var longestFirst = pathSet.OrderByDescending(static p => p.Length).ToArray();
+        var catalog = SlashCatalogIndex.FromDescriptors(overlayDescriptors);
 
         lock (Gate)
         {
             _baseUrl = baseUrl;
+            _catalog = catalog;
             _routes = routes;
             _descriptors = descriptors;
-            _pathSet = pathSet;
-            _pathsLongestFirst = longestFirst;
         }
     }
 
@@ -113,34 +112,31 @@ public static class ForgeSlashCatalogOverlay
         if (tokens.Count == 0)
             return false;
 
-        string[] paths;
+        SlashCatalogIndex catalog;
         lock (Gate)
-            paths = _pathsLongestFirst;
+            catalog = _catalog;
 
-        if (paths.Length == 0)
-            return false;
-
-        for (var len = tokens.Count; len >= 1; len--)
+        if (!catalog.TryResolveLongestPrefix(
+                tokens,
+                endsWithSpace,
+                out var pathBody,
+                out argTail,
+                out _,
+                out _,
+                out _))
         {
-            var path = "/" + string.Join(' ', tokens.Take(len));
-            lock (Gate)
-            {
-                if (!_pathSet.Contains(path))
-                    continue;
-            }
-
-            canonicalPath = path;
-            argTail = string.Join(' ', tokens.Skip(len));
-            var hasArgTail = argTail.Length > 0;
-            isExactPath = len == tokens.Count && !endsWithSpace && !hasArgTail;
-            endsWithSpaceAfterPath = endsWithSpace && !hasArgTail && len == tokens.Count;
-            return true;
+            return false;
         }
 
-        return false;
+        canonicalPath = IntentSlashCatalog.NormalizeSlashPath(pathBody);
+        var pathTokenCount = pathBody.Split(' ', StringSplitOptions.RemoveEmptyEntries).Length;
+        var hasArgTail = argTail.Length > 0;
+        isExactPath = pathTokenCount == tokens.Count && !endsWithSpace && !hasArgTail;
+        endsWithSpaceAfterPath = endsWithSpace && !hasArgTail && pathTokenCount == tokens.Count;
+        return true;
     }
 
-    public static bool TryGetRoute(string slashPath, out SlashRouteEntry route)
+    public static bool TryGetRoute(string slashPath, out CascadeIDE.Services.SlashRouteEntry route)
     {
         lock (Gate)
             return _routes.TryGetValue(IntentSlashCatalog.NormalizeSlashPath(slashPath), out route);
@@ -152,15 +148,15 @@ public static class ForgeSlashCatalogOverlay
             return _descriptors.TryGetValue(IntentSlashCatalog.NormalizeSlashPath(slashPath), out descriptor);
     }
 
-    public static SlashArgTailKind GetArgTailKind(string slashPath)
+    public static CascadeIDE.Features.Chat.SlashArgTailKind GetArgTailKind(string slashPath)
     {
         if (!TryGetRoute(slashPath, out var route))
-            return SlashArgTailKind.None;
+            return CascadeIDE.Features.Chat.SlashArgTailKind.None;
 
-        return route.ArgTailKindExplicit ?? SlashArgTailKind.None;
+        return route.ArgTailKindExplicit ?? CascadeIDE.Features.Chat.SlashArgTailKind.None;
     }
 
-    internal static IEnumerable<SlashRouteEntry> AllRoutes
+    internal static IEnumerable<CascadeIDE.Services.SlashRouteEntry> AllRoutes
     {
         get
         {
@@ -169,7 +165,7 @@ public static class ForgeSlashCatalogOverlay
         }
     }
 
-    private static IEnumerable<string> SelectCidePaths(ForgeCapabilitiesCommand command)
+    internal static IEnumerable<string> SelectCidePaths(SlashCommandDescriptor command)
     {
         var paths = new List<string>();
         foreach (var alias in command.PathAliases)
@@ -186,19 +182,45 @@ public static class ForgeSlashCatalogOverlay
         return [IntentSlashCatalog.NormalizeSlashPath($"/forge {obj} {command.Intent}")];
     }
 
-    private static SlashRouteEntry ToRouteEntry(ForgeCapabilitiesCommand command, string slashPath) =>
+    internal static SlashCommandDescriptor ForCidePath(SlashCommandDescriptor source, string cideSlashPath)
+    {
+        var body = cideSlashPath.Trim();
+        if (body.StartsWith('/'))
+            body = body[1..];
+
+        return new SlashCommandDescriptor
+        {
+            Domain = source.Domain,
+            Object = source.Object,
+            Intent = source.Intent,
+            CommandId = source.CommandId,
+            Path = body,
+            Help = source.Help,
+            Group = source.Group,
+            ArgTail = source.ArgTail,
+            ArgHint = source.ArgHint,
+            ArgPickerChoices = source.ArgPickerChoices,
+            Surfaces = source.Surfaces,
+            RequiredCapabilities = source.RequiredCapabilities,
+            Tier = source.Tier,
+            PluginId = source.PluginId,
+            RequiresDestructiveConfirm = source.RequiresDestructiveConfirm,
+        };
+    }
+
+    private static CascadeIDE.Services.SlashRouteEntry ToCideRoute(SlashCommandDescriptor command, string slashPath) =>
         new(
             slashPath,
             command.CommandId,
             command.Help?.Trim() ?? command.CommandId,
             ChatSlashCommandExecutionKind.ForgeCommand,
-            Group: string.IsNullOrWhiteSpace(command.Category) ? "Forge" : command.Category.Trim(),
-            ArgTailKindExplicit: ParseArgTail(command.ArgTail),
+            Group: string.IsNullOrWhiteSpace(command.Group) ? "Forge" : command.Group.Trim(),
+            ArgTailKindExplicit: ToCideArgTail(command.ArgTailKind),
             Domain: command.Domain,
             Object: command.Object,
             Intent: command.Intent);
 
-    private static ChatSlashCommandDescriptor ToDescriptor(SlashRouteEntry route) =>
+    private static ChatSlashCommandDescriptor ToChatDescriptor(CascadeIDE.Services.SlashRouteEntry route) =>
         new(
             route.SlashPath,
             route.CommandId,
@@ -206,14 +228,11 @@ public static class ForgeSlashCatalogOverlay
             route.ExecutionKind,
             SlashGroup: route.Group);
 
-    private static SlashArgTailKind ParseArgTail(string? raw)
-    {
-        var kind = AIGuiders.Platform.CommandPlane.SlashArgTailPolicy.Parse(raw ?? "optional");
-        return kind switch
+    private static CascadeIDE.Features.Chat.SlashArgTailKind ToCideArgTail(AIGuiders.Platform.CommandPlane.SlashArgTailKind kind) =>
+        kind switch
         {
-            AIGuiders.Platform.CommandPlane.SlashArgTailKind.None => SlashArgTailKind.None,
-            AIGuiders.Platform.CommandPlane.SlashArgTailKind.Required => SlashArgTailKind.Required,
-            _ => SlashArgTailKind.Optional,
+            AIGuiders.Platform.CommandPlane.SlashArgTailKind.None => CascadeIDE.Features.Chat.SlashArgTailKind.None,
+            AIGuiders.Platform.CommandPlane.SlashArgTailKind.Required => CascadeIDE.Features.Chat.SlashArgTailKind.Required,
+            _ => CascadeIDE.Features.Chat.SlashArgTailKind.Optional,
         };
-    }
 }
