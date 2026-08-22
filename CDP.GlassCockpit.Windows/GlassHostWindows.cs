@@ -185,6 +185,33 @@ internal sealed partial class GlassHostWindows : IDisposable
         PreferPmOneOf(zone.Value);
     }
 
+    /// <summary>Plan Face: satellite PfdHost on triple topology, OneOf Prefer P, else main PfdZone.</summary>
+    public void BringPlanFace()
+    {
+        if (_pfdHost is { IsVisible: true })
+        {
+            PulseHostAttention(_pfdHost);
+            return;
+        }
+
+        if (_mainScanOneOf)
+        {
+            PreferPmOneOf(PresentationAnchorKind.Pfd);
+            return;
+        }
+
+        _main.FocusPlanPfdFace();
+    }
+
+    static void PulseHostAttention(Window host)
+    {
+        if (host.WindowState == WindowState.Minimized)
+            host.WindowState = WindowState.Normal;
+        host.Activate();
+        host.Topmost = true;
+        host.Topmost = false;
+    }
+
     /// <summary>Auto-switch / chord: show P or M full in OneOf host (or F on single-TopLevel).</summary>
     public void PreferPmOneOf(PresentationAnchorKind kind)
     {

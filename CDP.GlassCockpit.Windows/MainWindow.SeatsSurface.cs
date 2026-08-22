@@ -35,7 +35,7 @@ public partial class MainWindow
                     if (PresentationPmOneOfPolicy.SeatsMaySelectMfd(view.ShowFace, view.MfdPage))
                         SelectMfdPage(view.MfdPage, sticky: true);
                     else if (string.Equals(view.FaceSeat, "p", StringComparison.OrdinalIgnoreCase))
-                        _hosts.PreferPmOneOf(PresentationAnchorKind.Pfd);
+                        _hosts.BringPlanFace();
 
                     // Sticky web_ai_url must not steal Face on every PlaceOrgan — only browser Face.
                     if (view.WantsWebAiNavigate)
@@ -66,5 +66,13 @@ public partial class MainWindow
         // Brief Topmost pulse — Activate alone often loses to Cursor foreground.
         Topmost = true;
         Topmost = false;
+    }
+
+    /// <summary>(P)(F)(M) main-grid fallback when PfdZone is still on main — focus P·Plan PFD.</summary>
+    internal void FocusPlanPfdFace()
+    {
+        PfdZoneTitle.Text = "P · Plan";
+        PfdZone.BringIntoView();
+        PfdZone.Focus();
     }
 }
