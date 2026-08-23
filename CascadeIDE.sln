@@ -21,7 +21,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tools", "tools", "{07C2787E
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CascadeIDE.BuildVerifyWorker", "tools\CascadeIDE.BuildVerifyWorker\CascadeIDE.BuildVerifyWorker.csproj", "{B5839049-5F6C-47B3-8D3F-622C910BA809}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DotNetBuildTest.Core", "..\dotnet-build-test-core\DotNetBuildTest.Core.csproj", "{268F0C75-6FA4-4BF8-AC2E-1B99BF78EF80}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DotNetBuildTest.Core", "..\..\guiders-core\src\DotNetBuildTest.Core\DotNetBuildTest.Core.csproj", "{268F0C75-6FA4-4BF8-AC2E-1B99BF78EF80}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "glass", "glass", "{C9AA5BEE-5213-4E98-A7A6-7EFFFF695DB3}"
 EndProject

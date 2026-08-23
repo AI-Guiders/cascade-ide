@@ -1,0 +1,1 @@
+﻿cascade-ide/scratch/sniper-dogfood-calc/

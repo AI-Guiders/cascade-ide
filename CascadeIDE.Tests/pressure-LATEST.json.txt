@@ -1,0 +1,9 @@
+{
+  "schema": "cide_pressure_latch/v1",
+  "origin": "agent",
+  "stamped_utc": "2026-08-16T03:05:46.4594525+00:00",
+  "armed": true,
+  "pulse": "pressure \u00B7 ARMED \u00B7 stashed \u00B7 recall\u00B7ready",
+  "has_stash": true,
+  "chrome_hint": "pressure \u00B7 ARMED \u00B7 stashed \u00B7 recall\u00B7ready"
+}

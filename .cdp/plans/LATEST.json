@@ -1,0 +1,13 @@
+{
+  "schema": "plan_promote/v0",
+  "plan_id": "38cb318a1662",
+  "status": "rejected",
+  "path": "D:\\Experiments\\Personal Cursor Folder\\Financial\\software\\open\\cascade-ide\\.cdp\\plans\\plan-20260804-115331-softinstrument-human-viz-plan-whynext.md",
+  "feature": "SoftInstrument human viz \u00B7 Plan WHY\u002BNEXT @act #CIDE",
+  "feature_id": "0ead4919-07d2-464f-bde3-e587bcbfc576",
+  "task_id": "75571f5b-77fe-456c-93f7-509bcdaccac3",
+  "task": "Plan WHY\u002BNEXT cards live dogfood",
+  "promoted_utc": "2026-08-04T11:53:31.672658Z",
+  "resolved_utc": "2026-08-04T11:53:44.3904091Z",
+  "notes": null
+}

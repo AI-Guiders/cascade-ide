@@ -1,0 +1,2 @@
+﻿>Света, по пульсу: monitor и topology нашлись (по 1 хиту), а GlassLayout — 0 хитов, корневой проект cdp-mcp. Это ожидаемо: GlassLayout, судя по всему, живёт в другом репо. Если нужно — могу сделать project list или project_switch, чтобы подступиться.
+В другом. В cascade-ide

@@ -1,0 +1,12 @@
+{
+  "Schema": "crm/v1",
+  "CallId": "3a9206929a62",
+  "Status": "go_around",
+  "Callout": "go_around",
+  "Kind": "general",
+  "RefId": "adhoc",
+  "Ask": "callout",
+  "OpenedUtc": "2026-08-04T11:51:08.2752208+00:00",
+  "ResolvedUtc": "2026-08-04T11:51:08.2754979+00:00",
+  "Why": null
+}

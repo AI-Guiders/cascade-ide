@@ -1,0 +1,1 @@
+﻿да, конечно. Можешь и саму kb осмотреть. Начни с Showcase.md или index-knowledge-router

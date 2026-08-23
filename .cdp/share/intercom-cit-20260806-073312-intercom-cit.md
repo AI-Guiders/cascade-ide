@@ -1,0 +1,1 @@
+﻿о CursorCutoff dual-agent: проверь руки — @intent health · @intent domain card=citizen · @intent files scene. В ответе: что ack/refuse и что болит для жизни без Cursor. SoftFL invent REJECT.

@@ -39,5 +39,5 @@ Do everything in Glass / Citizen. Done stays **REOPENED** vs max DoD.
 ## Not Done (honest)
 
 - Throw-Cursor max DoD closed
-- SoftOrgan Meta invent (REJECT under sealed course)
+- SoftInstrument Meta invent (REJECT under sealed course)
 - Treating battle VERIFY as Glass/Citizen Done stamp

@@ -1,0 +1,11 @@
+# pressure stash 2026-08-06 Who↔model
+## goal
+Ship 0.5.672 Who keyed by model + dialog partition. Operator AGREED.
+## open
+Serialize RootOverride flake done; verify→hard deploy dual→stamp→push→dogfood.
+## next
+Green tests then publish-and-deploy -Mode hard both targets.
+## ignite
+re-ARM after ship; timer≠idle
+## plan
+Intercom Face Who↔model

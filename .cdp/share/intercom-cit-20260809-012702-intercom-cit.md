@@ -1,0 +1,1 @@
+﻿Господи посмотри уже через files D:\Experiments\agent-notes\knowledge

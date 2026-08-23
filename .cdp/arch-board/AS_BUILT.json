@@ -1,0 +1,359 @@
+{
+  "schema": "arch_board/v0",
+  "title": "as-built \u00B7 cascade-ide",
+  "mode": "as_built",
+  "profile": "cide",
+  "updated_utc": "2026-08-04T12:47:11.8631516+00:00",
+  "focus_role_id": "databus-core",
+  "roles": [
+    {
+      "id": "transport-ingest",
+      "role": "transport",
+      "status": "promoted",
+      "note": "as_built \u00B7 Ingestion / stream transport (ADR 0094) \u00B7 auto-promoted",
+      "elected_candidate_id": "c-21fe2ecc",
+      "candidates": [
+        {
+          "id": "c-21fe2ecc",
+          "label": "BuildLogIngestion",
+          "anchor": "[F:Services/BuildLogIngestion.cs;M:BuildLogIngestion]",
+          "path": "Services/BuildLogIngestion.cs",
+          "symbol": "BuildLogIngestion",
+          "status": "elected"
+        },
+        {
+          "id": "c-965c95ef",
+          "label": "IntercomTransportIngest",
+          "anchor": "[F:Features/Intercom/Transport/IntercomTransportIngest.cs;M:IntercomTransportIngest]",
+          "path": "Features/Intercom/Transport/IntercomTransportIngest.cs",
+          "symbol": "IntercomTransportIngest",
+          "status": "candidate"
+        }
+      ],
+      "created_utc": "2026-08-04T12:47:11.8606175+00:00"
+    },
+    {
+      "id": "ccu-core",
+      "role": "ccu",
+      "status": "promoted",
+      "note": "as_built \u00B7 ComputingUnits (ADR 0097) \u00B7 auto-promoted",
+      "elected_candidate_id": "c-ec4ef3a2",
+      "candidates": [
+        {
+          "id": "c-ec4ef3a2",
+          "label": "ICockpitComputeUnit",
+          "anchor": "[F:Cockpit/ComputingUnits/ICockpitComputeUnit.cs;M:ICockpitComputeUnit]",
+          "path": "Cockpit/ComputingUnits/ICockpitComputeUnit.cs",
+          "symbol": "ICockpitComputeUnit",
+          "status": "elected"
+        },
+        {
+          "id": "c-198ecb3e",
+          "label": "EnvironmentReadinessSnapshotUnit",
+          "anchor": "[F:Cockpit/ComputingUnits/EnvironmentReadiness/EnvironmentReadinessSnapshotUnit.cs;M:EnvironmentReadinessSnapshotUnit]",
+          "path": "Cockpit/ComputingUnits/EnvironmentReadiness/EnvironmentReadinessSnapshotUnit.cs",
+          "symbol": "EnvironmentReadinessSnapshotUnit",
+          "status": "candidate"
+        },
+        {
+          "id": "c-7d277224",
+          "label": "IdeHealthFormattingUnit",
+          "anchor": "[F:Cockpit/ComputingUnits/IdeHealth/IdeHealthFormattingUnit.cs;M:IdeHealthFormattingUnit]",
+          "path": "Cockpit/ComputingUnits/IdeHealth/IdeHealthFormattingUnit.cs",
+          "symbol": "IdeHealthFormattingUnit",
+          "status": "candidate"
+        }
+      ],
+      "created_utc": "2026-08-04T12:47:11.8616679+00:00"
+    },
+    {
+      "id": "databus-core",
+      "role": "databus",
+      "status": "promoted",
+      "note": "as_built \u00B7 IDE DataBus typed events (ADR 0099) \u00B7 auto-promoted",
+      "elected_candidate_id": "c-7e006681",
+      "candidates": [
+        {
+          "id": "c-7e006681",
+          "label": "IDataBus",
+          "anchor": "[F:Cockpit/DataBus/IDataBus.cs;M:IDataBus]",
+          "path": "Cockpit/DataBus/IDataBus.cs",
+          "symbol": "IDataBus",
+          "status": "elected"
+        },
+        {
+          "id": "c-e2cbbcb7",
+          "label": "InMemoryDataBus",
+          "anchor": "[F:Cockpit/DataBus/InMemoryDataBus.cs;M:InMemoryDataBus]",
+          "path": "Cockpit/DataBus/InMemoryDataBus.cs",
+          "symbol": "InMemoryDataBus",
+          "status": "candidate"
+        },
+        {
+          "id": "c-6914c05b",
+          "label": "DataBusEventPolicy",
+          "anchor": "[F:Cockpit/DataBus/DataBusEventPolicy.cs;M:DataBusEventPolicy]",
+          "path": "Cockpit/DataBus/DataBusEventPolicy.cs",
+          "symbol": "DataBusEventPolicy",
+          "status": "candidate"
+        }
+      ],
+      "created_utc": "2026-08-04T12:47:11.8617923+00:00"
+    },
+    {
+      "id": "ch-core",
+      "role": "channel",
+      "status": "promoted",
+      "note": "as_built \u00B7 Channels (IChannel) \u00B7 auto-promoted",
+      "elected_candidate_id": "c-b308303f",
+      "candidates": [
+        {
+          "id": "c-b308303f",
+          "label": "IChannel",
+          "anchor": "[F:Cockpit/Channels/IChannel.cs;M:IChannel]",
+          "path": "Cockpit/Channels/IChannel.cs",
+          "symbol": "IChannel",
+          "status": "elected"
+        },
+        {
+          "id": "c-d2b84006",
+          "label": "EnvironmentReadinessChannel",
+          "anchor": "[F:Cockpit/Channels/EnvironmentReadiness/EnvironmentReadinessChannel.cs;M:EnvironmentReadinessChannel]",
+          "path": "Cockpit/Channels/EnvironmentReadiness/EnvironmentReadinessChannel.cs",
+          "symbol": "EnvironmentReadinessChannel",
+          "status": "candidate"
+        },
+        {
+          "id": "c-46e5e4bf",
+          "label": "CodeFlowTraceChannel",
+          "anchor": "[F:Cockpit/Channels/TraceFlow/CodeFlowTraceChannel.cs;M:CodeFlowTraceChannel]",
+          "path": "Cockpit/Channels/TraceFlow/CodeFlowTraceChannel.cs",
+          "symbol": "CodeFlowTraceChannel",
+          "status": "candidate"
+        }
+      ],
+      "created_utc": "2026-08-04T12:47:11.8618877+00:00"
+    },
+    {
+      "id": "cds-core",
+      "role": "cds",
+      "status": "promoted",
+      "note": "as_built \u00B7 CDS \u2014 \u043A\u0443\u0434\u0430 \u0432 \u043A\u0430\u0431\u0438\u043D\u0435 \u00B7 auto-promoted",
+      "elected_candidate_id": "c-e2fdc917",
+      "candidates": [
+        {
+          "id": "c-e2fdc917",
+          "label": "ICdsRouter",
+          "anchor": "[F:Cockpit/Cds/ICdsRouter.cs;M:ICdsRouter]",
+          "path": "Cockpit/Cds/ICdsRouter.cs",
+          "symbol": "ICdsRouter",
+          "status": "elected"
+        },
+        {
+          "id": "c-2ddba7bd",
+          "label": "CockpitSurfaceSnapshotBuilder",
+          "anchor": "[F:Cockpit/Cds/CockpitSurfaceSnapshotBuilder.cs;M:CockpitSurfaceSnapshotBuilder]",
+          "path": "Cockpit/Cds/CockpitSurfaceSnapshotBuilder.cs",
+          "symbol": "CockpitSurfaceSnapshotBuilder",
+          "status": "candidate"
+        },
+        {
+          "id": "c-02e10dd1",
+          "label": "TraceFlowCdsRouter",
+          "anchor": "[F:Cockpit/Cds/TraceFlowCdsRouter.cs;M:TraceFlowCdsRouter]",
+          "path": "Cockpit/Cds/TraceFlowCdsRouter.cs",
+          "symbol": "TraceFlowCdsRouter",
+          "status": "candidate"
+        }
+      ],
+      "created_utc": "2026-08-04T12:47:11.8619331+00:00"
+    },
+    {
+      "id": "ids-core",
+      "role": "ids",
+      "status": "promoted",
+      "note": "as_built \u00B7 IDS \u2014 IdeDisplay overlays (orthogonal to CDS) \u00B7 auto-promoted",
+      "elected_candidate_id": "c-35312f10",
+      "candidates": [
+        {
+          "id": "c-35312f10",
+          "label": "IIdsSurfaceCompositor",
+          "anchor": "[F:IdeDisplay/IIdsSurfaceCompositor.cs;M:IIdsSurfaceCompositor]",
+          "path": "IdeDisplay/IIdsSurfaceCompositor.cs",
+          "symbol": "IIdsSurfaceCompositor",
+          "status": "elected"
+        },
+        {
+          "id": "c-11855663",
+          "label": "CommandPaletteSurfaceCompositor",
+          "anchor": "[F:IdeDisplay/CommandPalette/CommandPaletteSurfaceCompositor.cs;M:CommandPaletteSurfaceCompositor]",
+          "path": "IdeDisplay/CommandPalette/CommandPaletteSurfaceCompositor.cs",
+          "symbol": "CommandPaletteSurfaceCompositor",
+          "status": "candidate"
+        },
+        {
+          "id": "c-d080ff96",
+          "label": "CockpitCommandLineSurfaceCompositor",
+          "anchor": "[F:IdeDisplay/CockpitCommandLine/CockpitCommandLineSurfaceCompositor.cs;M:CockpitCommandLineSurfaceCompositor]",
+          "path": "IdeDisplay/CockpitCommandLine/CockpitCommandLineSurfaceCompositor.cs",
+          "symbol": "CockpitCommandLineSurfaceCompositor",
+          "status": "candidate"
+        }
+      ],
+      "created_utc": "2026-08-04T12:47:11.8619648+00:00"
+    },
+    {
+      "id": "comp-core",
+      "role": "compositor",
+      "status": "promoted",
+      "note": "as_built \u00B7 Composition \u2192 surface \u00B7 auto-promoted",
+      "elected_candidate_id": "c-6db86d9b",
+      "candidates": [
+        {
+          "id": "c-6db86d9b",
+          "label": "ISurfaceCompositor",
+          "anchor": "[F:Cockpit/Composition/ISurfaceCompositor.cs;M:ISurfaceCompositor]",
+          "path": "Cockpit/Composition/ISurfaceCompositor.cs",
+          "symbol": "ISurfaceCompositor",
+          "status": "elected"
+        },
+        {
+          "id": "c-79dee1f0",
+          "label": "MainWindowHostSurfaceCompositor",
+          "anchor": "[F:Cockpit/Composition/HostSurface/MainWindowHostSurfaceCompositor.cs;M:MainWindowHostSurfaceCompositor]",
+          "path": "Cockpit/Composition/HostSurface/MainWindowHostSurfaceCompositor.cs",
+          "symbol": "MainWindowHostSurfaceCompositor",
+          "status": "candidate"
+        },
+        {
+          "id": "c-1994b20a",
+          "label": "MainWindowShellSurfaceCompositor",
+          "anchor": "[F:Cockpit/Composition/Shell/MainWindowShellSurfaceCompositor.cs;M:MainWindowShellSurfaceCompositor]",
+          "path": "Cockpit/Composition/Shell/MainWindowShellSurfaceCompositor.cs",
+          "symbol": "MainWindowShellSurfaceCompositor",
+          "status": "candidate"
+        }
+      ],
+      "created_utc": "2026-08-04T12:47:11.8620076+00:00"
+    },
+    {
+      "id": "instr-core",
+      "role": "instrument",
+      "status": "promoted",
+      "note": "as_built \u00B7 Instrument deck / descriptor (ADR 0047/0063) \u00B7 auto-promoted",
+      "elected_candidate_id": "c-534da507",
+      "candidates": [
+        {
+          "id": "c-534da507",
+          "label": "CockpitInstrumentDescriptor",
+          "anchor": "[F:Cockpit/Composition/CockpitInstrumentDescriptor.cs;M:CockpitInstrumentDescriptor]",
+          "path": "Cockpit/Composition/CockpitInstrumentDescriptor.cs",
+          "symbol": "CockpitInstrumentDescriptor",
+          "status": "elected"
+        },
+        {
+          "id": "c-ed8db68b",
+          "label": "InstrumentDeckDescriptor",
+          "anchor": "[F:Cockpit/InstrumentDeckDescriptor.cs;M:InstrumentDeckDescriptor]",
+          "path": "Cockpit/InstrumentDeckDescriptor.cs",
+          "symbol": "InstrumentDeckDescriptor",
+          "status": "candidate"
+        },
+        {
+          "id": "c-c53f96bb",
+          "label": "IdeHealthInstrumentDeck",
+          "anchor": "[F:Cockpit/Composition/IdeHealth/IdeHealthInstrumentDeck.cs;M:IdeHealthInstrumentDeck]",
+          "path": "Cockpit/Composition/IdeHealth/IdeHealthInstrumentDeck.cs",
+          "symbol": "IdeHealthInstrumentDeck",
+          "status": "candidate"
+        }
+      ],
+      "created_utc": "2026-08-04T12:47:11.8620436+00:00"
+    },
+    {
+      "id": "surf-core",
+      "role": "surface",
+      "status": "promoted",
+      "note": "as_built \u00B7 Surface snapshot / mounts \u00B7 auto-promoted",
+      "elected_candidate_id": "c-c2e3d4cb",
+      "candidates": [
+        {
+          "id": "c-c2e3d4cb",
+          "label": "UiLayoutSnapshot",
+          "anchor": "[F:Cockpit/Surface/UiLayoutSnapshot.cs;M:UiLayoutSnapshot]",
+          "path": "Cockpit/Surface/UiLayoutSnapshot.cs",
+          "symbol": "UiLayoutSnapshot",
+          "status": "elected"
+        },
+        {
+          "id": "c-85ecb372",
+          "label": "MainWindowInstrumentMountRegistry",
+          "anchor": "[F:Cockpit/Surface/MainWindowInstrumentMountRegistry.cs;M:MainWindowInstrumentMountRegistry]",
+          "path": "Cockpit/Surface/MainWindowInstrumentMountRegistry.cs",
+          "symbol": "MainWindowInstrumentMountRegistry",
+          "status": "candidate"
+        }
+      ],
+      "created_utc": "2026-08-04T12:47:11.8621216+00:00"
+    },
+    {
+      "id": "dal-gap",
+      "role": "dal",
+      "status": "open",
+      "note": "as_built \u00B7 missing locus \u2014 ADR 0102; toolchain ensure hangs here (ADR 0198)",
+      "elected_candidate_id": null,
+      "candidates": [],
+      "created_utc": "2026-08-04T12:47:11.8623843+00:00"
+    }
+  ],
+  "edges": [
+    {
+      "id": "e-08c20b56",
+      "from_role_id": "transport-ingest",
+      "to_role_id": "ccu-core",
+      "kind": "feeds"
+    },
+    {
+      "id": "e-41d60572",
+      "from_role_id": "dal-gap",
+      "to_role_id": "ccu-core",
+      "kind": "feeds"
+    },
+    {
+      "id": "e-7c86d952",
+      "from_role_id": "ccu-core",
+      "to_role_id": "ch-core",
+      "kind": "feeds"
+    },
+    {
+      "id": "e-54d80a1d",
+      "from_role_id": "ch-core",
+      "to_role_id": "cds-core",
+      "kind": "feeds"
+    },
+    {
+      "id": "e-e84a4eb6",
+      "from_role_id": "cds-core",
+      "to_role_id": "comp-core",
+      "kind": "projects"
+    },
+    {
+      "id": "e-826ae712",
+      "from_role_id": "comp-core",
+      "to_role_id": "surf-core",
+      "kind": "projects"
+    },
+    {
+      "id": "e-ae1ea63e",
+      "from_role_id": "databus-core",
+      "to_role_id": "ch-core",
+      "kind": "wires"
+    },
+    {
+      "id": "e-2a22f65c",
+      "from_role_id": "instr-core",
+      "to_role_id": "surf-core",
+      "kind": "mounts"
+    }
+  ]
+}

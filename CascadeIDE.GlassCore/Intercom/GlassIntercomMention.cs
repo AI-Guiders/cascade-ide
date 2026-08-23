@@ -108,6 +108,9 @@ public static partial class GlassIntercomMention
         if (MentionsKind(body, "operator"))
             Add(WakeSink.GlassOperator, "@operator wake");
 
+        if (MentionsAll(body))
+            ExpandWakes(body, roster, Add);
+
         foreach (var (name, kind, seatTag) in WhoCandidates(roster))
         {
             if (string.IsNullOrWhiteSpace(name))
@@ -126,6 +129,41 @@ public static partial class GlassIntercomMention
             Add(WakeSink.HabitatCitizen, "@Sierra→citizen wake");
 
         return hits.Select(kv => new WakeHit(kv.Key, kv.Value)).ToArray();
+    }
+
+    /// <summary>
+    /// SoftFL densify: @all expands to every seat + kind + Who roster wake.
+    /// </summary>
+    public static void ExpandWakes(string? body, MentionRoster roster, Action<WakeSink, string> add)
+    {
+        if (!MentionsAll(body))
+            return;
+
+        // Seats
+        var pfKind = NormalizeKind(roster.PfFaceKind) ?? NormalizeKind(roster.PfKind) ?? "guest";
+        var pfWho = !string.IsNullOrWhiteSpace(roster.PfFaceName) ? roster.PfFaceName : roster.PfName;
+        add(SinkForKind(pfKind), FormatWakeNote(Seat.Pf, pfWho));
+
+        var pmKind = NormalizeKind(roster.PmKind) ?? "operator";
+        add(SinkForKind(pmKind), FormatWakeNote(Seat.Pm, roster.PmName));
+
+        // Kinds
+        add(WakeSink.ExternalGuest, "@guest wake");
+        add(WakeSink.HabitatCitizen, "@citizen wake");
+        add(WakeSink.GlassOperator, "@operator wake");
+
+        // Who roster
+        foreach (var (name, kind, seatTag) in WhoCandidates(roster))
+        {
+            if (string.IsNullOrWhiteSpace(name))
+                continue;
+            var k = NormalizeKind(kind) ?? (seatTag == "@PM" ? "operator" : "guest");
+            add(SinkForKind(k), seatTag + "→" + name.Trim() + " wake");
+        }
+
+        // Canonical aliases
+        add(WakeSink.ExternalGuest, "@Kir→guest wake");
+        add(WakeSink.HabitatCitizen, "@Sierra→citizen wake");
     }
 
     public static WakeSink SinkForKind(string? kind) =>
@@ -209,6 +247,7 @@ public static partial class GlassIntercomMention
             ("@guest ", "@guest", "kind · external harness"),
             ("@citizen ", "@citizen", "kind · Glass Face"),
             ("@operator ", "@operator", "kind · Glass Face"),
+            ("@all ", "@all", "all · wake every seat + kind + Who"),
             // Canonical Cyrillic Who — Latin Kir is an alias (MentionsWho), not a second roster row.
             ("@Кир ", "@Кир", "Who · guest cannon (Cursor)"),
         };
@@ -230,6 +269,27 @@ public static partial class GlassIntercomMention
             .Select(g => g.First())
             .Take(Math.Max(1, limit))
             .ToList();
+    }
+
+    /// <summary>
+    /// SoftFL densify: @all autocomplete — every seat + kind + Who roster in one shot.
+    /// </summary>
+    public static IReadOnlyList<(string Insert, string Title, string Help)> SuggestAll(MentionRoster roster)
+    {
+        var bag = new List<(string Insert, string Title, string Help)>
+        {
+            ("@all ", "@all", "all · wake every seat + kind + Who"),
+        };
+
+        foreach (var (name, kind, seatTag) in WhoCandidates(roster))
+        {
+            if (string.IsNullOrWhiteSpace(name))
+                continue;
+            var n = CanonicalWhoLabel(name.Trim());
+            bag.Add(("@" + n + " ", "@" + n, seatTag + " · " + (NormalizeKind(kind) ?? "?")));
+        }
+
+        return bag;
     }
 
     /// <summary>Latin <c>Kir</c> ≡ Cyrillic <c>Кир</c> for roster dedupe / Suggest.</summary>

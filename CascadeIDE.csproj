@@ -25,6 +25,7 @@
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <GenerateTargetFrameworkAttribute>false</GenerateTargetFrameworkAttribute>
     <GuidersPlatformRoot Condition="'$(GuidersPlatformRoot)' == ''">..\guiders-platform</GuidersPlatformRoot>
+    <GuidersCoreRoot Condition="'$(GuidersCoreRoot)' == ''">..\guiders-core</GuidersCoreRoot>
     <UseLocalGuidersPlatform Condition="'$(UseLocalGuidersPlatform)' == '' AND Exists('$(GuidersPlatformRoot)\AIGuiders.Platform.sln')">true</UseLocalGuidersPlatform>
   </PropertyGroup>
   <PropertyGroup Condition="'$(GenerateIdeProtocolDocs)'=='true'">
@@ -298,10 +299,10 @@
     <!-- 2.1: локальный Core в open/; иначе NuGet AIGuiders.AgentNotes.Core 2.1.2+ (multi-root, registry prefix — ADR 015/016) -->
     <PackageReference Include="AvaloniaTerminal" Version="1.0.0" />
     <PackageReference Include="Topten.RichTextKit" Version="0.4.167" />
-    <ProjectReference Include="..\agent-notes-core\AgentNotes.Core.csproj" Condition="Exists('..\agent-notes-core\AgentNotes.Core.csproj')" />
-    <ProjectReference Include="..\cdp-core\Cdp.Core.csproj" Condition="Exists('..\cdp-core\Cdp.Core.csproj')" />
-    <PackageReference Include="AIGuiders.Cdp.Core" Version="0.3.0" Condition="!Exists('..\cdp-core\Cdp.Core.csproj')" />
-    <PackageReference Include="AIGuiders.AgentNotes.Core" Version="2.1.2" Condition="!Exists('..\agent-notes-core\AgentNotes.Core.csproj')" />
+    <ProjectReference Include="$(GuidersCoreRoot)\src\AgentNotes.Core\AgentNotes.Core.csproj" Condition="Exists('$(GuidersCoreRoot)\src\AgentNotes.Core\AgentNotes.Core.csproj')" />
+    <ProjectReference Include="$(GuidersCoreRoot)\src\Cdp.Core\Cdp.Core.csproj" Condition="Exists('$(GuidersCoreRoot)\src\Cdp.Core\Cdp.Core.csproj')" />
+    <PackageReference Include="AIGuiders.Cdp.Core" Version="0.3.0" Condition="!Exists('$(GuidersCoreRoot)\src\Cdp.Core\Cdp.Core.csproj')" />
+    <PackageReference Include="AIGuiders.AgentNotes.Core" Version="2.1.2" Condition="!Exists('$(GuidersCoreRoot)\src\AgentNotes.Core\AgentNotes.Core.csproj')" />
     <PackageReference Include="AIGuiders.GitMcp.Core" Version="1.0.1" />
     <ProjectReference Include="CascadeIDE.GlassCore\CascadeIDE.GlassCore.csproj" />
     <ProjectReference Include="CascadeIDE.Contracts\CascadeIDE.Contracts.csproj" />
@@ -314,16 +315,16 @@
   <ItemGroup>
     <!-- ACP C# SDK: вендор externals/acp-csharp (IAcpClient с TerminalOutputResponse). NuGet AgentClientProtocol 0.1.5 расходится по сигнатуре TerminalOutputAsync — не использовать до фикса апстрима. -->
     <ProjectReference Include="externals\acp-csharp\src\AgentClientProtocol\AgentClientProtocol.csproj" />
-    <ProjectReference Include="..\dotnet-build-test-parsers\DotNetBuildTestParsers.csproj" Condition="Exists('..\dotnet-build-test-parsers\DotNetBuildTestParsers.csproj')" />
-    <PackageReference Include="AIGuiders.DotNetBuildTestParsers" Version="0.1.1" Condition="!Exists('..\dotnet-build-test-parsers\DotNetBuildTestParsers.csproj')" />
-    <ProjectReference Include="..\dotnet-build-test-core\DotNetBuildTest.Core.csproj" Condition="Exists('..\dotnet-build-test-core\DotNetBuildTest.Core.csproj')" />
-    <PackageReference Include="AIGuiders.DotNetBuildTest.Core" Version="0.1.0" Condition="!Exists('..\dotnet-build-test-core\DotNetBuildTest.Core.csproj')" />
-    <ProjectReference Include="..\dotnet-debug-core\DotnetDebug.Core.csproj" Condition="Exists('..\dotnet-debug-core\DotnetDebug.Core.csproj')" />
-    <PackageReference Include="AIGuiders.DotnetDebugMCP.Core" Version="0.2.0" Condition="!Exists('..\dotnet-debug-core\DotnetDebug.Core.csproj')" />
-    <!-- Локальный Core в open/; иначе NuGet AIGuiders.HybridCodebaseIndex.Core (как agent-notes-core) -->
-    <ProjectReference Include="..\hybrid-codebase-index-core\HybridCodebaseIndex.Core.csproj" Condition="Exists('..\hybrid-codebase-index-core\HybridCodebaseIndex.Core.csproj')" />
+    <ProjectReference Include="$(GuidersCoreRoot)\src\DotNetBuildTestParsers\DotNetBuildTestParsers.csproj" Condition="Exists('$(GuidersCoreRoot)\src\DotNetBuildTestParsers\DotNetBuildTestParsers.csproj')" />
+    <PackageReference Include="AIGuiders.DotNetBuildTestParsers" Version="0.1.1" Condition="!Exists('$(GuidersCoreRoot)\src\DotNetBuildTestParsers\DotNetBuildTestParsers.csproj')" />
+    <ProjectReference Include="$(GuidersCoreRoot)\src\DotNetBuildTest.Core\DotNetBuildTest.Core.csproj" Condition="Exists('$(GuidersCoreRoot)\src\DotNetBuildTest.Core\DotNetBuildTest.Core.csproj')" />
+    <PackageReference Include="AIGuiders.DotNetBuildTest.Core" Version="0.1.0" Condition="!Exists('$(GuidersCoreRoot)\src\DotNetBuildTest.Core\DotNetBuildTest.Core.csproj')" />
+    <ProjectReference Include="$(GuidersCoreRoot)\src\DotnetDebug.Core\DotnetDebug.Core.csproj" Condition="Exists('$(GuidersCoreRoot)\src\DotnetDebug.Core\DotnetDebug.Core.csproj')" />
+    <PackageReference Include="AIGuiders.DotnetDebugMCP.Core" Version="0.2.0" Condition="!Exists('$(GuidersCoreRoot)\src\DotnetDebug.Core\DotnetDebug.Core.csproj')" />
+    <!-- Локальный Core в guiders-core; иначе NuGet AIGuiders.HybridCodebaseIndex.Core -->
+    <ProjectReference Include="$(GuidersCoreRoot)\src\HybridCodebaseIndex.Core\HybridCodebaseIndex.Core.csproj" Condition="Exists('$(GuidersCoreRoot)\src\HybridCodebaseIndex.Core\HybridCodebaseIndex.Core.csproj')" />
     <ProjectReference Include="wire\intercom-wire-core\IntercomWire.Core.csproj" Condition="Exists('wire\intercom-wire-core\IntercomWire.Core.csproj')" />
-    <PackageReference Include="AIGuiders.HybridCodebaseIndex.Core" Version="0.1.3" Condition="!Exists('..\hybrid-codebase-index-core\HybridCodebaseIndex.Core.csproj')" />
+    <PackageReference Include="AIGuiders.HybridCodebaseIndex.Core" Version="0.1.3" Condition="!Exists('$(GuidersCoreRoot)\src\HybridCodebaseIndex.Core\HybridCodebaseIndex.Core.csproj')" />
     <PackageReference Include="Microsoft.Data.Sqlite" Version="10.0.0" />
     <!-- Override transitive 2.1.11 (CVE-2025-6965 / GHSA-2m69-gcr7-jv3q); bundles SQLite >= 3.50.2. -->
     <PackageReference Include="SQLitePCLRaw.bundle_e_sqlite3" Version="3.0.3" />
@@ -346,8 +347,8 @@
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
     <PackageReference Include="Anthropic" Version="12.13.0" />
     <PackageReference Include="Microsoft.Agents.AI.OpenAI" Version="1.3.0" />
-    <ProjectReference Include="..\roslyn-mcp-core\RoslynMcp.Core.csproj" Condition="Exists('..\roslyn-mcp-core\RoslynMcp.Core.csproj')" />
-    <PackageReference Include="AIGuiders.RoslynMcp.Core" Version="0.1.1" Condition="!Exists('..\roslyn-mcp-core\RoslynMcp.Core.csproj')" />
+    <ProjectReference Include="$(GuidersCoreRoot)\src\RoslynMcp.Core\RoslynMcp.Core.csproj" Condition="Exists('$(GuidersCoreRoot)\src\RoslynMcp.Core\RoslynMcp.Core.csproj')" />
+    <PackageReference Include="AIGuiders.RoslynMcp.Core" Version="0.1.1" Condition="!Exists('$(GuidersCoreRoot)\src\RoslynMcp.Core\RoslynMcp.Core.csproj')" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="5.3.0" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Features" Version="5.3.0" />
     <PackageReference Include="Microsoft.CodeAnalysis.Workspaces.MSBuild" Version="5.3.0" />

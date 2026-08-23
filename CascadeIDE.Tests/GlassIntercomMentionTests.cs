@@ -125,4 +125,30 @@ public sealed class GlassIntercomMentionTests
         Assert.DoesNotContain(hits, h => h.Title.Equals("@PM", StringComparison.OrdinalIgnoreCase));
     }
 
+    [Fact]
+    public void ResolveWakes_All_expands_every_sink()
+    {
+        var hits = GlassIntercomMention.ResolveWakes("@all hands on deck", LiveRoster);
+        Assert.Contains(hits, h => h.Sink == GlassIntercomMention.WakeSink.ExternalGuest);
+        Assert.Contains(hits, h => h.Sink == GlassIntercomMention.WakeSink.HabitatCitizen);
+        Assert.Contains(hits, h => h.Sink == GlassIntercomMention.WakeSink.GlassOperator);
+    }
+
+    [Fact]
+    public void ResolveWakes_All_includes_Who_roster()
+    {
+        var hits = GlassIntercomMention.ResolveWakes("@all sync", LiveRoster);
+        Assert.Contains(hits, h => h.Cue.Contains("Sierra", StringComparison.Ordinal));
+        Assert.Contains(hits, h => h.Cue.Contains("Света", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public void SuggestAll_returns_all_and_Who()
+    {
+        var hits = GlassIntercomMention.SuggestAll(LiveRoster);
+        Assert.Contains(hits, h => h.Title == "@all");
+        Assert.Contains(hits, h => h.Title == "@Sierra");
+        Assert.Contains(hits, h => h.Title == "@Света");
+    }
+
 }

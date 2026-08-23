@@ -1,0 +1,13 @@
+﻿{
+  "schema": "plan_promote/v0",
+  "plan_id": "91ddb435ec3a",
+  "status": "rejected",
+  "path": "D:\\Experiments\\Personal Cursor Folder\\Financial\\software\\open\\cascade-ide\\.cdp\\plans\\plan-20260804-115050-citizen-done-toward-1508-act-cdp.md",
+  "feature": "Citizen Done toward 15.08 @act #CDP",
+  "feature_id": "a8c717db-3c0c-4665-8dc9-b349bfa0d632",
+  "task_id": "0b19a283-2680-42ad-b0ae-12b9ba3a8313",
+  "task": "Hold Citizen Done stable to 15.08 \u2014 invent only on real product gap",
+  "promoted_utc": "2026-08-04T11:50:50.703148Z",
+  "resolved_utc": "2026-08-04T11:51:08.294885Z",
+  "notes": null
+}

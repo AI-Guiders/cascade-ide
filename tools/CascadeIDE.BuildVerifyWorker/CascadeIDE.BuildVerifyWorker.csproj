@@ -10,7 +10,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\dotnet-build-test-core\DotNetBuildTest.Core.csproj" />
+    <ProjectReference Include="$(GuidersCoreRoot)\src\DotNetBuildTest.Core\DotNetBuildTest.Core.csproj" Condition="Exists('$(GuidersCoreRoot)\src\DotNetBuildTest.Core\DotNetBuildTest.Core.csproj')" />
   </ItemGroup>
 
 </Project>

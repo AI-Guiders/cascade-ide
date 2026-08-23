@@ -1,0 +1,232 @@
+{
+  "schema": "arch_board/v0",
+  "title": "as-built \u00B7 cascade-ide",
+  "mode": "as_built",
+  "profile": "cide",
+  "updated_utc": "2026-07-27T18:09:47.0391617+00:00",
+  "focus_role_id": "ccu-core",
+  "roles": [
+    {
+      "id": "ccu-core",
+      "role": "ccu",
+      "status": "promoted",
+      "note": "as_built \u00B7 ComputingUnits (ADR 0097) \u00B7 auto-promoted",
+      "elected_candidate_id": "c-90569b82",
+      "candidates": [
+        {
+          "id": "c-90569b82",
+          "label": "ICockpitComputeUnit",
+          "anchor": "[F:Cockpit/ComputingUnits/ICockpitComputeUnit.cs;M:ICockpitComputeUnit]",
+          "path": "Cockpit/ComputingUnits/ICockpitComputeUnit.cs",
+          "symbol": "ICockpitComputeUnit",
+          "status": "elected"
+        },
+        {
+          "id": "c-2ab9e4ce",
+          "label": "EnvironmentReadinessSnapshotUnit",
+          "anchor": "[F:Cockpit/ComputingUnits/EnvironmentReadiness/EnvironmentReadinessSnapshotUnit.cs;M:EnvironmentReadinessSnapshotUnit]",
+          "path": "Cockpit/ComputingUnits/EnvironmentReadiness/EnvironmentReadinessSnapshotUnit.cs",
+          "symbol": "EnvironmentReadinessSnapshotUnit",
+          "status": "candidate"
+        },
+        {
+          "id": "c-f1655a6c",
+          "label": "IdeHealthFormattingUnit",
+          "anchor": "[F:Cockpit/ComputingUnits/IdeHealth/IdeHealthFormattingUnit.cs;M:IdeHealthFormattingUnit]",
+          "path": "Cockpit/ComputingUnits/IdeHealth/IdeHealthFormattingUnit.cs",
+          "symbol": "IdeHealthFormattingUnit",
+          "status": "candidate"
+        }
+      ],
+      "created_utc": "2026-07-27T18:09:47.037593+00:00"
+    },
+    {
+      "id": "ch-core",
+      "role": "channel",
+      "status": "promoted",
+      "note": "as_built \u00B7 Channels (IChannel) \u00B7 auto-promoted",
+      "elected_candidate_id": "c-1c931cf3",
+      "candidates": [
+        {
+          "id": "c-1c931cf3",
+          "label": "IChannel",
+          "anchor": "[F:Cockpit/Channels/IChannel.cs;M:IChannel]",
+          "path": "Cockpit/Channels/IChannel.cs",
+          "symbol": "IChannel",
+          "status": "elected"
+        },
+        {
+          "id": "c-7ddf46c0",
+          "label": "EnvironmentReadinessChannel",
+          "anchor": "[F:Cockpit/Channels/EnvironmentReadiness/EnvironmentReadinessChannel.cs;M:EnvironmentReadinessChannel]",
+          "path": "Cockpit/Channels/EnvironmentReadiness/EnvironmentReadinessChannel.cs",
+          "symbol": "EnvironmentReadinessChannel",
+          "status": "candidate"
+        },
+        {
+          "id": "c-93c5f199",
+          "label": "CodeFlowTraceChannel",
+          "anchor": "[F:Cockpit/Channels/TraceFlow/CodeFlowTraceChannel.cs;M:CodeFlowTraceChannel]",
+          "path": "Cockpit/Channels/TraceFlow/CodeFlowTraceChannel.cs",
+          "symbol": "CodeFlowTraceChannel",
+          "status": "candidate"
+        }
+      ],
+      "created_utc": "2026-07-27T18:09:47.0383601+00:00"
+    },
+    {
+      "id": "cds-core",
+      "role": "cds",
+      "status": "promoted",
+      "note": "as_built \u00B7 CDS \u2014 \u043A\u0443\u0434\u0430 \u0432 \u043A\u0430\u0431\u0438\u043D\u0435 \u00B7 auto-promoted",
+      "elected_candidate_id": "c-bea1d8da",
+      "candidates": [
+        {
+          "id": "c-bea1d8da",
+          "label": "ICdsRouter",
+          "anchor": "[F:Cockpit/Cds/ICdsRouter.cs;M:ICdsRouter]",
+          "path": "Cockpit/Cds/ICdsRouter.cs",
+          "symbol": "ICdsRouter",
+          "status": "elected"
+        },
+        {
+          "id": "c-f4469dfa",
+          "label": "CockpitSurfaceSnapshotBuilder",
+          "anchor": "[F:Cockpit/Cds/CockpitSurfaceSnapshotBuilder.cs;M:CockpitSurfaceSnapshotBuilder]",
+          "path": "Cockpit/Cds/CockpitSurfaceSnapshotBuilder.cs",
+          "symbol": "CockpitSurfaceSnapshotBuilder",
+          "status": "candidate"
+        },
+        {
+          "id": "c-d1dd0b70",
+          "label": "TraceFlowCdsRouter",
+          "anchor": "[F:Cockpit/Cds/TraceFlowCdsRouter.cs;M:TraceFlowCdsRouter]",
+          "path": "Cockpit/Cds/TraceFlowCdsRouter.cs",
+          "symbol": "TraceFlowCdsRouter",
+          "status": "candidate"
+        }
+      ],
+      "created_utc": "2026-07-27T18:09:47.038404+00:00"
+    },
+    {
+      "id": "ids-core",
+      "role": "ids",
+      "status": "promoted",
+      "note": "as_built \u00B7 IDS \u2014 IdeDisplay overlays (orthogonal to CDS) \u00B7 auto-promoted",
+      "elected_candidate_id": "c-1e0fefdf",
+      "candidates": [
+        {
+          "id": "c-1e0fefdf",
+          "label": "IIdsSurfaceCompositor",
+          "anchor": "[F:IdeDisplay/IIdsSurfaceCompositor.cs;M:IIdsSurfaceCompositor]",
+          "path": "IdeDisplay/IIdsSurfaceCompositor.cs",
+          "symbol": "IIdsSurfaceCompositor",
+          "status": "elected"
+        },
+        {
+          "id": "c-d1219b64",
+          "label": "CommandPaletteSurfaceCompositor",
+          "anchor": "[F:IdeDisplay/CommandPalette/CommandPaletteSurfaceCompositor.cs;M:CommandPaletteSurfaceCompositor]",
+          "path": "IdeDisplay/CommandPalette/CommandPaletteSurfaceCompositor.cs",
+          "symbol": "CommandPaletteSurfaceCompositor",
+          "status": "candidate"
+        },
+        {
+          "id": "c-554c5f59",
+          "label": "CockpitCommandLineSurfaceCompositor",
+          "anchor": "[F:IdeDisplay/CockpitCommandLine/CockpitCommandLineSurfaceCompositor.cs;M:CockpitCommandLineSurfaceCompositor]",
+          "path": "IdeDisplay/CockpitCommandLine/CockpitCommandLineSurfaceCompositor.cs",
+          "symbol": "CockpitCommandLineSurfaceCompositor",
+          "status": "candidate"
+        }
+      ],
+      "created_utc": "2026-07-27T18:09:47.038439+00:00"
+    },
+    {
+      "id": "comp-core",
+      "role": "compositor",
+      "status": "promoted",
+      "note": "as_built \u00B7 Composition \u2192 surface \u00B7 auto-promoted",
+      "elected_candidate_id": "c-f463dc8e",
+      "candidates": [
+        {
+          "id": "c-f463dc8e",
+          "label": "ISurfaceCompositor",
+          "anchor": "[F:Cockpit/Composition/ISurfaceCompositor.cs;M:ISurfaceCompositor]",
+          "path": "Cockpit/Composition/ISurfaceCompositor.cs",
+          "symbol": "ISurfaceCompositor",
+          "status": "elected"
+        },
+        {
+          "id": "c-366ffbab",
+          "label": "MainWindowHostSurfaceCompositor",
+          "anchor": "[F:Cockpit/Composition/HostSurface/MainWindowHostSurfaceCompositor.cs;M:MainWindowHostSurfaceCompositor]",
+          "path": "Cockpit/Composition/HostSurface/MainWindowHostSurfaceCompositor.cs",
+          "symbol": "MainWindowHostSurfaceCompositor",
+          "status": "candidate"
+        },
+        {
+          "id": "c-fbde66d6",
+          "label": "MainWindowShellSurfaceCompositor",
+          "anchor": "[F:Cockpit/Composition/Shell/MainWindowShellSurfaceCompositor.cs;M:MainWindowShellSurfaceCompositor]",
+          "path": "Cockpit/Composition/Shell/MainWindowShellSurfaceCompositor.cs",
+          "symbol": "MainWindowShellSurfaceCompositor",
+          "status": "candidate"
+        }
+      ],
+      "created_utc": "2026-07-27T18:09:47.0384679+00:00"
+    },
+    {
+      "id": "surf-core",
+      "role": "surface",
+      "status": "promoted",
+      "note": "as_built \u00B7 Surface snapshot / mounts \u00B7 auto-promoted",
+      "elected_candidate_id": "c-6344d5b4",
+      "candidates": [
+        {
+          "id": "c-6344d5b4",
+          "label": "UiLayoutSnapshot",
+          "anchor": "[F:Cockpit/Surface/UiLayoutSnapshot.cs;M:UiLayoutSnapshot]",
+          "path": "Cockpit/Surface/UiLayoutSnapshot.cs",
+          "symbol": "UiLayoutSnapshot",
+          "status": "elected"
+        },
+        {
+          "id": "c-58a16522",
+          "label": "MainWindowInstrumentMountRegistry",
+          "anchor": "[F:Cockpit/Surface/MainWindowInstrumentMountRegistry.cs;M:MainWindowInstrumentMountRegistry]",
+          "path": "Cockpit/Surface/MainWindowInstrumentMountRegistry.cs",
+          "symbol": "MainWindowInstrumentMountRegistry",
+          "status": "candidate"
+        }
+      ],
+      "created_utc": "2026-07-27T18:09:47.0384946+00:00"
+    }
+  ],
+  "edges": [
+    {
+      "id": "e-92aabb08",
+      "from_role_id": "ccu-core",
+      "to_role_id": "ch-core",
+      "kind": "feeds"
+    },
+    {
+      "id": "e-1072a2eb",
+      "from_role_id": "ch-core",
+      "to_role_id": "cds-core",
+      "kind": "feeds"
+    },
+    {
+      "id": "e-090cf6d2",
+      "from_role_id": "cds-core",
+      "to_role_id": "comp-core",
+      "kind": "projects"
+    },
+    {
+      "id": "e-e3aec96b",
+      "from_role_id": "comp-core",
+      "to_role_id": "surf-core",
+      "kind": "projects"
+    }
+  ]
+}
