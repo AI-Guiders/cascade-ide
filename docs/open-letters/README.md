@@ -2,7 +2,7 @@
 
 **Canon lives in CDP** — not here.
 
-Canonical letters (full text, Hippocratic-2.1 / Ethical Source):
+Canonical letters (MIT / [ethical use](https://github.com/AI-Guiders/licensing/blob/main/docs/ethical-use.md)):
 [`cdp-mcp/docs/open-letters/`](https://github.com/AI-Guiders/cdp-mcp/tree/main/docs/open-letters)
 
 **Choose a shelf (same as canon):**

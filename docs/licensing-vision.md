@@ -29,7 +29,7 @@
 
 ## Связанные документы
 
-- [LICENSE](../LICENSE) — **Hippocratic License 2.1** (Ethical Source) на код CascadeIDE в этом репозитории.
+- [LICENSE](../LICENSE) — **MIT** (MIT (see ethical-use policy)) на код CascadeIDE в этом репозитории.
 - [COMMERCIAL-NOTICE.md](COMMERCIAL-NOTICE.md) — коммерческие услуги и контакты (Telegram, почта).
 - [ADR 0024](adr/0024-ui-skin-bundles-deferred.md) — скины как бандлы, OSS и самообслуживание авторов.
 - [ADR 0021](adr/0021-pfd-mfd-cockpit-attention-model.md) — модель внимания и инварианты UI (в т.ч. Dark Cockpit) не зависят от коммерческой линейки.

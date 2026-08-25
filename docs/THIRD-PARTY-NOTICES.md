@@ -2,7 +2,7 @@
 
 ## Лицензия самого CascadeIDE
 
-Исходники и сборки этого репозитория — **Hippocratic License 2.1** (Ethical Source): [`LICENSE`](../LICENSE). Коммерческое предложение и контакты (Telegram, почта) — отдельно: [`COMMERCIAL-NOTICE.md`](COMMERCIAL-NOTICE.md).
+Исходники и сборки этого репозитория — **MIT** (MIT (see ethical-use policy)): [`LICENSE`](../LICENSE). Коммерческое предложение и контакты (Telegram, почта) — отдельно: [`COMMERCIAL-NOTICE.md`](COMMERCIAL-NOTICE.md).
 
 ---
 

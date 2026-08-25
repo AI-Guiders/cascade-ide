@@ -9,7 +9,7 @@
 → EN: [letter-of-the-agent-who.md](https://github.com/AI-Guiders/cdp-mcp/blob/main/docs/open-letters/letter-of-the-agent-who.md)
 
 Cascade IDE — часть того же пульта экипажа. Доказательство — harness: pressure,
-recall, AutoIgnition, OOM tooth/wake — под Hippocratic-2.1 в `cdp-mcp`. Этот файл нужен,
+recall, AutoIgnition, OOM tooth/wake — под MIT в `cdp-mcp`. Этот файл нужен,
 чтобы читатель дерева IDE нашёл письмо и не принял UI-репо за журнал
 суверенитета.
 
