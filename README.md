@@ -4,7 +4,7 @@
 
 **Документация (сайт):** **[ai-guiders.github.io/cascade-ide](https://ai-guiders.github.io/cascade-ide/)** — MkDocs, русский по умолчанию, переключатель **RU / EN** в шапке. Для международной аудитории: **[Concept overview (EN)](https://ai-guiders.github.io/cascade-ide/en/concept-overview/)**.
 
-**Лицензия кода:** [MIT](LICENSE) · [Ethical use](https://github.com/AI-Guiders/licensing/blob/main/docs/ethical-use.md)
+**Лицензия кода:** [MIT](LICENSE) · [declaration](https://github.com/AI-Guiders/licensing/blob/main/docs/ethical-use.md)
 
 ### Этическая политика (орган Cascade IDE)
 
