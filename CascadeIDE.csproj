@@ -309,7 +309,7 @@
     <ProjectReference Include="CasaField.Core\CasaField.Core.csproj" />
     <!-- RoslynMcp передаёт RoslynMcpWorkspace=true: не ссылаться на локальный анализатор, иначе DLL в bin держит процесс MCP и ломает dotnet build. -->
     <ProjectReference Include="CascadeIDE.ArchitectureAnalyzers\CascadeIDE.ArchitectureAnalyzers.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" Condition="'$(RoslynMcpWorkspace)'!='true'" />
-    <PackageReference Include="AIGuiders.Platform.CommandPlane" Version="0.4.0" Condition="'$(UseLocalGuidersPlatform)' != 'true'" />
+    <PackageReference Include="AIGuiders.Platform.CommandPlane" Version="0.4.2" Condition="'$(UseLocalGuidersPlatform)' != 'true'" />
     <ProjectReference Include="$(GuidersPlatformRoot)\src\AIGuiders.Platform.CommandPlane\AIGuiders.Platform.CommandPlane.csproj" Condition="'$(UseLocalGuidersPlatform)' == 'true'" />
   </ItemGroup>
   <ItemGroup>

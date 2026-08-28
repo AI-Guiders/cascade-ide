@@ -14,6 +14,8 @@
     <RootNamespace>CascadeIDE</RootNamespace>
     <Description>Avalonia-free CIDE glass core: presentation topology + settings peel for WPF/Linux glass.</Description>
     <GuidersCoreRoot Condition="'$(GuidersCoreRoot)' == ''">..\..\guiders-core</GuidersCoreRoot>
+    <GuidersPlatformRoot Condition="'$(GuidersPlatformRoot)' == ''">..\..\guiders-platform</GuidersPlatformRoot>
+    <UseLocalGuidersPlatform Condition="'$(UseLocalGuidersPlatform)' == '' AND Exists('$(GuidersPlatformRoot)\AIGuiders.Platform.sln')">true</UseLocalGuidersPlatform>
   </PropertyGroup>
 
   <ItemGroup>
@@ -28,6 +30,8 @@
     <ProjectReference Include="$(GuidersCoreRoot)\src\HybridCodebaseIndex.Core\HybridCodebaseIndex.Core.csproj" Condition="Exists('$(GuidersCoreRoot)\src\HybridCodebaseIndex.Core\HybridCodebaseIndex.Core.csproj')" />
     <PackageReference Include="AIGuiders.HybridCodebaseIndex.Core" Version="0.1.3" Condition="!Exists('$(GuidersCoreRoot)\src\HybridCodebaseIndex.Core\HybridCodebaseIndex.Core.csproj')" />
     <PackageReference Include="Microsoft.VisualStudio.SolutionPersistence" Version="1.0.52" />
+    <PackageReference Include="AIGuiders.Platform.CommandPlane" Version="0.4.2" Condition="'$(UseLocalGuidersPlatform)' != 'true'" />
+    <ProjectReference Include="$(GuidersPlatformRoot)\src\AIGuiders.Platform.CommandPlane\AIGuiders.Platform.CommandPlane.csproj" Condition="'$(UseLocalGuidersPlatform)' == 'true'" />
     <PackageReference Include="DotNet.Glob" Version="3.1.3" />
   </ItemGroup>
 

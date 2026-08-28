@@ -1,4 +1,5 @@
 #nullable enable
+using AIGuiders.Platform.CommandPlane;
 
 namespace CascadeIDE.Intercom;
 
@@ -23,6 +24,28 @@ public static class GlassSlashCatalog
     public delegate IReadOnlyList<(string InsertPath, string Help)> WorkspaceFileMatchSource(
         string pathPrefix,
         int limit);
+
+    static readonly Lazy<SlashCatalogIndex> SlashCatalog = new(BuildSlashCatalog);
+
+    static SlashCatalogIndex BuildSlashCatalog() =>
+        SlashCatalogIndex.FromDescriptors(Commands.Select(ToDescriptor));
+
+    static SlashCommandDescriptor ToDescriptor(Command cmd) =>
+        new()
+        {
+            Domain = "",
+            Object = "",
+            Intent = "",
+            CommandId = cmd.Id,
+            Path = cmd.Path.TrimStart('/'),
+            Help = cmd.Help,
+            ArgTail = cmd.ArgTail switch
+            {
+                ArgTailKind.None => "none",
+                ArgTailKind.Required => "required",
+                _ => "optional",
+            },
+        };
 
     static readonly Command[] Commands =
     [
@@ -187,61 +210,22 @@ public static class GlassSlashCatalog
         return false;
     }
 
-    /// <summary>CIDE ChatSlashAutocomplete segment steps — next path token only (ADR 0119 hierarchy).</summary>
+    /// <summary>CIDE ChatSlashAutocomplete segment steps — platform flat-path completion.</summary>
     static IReadOnlyList<GlassSlashSuggestion> GetSegmentSuggestions(
         IReadOnlyList<string> tokens,
         bool endsWithSpace)
     {
-        var depth = endsWithSpace ? tokens.Count : Math.Max(0, tokens.Count - 1);
-        var partial = endsWithSpace || tokens.Count == 0 ? "" : tokens[^1];
-        var prefixTokens = endsWithSpace
-            ? tokens
-            : tokens.Take(Math.Max(0, tokens.Count - 1)).ToArray();
+        var body = tokens.Count == 0 && !endsWithSpace
+            ? ""
+            : string.Join(' ', tokens) + (endsWithSpace ? " " : "");
 
-        var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-        var list = new List<GlassSlashSuggestion>();
-
-        foreach (var cmd in Commands)
-        {
-            var segs = cmd.Path.TrimStart('/').Split(' ', StringSplitOptions.RemoveEmptyEntries);
-            if (segs.Length <= depth)
-                continue;
-
-            if (!PrefixMatches(segs, prefixTokens))
-                continue;
-
-            var next = segs[depth];
-            if (partial.Length > 0
-                && !next.StartsWith(partial, StringComparison.OrdinalIgnoreCase))
-                continue;
-
-            if (!seen.Add(next))
-                continue;
-
-            var insertSegs = prefixTokens.Concat([next]).ToArray();
-            var more = segs.Length > depth + 1 || cmd.ArgTail != ArgTailKind.None;
-            var insert = "/" + string.Join(' ', insertSegs) + (more ? " " : "");
-            var title = next;
-            var help = segs.Length == depth + 1
-                ? cmd.Help
-                : $"{cmd.Path} — {cmd.Help}";
-            list.Add(new GlassSlashSuggestion(insert, title, help));
-        }
-
-        return list;
-    }
-
-    static bool PrefixMatches(string[] segs, IReadOnlyList<string> prefixTokens)
-    {
-        if (prefixTokens.Count > segs.Length)
-            return false;
-        for (var i = 0; i < prefixTokens.Count; i++)
-        {
-            if (!segs[i].Equals(prefixTokens[i], StringComparison.OrdinalIgnoreCase))
-                return false;
-        }
-
-        return true;
+        return SlashStepCompletion
+            .GetSuggestions(SlashCatalog.Value, body)
+            .Select(item => new GlassSlashSuggestion(
+                item.InsertText,
+                item.StepSegment ?? item.InsertText.TrimStart('/').Split(' ').LastOrDefault() ?? "",
+                item.Help))
+            .ToArray();
     }
 
     public static bool TryResolve(string? raw, out Command command, out string argsTail)
