@@ -26,7 +26,7 @@
     <GenerateTargetFrameworkAttribute>false</GenerateTargetFrameworkAttribute>
     <GuidersPlatformRoot Condition="'$(GuidersPlatformRoot)' == ''">..\guiders-platform</GuidersPlatformRoot>
     <GuidersCoreRoot Condition="'$(GuidersCoreRoot)' == ''">..\guiders-core</GuidersCoreRoot>
-    <UseLocalGuidersPlatform Condition="'$(UseLocalGuidersPlatform)' == '' AND Exists('$(GuidersPlatformRoot)\AIGuiders.Platform.sln')">true</UseLocalGuidersPlatform>
+    <UseLocalGuidersPlatform Condition="'$(UseLocalGuidersPlatform)' == '' AND Exists('$(GuidersPlatformRoot)\AIGuiders.Platform.slnx')">true</UseLocalGuidersPlatform>
   </PropertyGroup>
   <PropertyGroup Condition="'$(GenerateIdeProtocolDocs)'=='true'">
     <DefineConstants>$(DefineConstants);IDE_COMMANDS_CODEGEN</DefineConstants>
